@@ -8,7 +8,7 @@
 [![License](https://img.shields.io/github/license/baetyl/baetyl-cloud?color=blue)](LICENSE) 
 [![Stars](https://img.shields.io/github/stars/baetyl/baetyl-cloud?style=social)](Stars)
 
-[![README_CN](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87-brightgreen)](./README_CN.md) -->
+[![README](https://img.shields.io/badge/README-English-brightgreen)](./README.md) -->
 
 **[Baetyl](https://baetyl.io) 是 [Linux Foundation Edge](https://www.lfedge.org) 
 旗下的边缘计算项目，旨在将云计算能力拓展至用户现场**。
