@@ -2,85 +2,93 @@
 
 [![Baetyl-logo](./docs/logo_with_name.png)](https://baetyl.io)
 
-<!-- [![build](https://github.com/baetyl/baetyl-cloud/workflows/build/badge.svg)](https://github.com/baetyl/baetyl-cloud/actions?query=workflow%3Abuild)
+[![build](https://github.com/baetyl/baetyl-cloud/workflows/build/badge.svg)](https://github.com/baetyl/baetyl-cloud/actions?query=workflow%3Abuild)
 [![codecov](https://codecov.io/gh/baetyl/baetyl-cloud/branch/master/graph/badge.svg)](https://codecov.io/gh/baetyl/baetyl-cloud)
 [![Go Report Card](https://goreportcard.com/badge/github.com/baetyl/baetyl-cloud)](https://goreportcard.com/report/github.com/baetyl/baetyl-cloud) 
 [![License](https://img.shields.io/github/license/baetyl/baetyl-cloud?color=blue)](LICENSE) 
 [![Stars](https://img.shields.io/github/stars/baetyl/baetyl-cloud?style=social)](Stars)
 
-[![README_CN](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87-brightgreen)](./README_CN.md) -->
+[![README_CN](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87-brightgreen)](./README_CN.md) 
 
-**[Baetyl](https://baetyl.io) 是 [Linux Foundation Edge](https://www.lfedge.org) 
-旗下的边缘计算项目，旨在将云计算能力拓展至用户现场**。
-包括设备接入、消息路由、数据遥传、函数计算、视频采集、AI推断、状态上报、配置下发等功能。
+**[Baetyl](https://baetyl.io) is an open edge computing framework of
+[Linux Foundation Edge](https://www.lfedge.org) that extends cloud computing,
+data and service seamlessly to edge devices.** It can provide temporary offline, low-latency computing services include device connection, message routing, remote synchronization, function computing, video capture, AI inference, status reporting, configuration ota etc.
 
-Baetyl v2 提供了一个全新的边云融合平台，采用云端管理、边缘运行的方案，分成[**边缘计算框架**](https://github.com/baetyl/baetyl)和[**云端管理套件（本项目）**](https://github.com/baetyl/baetyl-cloud)两部分，支持多种部署方式。可在云端管理所有资源，比如节点、应用、配置等，自动部署应用到边缘节点，满足各种边缘计算场景，特别适合新兴的强边缘设备，比如 AI 一体机、5G 路测盒子等。
+Baetyl v2 provides a new edge cloud integration platform, which adopts cloud management and edge operation solutions, and is divided into [**Edge Computing Framework**](https://github.com/baetyl/baetyl) and [**Cloud Management Suite (this project)**](https://github.com/baetyl/baetyl-cloud) supports varius deployment methods. It can manage all resources in the cloud, such as nodes, applications, configuration, etc., and automatically deploy applications to edge nodes to meet various edge computing scenarios. It is especially suitable for emerging strong edge devices, such as AI all-in-one machines and 5G roadside boxes.
 
-v2 和 v1 版本的主要区别如下：
-* 边缘和云端框架全部向云原生演化，已支持运行在 K8S 或 K3S 之上。
-* 引入声明式的设计，通过影子（Report/Desire）实现端云同步（OTA）。
-* 边缘框架暂不支持进程（native）运行模式，由于运行在 K3S 上，所以整体的资源开销会有增加。
-* 边缘框架将来会支持边缘节点集群。
+The main differences between v2 and v1 versions are as follows:
+* Edge and cloud frameworks have all evolved to cloud native, and already support running on K8S or K3S.
+* Introduce declarative design, realize data synchronization (OTA) through shadow (Report/Desire).
+* The edge framework does not support native process mode currently. Since it runs on K3S, the overall resource overhead will increase.
+* The edge framework will support edge node clusters in the future.
 
-## 全景图
+## Architecture
 
 ![Architecture](./docs/baetyl-arch-v2.svg)
 
-### 云端管理套件（本项目）
+### Cloud Management Suite (this project)
 
-云端管理套件（Cloud Management Suite）负责管理所有资源，包括节点、应用、配置、部署等。所有功能的实现都插件化，方便功能扩展和第三方服务的接入，提供丰富的应用。云端管理套件的部署非常灵活，即可部署在公有云上，又可部署在私有化环境中，还可部署在普通 PC 上，支持 K8S/K3S 部署，支持单租户和多租户。
+The Cloud Management Suite is responsible for managing all resources, including nodes, applications, configuration, and deployment. The realization of all functions is plug-in, which is convenient for function expansion and third-party service access, and provides rich applications. The deployment of the cloud management suite is very flexible. It can be deployed on public clouds, private cloud environments, and common devices. It supports K8S/K3S deployment, and supports single-tenancy and multi-tenancy.
 
-开源版云端管理套件提供的基础功能如下：
-* 边缘节点管理
-    * 在线安装
-    * 端云同步（影子）
-    * 节点信息
-    * 节点状态
-    * 应用状态
-* 应用部署管理
-    * 容器应用
-    * 函数应用
-    * 节点匹配（自动）
-* 配置管理
-    * 普通配置
-    * 函数配置
-    * 密文
-    * 证书
-    * 镜像库凭证
-* 节点预配管理
-    * 批次管理
-    * 注册激活
+The basic functions provided by the cloud management suite in this project are as follows:
+* Edge node management
+     * Online installation of edge computing framework
+     * Synchronization (shadow) between edge and cloud
+     * Node information collection
+     * Node status collection
+     * Application status collection
+* Application deployment management
+     * Container application
+     * Function application
+     * Node matching (automatic)
+* Configuration management
+     * Common configuration
+     * Function configuration
+     * Secrets
+     * Certificates
+     * Registry credentials
+* Node provisioning management
+     * Node batch management
+     * Registration and activation
 
-_开源版本包含上述所有功能的 RESTful API，暂不包含前端界面（Dashboard）。_
+_The open source version contains the RESTful API of all the above functions, but does not include the front-end dashboard. _
 
-### 边缘计算框架
+### Edge Computing Framework
 
-边缘计算框架（Edge Computing Framework）运行在边缘节点的 Kubernetes 上，
-管理和部署节点的所有应用，通过应用服务提供各式各样的能力。
-应用包含系统应用和普通应用，系统应用全部由 Baetyl 官方提供，用户无需配置。
+The Edge Computing Framework runs on Kubernetes at the edge node,
+manages and deploys all applications which provide various capabilities.
+Applications include system applications and common applications.
+All system applications are officially provided by Baetyl,
+and you do not need to configure them.
 
-目前有如下几个系统应用：
-* baetyl-init：负责激活边缘节点到云端，并初始化 baetyl-core，任务完成后就会退出。
-* baetyl-core：负责本地节点管理（node）、端云数据同步（sync）和应用部署（engine）。
-* baetyl-function: 所有函数运行时服务的代理模块，函数调用都到通过这个模块。
+There are currently several system applications:
+* baetyl-init: responsible for activating the edge node to the cloud
+and initializing baetyl-core, and will exit after all tasks are completed.
+* baetyl-core: responsible for local node management (node),
+data synchronization with cloud (sync) and application deployment (engine).
+* baetyl-function: the proxy for all function runtime services,
+function invocations are passed through this module.
 
-目前框架支持 Linux/amd64、Linux/arm64、Linux/armv7，
-如果边缘节点的资源有限，可考虑使用轻量版 Kubernetes：[K3S](https://k3s.io/)。
+Currently the framework supports Linux/amd64, Linux/arm64, Linux/armv7,
+If the resources of the edge nodes are limited,
+consider to use the lightweight kubernetes: [K3S](https://k3s.io/).
 
-## 联系我们
+## Contact us
 
-Baetyl 作为中国首发的开源边缘计算框架，
-我们旨在打造一个 **轻量、安全、可靠、可扩展性强** 的边缘计算社区，
-为边缘计算技术的发展和不断推进营造一个良好的生态环境。
-为了更好的推进 Baetyl 的发展，如果您有更好的关于 Baetyl 的发展建议，
-欢迎选择如下方式与我们联系。
+As the first open edge computing framework in China,
+Baetyl aims to create a lightweight, secure,
+reliable and scalable edge computing community
+that will create a good ecological environment.
+In order to create a better development of Baetyl,
+if you have better advice about Baetyl, please contact us:
 
-- 欢迎加入 [Baetyl 边缘计算开发者社区群](https://baetyl.bj.bcebos.com/Wechat/Wechat-Baetyl.png)
-- 欢迎加入 [Baetyl 的 LF Edge 讨论组](https://lists.lfedge.org/g/baetyl/topics)
-- 欢迎发送邮件到：<baetyl@lists.lfedge.org>
-- 欢迎到 [GitHub 提交 Issue](https://github.com/baetyl/baetyl-cloud/issues)
+- Welcome to join [Baetyl's Wechat](https://baetyl.bj.bcebos.com/Wechat/Wechat-Baetyl.png)
+- Welcome to join [Baetyl's LF Edge Community](https://lists.lfedge.org/g/baetyl/topics)
+- Welcome to send email to <baetyl@lists.lfedge.org>
+- Welcome to [submit an issue](https://github.com/baetyl/baetyl/issues)
 
-## 如何贡献
+## Contributing
 
-如果您热衷于开源社区贡献，Baetyl 将为您提供两种贡献方式，分别是代码贡献和文档贡献。
-具体请参考 [如何向 Baetyl 贡献代码和文档](./docs/contributing_cn.md)。
+If you are passionate about contributing to open source community,
+Baetyl will provide you with both code contributions and document contributions.
+More details, please see: [How to contribute code or document to Baetyl](./docs/contributing.md).

@@ -15,8 +15,8 @@ Baetyl 使用通用的 [Git 分支构建模型](http://nvie.com/posts/a-successf
    如果您想要向 Baetyl 贡献代码，请参考如下命令准备相关本地开发环境：
 
    ```bash
-   go get github.com/baetyl/baetyl # 获取 baetyl 代码库
-   cd $GOPATH/src/github.com/baetyl/baetyl # 进入 baetyl 代码库目录
+   go get github.com/baetyl/baetyl-cloud # 获取 baetyl 代码库
+   cd $GOPATH/src/github.com/baetyl/baetyl-cloud # 进入 baetyl cloud 代码库目录
    git checkout master  # 校验当前处于 master 主分支
    git remote add fork https://github.com/<your_github_account>/baetyl  # 指定远程提交代码仓库
    ```
@@ -34,7 +34,7 @@ Baetyl 使用通用的 [Git 分支构建模型](http://nvie.com/posts/a-successf
 
 4. 创建代码合入请求
 
-   基于 fork 的仓库地址直接向 Baetyl 官方仓库 [https://github.com/baetyl/baetyl](https://github.com/baetyl/baetyl) 提交 **pull request**（具体请参考[如何创建一个提交请求](https://help.github.com/articles/creating-a-pull-request/)），即可完成向 Baetyl 官方仓库的代码合入请求。一旦 Baetyl 代码仓库评审人员通过了您的代码提交、合入请求，您即可在 Baetyl 官方代码仓库中看到您贡献的代码。
+   基于 fork 的仓库地址直接向 Baetyl 官方仓库 [https://github.com/baetyl/baetyl-cloud](https://github.com/baetyl/baetyl-cloud) 提交 **pull request**（具体请参考[如何创建一个提交请求](https://help.github.com/articles/creating-a-pull-request/)），即可完成向 Baetyl 官方仓库的代码合入请求。一旦 Baetyl 代码仓库评审人员通过了您的代码提交、合入请求，您即可在 Baetyl 官方代码仓库中看到您贡献的代码。
 
 ## 代码评审规范
 

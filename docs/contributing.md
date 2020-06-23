@@ -15,8 +15,8 @@ Baetyl use this [Git branching model](https://nvie.com/posts/a-successful-git-br
 2. Prepare for the development environment
 
    ```bash
-   go get github.com/baetyl/baetyl # clone baetyl official repository
-   cd $GOPATH/src/github.com/baetyl/baetyl # step into baetyl
+   go get github.com/baetyl/baetyl-cloud # clone baetyl official repository
+   cd $GOPATH/src/github.com/baetyl/baetyl-cloud # step into baetyl cloud
    git checkout master  # verify master branch
    git remote add fork https://github.com/<your_github_account>/baetyl  # specify remote repository
    ```
@@ -32,7 +32,7 @@ Baetyl use this [Git branching model](https://nvie.com/posts/a-successful-git-br
 
 4. Create pull request
 
-   You can push and file a pull request to Baetyl official repository [https://github.com/baetyl/baetyl](https://github.com/baetyl/baetyl). To create a pull request, please follow [these steps](https://help.github.com/articles/creating-a-pull-request/). Once the Baetyl repository reviewer approves and merges your pull request, you will see the code which contributed by you in the Baetyl official repository.
+   You can push and file a pull request to Baetyl official repository [https://github.com/baetyl/baetyl-cloud](https://github.com/baetyl/baetyl-cloud). To create a pull request, please follow [these steps](https://help.github.com/articles/creating-a-pull-request/). Once the Baetyl repository reviewer approves and merges your pull request, you will see the code which contributed by you in the Baetyl official repository.
 
 ## Code Review
 

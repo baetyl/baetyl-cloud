@@ -2,19 +2,19 @@
 
 [![Baetyl-logo](./docs/logo_with_name.png)](https://baetyl.io)
 
-<!-- [![build](https://github.com/baetyl/baetyl-cloud/workflows/build/badge.svg)](https://github.com/baetyl/baetyl-cloud/actions?query=workflow%3Abuild)
+[![build](https://github.com/baetyl/baetyl-cloud/workflows/build/badge.svg)](https://github.com/baetyl/baetyl-cloud/actions?query=workflow%3Abuild)
 [![codecov](https://codecov.io/gh/baetyl/baetyl-cloud/branch/master/graph/badge.svg)](https://codecov.io/gh/baetyl/baetyl-cloud)
 [![Go Report Card](https://goreportcard.com/badge/github.com/baetyl/baetyl-cloud)](https://goreportcard.com/report/github.com/baetyl/baetyl-cloud) 
 [![License](https://img.shields.io/github/license/baetyl/baetyl-cloud?color=blue)](LICENSE) 
 [![Stars](https://img.shields.io/github/stars/baetyl/baetyl-cloud?style=social)](Stars)
 
-[![README](https://img.shields.io/badge/README-English-brightgreen)](./README.md) -->
+[![README](https://img.shields.io/badge/README-English-brightgreen)](./README.md) 
 
 **[Baetyl](https://baetyl.io) 是 [Linux Foundation Edge](https://www.lfedge.org) 
 旗下的边缘计算项目，旨在将云计算能力拓展至用户现场**。
-包括设备接入、消息路由、数据遥传、函数计算、视频采集、AI推断、状态上报、配置下发等功能。
+提供临时离线、低延时的计算服务，包括设备接入、消息路由、数据遥传、函数计算、视频采集、AI推断、状态上报、配置下发等功能。
 
-Baetyl v2 提供了一个全新的边云融合平台，采用云端管理、边缘运行的方案，分成[**边缘计算框架**](https://github.com/baetyl/baetyl)和[**云端管理套件（本项目）**](https://github.com/baetyl/baetyl-cloud)两部分，支持多种部署方式。可在云端管理所有资源，比如节点、应用、配置等，自动部署应用到边缘节点，满足各种边缘计算场景，特别适合新兴的强边缘设备，比如 AI 一体机、5G 路测盒子等。
+Baetyl v2 提供了一个全新的边云融合平台，采用云端管理、边缘运行的方案，分成[**边缘计算框架**](https://github.com/baetyl/baetyl)和[**云端管理套件（本项目）**](https://github.com/baetyl/baetyl-cloud)两部分，支持多种部署方式。可在云端管理所有资源，比如节点、应用、配置等，自动部署应用到边缘节点，满足各种边缘计算场景，特别适合新兴的强边缘设备，比如 AI 一体机、5G 路侧盒子等。
 
 v2 和 v1 版本的主要区别如下：
 * 边缘和云端框架全部向云原生演化，已支持运行在 K8S 或 K3S 之上。
@@ -22,13 +22,13 @@ v2 和 v1 版本的主要区别如下：
 * 边缘框架暂不支持进程（native）运行模式，由于运行在 K3S 上，所以整体的资源开销会有增加。
 * 边缘框架将来会支持边缘节点集群。
 
-## 全景图
+## 架构
 
 ![Architecture](./docs/baetyl-arch-v2.svg)
 
 ### 云端管理套件（本项目）
 
-云端管理套件（Cloud Management Suite）负责管理所有资源，包括节点、应用、配置、部署等。所有功能的实现都插件化，方便功能扩展和第三方服务的接入，提供丰富的应用。云端管理套件的部署非常灵活，即可部署在公有云上，又可部署在私有化环境中，还可部署在普通 PC 上，支持 K8S/K3S 部署，支持单租户和多租户。
+云端管理套件（Cloud Management Suite）负责管理所有资源，包括节点、应用、配置、部署等。所有功能的实现都插件化，方便功能扩展和第三方服务的接入，提供丰富的应用。云端管理套件的部署非常灵活，即可部署在公有云上，又可部署在私有化环境中，还可部署在普通设备上，支持 K8S/K3S 部署，支持单租户和多租户。
 
 开源版云端管理套件提供的基础功能如下：
 * 边缘节点管理
