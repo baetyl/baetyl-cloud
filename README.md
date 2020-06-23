@@ -26,7 +26,7 @@ The main differences between v2 and v1 versions are as follows:
 
 ![Architecture](./docs/baetyl-arch-v2.svg)
 
-### Cloud Management Suite (this project)
+### [Cloud Management Suite (this project)](./README.md) 
 
 The Cloud Management Suite is responsible for managing all resources, including nodes, applications, configuration, and deployment. The realization of all functions is plug-in, which is convenient for function expansion and third-party service access, and provides rich applications. The deployment of the cloud management suite is very flexible. It can be deployed on public clouds, private cloud environments, and common devices. It supports K8S/K3S deployment, and supports single-tenancy and multi-tenancy.
 
@@ -53,7 +53,7 @@ The basic functions provided by the cloud management suite in this project are a
 
 _The open source version contains the RESTful API of all the above functions, but does not include the front-end dashboard. _
 
-### Edge Computing Framework
+### [Edge Computing Framework](https://github.com/baetyl/baetyl)
 
 The Edge Computing Framework runs on Kubernetes at the edge node,
 manages and deploys all applications which provide various capabilities.
