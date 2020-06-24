@@ -1,0 +1,36 @@
+package api
+
+import (
+	"github.com/baetyl/baetyl-cloud/common"
+	specV1 "github.com/baetyl/baetyl-go/spec/v1"
+)
+
+// Report for node report
+func (api *API) Report(c *common.Context) (interface{}, error) {
+	ns, n := c.GetNamespace(), c.GetName()
+	var report specV1.Report
+	err := c.BindJSON(&report)
+	if ns == "" || n == "" || err != nil {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+	}
+	return api.syncService.Report(ns, n, report)
+}
+
+// Desire for node synchronize desire info
+func (api *API) Desire(c *common.Context) (interface{}, error) {
+	ns := c.GetNamespace()
+	var request specV1.DesireRequest
+	err := c.BindJSON(&request)
+	if ns == "" || err != nil {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+	}
+	// TODO: remove compatible code
+	if len(request.CRDInfos) != 0 {
+		request.Infos = request.CRDInfos
+	}
+	res, err := api.syncService.Desire(ns, request.Infos)
+	if err != nil {
+		return nil, err
+	}
+	return specV1.DesireResponse{Values: res}, nil
+}

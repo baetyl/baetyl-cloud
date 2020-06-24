@@ -1,0 +1,59 @@
+package config
+
+import (
+	"os"
+	"time"
+
+	"github.com/baetyl/baetyl-go/log"
+	"github.com/baetyl/baetyl-go/utils"
+)
+
+const (
+	AdminServerPort  = "ADMIN_PORT"
+	NodeServerPort   = "NODE_PORT"
+	ActiveServerPort = "ACTIVE_PORT"
+)
+
+// CloudConfig baetyl-cloud config
+type CloudConfig struct {
+	ActiveServer Server     `yaml:"activeServer" json:"activeServer"`
+	AdminServer  Server     `yaml:"adminServer" json:"adminServer"`
+	NodeServer   Server     `yaml:"nodeServer" json:"nodeServer"`
+	LogInfo      log.Config `yaml:"logger" json:"logger"`
+	Plugin       struct {
+		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
+		Auth      string   `yaml:"auth" json:"auth" default:"defaultauth"`
+		License   string   `yaml:"license" json:"license" default:"defaultlicense"`
+		Shadow    string   `yaml:"shadow" json:"shadow" default:"database"`
+		Objects   []string `yaml:"objects" json:"objects" default:"[]"`
+		Functions []string `yaml:"functions" json:"functions" default:"[]"`
+
+		// TODO: deprecated
+		ModelStorage    string `yaml:"modelStorage" json:"modelStorage" default:"kubernetes"`
+		DatabaseStorage string `yaml:"databaseStorage" json:"databaseStorage" default:"database"`
+	} `yaml:"plugin" json:"plugin"`
+}
+
+// Server server config
+type Server struct {
+	Port         string            `yaml:"port" json:"port" validate:"nonzero"`
+	ReadTimeout  time.Duration     `yaml:"readTimeout" json:"readTimeout" default:"30s"`
+	WriteTimeout time.Duration     `yaml:"writeTimeout" json:"writeTimeout" default:"30s"`
+	ShutdownTime time.Duration     `yaml:"shutdownTime" json:"shutdownTime" default:"3s"`
+	Certificate  utils.Certificate `yaml:",inline" json:",inline"`
+}
+
+func SetPortFromEnv(cfg *CloudConfig) {
+	adminPort := os.Getenv(AdminServerPort)
+	if adminPort != "" {
+		cfg.AdminServer.Port = ":" + adminPort
+	}
+	activePort := os.Getenv(ActiveServerPort)
+	if activePort != "" {
+		cfg.ActiveServer.Port = ":" + activePort
+	}
+	nodePort := os.Getenv(NodeServerPort)
+	if nodePort != "" {
+		cfg.NodeServer.Port = ":" + nodePort
+	}
+}
