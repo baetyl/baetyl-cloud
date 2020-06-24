@@ -16,18 +16,14 @@
 .svn
 .tmp
 .download
-output
 .*.swp
 .*.swo
-/etc
-/**/var
 .idea
 .vscode
+.DS_Store
 /vendor
-/coverage.out
 /output*
-/etc
-coverage.txt
-coverage.html
+coverage.*
 
+output
 baetyl-cloud
