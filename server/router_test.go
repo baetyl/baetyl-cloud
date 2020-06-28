@@ -81,8 +81,7 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 	})
 
 	s, _ := NewAdminServer(c)
-	n, err := NewNodeServer(c)
-	fmt.Println(err)
+	n, _ := NewNodeServer(c)
 	a, _ := NewActiveServer(c)
 	return s, n, a, mockAuth, mLicense, mockCtl, c
 }

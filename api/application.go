@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	ConfigDir            = "etc/baetyl"
+	ConfigDir            = "/etc/baetyl"
 	FunctionConfigPrefix = "baetyl-function-config"
 	FunctionCodePrefix   = "baetyl-function-code"
 )
@@ -339,6 +339,13 @@ func (api *API) toAppliation(appView *models.ApplicationView, oldApp *specV1.App
 			return nil, nil, err
 		}
 		service.Image = image
+
+		service.Ports = []specV1.ContainerPort{
+			{
+				ContainerPort: 80,
+				Protocol:      "TCP",
+			},
+		}
 	}
 	return app, configs, nil
 }

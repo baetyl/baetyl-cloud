@@ -62,7 +62,7 @@ func (api *API) ImportFunction(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	bucketName := fmt.Sprintf("%s-%s", common.BaetylCloud, id)
-	objectName := fmt.Sprintf("%s/%s.zip", objectNamePrefix, functionObj.Name)
+	objectName := fmt.Sprintf("%s/%s.%s", objectNamePrefix, functionObj.Name, common.UnpackTypeZip)
 
 	objectSource, err := api.getDefaultObjectSource()
 	if err != nil {
@@ -84,8 +84,12 @@ func (api *API) ImportFunction(c *common.Context) (interface{}, error) {
 		Version:  functionObj.Version,
 		Runtime:  functionObj.Runtime,
 		Handler:  functionObj.Handler,
-		Bucket:   bucketName,
-		Object:   objectName,
+		ConfigObjectItem: models.ConfigObjectItem{
+			Source: objectSource,
+			Bucket: bucketName,
+			Object: objectName,
+			Unpack: common.UnpackTypeZip,
+		},
 	}, nil
 }
 

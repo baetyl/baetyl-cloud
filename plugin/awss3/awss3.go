@@ -239,6 +239,11 @@ func (c *awss3Storage) GenObjectURL(_, bucket, name string) (*models.ObjectURL, 
 }
 
 func (c *awss3Storage) GenExternalObjectURL(_ string, param models.ConfigObjectItem) (*models.ObjectURL, error) {
+	if param.Ak == "" && param.Sk == "" {
+		return &models.ObjectURL{
+			URL: fmt.Sprintf("%s/%s/%s", param.Endpoint, param.Bucket, param.Object),
+		}, nil
+	}
 	newSession, err := session.NewSession(&aws.Config{
 		Credentials:      credentials.NewStaticCredentials(param.Ak, param.Sk, ""),
 		Endpoint:         aws.String(param.Endpoint),
