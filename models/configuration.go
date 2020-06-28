@@ -31,12 +31,11 @@ type ConfigDataItem struct {
 }
 
 type ConfigFunctionItem struct {
-	Function string `json:"function,omitempty"`
-	Version  string `json:"version,omitempty"`
-	Runtime  string `json:"runtime,omitempty"`
-	Handler  string `json:"handler,omitempty"`
-	Bucket   string `json:"bucket,omitempty"`
-	Object   string `json:"object,omitempty"`
+	ConfigObjectItem `json:",inline"`
+	Function         string `json:"function,omitempty"`
+	Version          string `json:"version,omitempty"`
+	Runtime          string `json:"runtime,omitempty"`
+	Handler          string `json:"handler,omitempty"`
 }
 
 type ConfigObjectItem struct {

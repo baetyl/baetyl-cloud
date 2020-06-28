@@ -198,7 +198,6 @@ func TestImportFunction(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	fmt.Println(w.Body.String())
 	var res models.ConfigFunctionItem
 	err := json.Unmarshal(w.Body.Bytes(), &res)
 	assert.NoError(t, err)

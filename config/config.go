@@ -16,9 +16,9 @@ const (
 
 // CloudConfig baetyl-cloud config
 type CloudConfig struct {
-	ActiveServer Server     `yaml:"activeServer" json:"activeServer"`
-	AdminServer  Server     `yaml:"adminServer" json:"adminServer"`
-	NodeServer   Server     `yaml:"nodeServer" json:"nodeServer"`
+	ActiveServer Server     `yaml:"activeServer" json:"activeServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
+	AdminServer  Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
+	NodeServer   Server     `yaml:"nodeServer" json:"nodeServer" default:"{\"port\":\":9005\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
 	Plugin       struct {
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
@@ -36,7 +36,7 @@ type CloudConfig struct {
 
 // Server server config
 type Server struct {
-	Port         string            `yaml:"port" json:"port" validate:"nonzero"`
+	Port         string            `yaml:"port" json:"port"`
 	ReadTimeout  time.Duration     `yaml:"readTimeout" json:"readTimeout" default:"30s"`
 	WriteTimeout time.Duration     `yaml:"writeTimeout" json:"writeTimeout" default:"30s"`
 	ShutdownTime time.Duration     `yaml:"shutdownTime" json:"shutdownTime" default:"3s"`

@@ -199,6 +199,10 @@ const (
 	ConfigObjectPrefix = "_object_"
 )
 
+const (
+	UnpackTypeZip = "zip"
+)
+
 var (
 	// Todo use global.go
 	Cache          map[string]string
