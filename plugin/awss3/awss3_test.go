@@ -23,9 +23,9 @@ func TestNewLocal(t *testing.T) {
 	t.Skip(t.Name())
 	conf := `
 minio:
-  endpoint: http://106.12.34.129:30090/
-  ak: AKIAIOSFODNN7EXAMPLE
-  sk: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+  endpoint: xx
+  ak: xx
+  sk: xx
 `
 	filename := "cloud.yml"
 	err := ioutil.WriteFile(filename, []byte(conf), 0644)
