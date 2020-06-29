@@ -89,7 +89,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 	}
 
 	if models.EqualConfig(res, config) {
-		return res, nil
+		return api.toConfigurationView(res)
 	}
 
 	config.Version = res.Version
