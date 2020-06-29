@@ -240,23 +240,13 @@ func TestAPI_CreateRecord(t *testing.T) {
 	api.registerService = rs
 
 	mRecord := models.Record{
-		FingerprintValue: "",
+		FingerprintValue: "123",
 	}
+	rs.EXPECT().CreateRecord(gomock.Any()).Return(&mRecord, nil).Times(1)
 
 	body, _ := json.Marshal(mRecord)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/register/test/record", bytes.NewReader(body))
 	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	rs.EXPECT().CreateRecord(gomock.Any()).Return(nil, nil).AnyTimes()
-
-	mRecord = models.Record{
-		FingerprintValue: "123",
-	}
-	body, _ = json.Marshal(mRecord)
-	req, _ = http.NewRequest(http.MethodPost, "/v1/register/test/record", bytes.NewReader(body))
-	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 }
