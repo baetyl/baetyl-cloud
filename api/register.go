@@ -79,12 +79,13 @@ func (api *API) GenInitCmdFromBatch(c *common.Context) (interface{}, error) {
 
 func (api *API) CreateRecord(c *common.Context) (interface{}, error) {
 	ns, batchName := c.GetNamespace(), c.Param("batchName")
-	r := &models.Record{
-		FingerprintValue: common.UUIDPrune(),
-	}
+	r := &models.Record{}
 	r, err := api.parseRecord(r, c)
 	if err != nil {
 		return nil, err
+	}
+	if r.FingerprintValue == "" {
+		r.FingerprintValue = common.UUIDPrune()
 	}
 	r.Namespace = ns
 	if r.Name == "" {
