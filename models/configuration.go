@@ -26,7 +26,7 @@ type ConfigurationView struct {
 }
 
 type ConfigDataItem struct {
-	Key   string            `json:"key,omitempty"`
+	Key   string            `json:"key,omitempty" binding:"required"`
 	Value map[string]string `json:"value,omitempty"`
 }
 
