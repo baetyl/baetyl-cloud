@@ -18,11 +18,6 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-const (
-	MINIO = "minio"
-	AWSS3 = "awss3"
-)
-
 type awss3Storage struct {
 	s3Client   *s3.S3
 	cfg        CloudConfig
@@ -31,37 +26,21 @@ type awss3Storage struct {
 }
 
 func init() {
-	plugin.RegisterFactory(MINIO, NewMinio)
-	plugin.RegisterFactory(AWSS3, NewAwss3)
+	plugin.RegisterFactory("minio", NewMinio)
 }
 
 func NewMinio() (plugin.Plugin, error) {
-	return newInstance(MINIO)
-}
-
-func NewAwss3() (plugin.Plugin, error) {
-	return newInstance(AWSS3)
-}
-
-func newInstance(source string) (plugin.Plugin, error) {
 	var cfg CloudConfig
 	if err := common.LoadConfig(&cfg); err != nil {
 		return nil, err
 	}
 
-	var config S3Config
-	switch source {
-	case MINIO:
-		config = cfg.Minio
-	case AWSS3:
-		config = cfg.Awss3
-	}
 	// Configure to use S3 Server
 	s3Config := &aws.Config{
-		Credentials:      credentials.NewStaticCredentials(config.Ak, config.Sk, ""),
-		Endpoint:         aws.String(config.Endpoint),
-		Region:           aws.String(config.Region),
-		DisableSSL:       aws.Bool(!strings.HasPrefix(config.Endpoint, "https")),
+		Credentials:      credentials.NewStaticCredentials(cfg.Minio.Ak, cfg.Minio.Sk, ""),
+		Endpoint:         aws.String(cfg.Minio.Endpoint),
+		Region:           aws.String(cfg.Minio.Region),
+		DisableSSL:       aws.Bool(!strings.HasPrefix(cfg.Minio.Endpoint, "https")),
 		S3ForcePathStyle: aws.Bool(true),
 	}
 	newSession, err := session.NewSession(s3Config)
@@ -235,50 +214,6 @@ func (c *awss3Storage) GenObjectURL(_, bucket, name string) (*models.ObjectURL, 
 	}
 	return &models.ObjectURL{
 		URL: url,
-	}, err
-}
-
-func (c *awss3Storage) GenExternalObjectURL(_ string, param models.ConfigObjectItem) (*models.ObjectURL, error) {
-	if param.Ak == "" && param.Sk == "" {
-		return &models.ObjectURL{
-			URL: fmt.Sprintf("%s/%s/%s", param.Endpoint, param.Bucket, param.Object),
-		}, nil
-	}
-	newSession, err := session.NewSession(&aws.Config{
-		Credentials:      credentials.NewStaticCredentials(param.Ak, param.Sk, ""),
-		Endpoint:         aws.String(param.Endpoint),
-		Region:           aws.String("us-east-1"),
-		DisableSSL:       aws.Bool(!strings.HasPrefix(param.Endpoint, "https")),
-		S3ForcePathStyle: aws.Bool(true),
-	})
-	if err != nil {
-		return nil, err
-	}
-	cli := s3.New(newSession)
-
-	resp, err := cli.HeadObject(&s3.HeadObjectInput{
-		Bucket: aws.String(param.Bucket),
-		Key:    aws.String(param.Object),
-	})
-	if err != nil {
-		return nil, err
-	}
-	MD5, err := strconv.Unquote(*resp.ETag)
-	if err != nil {
-		return nil, err
-	}
-
-	req, _ := cli.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(param.Bucket),
-		Key:    aws.String(param.Object),
-	})
-	url, err := req.Presign(c.cfg.Minio.Expiration)
-	if err != nil {
-		return nil, err
-	}
-	return &models.ObjectURL{
-		URL: url,
-		MD5: MD5,
 	}, err
 }
 

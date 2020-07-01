@@ -2,6 +2,13 @@ package service
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/config"
 	"github.com/baetyl/baetyl-cloud/models"
@@ -102,11 +109,46 @@ func (c *objectService) PutObjectFromURLIfNotExist(userID, bucket, name, url, so
 
 // GetObjectURL GetObjectURL
 func (c *objectService) GenObjectURL(userID string, param models.ConfigObjectItem) (*models.ObjectURL, error) {
+	if param.Endpoint != "" {
+		return c.GenAwss3ObjectURL(param)
+	}
+
 	if _, ok := c.objects[param.Source]; !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", param.Source)))
 	}
-	if param.Endpoint != "" {
-		return c.objects[param.Source].GenExternalObjectURL(userID, param)
-	}
 	return c.objects[param.Source].GenObjectURL(userID, param.Bucket, param.Object)
+}
+
+// GetObjectURL GetObjectURL
+func (c *objectService) GenAwss3ObjectURL(param models.ConfigObjectItem) (*models.ObjectURL, error) {
+	if param.Ak == "" && param.Sk == "" {
+		return &models.ObjectURL{
+			URL: fmt.Sprintf("%s/%s/%s", param.Endpoint, param.Bucket, param.Object),
+		}, nil
+	}
+	newSession, err := session.NewSession(&aws.Config{
+		Credentials:      credentials.NewStaticCredentials(param.Ak, param.Sk, ""),
+		Endpoint:         aws.String(param.Endpoint),
+		Region:           aws.String("us-east-1"),
+		DisableSSL:       aws.Bool(!strings.HasPrefix(param.Endpoint, "https")),
+		S3ForcePathStyle: aws.Bool(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	cli := s3.New(newSession)
+	req, _ := cli.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(param.Bucket),
+		Key:    aws.String(param.Object),
+	})
+	url, err := req.Presign(7 * time.Hour)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Awss3 Etag is not all md5, fix this bug in the future
+	return &models.ObjectURL{
+		URL: url,
+	}, err
 }

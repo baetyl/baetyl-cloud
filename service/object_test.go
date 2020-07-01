@@ -163,6 +163,28 @@ func TestObjectService_GenObjectURL(t *testing.T) {
 	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source (unknown) is not supported)")
 }
 
+func TestObjectService_GenObjectURLWithEndpoint(t *testing.T) {
+	t.Skip(t.Name())
+
+	mockObject := InitMockEnvironment(t)
+	defer mockObject.Close()
+	cs, err := NewObjectService(mockObject.conf)
+	assert.NoError(t, err)
+
+	object := models.ConfigObjectItem{
+		Source:   "awss3",
+		Endpoint: "xx",
+		Bucket:   "xx",
+		Object:   "xx",
+		Ak:       "xx",
+		Sk:       "xx",
+	}
+
+	res, err := cs.GenObjectURL("ns", object)
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+}
+
 func TestObjectService_CreateBucketIfNotExist(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
