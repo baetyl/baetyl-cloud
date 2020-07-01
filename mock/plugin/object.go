@@ -75,21 +75,6 @@ func (mr *MockObjectMockRecorder) DeleteObject(arg0, arg1, arg2 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteObject", reflect.TypeOf((*MockObject)(nil).DeleteObject), arg0, arg1, arg2)
 }
 
-// GenExternalObjectURL mocks base method
-func (m *MockObject) GenExternalObjectURL(arg0 string, arg1 models.ConfigObjectItem) (*models.ObjectURL, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenExternalObjectURL", arg0, arg1)
-	ret0, _ := ret[0].(*models.ObjectURL)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GenExternalObjectURL indicates an expected call of GenExternalObjectURL
-func (mr *MockObjectMockRecorder) GenExternalObjectURL(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenExternalObjectURL", reflect.TypeOf((*MockObject)(nil).GenExternalObjectURL), arg0, arg1)
-}
-
 // GenObjectURL mocks base method
 func (m *MockObject) GenObjectURL(arg0, arg1, arg2 string) (*models.ObjectURL, error) {
 	m.ctrl.T.Helper()

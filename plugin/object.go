@@ -21,6 +21,5 @@ type Object interface {
 	HeadObject(userID, bucket, name string) (*models.ObjectMeta, error)
 	DeleteObject(userID, bucket, name string) error
 	GenObjectURL(userID, bucket, name string) (*models.ObjectURL, error)
-	GenExternalObjectURL(userID string, param models.ConfigObjectItem) (*models.ObjectURL, error)
 	io.Closer
 }
