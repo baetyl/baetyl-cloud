@@ -162,7 +162,9 @@ func (t *syncService) populateConfig(cfg *specV1.Configuration) error {
 			}
 			obj.URL = res.URL
 			obj.Token = res.Token
-			obj.MD5 = res.MD5
+			if res.MD5 != "" {
+				obj.MD5 = res.MD5
+			}
 			obj.Unpack = configObject.Unpack
 			obj.Metadata = nil
 

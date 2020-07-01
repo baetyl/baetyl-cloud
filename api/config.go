@@ -277,6 +277,7 @@ func (api *API) toConfiguration(userID string, configView *models.ConfigurationV
 			config.Data[v.Key] = v.Value["value"]
 		case ConfigTypeFunction, ConfigTypeObject:
 			object := &specV1.ConfigurationObject{
+				MD5:      v.Value["md5"],
 				Metadata: map[string]string{},
 			}
 			object.Metadata = v.Value
