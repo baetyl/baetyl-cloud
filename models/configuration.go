@@ -44,6 +44,7 @@ type ConfigObjectItem struct {
 	Bucket   string `json:"bucket,omitempty"`
 	Object   string `json:"object,omitempty"`
 	Unpack   string `json:"unpack,omitempty"`
+	MD5      string `json:"md5,omitempty"`
 	Ak       string `json:"ak,omitempty"`
 	Sk       string `json:"sk,omitempty"`
 }
