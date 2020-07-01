@@ -160,7 +160,7 @@ func TestObjectService_GenObjectURL(t *testing.T) {
 	}
 	_, err = cs.GenObjectURL(ns, object)
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source is not supported)")
+	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source (unknown) is not supported)")
 }
 
 func TestObjectService_CreateBucketIfNotExist(t *testing.T) {
@@ -183,7 +183,7 @@ func TestObjectService_CreateBucketIfNotExist(t *testing.T) {
 
 	_, err = cs.CreateBucketIfNotExist(ns, bucket, "public", "default")
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source is not supported)")
+	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source (default) is not supported)")
 }
 
 func TestObjectService_PutObjectFromURL(t *testing.T) {
@@ -205,5 +205,5 @@ func TestObjectService_PutObjectFromURL(t *testing.T) {
 
 	err = cs.PutObjectFromURLIfNotExist(ns, bucket, name, url, "default")
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source is not supported)")
+	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source (default) is not supported)")
 }

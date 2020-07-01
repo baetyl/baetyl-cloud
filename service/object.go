@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/config"
 	"github.com/baetyl/baetyl-cloud/models"
@@ -41,7 +42,7 @@ func NewObjectService(config *config.CloudConfig) (ObjectService, error) {
 func (c *objectService) ListBuckets(userID, source string) ([]models.Bucket, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the source is not supported"))
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
 	return objectPlugin.ListBuckets(userID)
 }
@@ -50,7 +51,7 @@ func (c *objectService) ListBuckets(userID, source string) ([]models.Bucket, err
 func (c *objectService) ListBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the source is not supported"))
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
 	err := objectPlugin.HeadBucket(userID, bucket)
 	if err != nil {
@@ -62,7 +63,7 @@ func (c *objectService) ListBucketObjects(userID, bucket, source string) (*model
 func (c *objectService) CreateBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the source is not supported"))
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
 	err := objectPlugin.HeadBucket(userID, bucket)
 	if err == nil {
@@ -91,7 +92,7 @@ func (c *objectService) ListSources() []models.ObjectStorageSource {
 func (c *objectService) PutObjectFromURLIfNotExist(userID, bucket, name, url, source string) error {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
-		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "the source is not supported"))
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
 	if _, err := objectPlugin.HeadObject(userID, bucket, name); err == nil {
 		return nil
@@ -102,7 +103,7 @@ func (c *objectService) PutObjectFromURLIfNotExist(userID, bucket, name, url, so
 // GetObjectURL GetObjectURL
 func (c *objectService) GenObjectURL(userID string, param models.ConfigObjectItem) (*models.ObjectURL, error) {
 	if _, ok := c.objects[param.Source]; !ok {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the source is not supported"))
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", param.Source)))
 	}
 	if param.Endpoint != "" {
 		return c.objects[param.Source].GenExternalObjectURL(userID, param)
