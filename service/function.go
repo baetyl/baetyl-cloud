@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/config"
 	"github.com/baetyl/baetyl-cloud/models"
@@ -39,7 +40,7 @@ func NewFunctionService(config *config.CloudConfig) (FunctionService, error) {
 func (c *functionService) List(userID string, source string) ([]models.Function, error) {
 	functionPlugin, ok := c.functions[source]
 	if !ok {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the source is not supported"))
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
 	return functionPlugin.List(userID)
 }
@@ -48,7 +49,7 @@ func (c *functionService) List(userID string, source string) ([]models.Function,
 func (c *functionService) ListFunctionVersions(userID, name string, source string) ([]models.Function, error) {
 	functionPlugin, ok := c.functions[source]
 	if !ok {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the source is not supported"))
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
 	return functionPlugin.ListFunctionVersions(userID, name)
 }
@@ -67,7 +68,7 @@ func (c *functionService) ListSources() []models.FunctionSource {
 func (c *functionService) GetFunction(userID, name, version, source string) (*models.Function, error) {
 	functionPlugin, ok := c.functions[source]
 	if !ok {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the source is not supported"))
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
 
 	return functionPlugin.Get(userID, name, version)
