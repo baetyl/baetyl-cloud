@@ -14,7 +14,7 @@ type Batch struct {
 	SecurityType    common.Security   `json:"securityType,omitempty"`
 	SecurityKey     string            `json:"securityKey,omitempty"`
 	CallbackName    string            `json:"callbackName,omitempty"`
-	Labels          map[string]string `json:"labels,omitempty"`
+	Labels          map[string]string `json:"labels,omitempty" validate:"omitempty,validLabels"`
 	Fingerprint     Fingerprint       `json:"fingerprint,omitempty"`
 	CreateTime      time.Time         `json:"createTime,omitempty"`
 	UpdateTime      time.Time         `json:"updateTime,omitempty"`
