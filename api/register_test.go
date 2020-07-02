@@ -164,6 +164,26 @@ func TestAPI_CreateBatch(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/register", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// bad case
+	// len(name)=64
+	mBatch = generateDefaultBatch("test")
+	mBatch.Name = "1234567812345678123456781234567812345678123456781234567812345678"
+	body, _ = json.Marshal(mBatch)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/register", bytes.NewReader(body))
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// bad case
+	// len(label)=64
+	mBatch = generateDefaultBatch("test")
+	mBatch.Labels["a"] = "1234567812345678123456781234567812345678123456781234567812345678"
+	body, _ = json.Marshal(mBatch)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/register", bytes.NewReader(body))
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 func TestAPI_UpdateBatch(t *testing.T) {

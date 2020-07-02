@@ -197,6 +197,16 @@ func (api *API) parseBatch(batch *models.Batch, c *common.Context) (*models.Batc
 }
 
 func (api *API) verifyBatch(batch *models.Batch) error {
+	if len(batch.Name) > 63 {
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "Product name must less than 64"))
+	}
+	if len(batch.Labels) > 0 {
+		for k, v := range batch.Labels {
+			if len(k) > 63 || len(v) > 63 {
+				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "Label key and value name must less than 64"))
+			}
+		}
+	}
 	if batch.Fingerprint.Type < common.FingerprintSN || batch.Fingerprint.Type > ((common.FingerprintMachineID<<1)-1) {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "Fingerprint.Type error"))
 	}
