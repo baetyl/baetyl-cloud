@@ -7,7 +7,7 @@ import (
 
 type ApplicationView struct {
 	specV1.Application `json:",inline"`
-	Registries         []*ObjectReference `json:"registries,omitempty"`
+	Registries         []RegistryView `json:"registries,omitempty"`
 }
 
 type AppItem struct {
@@ -27,11 +27,6 @@ type ApplicationList struct {
 	Total       int          `json:"total"`
 	ListOptions *ListOptions `json:"listOptions"`
 	Items       []AppItem    `json:"items"`
-}
-
-type ObjectReference struct {
-	Name    string `json:"name,omitempty"`
-	Version string `json:"version,omitempty"`
 }
 
 type ServiceFunction struct {
