@@ -64,7 +64,7 @@ const (
 	// * resourceName
 	ErrInvalidResourceName = "resourceName"
 	ErrInvalidLabels       = "validLabels"
-	ErrInvalidRequired       = "required"
+	ErrInvalidRequired     = "required"
 	// * fingerprintValue
 	ErrInvalidFingerprintValue = "fingerprintValue"
 	// * memory

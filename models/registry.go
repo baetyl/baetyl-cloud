@@ -22,6 +22,12 @@ type Registry struct {
 	Version           string    `json:"version,omitempty"`
 }
 
+type RegistryView struct {
+	Name     string `json:"name,omitempty"`
+	Address  string `json:"address,omitempty"`
+	Username string `json:"username,omitempty"`
+}
+
 // RegistryList Registry List
 type RegistryList struct {
 	Total       int          `json:"total"`

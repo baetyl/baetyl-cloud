@@ -15,9 +15,10 @@ import (
 )
 
 const (
-	ConfigDir            = "/etc/baetyl"
-	FunctionConfigPrefix = "baetyl-function-config"
-	FunctionCodePrefix   = "baetyl-function-code"
+	ConfigDir                 = "/etc/baetyl"
+	FunctionConfigPrefix      = "baetyl-function-config"
+	FunctionCodePrefix        = "baetyl-function-code"
+	FunctionDefaultConfigFile = "service.yml"
 )
 
 // GetApplication get a application
@@ -289,7 +290,7 @@ func (api *API) toApplicationView(app *specV1.Application) (*models.ApplicationV
 		if err != nil {
 			return nil, err
 		}
-		if data, ok := config.Data["service.yml"]; ok {
+		if data, ok := config.Data[FunctionDefaultConfigFile]; ok {
 			serviceFunctions := new(models.ServiceFunction)
 			err := json.Unmarshal([]byte(data), serviceFunctions)
 			if err != nil {
@@ -356,8 +357,7 @@ func translateReistriesToSecrets(appView *models.ApplicationView, app *specV1.Ap
 			Name: reg.Name,
 			VolumeSource: specV1.VolumeSource{
 				Secret: &specV1.ObjectReference{
-					Name:    reg.Name,
-					Version: reg.Version,
+					Name: reg.Name,
 				},
 			},
 		}
@@ -366,7 +366,7 @@ func translateReistriesToSecrets(appView *models.ApplicationView, app *specV1.Ap
 }
 
 func (api *API) translateSecretsToRegistries(appView *models.ApplicationView) error {
-	appView.Registries = make([]*models.ObjectReference, 0)
+	appView.Registries = make([]models.RegistryView, 0)
 	volumes := make([]specV1.Volume, 0)
 	for _, volume := range appView.Volumes {
 		if volume.Secret != nil {
@@ -379,9 +379,11 @@ func (api *API) translateSecretsToRegistries(appView *models.ApplicationView) er
 			}
 
 			if label, ok := secret.Labels[specV1.SecretLabel]; ok && label == specV1.SecretRegistry {
-				appView.Registries = append(appView.Registries, &models.ObjectReference{
-					Name:    secret.Name,
-					Version: secret.Version,
+				registry := models.FromSecret(secret)
+				appView.Registries = append(appView.Registries, models.RegistryView{
+					Name:     registry.Name,
+					Address:  registry.Address,
+					Username: registry.Username,
 				})
 				continue
 			}
@@ -503,7 +505,7 @@ func generateConfigOfFunctionService(service *specV1.Service, app *specV1.Applic
 			common.LabelSystem: "true",
 		},
 		Data: map[string]string{
-			"service.yml": string(data),
+			FunctionDefaultConfigFile: string(data),
 		},
 	}
 	return config, nil

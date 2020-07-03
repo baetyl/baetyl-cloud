@@ -188,7 +188,6 @@ func TestGetContainerApplication(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &view)
 	assert.NoError(t, err)
 	assert.Equal(t, view.Registries[0].Name, "secret01")
-	assert.Equal(t, view.Registries[0].Version, "1")
 }
 
 func TestGetFunctionApplication(t *testing.T) {
@@ -350,7 +349,7 @@ func TestCreateContainerApplication(t *testing.T) {
 				},
 			},
 		},
-		Registries: []*models.ObjectReference{
+		Registries: []models.RegistryView{
 			{
 				Name: "registry01",
 			},

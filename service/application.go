@@ -235,7 +235,6 @@ func (a *applicationService) getConfigsAndSecrets(namespace string, app *specV1.
 	}
 
 	return configs, secrets, nil
-
 }
 
 func (a *applicationService) validName(app *specV1.Application) error {
