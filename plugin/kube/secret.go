@@ -13,9 +13,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (c *client) toSecretModel(Secret *v1alpha1.Secret) *specV1.Secret {
-	res := &specV1.Secret{Version: Secret.ObjectMeta.ResourceVersion}
-	err := copier.Copy(res, Secret)
+func (c *client) toSecretModel(secret *v1alpha1.Secret) *specV1.Secret {
+	res := &specV1.Secret{Version: secret.ObjectMeta.ResourceVersion}
+	err := copier.Copy(res, secret)
 	if err != nil {
 		panic(fmt.Sprintf("copier exception: %s", err.Error()))
 	}
@@ -23,41 +23,41 @@ func (c *client) toSecretModel(Secret *v1alpha1.Secret) *specV1.Secret {
 	if err != nil {
 		log.L().Error("decrypt exception", log.Error(err))
 	}
-	if desc, ok := Secret.Annotations[common.AnnotationDescription]; ok {
+	if desc, ok := secret.Annotations[common.AnnotationDescription]; ok {
 		res.Description = desc
 	}
-	if us, ok := Secret.Annotations[common.AnnotationUpdateTimestamp]; ok {
+	if us, ok := secret.Annotations[common.AnnotationUpdateTimestamp]; ok {
 		res.UpdateTimestamp, _ = time.Parse(common.TimeFormat, us)
 	}
-	res.CreationTimestamp = Secret.CreationTimestamp.Time.UTC()
-	res.Annotations = Secret.Annotations
+	res.CreationTimestamp = secret.CreationTimestamp.Time.UTC()
+	res.Annotations = secret.Annotations
 
 	return res
 }
 
-func (c *client) toSecretListModel(SecretList *v1alpha1.SecretList) *models.SecretList {
+func (c *client) toSecretListModel(secretList *v1alpha1.SecretList) *models.SecretList {
 	res := &models.SecretList{
 		Items: make([]specV1.Secret, 0),
 	}
-	for _, item := range SecretList.Items {
+	for _, item := range secretList.Items {
 		ptr := c.toSecretModel(&item)
 		res.Items = append(res.Items, *ptr)
 	}
-	res.Total = len(SecretList.Items)
+	res.Total = len(secretList.Items)
 	return res
 }
 
-func (c *client) fromSecretModel(Secret *specV1.Secret) (*v1alpha1.Secret, error) {
+func (c *client) fromSecretModel(secret *specV1.Secret) (*v1alpha1.Secret, error) {
 	res := &v1alpha1.Secret{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "Secret",
+			Kind:       "secret",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			ResourceVersion: Secret.Version,
+			ResourceVersion: secret.Version,
 		},
 	}
-	err := copier.Copy(res, Secret)
+	err := copier.Copy(res, secret)
 	if err != nil {
 		panic(fmt.Sprintf("copier exception: %s", err.Error()))
 	}
@@ -66,11 +66,11 @@ func (c *client) fromSecretModel(Secret *specV1.Secret) (*v1alpha1.Secret, error
 		log.L().Error("encrypt exception", log.Error(err))
 	}
 	res.Annotations = map[string]string{}
-	if Secret.Annotations != nil {
-		res.Annotations = Secret.Annotations
+	if secret.Annotations != nil {
+		res.Annotations = secret.Annotations
 	}
-	res.Annotations[common.AnnotationDescription] = Secret.Description
-	res.Annotations[common.AnnotationUpdateTimestamp] = Secret.UpdateTimestamp.UTC().Format(common.TimeFormat)
+	res.Annotations[common.AnnotationDescription] = secret.Description
+	res.Annotations[common.AnnotationUpdateTimestamp] = secret.UpdateTimestamp.UTC().Format(common.TimeFormat)
 
 	return res, nil
 }
@@ -84,12 +84,14 @@ func (c *client) GetSecret(namespace, name, version string) (*specV1.Secret, err
 	return c.toSecretModel(Secret), nil
 }
 
-func (c *client) CreateSecret(namespace string, SecretModel *specV1.Secret) (*specV1.Secret, error) {
-	model, err := c.fromSecretModel(SecretModel)
+func (c *client) CreateSecret(namespace string, secretModel *specV1.Secret) (*specV1.Secret, error) {
+	secretModel.UpdateTimestamp = time.Now()
+
+	model, err := c.fromSecretModel(secretModel)
 	if err != nil {
 		return nil, err
 	}
-	SecretModel.UpdateTimestamp = time.Now()
+
 	Secret, err := c.customClient.CloudV1alpha1().
 		Secrets(namespace).
 		Create(model)
@@ -99,8 +101,8 @@ func (c *client) CreateSecret(namespace string, SecretModel *specV1.Secret) (*sp
 	return c.toSecretModel(Secret), err
 }
 
-func (c *client) UpdateSecret(namespace string, SecretMapModel *specV1.Secret) (*specV1.Secret, error) {
-	model, err := c.fromSecretModel(SecretMapModel)
+func (c *client) UpdateSecret(namespace string, secretMapModel *specV1.Secret) (*specV1.Secret, error) {
+	model, err := c.fromSecretModel(secretMapModel)
 	if err != nil {
 		return nil, err
 	}
