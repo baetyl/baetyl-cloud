@@ -49,7 +49,7 @@ func (api *API) ParseTemplate(key string, data map[string]string) ([]byte, error
 
 //// CreateSysConfig create a system config
 func (api *API) CreateSysConfig(c *common.Context) (interface{}, error){
-	sysConfig := &(models.SysConfig{//这里可以不创建吗
+	sysConfig := &(models.SysConfig{
 		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
 	})
