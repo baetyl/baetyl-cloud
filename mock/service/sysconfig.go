@@ -62,3 +62,64 @@ func (mr *MockSysConfigServiceMockRecorder) ListSysConfigAll(arg0 interface{}) *
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSysConfigAll", reflect.TypeOf((*MockSysConfigService)(nil).ListSysConfigAll), arg0)
 }
+
+// ListSysConfig mocks base method
+func (m *MockSysConfigService) ListSysConfig(arg0 string, arg1 int, arg2 int) ([]models.SysConfig, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListSysConfig", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]models.SysConfig)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListSysConfig indicates an expected call of ListSysConfig
+func (mr *MockSysConfigServiceMockRecorder) ListSysConfig(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSysConfig", reflect.TypeOf((*MockSysConfigService)(nil).ListSysConfig), arg0)
+}
+
+// CreateSysConfig mocks base method
+func (m *MockSysConfigService) CreateSysConfig(arg0 *models.SysConfig) ([]models.SysConfig, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateSysConfig", arg0)
+	ret0, _ := ret[0].([]models.SysConfig)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateSysConfig indicates an expected call of CreateSysConfig
+func (mr *MockSysConfigServiceMockRecorder) CreateSysConfig(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSysConfig", reflect.TypeOf((*MockSysConfigService)(nil).CreateSysConfig), arg0)
+}
+
+
+// DeleteSysConfig mocks base method
+func (m *MockSysConfigService) DeleteSysConfig(arg0 , arg1 string) (sql.Result, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSysConfig", arg0, arg1)
+	ret0, _ := ret[0].(sql.Result)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteSysConfig indicates an expected call of DeleteSysConfig
+func (mr *MockSysConfigServiceMockRecorder) DeleteSysConfig(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSysConfig", reflect.TypeOf((*MockSysConfigService)(nil).DeleteSysConfig), arg0)
+}
+
+// UpdateSysConfig mocks base method
+func (m *MockSysConfigService) UpdateSysConfig(arg0 *models.SysConfig) (sql.Result, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSysConfig", arg0)
+	ret0, _ := ret[0].(sql.Result)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateSysConfig indicates an expected call of UpdateSysConfig
+func (mr *MockSysConfigServiceMockRecorder) UpdateSysConfig(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSysConfig", reflect.TypeOf((*MockSysConfigService)(nil).UpdateSysConfig), arg0)
+}

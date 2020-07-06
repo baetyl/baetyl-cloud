@@ -51,6 +51,7 @@ FROM baetyl_system_config WHERE type=? AND name=? LIMIT 0,1
 		common.Field("name", key))
 }
 
+
 func (d *dbStorage) ListSysConfigTx(tx *sqlx.Tx, tp string, pageNo, pageSize int) ([]models.SysConfig, error) {
 	selectSQL := `
 SELECT  
@@ -76,6 +77,7 @@ FROM baetyl_system_config WHERE type=?
 	}
 	return cs, nil
 }
+
 
 func (d *dbStorage) CreateSysConfigTx(tx *sqlx.Tx, sysConfig *models.SysConfig) (sql.Result, error) {
 	insertSQL := `
