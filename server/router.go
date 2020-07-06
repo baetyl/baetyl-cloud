@@ -96,12 +96,7 @@ func (s *AdminServer) InitRoute() {
 		namespace.GET("", common.Wrapper(s.api.GetNamespace))
 		namespace.DELETE("", common.Wrapper(s.api.DeleteNamespace))
 	}
-	{
-		sysconfig := v1.Group("/sysconfig")
-		sysconfig.GET("/:type/:key", common.Wrapper(s.api.GetSysConfig))
-		sysconfig.GET("/:type", common.Wrapper(s.api.ListSysConfig))
 
-	}
 	{
 		function := v1.Group("/functions")
 		function.GET("", common.Wrapper(s.api.ListFunctionSources))
@@ -195,5 +190,30 @@ func (s *ActiveServer) InitRoute() {
 		active := v1.Group("/active")
 		active.POST("/", common.Wrapper(s.api.Active))
 		active.GET("/:resource", common.WrapperRaw(s.api.GetResource))
+	}
+}
+
+
+
+//// GetRoute get router
+func (s *AmisServer) GetRoute() *gin.Engine {
+	return s.router
+}
+func (s *AmisServer) InitRoute(){
+	s.router.NoRoute(noRouteHandler)
+	s.router.NoMethod(noMethodHandler)
+	s.router.GET("/health", health)
+
+	s.router.Use(requestIDHandler)
+	s.router.Use(loggerHandler)
+	v1 := s.router.Group("v1")
+	{
+		sysconfig := v1.Group("/sysconfig")
+		sysconfig.GET("/:type/:key", common.Wrapper(s.api.GetSysConfig))
+		sysconfig.GET("/:type", common.Wrapper(s.api.ListSysConfig))
+
+		sysconfig.POST("", common.Wrapper(s.api.CreateSysConfig))
+		sysconfig.DELETE("/:type/:key", common.Wrapper(s.api.DeleteSysConfig))
+		sysconfig.PUT("/:type/:key",common.Wrapper(s.api.UpdateSysConfig))
 	}
 }

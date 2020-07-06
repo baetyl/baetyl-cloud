@@ -1,6 +1,8 @@
 package service
 
 import (
+	"database/sql"
+	//"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/config"
 	"github.com/baetyl/baetyl-cloud/models"
 	"github.com/baetyl/baetyl-cloud/plugin"
@@ -11,6 +13,10 @@ import (
 type SysConfigService interface {
 	GetSysConfig(tp, key string) (*models.SysConfig, error)
 	ListSysConfigAll(tp string) ([]models.SysConfig, error)
+	////
+	CreateSysConfig(sysConfig *models.SysConfig) (sql.Result, error)
+	DeleteSysConfig(tp, key string) (sql.Result, error)
+	UpdateSysConfig(sysConfig *models.SysConfig) (sql.Result, error)
 }
 
 type sysConfigService struct {
@@ -36,4 +42,19 @@ func (s *sysConfigService) GetSysConfig(tp, key string) (*models.SysConfig, erro
 
 func (s *sysConfigService) ListSysConfigAll(tp string) ([]models.SysConfig, error) {
 	return s.dbStorage.ListSysConfigAll(tp)
+}
+
+
+////创建系统配置
+func (s *sysConfigService) CreateSysConfig(sysConfig *models.SysConfig) (sql.Result, error){
+	return s.dbStorage.CreateSysConfig(sysConfig)
+}
+
+func (s *sysConfigService) DeleteSysConfig(tp, key string) (sql.Result, error) {
+	return s.dbStorage.DeleteSysConfig(tp, key)
+}
+
+
+func (s *sysConfigService) UpdateSysConfig(sysConfig *models.SysConfig) (sql.Result, error) {
+	return s.dbStorage.UpdateSysConfig(sysConfig)
 }

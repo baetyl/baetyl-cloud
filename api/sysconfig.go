@@ -2,10 +2,10 @@ package api
 
 import (
 	"bytes"
-	"text/template"
-
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/models"
+	"text/template"
+	"time"
 )
 
 // TODO: optimize this layer, general abstraction
@@ -41,4 +41,60 @@ func (api *API) ParseTemplate(key string, data map[string]string) ([]byte, error
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+
+
+
+
+//// CreateSysConfig create a system config
+func (api *API) CreateSysConfig(c *common.Context) (interface{}, error){
+	sysConfig := &(models.SysConfig{//这里可以不创建吗
+		CreateTime: time.Now(),
+		UpdateTime: time.Now(),
+	})
+	err := api.ParseSysConfig(sysConfig, c)
+	if err != nil {
+		return nil, err
+	}
+
+	// avoid inserting data with duplicate primary keys
+	oldSysConfig, err := api.sysConfigService.GetSysConfig(sysConfig.Type, sysConfig.Key)
+	if oldSysConfig!= nil {
+		return nil, common.Error(common.ErrResourceHasBeenUsed,
+			common.Field("error", "system config ["+oldSysConfig.Type+","+oldSysConfig.Key+"] is already exists"))
+	}
+	return api.sysConfigService.CreateSysConfig(sysConfig)
+}
+
+func (api *API) ParseSysConfig(sysConfig *models.SysConfig, c *common.Context) error {
+	err := c.LoadBody(sysConfig)
+	if err != nil {
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+	}
+
+	return err
+}
+
+func (api *API) DeleteSysConfig(c *common.Context) (interface{}, error) {
+	tp, key := c.Param("type"), c.Param("key")
+	return api.sysConfigService.DeleteSysConfig(tp, key)
+}
+
+func (api *API) UpdateSysConfig(c *common.Context) (interface{}, error) {
+	tp, key := c.Param("type"), c.Param("key")
+	oldSysConfig, err := api.sysConfigService.GetSysConfig(tp, key)
+	// ensure that the modified data exists
+	if err != nil {
+		return nil, common.Error(common.ErrResourceHasBeenUsed,
+			common.Field("error", "this system config does not exist"))
+	}
+	oldSysConfig.UpdateTime = time.Now()
+
+	err = c.LoadBody(oldSysConfig)
+	if err != nil {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+	}
+
+	return api.sysConfigService.UpdateSysConfig(oldSysConfig)
 }
