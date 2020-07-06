@@ -2,7 +2,6 @@ package service
 
 import (
 	"database/sql"
-	//"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/config"
 	"github.com/baetyl/baetyl-cloud/models"
 	"github.com/baetyl/baetyl-cloud/plugin"
@@ -13,7 +12,7 @@ import (
 type SysConfigService interface {
 	GetSysConfig(tp, key string) (*models.SysConfig, error)
 	ListSysConfigAll(tp string) ([]models.SysConfig, error)
-	////
+	
 	CreateSysConfig(sysConfig *models.SysConfig) (sql.Result, error)
 	DeleteSysConfig(tp, key string) (sql.Result, error)
 	UpdateSysConfig(sysConfig *models.SysConfig) (sql.Result, error)
@@ -45,7 +44,7 @@ func (s *sysConfigService) ListSysConfigAll(tp string) ([]models.SysConfig, erro
 }
 
 
-////创建系统配置
+
 func (s *sysConfigService) CreateSysConfig(sysConfig *models.SysConfig) (sql.Result, error){
 	return s.dbStorage.CreateSysConfig(sysConfig)
 }
