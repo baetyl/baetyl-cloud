@@ -211,6 +211,7 @@ func (s *AmisServer) InitRoute(){
 		sysconfig := v1.Group("/sysconfig")
 		sysconfig.GET("/:type/:key", common.Wrapper(s.api.GetSysConfig))
 		sysconfig.GET("", common.Wrapper(s.api.ListSysConfig))
+		sysconfig.GET("/:type", common.Wrapper(s.api.ListSysConfigAll))
 
 		sysconfig.POST("", common.Wrapper(s.api.CreateSysConfig))
 		sysconfig.DELETE("/:type/:key", common.Wrapper(s.api.DeleteSysConfig))

@@ -2,10 +2,10 @@ package api
 
 import (
 	"bytes"
+	"text/template"
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/models"
 	"strconv"
-	"text/template"
 	"time"
 )
 
@@ -16,9 +16,6 @@ func (api *API) GetSysConfig(c *common.Context) (interface{}, error) {
 	tp, key := c.Param("type"), c.Param("key")
 	return api.sysConfigService.GetSysConfig(tp, key)
 }
-
-
-
 
 
 func (api *API) ParseTemplate(key string, data map[string]string) ([]byte, error) {
@@ -38,12 +35,8 @@ func (api *API) ParseTemplate(key string, data map[string]string) ([]byte, error
 	return buf.Bytes(), nil
 }
 
-
-
-func (api *API) ListSysConfig(c *common.Context) (interface{}, error) {
-	pageNo, _ :=  strconv.Atoi(c.Query("pageNo"))
-	pageSize, _ :=  strconv.Atoi(c.Query("pageSize"))
-	res, err := api.sysConfigService.ListSysConfig(c.Query("type"), pageNo, pageSize)
+func (api *API) ListSysConfigAll(c *common.Context) (interface{}, error) {
+	res, err := api.sysConfigService.ListSysConfigAll(c.Param("type"))
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
@@ -52,8 +45,11 @@ func (api *API) ListSysConfig(c *common.Context) (interface{}, error) {
 	}, nil
 }
 
-func (api *API) ListSysConfigAll(c *common.Context) (interface{}, error) {
-	res, err := api.sysConfigService.ListSysConfigAll(c.Param("type"))
+
+func (api *API) ListSysConfig(c *common.Context) (interface{}, error) {
+	pageNo, _ :=  strconv.Atoi(c.Query("pageNo"))
+	pageSize, _ :=  strconv.Atoi(c.Query("pageSize"))
+	res, err := api.sysConfigService.ListSysConfig(c.Query("type"), pageNo, pageSize)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
