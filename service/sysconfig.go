@@ -12,7 +12,8 @@ import (
 type SysConfigService interface {
 	GetSysConfig(tp, key string) (*models.SysConfig, error)
 	ListSysConfigAll(tp string) ([]models.SysConfig, error)
-	
+
+	ListSysConfig(tp string, page, size int) ([]models.SysConfig, error)
 	CreateSysConfig(sysConfig *models.SysConfig) (sql.Result, error)
 	DeleteSysConfig(tp, key string) (sql.Result, error)
 	UpdateSysConfig(sysConfig *models.SysConfig) (sql.Result, error)
@@ -43,7 +44,9 @@ func (s *sysConfigService) ListSysConfigAll(tp string) ([]models.SysConfig, erro
 	return s.dbStorage.ListSysConfigAll(tp)
 }
 
-
+func (s *sysConfigService) ListSysConfig(tp string, page, size int) ([]models.SysConfig, error){
+	return s.dbStorage.ListSysConfig(tp, page, size)
+}
 
 func (s *sysConfigService) CreateSysConfig(sysConfig *models.SysConfig) (sql.Result, error){
 	return s.dbStorage.CreateSysConfig(sysConfig)
@@ -52,7 +55,6 @@ func (s *sysConfigService) CreateSysConfig(sysConfig *models.SysConfig) (sql.Res
 func (s *sysConfigService) DeleteSysConfig(tp, key string) (sql.Result, error) {
 	return s.dbStorage.DeleteSysConfig(tp, key)
 }
-
 
 func (s *sysConfigService) UpdateSysConfig(sysConfig *models.SysConfig) (sql.Result, error) {
 	return s.dbStorage.UpdateSysConfig(sysConfig)
