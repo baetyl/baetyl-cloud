@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-const (
-	HeaderCommonName = "X-Bfe-Client-Cert-Cn"
+var (
+	HeaderCommonName = "common-name"
 )
 
 func noRouteHandler(c *gin.Context) {
