@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const (
+var (
 	HeaderCommonName = "common-name"
 )
 

@@ -166,6 +166,7 @@ func (s *NodeServer) InitRoute() {
 	s.router.Use(requestIDHandler)
 	s.router.Use(loggerHandler)
 	if s.server.TLSConfig == nil {
+		HeaderCommonName = s.cfg.NodeServer.CommonName
 		s.router.Use(extractNodeCommonNameFromHeader)
 	} else {
 		s.router.Use(extractNodeCommonNameFromCert)

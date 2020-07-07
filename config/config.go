@@ -18,7 +18,7 @@ const (
 type CloudConfig struct {
 	ActiveServer Server     `yaml:"activeServer" json:"activeServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	AdminServer  Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
-	NodeServer   Server     `yaml:"nodeServer" json:"nodeServer" default:"{\"port\":\":9005\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
+	NodeServer   NodeServer `yaml:"nodeServer" json:"nodeServer" default:"{\"port\":\":9005\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"commonName\":\"common-name\"}"`
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
 	Plugin       struct {
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
@@ -32,6 +32,11 @@ type CloudConfig struct {
 		ModelStorage    string `yaml:"modelStorage" json:"modelStorage" default:"kubernetes"`
 		DatabaseStorage string `yaml:"databaseStorage" json:"databaseStorage" default:"database"`
 	} `yaml:"plugin" json:"plugin"`
+}
+
+type NodeServer struct {
+	Server     `yaml:",inline" json:",inline"`
+	CommonName string `yaml:"commonName" json:"commonName" default:"common-name"`
 }
 
 // Server server config

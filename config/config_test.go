@@ -12,8 +12,9 @@ func TestSetPortFromEnv(t *testing.T) {
 	cfg := &CloudConfig{
 		ActiveServer: Server{Port: ":1"},
 		AdminServer:  Server{Port: ":2"},
-		NodeServer:   Server{Port: ":3"},
+		NodeServer:   NodeServer{},
 	}
+	cfg.NodeServer.Port = ":3"
 	// no env
 	SetPortFromEnv(cfg)
 	assert.Equal(t, ":1", cfg.ActiveServer.Port)
@@ -50,6 +51,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.NodeServer.WriteTimeout = time.Second * 30
 	expect.NodeServer.ReadTimeout = time.Second * 30
 	expect.NodeServer.ShutdownTime = time.Second * 3
+	expect.NodeServer.CommonName = "common-name"
 
 	expect.LogInfo.Level = "info"
 	expect.LogInfo.MaxAge = 15
