@@ -1,3 +1,8 @@
+MODULE:=cloud
+BIN:=baetyl-$(MODULE)
+SRC_FILES:=$(shell find . -type f -name '*.go')
+PLATFORM_ALL:=darwin/amd64 linux/amd64 linux/arm64 linux/arm/v7
+
 HOMEDIR := $(shell pwd)
 OUTDIR  := $(HOMEDIR)/output
 
@@ -13,41 +18,31 @@ GO_BUILD = $(GO_ENV) $(GO) build $(GO_FLAGX) $(GO_TAGS)
 GOTEST   = $(GO) test
 GOPKGS   = $$($(GO) list ./... | grep -vE "vendor")
 
-MODULE  := baetyl-cloud
+REGISTRY?=
+XFLAGS?=--load
+XPLATFORMS:=$(shell echo $(filter-out darwin/amd64,$(PLATFORMS)) | sed 's: :,:g')
 
-all: test package
-
-prepare: prepare-dep
-prepare-dep:
-	git config --global http.sslVerify false
-	$(AGILE_BCLOUD)
-	$(EASYPACK_ANTI_DEBUG)
-	$(EASYPACK_AIPE_SECURITY)
-
-set-env:
-	$(GO) env -w GONOPROXY=\*\*.baidu.com\*\*
-	$(GO) env -w GOPROXY=https://goproxy.baidu.com
-	$(GO) env -w GONOSUMDB=\*
-
-compile:build
-build: set-env
-	$(GO_MOD) tidy
-	$(GO_BUILD) -o $(HOMEDIR)/$(MODULE)
+.PHONY: all
+all: $(SRC_FILES)
+	@echo "BUILD $(BIN)"
+	@env GO111MODULE=on GOPROXY=https://goproxy.cn CGO_ENABLED=0 go build -o $(BIN) $(GO_FLAGS) .
 
 test: fmt test-case
 test-case: set-env
 	$(GOTEST) -race -cover -coverprofile=coverage.out $(GOPKGS)
 
-package: compile package-bin
-package-bin:
-	mkdir -p $(OUTDIR)/bin
-	mv $(MODULE) $(OUTDIR)/bin/$(MODULE)
-
 clean:
 	rm -rf $(OUTDIR)
 	rm -rf $(HOMEDIR)/$(MODULE)
 
+image:
+	@echo "BUILDX: $(REGISTRY)$(MODULE):$(VERSION)"
+	@-docker buildx create --name baetyl
+	@docker buildx use baetyl
+	@docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+	docker buildx build $(XFLAGS) --platform $(XPLATFORMS) -t $(REGISTRY)$(MODULE):$(VERSION) -f Dockerfile .
+
 fmt:
 	go fmt ./...
 
-.PHONY: all prepare compile test package clean build
+.PHONY: all test clean image
