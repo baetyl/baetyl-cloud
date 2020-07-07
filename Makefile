@@ -42,7 +42,7 @@ all: $(SRC_FILES)
 	@env GO111MODULE=on GOPROXY=https://goproxy.cn CGO_ENABLED=0 go build -o $(BIN) $(GO_FLAGS) .
 
 test: fmt test-case
-test-case: set-env
+test-case:
 	$(GOTEST) -race -cover -coverprofile=coverage.out $(GOPKGS)
 
 clean:
