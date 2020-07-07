@@ -18,6 +18,18 @@ GO_BUILD = $(GO_ENV) $(GO) build $(GO_FLAGX) $(GO_TAGS)
 GOTEST   = $(GO) test
 GOPKGS   = $$($(GO) list ./... | grep -vE "vendor")
 
+ifndef PLATFORMS
+	GO_OS:=$(shell go env GOOS)
+	GO_ARCH:=$(shell go env GOARCH)
+	GO_ARM:=$(shell go env GOARM)
+	PLATFORMS:=$(if $(GO_ARM),$(GO_OS)/$(GO_ARCH)/$(GO_ARM),$(GO_OS)/$(GO_ARCH))
+	ifeq ($(GO_OS),darwin)
+		PLATFORMS+=linux/amd64
+	endif
+else ifeq ($(PLATFORMS),all)
+	override PLATFORMS:=$(PLATFORM_ALL)
+endif
+
 REGISTRY?=
 XFLAGS?=--load
 XPLATFORMS:=$(shell echo $(filter-out darwin/amd64,$(PLATFORMS)) | sed 's: :,:g')
