@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	HeaderCommonName = "common-name"
+	HeaderCommonName = "X-Bfe-Client-Cert-Cn"
 )
 
 func noRouteHandler(c *gin.Context) {
