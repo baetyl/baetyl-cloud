@@ -22,13 +22,10 @@ jobs:
           docker -v
       - name: Checkout code
         uses: actions/checkout@v1
-      - id: version
-        run: |
-          echo ::set-output name=version::$(echo ${GITHUB_REF:10})
       - name: docker login
         run: |
           docker login -u ${{ secrets.DOCKER_REGISTRY_ID }} -p ${{ secrets.DOCKER_REGISTRY_PASS }}
       - name: build and publish image
         run: |
-          make image PLATFORMS=all XFLAGS='--push --cache-to=type=local,dest=/tmp/main' REGISTRY=baetyltech/ GIT_TAG=${{ steps.version.outputs.version }}
+          make image PLATFORMS=all XFLAGS='--push --cache-to=type=local,dest=/tmp/main' REGISTRY=baetyltech/
       
