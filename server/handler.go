@@ -77,6 +77,10 @@ func extractNodeCommonNameFromHeader(c *gin.Context) {
 func extractNodeCommonName(cc *common.Context, commonName string) {
 	res := strings.SplitN(commonName, ".", 2)
 	if len(res) != 2 || res[0] == "" || res[1] == "" {
+		log.L().Error("extract node common name error",
+			log.Any(cc.GetTrace()),
+			log.Any("commonName", commonName),
+			log.Any("HeaderCommonName", HeaderCommonName))
 		common.PopulateFailedResponse(cc, common.Error(common.ErrRequestAccessDenied), true)
 		return
 	}
