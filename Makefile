@@ -5,12 +5,12 @@ PLATFORM_ALL:=darwin/amd64 linux/amd64 linux/arm64 linux/arm/v7
 
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
-HOMEDIR := $(shell pwd)
-OUTDIR  := $(HOMEDIR)/output
-
 GIT_TAG:=$(shell git tag --contains HEAD)
 GIT_REV:=git-$(shell git rev-parse --short HEAD)
 VERSION:=$(if $(GIT_TAG),$(GIT_TAG),$(GIT_REV))
+
+HOMEDIR := $(shell pwd)
+OUTDIR  := $(HOMEDIR)/output
 
 GO       = go
 GO_MOD   = $(GO) mod
