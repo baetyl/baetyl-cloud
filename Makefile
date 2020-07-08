@@ -15,8 +15,7 @@ VERSION:=$(if $(GIT_TAG),$(GIT_TAG),$(GIT_REV))
 GO       = go
 GO_MOD   = $(GO) mod
 GO_ENV   = env CGO_ENABLED=0
-GO_FLAGX = -ldflags '-X "github.com/baetyl/baetyl-go/utils.REVISION=$(GIT_REV)" -X "github.com/baetyl/baetyl-go/utils.VERSION=$(VERSION)"'
-GO_BUILD = $(GO_ENV) $(GO) build $(GO_FLAGX) $(GO_TAGS)
+GO_FLAGS = -ldflags '-X "github.com/baetyl/baetyl-go/utils.REVISION=$(GIT_REV)" -X "github.com/baetyl/baetyl-go/utils.VERSION=$(VERSION)"'
 GOTEST   = $(GO) test
 GOPKGS   = $$($(GO) list ./... | grep -vE "vendor")
 
