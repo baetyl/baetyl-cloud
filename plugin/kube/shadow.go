@@ -14,11 +14,17 @@ import (
 )
 
 func (c *client) Get(namespace, name string) (*models.Shadow, error) {
+	beforeRequest := time.Now().UnixNano()
 	nodeDesire, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Get(name, metav1.GetOptions{})
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube NodeDesires Get", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
+	beforeRequest = time.Now().UnixNano()
 	nodeReport, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Get(name, metav1.GetOptions{})
+	afterRequest = time.Now().UnixNano()
+	log.L().Debug("kube NodeReports Get", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -36,12 +42,22 @@ func (c *client) Create(shadow *models.Shadow) (*models.Shadow, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	if nd, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Create(desire); err != nil {
-		if d, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Get(name, metav1.GetOptions{}); err == nil && d != nil {
+	beforeRequest := time.Now().UnixNano()
+	nd, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Create(desire)
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube NodeDesires Create", log.Any("cost time (ns)", afterRequest-beforeRequest))
+	if err != nil {
+		beforeRequest = time.Now().UnixNano()
+		d, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Get(name, metav1.GetOptions{})
+		afterRequest = time.Now().UnixNano()
+		log.L().Debug("kube NodeDesires Get", log.Any("cost time (ns)", afterRequest-beforeRequest))
+		if err == nil && d != nil {
 			desire.ResourceVersion = d.ResourceVersion
 			desire.Labels = d.Labels
+			beforeRequest = time.Now().UnixNano()
 			desire, err = c.customClient.CloudV1alpha1().NodeDesires(namespace).Update(desire)
+			afterRequest = time.Now().UnixNano()
+			log.L().Debug("kube NodeDesires Update", log.Any("cost time (ns)", afterRequest-beforeRequest))
 			if err != nil {
 				return nil, err
 			}
@@ -55,11 +71,22 @@ func (c *client) Create(shadow *models.Shadow) (*models.Shadow, error) {
 		return nil, err
 	}
 
-	if nr, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Create(report); err != nil {
-		if r, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Get(name, metav1.GetOptions{}); err == nil && r != nil {
+	beforeRequest = time.Now().UnixNano()
+	nr, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Create(report)
+	afterRequest = time.Now().UnixNano()
+	log.L().Debug("kube NodeReports Create", log.Any("cost time (ns)", afterRequest-beforeRequest))
+	if err != nil {
+		beforeRequest = time.Now().UnixNano()
+		r, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Get(name, metav1.GetOptions{})
+		afterRequest = time.Now().UnixNano()
+		log.L().Debug("kube NodeReports Get", log.Any("cost time (ns)", afterRequest-beforeRequest))
+		if err == nil && r != nil {
 			report.ResourceVersion = r.ResourceVersion
 			report.Labels = r.Labels
+			beforeRequest = time.Now().UnixNano()
 			report, err = c.customClient.CloudV1alpha1().NodeReports(namespace).Update(report)
+			afterRequest = time.Now().UnixNano()
+			log.L().Debug("kube NodeReports Update", log.Any("cost time (ns)", afterRequest-beforeRequest))
 			if err != nil {
 				return nil, err
 			}
@@ -80,11 +107,17 @@ func (c *client) List(namespace string, nodeList *models.NodeList) (*models.Shad
 		LabelSelector: generatorLabelSelector(nodeList),
 	}
 
+	beforeRequest := time.Now().UnixNano()
 	deisres, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).List(option)
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube NodeDesires List", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
+	beforeRequest = time.Now().UnixNano()
 	reports, err := c.customClient.CloudV1alpha1().NodeReports(namespace).List(option)
+	afterRequest = time.Now().UnixNano()
+	log.L().Debug("kube NodeReports List", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +126,10 @@ func (c *client) List(namespace string, nodeList *models.NodeList) (*models.Shad
 }
 
 func (c *client) Delete(namespace, name string) error {
+	beforeRequest := time.Now().UnixNano()
 	err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Delete(name, &metav1.DeleteOptions{})
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube NodeDesires Delete", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", common.NodeDesire),
@@ -101,7 +137,10 @@ func (c *client) Delete(namespace, name string) error {
 			log.Any("name", name),
 			log.Any("operation", "delete"))
 	}
+	beforeRequest = time.Now().UnixNano()
 	err = c.customClient.CloudV1alpha1().NodeReports(namespace).Delete(name, &metav1.DeleteOptions{})
+	afterRequest = time.Now().UnixNano()
+	log.L().Debug("kube NodeReports Delete", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", common.NodeReport),
@@ -117,14 +156,20 @@ func (c *client) UpdateDesire(shadow *models.Shadow) (*models.Shadow, error) {
 	if err != nil {
 		return nil, err
 	}
+	beforeRequest := time.Now().UnixNano()
 	d, err := c.customClient.CloudV1alpha1().NodeDesires(shadow.Namespace).Get(desire.Name, metav1.GetOptions{})
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube NodeDesires Get", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		log.L().Error("get node desire error", log.Error(err))
 		return nil, err
 	}
 	desire.ResourceVersion = d.ResourceVersion
 	desire.Labels = d.Labels
+	beforeRequest = time.Now().UnixNano()
 	desire, err = c.customClient.CloudV1alpha1().NodeDesires(shadow.Namespace).Update(desire)
+	afterRequest = time.Now().UnixNano()
+	log.L().Debug("kube NodeDesires Update", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		log.L().Error("update node desire error", log.Error(err))
 		return nil, err
@@ -145,14 +190,20 @@ func (c *client) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
 	if err != nil {
 		return nil, err
 	}
+	beforeRequest := time.Now().UnixNano()
 	r, err := c.customClient.CloudV1alpha1().NodeReports(shadow.Namespace).Get(shadow.Name, metav1.GetOptions{})
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube NodeReports Get", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		log.L().Error("get node report error", log.Error(err))
 		return nil, err
 	}
 	report.ResourceVersion = r.ResourceVersion
 	report.Labels = r.Labels
+	beforeRequest = time.Now().UnixNano()
 	report, err = c.customClient.CloudV1alpha1().NodeReports(shadow.Namespace).Update(report)
+	afterRequest = time.Now().UnixNano()
+	log.L().Debug("kube NodeReports Update", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		log.L().Error("update node report error", log.Error(err))
 		return nil, err

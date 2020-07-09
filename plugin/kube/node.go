@@ -11,6 +11,7 @@ import (
 	"github.com/jinzhu/copier"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 func toNodeModel(node *v1alpha1.Node) *specV1.Node {
@@ -88,7 +89,10 @@ func fromNodeModel(node *specV1.Node) (*v1alpha1.Node, error) {
 }
 
 func (c *client) GetNode(namespace, name string) (*specV1.Node, error) {
+	beforeRequest := time.Now().UnixNano()
 	node, err := c.customClient.CloudV1alpha1().Nodes(namespace).Get(name, metav1.GetOptions{})
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube GetNode", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +106,10 @@ func (c *client) CreateNode(namespace string, node *specV1.Node) (*specV1.Node, 
 		return nil, err
 	}
 
+	beforeRequest := time.Now().UnixNano()
 	n, err = c.customClient.CloudV1alpha1().Nodes(namespace).Create(n)
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube CreateNode", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +122,10 @@ func (c *client) UpdateNode(namespace string, node *specV1.Node) (*specV1.Node, 
 	if err != nil {
 		return nil, err
 	}
+	beforeRequest := time.Now().UnixNano()
 	n, err = c.customClient.CloudV1alpha1().Nodes(namespace).Update(n)
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube UpdateNode", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		log.L().Error("update node error", log.Error(err))
 		return nil, err
@@ -124,11 +134,18 @@ func (c *client) UpdateNode(namespace string, node *specV1.Node) (*specV1.Node, 
 }
 
 func (c *client) DeleteNode(namespace, name string) error {
-	return c.customClient.CloudV1alpha1().Nodes(namespace).Delete(name, &metav1.DeleteOptions{})
+	beforeRequest := time.Now().UnixNano()
+	err := c.customClient.CloudV1alpha1().Nodes(namespace).Delete(name, &metav1.DeleteOptions{})
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube DeleteNode", log.Any("cost time (ns)", afterRequest-beforeRequest))
+	return err
 }
 
 func (c *client) ListNode(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
+	beforeRequest := time.Now().UnixNano()
 	list, err := c.customClient.CloudV1alpha1().Nodes(namespace).List(*fromListOptionsModel(listOptions))
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube ListNode", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}

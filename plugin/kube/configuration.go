@@ -2,6 +2,7 @@ package kube
 
 import (
 	"fmt"
+	"github.com/baetyl/baetyl-go/log"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/common"
@@ -66,7 +67,10 @@ func fromConfigurationModel(config *specV1.Configuration) *v1alpha1.Configuratio
 
 func (c *client) GetConfig(namespace, name, version string) (*specV1.Configuration, error) {
 	options := metav1.GetOptions{ResourceVersion: version}
+	beforeRequest := time.Now().UnixNano()
 	config, err := c.customClient.CloudV1alpha1().Configurations(namespace).Get(name, options)
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube GetConfig", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -75,9 +79,12 @@ func (c *client) GetConfig(namespace, name, version string) (*specV1.Configurati
 
 func (c *client) CreateConfig(namespace string, configModel *specV1.Configuration) (*specV1.Configuration, error) {
 	configModel.UpdateTimestamp = time.Now()
+	beforeRequest := time.Now().UnixNano()
 	config, err := c.customClient.CloudV1alpha1().
 		Configurations(namespace).
 		Create(fromConfigurationModel(configModel))
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube CreateConfig", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -85,9 +92,12 @@ func (c *client) CreateConfig(namespace string, configModel *specV1.Configuratio
 }
 
 func (c *client) UpdateConfig(namespace string, configurationModel *specV1.Configuration) (*specV1.Configuration, error) {
+	beforeRequest := time.Now().UnixNano()
 	configuration, err := c.customClient.CloudV1alpha1().
 		Configurations(namespace).
 		Update(fromConfigurationModel(configurationModel))
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube UpdateConfig", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -95,11 +105,18 @@ func (c *client) UpdateConfig(namespace string, configurationModel *specV1.Confi
 }
 
 func (c *client) DeleteConfig(namespace, name string) error {
-	return c.customClient.CloudV1alpha1().Configurations(namespace).Delete(name, &metav1.DeleteOptions{})
+	beforeRequest := time.Now().UnixNano()
+	err := c.customClient.CloudV1alpha1().Configurations(namespace).Delete(name, &metav1.DeleteOptions{})
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube DeleteConfig", log.Any("cost time (ns)", afterRequest-beforeRequest))
+	return err
 }
 
 func (c *client) ListConfig(namespace string, listOptions *models.ListOptions) (*models.ConfigurationList, error) {
+	beforeRequest := time.Now().UnixNano()
 	list, err := c.customClient.CloudV1alpha1().Configurations(namespace).List(*fromListOptionsModel(listOptions))
+	afterRequest := time.Now().UnixNano()
+	log.L().Debug("kube ListConfig", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
