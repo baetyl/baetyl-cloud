@@ -2,10 +2,9 @@ package kube
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-go/log"
-	"time"
-
 	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-go/log"
+	"github.com/baetyl/baetyl-go/utils"
 	"github.com/jinzhu/copier"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,10 +29,8 @@ func fromNamespaceModel(namespace *models.Namespace) *v1.Namespace {
 }
 
 func (c *client) GetNamespace(namespace string) (*models.Namespace, error) {
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "GetNamespace")()
 	n, err := c.coreV1.Namespaces().Get(namespace, metav1.GetOptions{})
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube GetNamespace", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -41,10 +38,8 @@ func (c *client) GetNamespace(namespace string) (*models.Namespace, error) {
 }
 
 func (c *client) CreateNamespace(namespace *models.Namespace) (*models.Namespace, error) {
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "CreateNamespace")()
 	n, err := c.coreV1.Namespaces().Create(fromNamespaceModel(namespace))
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube CreateNamespace", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -52,22 +47,13 @@ func (c *client) CreateNamespace(namespace *models.Namespace) (*models.Namespace
 }
 
 func (c *client) DeleteNamespace(namespace *models.Namespace) error {
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "DeleteNamespace")()
 	err := c.coreV1.Namespaces().Delete(namespace.Name, &metav1.DeleteOptions{})
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube DeleteNamespace Delete", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return err
 	}
-	beforeRequest = time.Now().UnixNano()
-	n, _ := c.coreV1.Namespaces().Get(namespace.Name, metav1.GetOptions{})
-	afterRequest = time.Now().UnixNano()
-	log.L().Debug("kube DeleteNamespace Get", log.Any("cost time (ns)", afterRequest-beforeRequest))
-	if n != nil {
-		beforeRequest = time.Now().UnixNano()
+	if n, _ := c.coreV1.Namespaces().Get(namespace.Name, metav1.GetOptions{}); n != nil {
 		_, err = c.coreV1.Namespaces().Finalize(fromNamespaceModel(namespace))
-		afterRequest = time.Now().UnixNano()
-		log.L().Debug("kube DeleteNamespace Finalize", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	}
 	return err
 }
