@@ -7,9 +7,9 @@ import (
 	"github.com/baetyl/baetyl-cloud/plugin/kube/apis/cloud/v1alpha1"
 	"github.com/baetyl/baetyl-go/log"
 	specV1 "github.com/baetyl/baetyl-go/spec/v1"
+	"github.com/baetyl/baetyl-go/utils"
 	"github.com/jinzhu/copier"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 func toAppModel(app *v1alpha1.Application) *specV1.Application {
@@ -90,10 +90,8 @@ func fromListOptionsModel(listOptions *models.ListOptions) *metav1.ListOptions {
 
 func (c *client) GetApplication(namespace, name, version string) (*specV1.Application, error) {
 	options := metav1.GetOptions{ResourceVersion: version}
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "kube GetApplication")()
 	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Get(name, options)
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube GetApplication", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -102,10 +100,8 @@ func (c *client) GetApplication(namespace, name, version string) (*specV1.Applic
 
 func (c *client) CreateApplication(namespace string, application *specV1.Application) (*specV1.Application, error) {
 	app := fromAppModel(namespace, application)
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "kube CreateApplication")()
 	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Create(app)
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube CreateApplication", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -115,10 +111,8 @@ func (c *client) CreateApplication(namespace string, application *specV1.Applica
 
 func (c *client) UpdateApplication(namespace string, application *specV1.Application) (*specV1.Application, error) {
 	app := fromAppModel(namespace, application)
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "kube UpdateApplication")()
 	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Update(app)
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube UpdateApplication", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -126,18 +120,14 @@ func (c *client) UpdateApplication(namespace string, application *specV1.Applica
 }
 
 func (c *client) DeleteApplication(namespace, name string) error {
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "kube DeleteApplication")()
 	err := c.customClient.CloudV1alpha1().Applications(namespace).Delete(name, &metav1.DeleteOptions{})
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube DeleteApplication", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	return err
 }
 
 func (c *client) ListApplication(namespace string, listOptions *models.ListOptions) (*models.ApplicationList, error) {
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "kube ListApplication")()
 	list, err := c.customClient.CloudV1alpha1().Applications(namespace).List(*fromListOptionsModel(listOptions))
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube ListApplication", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	listOptions.Continue = list.Continue
 	if err != nil {
 		return nil, err

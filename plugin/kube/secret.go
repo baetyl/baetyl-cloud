@@ -2,6 +2,7 @@ package kube
 
 import (
 	"fmt"
+	"github.com/baetyl/baetyl-go/utils"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/common"
@@ -77,10 +78,8 @@ func (c *client) fromSecretModel(secret *specV1.Secret) (*v1alpha1.Secret, error
 
 func (c *client) GetSecret(namespace, name, version string) (*specV1.Secret, error) {
 	options := metav1.GetOptions{ResourceVersion: version}
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "kube GetSecret")()
 	Secret, err := c.customClient.CloudV1alpha1().Secrets(namespace).Get(name, options)
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube GetSecret", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -95,12 +94,10 @@ func (c *client) CreateSecret(namespace string, secretModel *specV1.Secret) (*sp
 		return nil, err
 	}
 
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "kube CreateSecret")()
 	Secret, err := c.customClient.CloudV1alpha1().
 		Secrets(namespace).
 		Create(model)
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube CreateSecret", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -112,12 +109,10 @@ func (c *client) UpdateSecret(namespace string, secretMapModel *specV1.Secret) (
 	if err != nil {
 		return nil, err
 	}
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "kube UpdateSecret")()
 	SecretMap, err := c.customClient.CloudV1alpha1().
 		Secrets(namespace).
 		Update(model)
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube UpdateSecret", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -125,18 +120,14 @@ func (c *client) UpdateSecret(namespace string, secretMapModel *specV1.Secret) (
 }
 
 func (c *client) DeleteSecret(namespace, name string) error {
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "kube DeleteSecret")()
 	err := c.customClient.CloudV1alpha1().Secrets(namespace).Delete(name, &metav1.DeleteOptions{})
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube DeleteSecret", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	return err
 }
 
 func (c *client) ListSecret(namespace string, listOptions *models.ListOptions) (*models.SecretList, error) {
-	beforeRequest := time.Now().UnixNano()
+	defer utils.Trace(log.L().Debug, "kube ListSecret")()
 	list, err := c.customClient.CloudV1alpha1().Secrets(namespace).List(*fromListOptionsModel(listOptions))
-	afterRequest := time.Now().UnixNano()
-	log.L().Debug("kube ListSecret", log.Any("cost time (ns)", afterRequest-beforeRequest))
 	if err != nil {
 		return nil, err
 	}
