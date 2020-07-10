@@ -89,7 +89,7 @@ func fromNodeModel(node *specV1.Node) (*v1alpha1.Node, error) {
 }
 
 func (c *client) GetNode(namespace, name string) (*specV1.Node, error) {
-	defer utils.Trace(log.L().Debug, "kube GetNode")()
+	defer utils.Trace(c.log.Debug, "GetNode")()
 	node, err := c.customClient.CloudV1alpha1().Nodes(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (c *client) CreateNode(namespace string, node *specV1.Node) (*specV1.Node, 
 		return nil, err
 	}
 
-	defer utils.Trace(log.L().Debug, "kube CreateNode")()
+	defer utils.Trace(c.log.Debug, "CreateNode")()
 	n, err = c.customClient.CloudV1alpha1().Nodes(namespace).Create(n)
 	if err != nil {
 		return nil, err
@@ -118,7 +118,7 @@ func (c *client) UpdateNode(namespace string, node *specV1.Node) (*specV1.Node, 
 	if err != nil {
 		return nil, err
 	}
-	defer utils.Trace(log.L().Debug, "kube UpdateNode")()
+	defer utils.Trace(c.log.Debug, "UpdateNode")()
 	n, err = c.customClient.CloudV1alpha1().Nodes(namespace).Update(n)
 	if err != nil {
 		log.L().Error("update node error", log.Error(err))
@@ -128,12 +128,12 @@ func (c *client) UpdateNode(namespace string, node *specV1.Node) (*specV1.Node, 
 }
 
 func (c *client) DeleteNode(namespace, name string) error {
-	defer utils.Trace(log.L().Debug, "kube DeleteNode")()
+	defer utils.Trace(c.log.Debug, "DeleteNode")()
 	return c.customClient.CloudV1alpha1().Nodes(namespace).Delete(name, &metav1.DeleteOptions{})
 }
 
 func (c *client) ListNode(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
-	defer utils.Trace(log.L().Debug, "kube ListNode")()
+	defer utils.Trace(c.log.Debug, "ListNode")()
 	list, err := c.customClient.CloudV1alpha1().Nodes(namespace).List(*fromListOptionsModel(listOptions))
 	if err != nil {
 		return nil, err

@@ -1,6 +1,7 @@
 package kube
 
 import (
+	"github.com/baetyl/baetyl-go/log"
 	"testing"
 
 	"github.com/baetyl/baetyl-cloud/models"
@@ -26,6 +27,7 @@ func initNamespaceClient() *client {
 	fc := fake.NewSimpleClientset(genNamespaceRuntime()...)
 	return &client{
 		coreV1: fc.CoreV1(),
+		log:    log.With(log.Any("plugin", "kube")),
 	}
 }
 

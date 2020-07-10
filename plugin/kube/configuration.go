@@ -2,7 +2,6 @@ package kube
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-go/log"
 	"github.com/baetyl/baetyl-go/utils"
 	"time"
 
@@ -68,7 +67,7 @@ func fromConfigurationModel(config *specV1.Configuration) *v1alpha1.Configuratio
 
 func (c *client) GetConfig(namespace, name, version string) (*specV1.Configuration, error) {
 	options := metav1.GetOptions{ResourceVersion: version}
-	defer utils.Trace(log.L().Debug, "GetConfig")()
+	defer utils.Trace(c.log.Debug, "GetConfig")()
 	config, err := c.customClient.CloudV1alpha1().Configurations(namespace).Get(name, options)
 	if err != nil {
 		return nil, err
@@ -78,7 +77,7 @@ func (c *client) GetConfig(namespace, name, version string) (*specV1.Configurati
 
 func (c *client) CreateConfig(namespace string, configModel *specV1.Configuration) (*specV1.Configuration, error) {
 	configModel.UpdateTimestamp = time.Now()
-	defer utils.Trace(log.L().Debug, "CreateConfig")()
+	defer utils.Trace(c.log.Debug, "CreateConfig")()
 	config, err := c.customClient.CloudV1alpha1().
 		Configurations(namespace).
 		Create(fromConfigurationModel(configModel))
@@ -89,7 +88,7 @@ func (c *client) CreateConfig(namespace string, configModel *specV1.Configuratio
 }
 
 func (c *client) UpdateConfig(namespace string, configurationModel *specV1.Configuration) (*specV1.Configuration, error) {
-	defer utils.Trace(log.L().Debug, "UpdateConfig")()
+	defer utils.Trace(c.log.Debug, "UpdateConfig")()
 	configuration, err := c.customClient.CloudV1alpha1().
 		Configurations(namespace).
 		Update(fromConfigurationModel(configurationModel))
@@ -100,12 +99,12 @@ func (c *client) UpdateConfig(namespace string, configurationModel *specV1.Confi
 }
 
 func (c *client) DeleteConfig(namespace, name string) error {
-	defer utils.Trace(log.L().Debug, "DeleteConfig")()
+	defer utils.Trace(c.log.Debug, "DeleteConfig")()
 	return c.customClient.CloudV1alpha1().Configurations(namespace).Delete(name, &metav1.DeleteOptions{})
 }
 
 func (c *client) ListConfig(namespace string, listOptions *models.ListOptions) (*models.ConfigurationList, error) {
-	defer utils.Trace(log.L().Debug, "ListConfig")()
+	defer utils.Trace(c.log.Debug, "ListConfig")()
 	list, err := c.customClient.CloudV1alpha1().Configurations(namespace).List(*fromListOptionsModel(listOptions))
 	if err != nil {
 		return nil, err

@@ -1,6 +1,7 @@
 package kube
 
 import (
+	"github.com/baetyl/baetyl-go/log"
 	"testing"
 
 	"encoding/json"
@@ -187,6 +188,7 @@ func initNodeClient() *client {
 	fc := fake.NewSimpleClientset(genNodeRuntime()...)
 	return &client{
 		customClient: fc,
+		log:          log.With(log.Any("plugin", "kube")),
 	}
 }
 
