@@ -3,7 +3,6 @@ package kube
 import (
 	"fmt"
 	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/baetyl/baetyl-go/log"
 	"github.com/baetyl/baetyl-go/utils"
 	"github.com/jinzhu/copier"
 	"k8s.io/api/core/v1"
@@ -29,7 +28,7 @@ func fromNamespaceModel(namespace *models.Namespace) *v1.Namespace {
 }
 
 func (c *client) GetNamespace(namespace string) (*models.Namespace, error) {
-	defer utils.Trace(log.L().Debug, "GetNamespace")()
+	defer utils.Trace(c.log.Debug, "GetNamespace")()
 	n, err := c.coreV1.Namespaces().Get(namespace, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
@@ -38,7 +37,7 @@ func (c *client) GetNamespace(namespace string) (*models.Namespace, error) {
 }
 
 func (c *client) CreateNamespace(namespace *models.Namespace) (*models.Namespace, error) {
-	defer utils.Trace(log.L().Debug, "CreateNamespace")()
+	defer utils.Trace(c.log.Debug, "CreateNamespace")()
 	n, err := c.coreV1.Namespaces().Create(fromNamespaceModel(namespace))
 	if err != nil {
 		return nil, err
@@ -47,7 +46,7 @@ func (c *client) CreateNamespace(namespace *models.Namespace) (*models.Namespace
 }
 
 func (c *client) DeleteNamespace(namespace *models.Namespace) error {
-	defer utils.Trace(log.L().Debug, "DeleteNamespace")()
+	defer utils.Trace(c.log.Debug, "DeleteNamespace")()
 	err := c.coreV1.Namespaces().Delete(namespace.Name, &metav1.DeleteOptions{})
 	if err != nil {
 		return err

@@ -1,6 +1,7 @@
 package kube
 
 import (
+	"github.com/baetyl/baetyl-go/log"
 	"testing"
 
 	"github.com/baetyl/baetyl-cloud/models"
@@ -66,6 +67,7 @@ func initSecretMapClient() *client {
 	return &client{
 		customClient: fc,
 		aesKey:       []byte("0123456789abcdef"),
+		log:          log.With(log.Any("plugin", "kube")),
 	}
 }
 

@@ -15,7 +15,7 @@ import (
 )
 
 func (c *client) Get(namespace, name string) (*models.Shadow, error) {
-	defer utils.Trace(log.L().Debug, "kube shadow Get")()
+	defer utils.Trace(c.log.Debug, "shadow Get")()
 	nodeDesire, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func (c *client) Create(shadow *models.Shadow) (*models.Shadow, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer utils.Trace(log.L().Debug, "kube shadow Create")()
+	defer utils.Trace(c.log.Debug, "shadow Create")()
 	nd, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Create(desire)
 	if err != nil {
 		d, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Get(name, metav1.GetOptions{})
@@ -86,7 +86,7 @@ func (c *client) List(namespace string, nodeList *models.NodeList) (*models.Shad
 		LabelSelector: generatorLabelSelector(nodeList),
 	}
 
-	defer utils.Trace(log.L().Debug, "kube shadow List")()
+	defer utils.Trace(c.log.Debug, "shadow List")()
 	deisres, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).List(option)
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func (c *client) List(namespace string, nodeList *models.NodeList) (*models.Shad
 }
 
 func (c *client) Delete(namespace, name string) error {
-	defer utils.Trace(log.L().Debug, "kube shadow Delete")()
+	defer utils.Trace(c.log.Debug, "shadow Delete")()
 	err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Delete(name, &metav1.DeleteOptions{})
 	if err != nil {
 		common.LogDirtyData(err,
@@ -125,7 +125,7 @@ func (c *client) UpdateDesire(shadow *models.Shadow) (*models.Shadow, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer utils.Trace(log.L().Debug, "kube shadow UpdateDesire")()
+	defer utils.Trace(c.log.Debug, "shadow UpdateDesire")()
 	d, err := c.customClient.CloudV1alpha1().NodeDesires(shadow.Namespace).Get(desire.Name, metav1.GetOptions{})
 	if err != nil {
 		log.L().Error("get node desire error", log.Error(err))
@@ -154,7 +154,7 @@ func (c *client) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer utils.Trace(log.L().Debug, "kube shadow UpdateReport")()
+	defer utils.Trace(c.log.Debug, "shadow UpdateReport")()
 	r, err := c.customClient.CloudV1alpha1().NodeReports(shadow.Namespace).Get(shadow.Name, metav1.GetOptions{})
 	if err != nil {
 		log.L().Error("get node report error", log.Error(err))

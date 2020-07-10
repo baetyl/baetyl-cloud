@@ -1,6 +1,7 @@
 package kube
 
 import (
+	"github.com/baetyl/baetyl-go/log"
 	specV1 "github.com/baetyl/baetyl-go/spec/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -77,6 +78,7 @@ func initShadowClient() *client {
 	fc := fake.NewSimpleClientset(genShadowRuntime()...)
 	return &client{
 		customClient: fc,
+		log:          log.With(log.Any("plugin", "kube")),
 	}
 }
 

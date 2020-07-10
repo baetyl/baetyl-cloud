@@ -4,6 +4,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/plugin"
 	clientset "github.com/baetyl/baetyl-cloud/plugin/kube/client/clientset/versioned"
+	"github.com/baetyl/baetyl-go/log"
 	"k8s.io/client-go/kubernetes"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -15,6 +16,7 @@ type client struct {
 	customClient clientset.Interface
 	cfg          CloudConfig
 	aesKey       []byte
+	log          *log.Logger
 }
 
 // Close Close
@@ -58,5 +60,6 @@ func New() (plugin.Plugin, error) {
 		customClient: customClient,
 		cfg:          cfg,
 		aesKey:       []byte(cfg.Kubernetes.AES.Key),
+		log:          log.With(log.Any("plugin", "kube")),
 	}, nil
 }

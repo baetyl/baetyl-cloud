@@ -1,6 +1,7 @@
 package kube
 
 import (
+	"github.com/baetyl/baetyl-go/log"
 	"testing"
 
 	"github.com/baetyl/baetyl-cloud/models"
@@ -62,6 +63,7 @@ func initConfigurationClient() *client {
 	fc := fake.NewSimpleClientset(genConfigRuntime()...)
 	return &client{
 		customClient: fc,
+		log:          log.With(log.Any("plugin", "kube")),
 	}
 }
 

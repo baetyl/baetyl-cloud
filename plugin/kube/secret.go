@@ -78,7 +78,7 @@ func (c *client) fromSecretModel(secret *specV1.Secret) (*v1alpha1.Secret, error
 
 func (c *client) GetSecret(namespace, name, version string) (*specV1.Secret, error) {
 	options := metav1.GetOptions{ResourceVersion: version}
-	defer utils.Trace(log.L().Debug, "kube GetSecret")()
+	defer utils.Trace(c.log.Debug, "GetSecret")()
 	Secret, err := c.customClient.CloudV1alpha1().Secrets(namespace).Get(name, options)
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (c *client) CreateSecret(namespace string, secretModel *specV1.Secret) (*sp
 		return nil, err
 	}
 
-	defer utils.Trace(log.L().Debug, "kube CreateSecret")()
+	defer utils.Trace(c.log.Debug, "CreateSecret")()
 	Secret, err := c.customClient.CloudV1alpha1().
 		Secrets(namespace).
 		Create(model)
@@ -109,7 +109,7 @@ func (c *client) UpdateSecret(namespace string, secretMapModel *specV1.Secret) (
 	if err != nil {
 		return nil, err
 	}
-	defer utils.Trace(log.L().Debug, "kube UpdateSecret")()
+	defer utils.Trace(c.log.Debug, "UpdateSecret")()
 	SecretMap, err := c.customClient.CloudV1alpha1().
 		Secrets(namespace).
 		Update(model)
@@ -120,13 +120,13 @@ func (c *client) UpdateSecret(namespace string, secretMapModel *specV1.Secret) (
 }
 
 func (c *client) DeleteSecret(namespace, name string) error {
-	defer utils.Trace(log.L().Debug, "kube DeleteSecret")()
+	defer utils.Trace(c.log.Debug, "DeleteSecret")()
 	err := c.customClient.CloudV1alpha1().Secrets(namespace).Delete(name, &metav1.DeleteOptions{})
 	return err
 }
 
 func (c *client) ListSecret(namespace string, listOptions *models.ListOptions) (*models.SecretList, error) {
-	defer utils.Trace(log.L().Debug, "kube ListSecret")()
+	defer utils.Trace(c.log.Debug, "ListSecret")()
 	list, err := c.customClient.CloudV1alpha1().Secrets(namespace).List(*fromListOptionsModel(listOptions))
 	if err != nil {
 		return nil, err
