@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"time"
 
-	specV1 "github.com/baetyl/baetyl-go/spec/v1"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/jinzhu/copier"
 )
 

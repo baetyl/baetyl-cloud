@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/baetyl/baetyl-go/errors"
-	"github.com/baetyl/baetyl-go/log"
-	"github.com/baetyl/baetyl-go/utils"
+	"github.com/baetyl/baetyl-go/v2/errors"
+	"github.com/baetyl/baetyl-go/v2/log"
+	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/satori/go.uuid"
 	"gopkg.in/go-playground/validator.v9"

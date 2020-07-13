@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/baetyl/baetyl-cloud/api"
 	"github.com/baetyl/baetyl-cloud/config"
-	"github.com/baetyl/baetyl-go/log"
-	"github.com/baetyl/baetyl-go/utils"
+	"github.com/baetyl/baetyl-go/v2/log"
+	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

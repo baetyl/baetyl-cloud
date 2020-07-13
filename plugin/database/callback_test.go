@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/baetyl/baetyl-go/log"
+	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

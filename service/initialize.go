@@ -7,7 +7,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/config"
 	"github.com/baetyl/baetyl-cloud/models"
 	"github.com/baetyl/baetyl-cloud/plugin"
-	specV1 "github.com/baetyl/baetyl-go/spec/v1"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"io/ioutil"
 	"path"
 	"strings"

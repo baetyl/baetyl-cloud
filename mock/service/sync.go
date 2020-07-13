@@ -5,7 +5,7 @@
 package plugin
 
 import (
-	v1 "github.com/baetyl/baetyl-go/spec/v1"
+	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

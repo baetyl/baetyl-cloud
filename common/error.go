@@ -5,7 +5,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/baetyl/baetyl-go/errors"
+	"github.com/baetyl/baetyl-go/v2/errors"
 )
 
 // Field returns a field

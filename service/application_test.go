@@ -10,7 +10,7 @@ import (
 
 	"encoding/json"
 	ms "github.com/baetyl/baetyl-cloud/mock/service"
-	specV1 "github.com/baetyl/baetyl-go/spec/v1"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"time"
 )
 

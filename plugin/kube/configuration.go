@@ -2,13 +2,13 @@ package kube
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-go/utils"
+	"github.com/baetyl/baetyl-go/v2/utils"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/models"
 	"github.com/baetyl/baetyl-cloud/plugin/kube/apis/cloud/v1alpha1"
-	specV1 "github.com/baetyl/baetyl-go/spec/v1"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/jinzhu/copier"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

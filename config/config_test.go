@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/baetyl/baetyl-go/utils"
+	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"

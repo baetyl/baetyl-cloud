@@ -13,8 +13,8 @@ import (
 	_ "github.com/baetyl/baetyl-cloud/plugin/default/pki"
 	_ "github.com/baetyl/baetyl-cloud/plugin/kube"
 	"github.com/baetyl/baetyl-cloud/server"
-	"github.com/baetyl/baetyl-go/context"
-	"github.com/baetyl/baetyl-go/log"
+	"github.com/baetyl/baetyl-go/v2/context"
+	"github.com/baetyl/baetyl-go/v2/log"
 	_ "github.com/go-sql-driver/mysql"
 )
 
