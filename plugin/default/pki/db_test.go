@@ -2,12 +2,14 @@ package pki
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-go/v2/pki"
+	"github.com/baetyl/baetyl-go/v2/pki/models"
+	"testing"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 var (
@@ -53,11 +55,11 @@ func genCertificate() *models.Cert {
 	return &models.Cert{
 		CertId:      "123",
 		ParentId:    "456",
-		Type:        TypeIssuingCA,
+		Type:        pki.TypeIssuingCA,
 		CommonName:  "cn",
-		Csr:         []byte(csr),
-		Content:     []byte(content),
-		Priv:        []byte(priv),
+		Csr:         csr,
+		Content:     content,
+		PrivateKey:  priv,
 		Description: "desc",
 		NotBefore:   timestamp,
 		NotAfter:    timestamp,
@@ -112,7 +114,7 @@ func TestCertificate(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test new
-	_, err = NewPVCDatabase(cfg)
+	_, err = NewStorageDatabase(cfg)
 	assert.NoError(t, err)
 
 	err = db.Close()
@@ -127,5 +129,5 @@ func checkCertificate(t *testing.T, expect, actual *models.Cert) {
 	assert.Equal(t, expect.CommonName, actual.CommonName)
 	assert.Equal(t, expect.Content, actual.Content)
 	assert.Equal(t, expect.Csr, actual.Csr)
-	assert.Equal(t, expect.Priv, actual.Priv)
+	assert.Equal(t, expect.PrivateKey, actual.PrivateKey)
 }

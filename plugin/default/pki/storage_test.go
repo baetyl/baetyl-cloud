@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestNewPVC(t *testing.T) {
+func TestNewStorage(t *testing.T) {
 	cfg := Persistent{
 		Kind: "error",
 	}
-	_, err := NewPVC(cfg)
+	_, err := NewStorage(cfg)
 	assert.Error(t, err, os.ErrInvalid)
 }

@@ -3,7 +3,6 @@ package models
 import (
 	"net"
 	"net/url"
-	"time"
 )
 
 // AltNames contains the domain names and IP addresses that will be added
@@ -23,28 +22,9 @@ type PEMCredential struct {
 	CertId  string
 }
 
-// PrivateKey wraps a ECC or RSA private key
-type PrivateKey struct {
-	Type string
-	Key  interface{}
-}
-
 // CertStorage contains certName and keyName which can be used to
 // storage certificate and private key pem data to secret.
 type CertStorage struct {
 	CertName string
 	KeyName  string
-}
-
-type Cert struct {
-	CertId      string
-	ParentId    string
-	Type        string
-	CommonName  string
-	Csr         []byte
-	Content     []byte
-	Priv        []byte
-	Description string
-	NotBefore   time.Time
-	NotAfter    time.Time
 }
