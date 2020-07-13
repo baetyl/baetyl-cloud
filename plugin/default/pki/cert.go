@@ -3,7 +3,7 @@ package pki
 import (
 	"encoding/base64"
 	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/baetyl/baetyl-go/log"
+	"github.com/baetyl/baetyl-go/v2/log"
 	"time"
 )
 

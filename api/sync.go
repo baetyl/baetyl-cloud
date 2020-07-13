@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/baetyl/baetyl-cloud/common"
-	specV1 "github.com/baetyl/baetyl-go/spec/v1"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
 // Report for node report
@@ -23,10 +23,6 @@ func (api *API) Desire(c *common.Context) (interface{}, error) {
 	err := c.BindJSON(&request)
 	if ns == "" || err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
-	}
-	// TODO: remove compatible code
-	if len(request.CRDInfos) != 0 {
-		request.Infos = request.CRDInfos
 	}
 	res, err := api.syncService.Desire(ns, request.Infos)
 	if err != nil {

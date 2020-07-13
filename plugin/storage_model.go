@@ -2,7 +2,7 @@ package plugin
 
 import (
 	"github.com/baetyl/baetyl-cloud/models"
-	specV1 "github.com/baetyl/baetyl-go/spec/v1"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
 //go:generate mockgen -destination=../mock/plugin/storage_model.go -package=plugin github.com/baetyl/baetyl-cloud/plugin ModelStorage

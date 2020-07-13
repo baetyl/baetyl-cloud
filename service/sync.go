@@ -9,8 +9,8 @@ import (
 	"github.com/baetyl/baetyl-cloud/config"
 	"github.com/baetyl/baetyl-cloud/models"
 	"github.com/baetyl/baetyl-cloud/plugin"
-	"github.com/baetyl/baetyl-go/log"
-	specV1 "github.com/baetyl/baetyl-go/spec/v1"
+	"github.com/baetyl/baetyl-go/v2/log"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
 //go:generate mockgen -destination=../mock/service/sync.go -package=plugin github.com/baetyl/baetyl-cloud/service SyncService

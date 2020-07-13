@@ -1,7 +1,7 @@
 package plugin
 
 import (
-	"github.com/baetyl/baetyl-go/log"
+	"github.com/baetyl/baetyl-go/v2/log"
 	"io"
 	"strings"
 	"sync"

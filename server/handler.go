@@ -3,7 +3,7 @@ package server
 import (
 	"bytes"
 	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-go/log"
+	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"strconv"

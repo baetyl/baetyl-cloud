@@ -2,8 +2,8 @@ package entities
 
 import (
 	"encoding/json"
-	"github.com/baetyl/baetyl-go/log"
-	specV1 "github.com/baetyl/baetyl-go/spec/v1"
+	"github.com/baetyl/baetyl-go/v2/log"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"time"
 )
 

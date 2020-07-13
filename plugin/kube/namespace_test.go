@@ -1,7 +1,7 @@
 package kube
 
 import (
-	"github.com/baetyl/baetyl-go/log"
+	"github.com/baetyl/baetyl-go/v2/log"
 	"testing"
 
 	"github.com/baetyl/baetyl-cloud/models"

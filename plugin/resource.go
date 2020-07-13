@@ -2,7 +2,7 @@ package plugin
 
 import (
 	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/baetyl/baetyl-go/spec/v1"
+	"github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
 type Namespace interface {

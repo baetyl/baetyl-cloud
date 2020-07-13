@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/baetyl/baetyl-go/utils"
+	"github.com/baetyl/baetyl-go/v2/utils"
 )
 
 func LoadConfig(cfg interface{}, files ...string) error {

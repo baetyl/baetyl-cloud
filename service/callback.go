@@ -7,8 +7,8 @@ import (
 	"github.com/baetyl/baetyl-cloud/config"
 	"github.com/baetyl/baetyl-cloud/models"
 	"github.com/baetyl/baetyl-cloud/plugin"
-	"github.com/baetyl/baetyl-go/http"
-	"github.com/baetyl/baetyl-go/log"
+	"github.com/baetyl/baetyl-go/v2/http"
+	"github.com/baetyl/baetyl-go/v2/log"
 )
 
 //go:generate mockgen -destination=../mock/service/callback.go -package=plugin github.com/baetyl/baetyl-cloud/service CallbackService
