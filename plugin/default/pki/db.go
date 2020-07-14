@@ -1,16 +1,18 @@
 package pki
 
 import (
-	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/jmoiron/sqlx"
 	"time"
+
+	"github.com/baetyl/baetyl-go/v2/pki"
+	"github.com/baetyl/baetyl-go/v2/pki/models"
+	"github.com/jmoiron/sqlx"
 )
 
 type dbStorage struct {
 	db *sqlx.DB
 }
 
-func NewPVCDatabase(cfg Persistent) (PVC, error) {
+func NewStorageDatabase(cfg Persistent) (pki.Storage, error) {
 	db, err := sqlx.Open(cfg.Database.Type, cfg.Database.URL)
 	if err != nil {
 		return nil, err
@@ -34,11 +36,10 @@ cert_id, parent_id, type, common_name,
 description, csr, content, private_key, not_before, not_after) 
 VALUES (?,?,?,?,?,?,?,?,?,?)
 `
-	c := FromCertModel(&cert)
 	_, err := d.db.Exec(insertSQL,
-		c.CertId, c.ParentId, c.Type,
-		c.CommonName, c.Description, c.Csr,
-		c.Content, c.PrivateKey, c.NotBefore, c.NotAfter)
+		cert.CertId, cert.ParentId, cert.Type,
+		cert.CommonName, cert.Description, cert.Csr,
+		cert.Content, cert.PrivateKey, cert.NotBefore, cert.NotAfter)
 	return err
 }
 
@@ -57,27 +58,25 @@ common_name=?,description=?,csr=?,content=?,private_key=?,
 not_before=?, not_after=? 
 WHERE cert_id=?
 `
-	c := FromCertModel(&cert)
 	_, err := d.db.Exec(updateSQL,
-		c.ParentId, c.Type, c.CommonName, c.Description, c.Csr,
-		c.Content, c.PrivateKey, c.NotBefore, c.NotAfter, c.CertId)
+		cert.ParentId, cert.Type, cert.CommonName, cert.Description, cert.Csr,
+		cert.Content, cert.PrivateKey, cert.NotBefore, cert.NotAfter, cert.CertId)
 	return err
 }
 
 func (d dbStorage) GetCert(certId string) (*models.Cert, error) {
 	selectSQL := `
 SELECT cert_id, parent_id, type, common_name, 
-description, csr, content, private_key, not_before, not_after,
-create_time, update_time 
+description, csr, content, private_key, not_before, not_after
 FROM baetyl_certificate 
 WHERE cert_id=? LIMIT 0,1
 `
-	var cert []Cert
+	var cert []models.Cert
 	if err := d.db.Select(&cert, selectSQL, certId); err != nil {
 		return nil, err
 	}
 	if len(cert) > 0 {
-		return ToCertModel(&cert[0]), nil
+		return &cert[0], nil
 	}
 	return nil, nil
 }

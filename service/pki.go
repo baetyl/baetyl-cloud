@@ -4,8 +4,9 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"github.com/baetyl/baetyl-go/v2/pki"
+
 	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/common/util"
 	"github.com/baetyl/baetyl-cloud/config"
 	"github.com/baetyl/baetyl-cloud/models"
 	"github.com/baetyl/baetyl-cloud/plugin"
@@ -104,12 +105,12 @@ func (p *pkiService) signCertificate(cn string, altNames models.AltNames, create
 	csrInfo.IPAddresses = altNames.IPs
 	csrInfo.URIs = altNames.URIs
 
-	priv, err := util.GenCertPrivateKey(util.DefaultDSA, util.DefaultRSABits)
+	priv, err := pki.GenCertPrivateKey(pki.DefaultDSA, pki.DefaultRSABits)
 	if err != nil {
 		return nil, err
 	}
 
-	keyPem, err := util.EncodeCertPrivateKey(priv)
+	keyPem, err := pki.EncodeCertPrivateKey(priv)
 	if err != nil {
 		return nil, err
 	}
