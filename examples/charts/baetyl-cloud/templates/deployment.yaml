@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "baetyl-cloud.fullname" . }}
+  labels:
+    {{- include "baetyl-cloud.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "baetyl-cloud.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "baetyl-cloud.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "baetyl-cloud.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - baetyl-cloud
+          args:
+            - -c
+            - /etc/baetyl/cloud.yml
+#          command:
+#            - /bin/bash
+#          args:
+#            - -c
+#            - while true; do echo hello world; sleep 1; done
+          ports:
+            {{- toYaml .Values.baetylCloud.ports | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.baetylCloud.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.baetylCloud.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: {{ .Values.baetylCloud.configVolumeName }}
+              mountPath: {{ .Values.baetylCloud.configMountPath }}
+            - name: {{ .Values.baetylCloud.secretVolumeName }}
+              mountPath: {{ .Values.baetylCloud.secretMountPath }}
+      volumes:
+        - name: {{ .Values.baetylCloud.configVolumeName }}
+          configMap:
+            name: {{ .Values.baetylCloud.configName }}
+        - name: {{ .Values.baetylCloud.secretVolumeName }}
+          secret:
+            secretName: {{ .Values.baetylCloud.secretName }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
