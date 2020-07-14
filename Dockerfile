@@ -3,5 +3,5 @@ COPY / /go/src/
 RUN cd /go/src/ && make all
 
 FROM --platform=$TARGETPLATFORM busybox
-COPY --from=devel /go/src/baetyl-cloud /bin/
+COPY --from=devel /go/src/output/baetyl-cloud /bin/
 ENTRYPOINT ["baetyl-cloud"]
