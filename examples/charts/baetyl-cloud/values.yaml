@@ -1,0 +1,97 @@
+nameOverride: "baetyl-cloud"
+fullnameOverride: "baetyl-cloud"
+
+replicaCount: 1
+
+imagePullSecrets: []
+podSecurityContext: {}
+
+securityContext: {}
+
+image:
+  repository: hub.baidubce.com/baetyl/cloud
+  tag: v2.0.0
+#  repository: centos
+#  tag: latest
+  pullPolicy: IfNotPresent
+
+baetylCloud:
+  ports:
+    - name: active-port
+      containerPort: 9003
+      protocol: TCP
+    - name: admin-port
+      containerPort: 9004
+      protocol: TCP
+    - name: node-port
+      containerPort: 9005
+      protocol: TCP
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: admin-port
+    failureThreshold: 1
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: admin-port
+    failureThreshold: 3
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    successThreshold: 1
+    timeoutSeconds: 10
+
+  configVolumeName: conf
+  configMountPath: /etc/baetyl
+  configName: baetyl-cloud-config-map
+
+  secretVolumeName: cert
+  secretMountPath: /etc/certs
+  secretName: baetyl-cloud-secret
+
+nodeSelector: {}
+affinity: {}
+tolerations: []
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 2048Mi
+
+service:
+  type: NodePort
+  ports:
+    - name: active-port
+      port: 9003
+      targetPort: 9003
+      nodePort: 30003
+      protocol: TCP
+    - name: admin-port
+      port: 9004
+      targetPort: 9004
+      nodePort: 30004
+      protocol: TCP
+    - name: node-port
+      port: 9005
+      targetPort: 9005
+      nodePort: 30005
+      protocol: TCP
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name:
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+
+
