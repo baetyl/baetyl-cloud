@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baetyl-cloud
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: baetyl-cloud
+  template:
+    metadata:
+      labels:
+        app: baetyl-cloud
+    spec:
+      hostNetwork: true
+      containers:
+      - image: hub.baidubce.com/baetyl/cloud:v2.0.0
+        imagePullPolicy: IfNotPresent
+        name: baetyl-cloud
+        ports:
+        - containerPort: 9004
+          name: admin-port
+          protocol: TCP
+        - containerPort: 9005
+          name: node-port
+          protocol: TCP
+        - containerPort: 9003
+          name: active-port
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /etc/baetyl
+          name: system-config
+      volumes:
+      - configMap:
+          name: baetyl-cloud-config
+          defaultMode: 256
+        name: system-config
