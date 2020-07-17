@@ -14,7 +14,34 @@ func genSystemConfigTestCase() *models.SystemConfig{
 	}
 	return systemConfig
 }
-func TestSystemConfigService_GetSystemConfig(t *testing.T) {
+func TestGet(t *testing.T){
+	mockObject := InitMockEnvironment(t)
+	defer mockObject.Close()
+	mConf := genSystemConfigTestCase()
+
+	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil)
+	cs, err := NewCacheService(mockObject.conf)
+	assert.NoError(t, err)
+	res, err := cs.Get(mConf.Key)
+	assert.NoError(t, err)
+	assert.Equal(t, mConf.Value, res.(*models.SystemConfig).Value)
+}
+func TestSet(t *testing.T){
+	mockObject := InitMockEnvironment(t)
+	defer mockObject.Close()
+	mConf := genSystemConfigTestCase()
+
+	mockObject.cacheStorage.EXPECT().UpdateSystemConfig(mConf).Return(nil, nil)
+	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).AnyTimes()
+
+	cs, err := NewCacheService(mockObject.conf)
+	assert.NoError(t, err)
+	res, err := cs.Set(mConf.Key, mConf)
+	assert.NoError(t, err)
+	assert.Equal(t, mConf.Value, res.(*models.SystemConfig).Value)
+
+}
+func Test_GetSystemConfig(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
@@ -29,7 +56,7 @@ func TestSystemConfigService_GetSystemConfig(t *testing.T) {
 	assert.Equal(t, mConf.Value, res.Value)
 }
 
-func TestSystemConfigService_ListSystemConfig(t *testing.T) {
+func Test_ListSystemConfig(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 	mConf := genSystemConfigTestCase()
@@ -49,7 +76,7 @@ func TestSystemConfigService_ListSystemConfig(t *testing.T) {
 
 }
 
-func TestSystemConfigService_CreateSystemConfig(t *testing.T) {
+func Test_CreateSystemConfig(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
@@ -64,7 +91,7 @@ func TestSystemConfigService_CreateSystemConfig(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestSystemConfigService_UpdateSystemConfig(t *testing.T) {
+func Test_UpdateSystemConfig(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
@@ -80,7 +107,7 @@ func TestSystemConfigService_UpdateSystemConfig(t *testing.T) {
 	assert.Equal(t, mConf.Value, res.Value)
 }
 
-func TestSystemConfigService_DeleteSystemConfig(t *testing.T) {
+func Test_DeleteSystemConfig(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 

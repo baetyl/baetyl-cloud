@@ -10,6 +10,9 @@ import (
 //go:generate mockgen -destination=../mock/service/cache.go -package=plugin github.com/baetyl/baetyl-cloud/service CacheService
 
 type CacheService interface {
+	Get(key string) (interface{}, error)
+	Set(key string, value interface{})(interface{}, error)
+
 	GetSystemConfig(key string) (*models.SystemConfig, error)
 	ListSystemConfig(page *models.Filter) (*models.ListView, error) //分页
 	CreateSystemConfig(sysConfig *models.SystemConfig) (*models.SystemConfig, error)
@@ -32,6 +35,22 @@ func NewCacheService(config *config.CloudConfig) (CacheService, error) {
 		cfg:       config,
 		dbStorage: ds.(plugin.CacheStorage),
 	}, nil
+}
+
+func (s *cacheService) Get(key string) (interface{}, error) {
+	return s.dbStorage.GetSystemConfig(key)
+}
+
+func (s *cacheService) Set(key string,value interface{}) (interface{}, error){
+	_, err := s.dbStorage.UpdateSystemConfig(value.(*models.SystemConfig))
+	if err != nil {
+		return nil, err
+	}
+	res, err := s.dbStorage.GetSystemConfig(key)
+	if err != nil {
+		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
+	}
+	return res, nil
 }
 
 func (s *cacheService) GetSystemConfig(key string) (*models.SystemConfig, error) {

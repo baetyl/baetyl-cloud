@@ -33,6 +33,36 @@ func (m *MockCacheService) EXPECT() *MockCacheServiceMockRecorder {
 	return m.recorder
 }
 
+// Get mocks base method.
+func (m *MockCacheService) Get(key string) (interface{}, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", key)
+	ret0, _ := ret[0].(interface{})
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockCacheServiceMockRecorder) Get(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockCacheService)(nil).Get), key)
+}
+
+// Set mocks base method.
+func (m *MockCacheService) Set(key string, value interface{}) (interface{}, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Set", key, value)
+	ret0, _ := ret[0].(interface{})
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Set indicates an expected call of Set.
+func (mr *MockCacheServiceMockRecorder) Set(key, value interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockCacheService)(nil).Set), key, value)
+}
+
 // GetSystemConfig mocks base method.
 func (m *MockCacheService) GetSystemConfig(key string) (*models.SystemConfig, error) {
 	m.ctrl.T.Helper()
