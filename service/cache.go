@@ -42,15 +42,20 @@ func (s *cacheService) Get(key string) (interface{}, error) {
 }
 
 func (s *cacheService) Set(key string,value interface{}) (interface{}, error){
-	_, err := s.dbStorage.UpdateSystemConfig(value.(*models.SystemConfig))
-	if err != nil {
-		return nil, err
+	switch value.(type) {
+	case *models.SystemConfig:
+		_, err := s.dbStorage.UpdateSystemConfig(value.(*models.SystemConfig))
+		if err != nil {
+			return nil, err
+		}
+		res, err := s.dbStorage.GetSystemConfig(key)
+		if err != nil {
+			return nil, common.Error(common.ErrDatabase, common.Field("error", err))
+		}
+		return res, nil
+	//case 系统模板
 	}
-	res, err := s.dbStorage.GetSystemConfig(key)
-	if err != nil {
-		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
-	}
-	return res, nil
+	return nil, nil
 }
 
 func (s *cacheService) GetSystemConfig(key string) (*models.SystemConfig, error) {
@@ -88,10 +93,7 @@ func (s *cacheService) CreateSystemConfig(systemConfig *models.SystemConfig) (*m
 
 func (s *cacheService) DeleteSystemConfig(key string) error {
 	_, err := s.dbStorage.DeleteSystemConfig(key)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (s *cacheService) UpdateSystemConfig(systemConfig *models.SystemConfig) (*models.SystemConfig, error) {

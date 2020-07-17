@@ -36,11 +36,7 @@ func TestSystemConfig(t *testing.T) {
 	systemConfig := genSystemConfig()
 
 	db, err := MockNewDB()
-	if err != nil {
-		fmt.Printf("get mock sqlite3 error = %s", err.Error())
-		t.Fail()
-		return
-	}
+	assert.NoError(t, err)
 	db.MockCreateSystemTable()
 	res, err := db.CreateSystemConfig(systemConfig)
 	assert.NoError(t, err)

@@ -42,6 +42,7 @@ func (d *dbStorage) GetSystemConfigTx(tx *sqlx.Tx, key string) (*models.SystemCo
 	selectSQL := "SELECT `key`,  value, create_time, update_time " +
 		"FROM baetyl_cloud_system_config " +
 		"WHERE `key`=?"
+
 	var cs []models.SystemConfig
 	if err := d.query(tx, selectSQL, &cs, key); err != nil {
 		return nil, err

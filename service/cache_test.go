@@ -19,7 +19,7 @@ func TestGet(t *testing.T){
 	defer mockObject.Close()
 	mConf := genSystemConfigTestCase()
 
-	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil)
+	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).Times(1)
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
 	res, err := cs.Get(mConf.Key)
@@ -31,8 +31,8 @@ func TestSet(t *testing.T){
 	defer mockObject.Close()
 	mConf := genSystemConfigTestCase()
 
-	mockObject.cacheStorage.EXPECT().UpdateSystemConfig(mConf).Return(nil, nil)
-	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).AnyTimes()
+	mockObject.cacheStorage.EXPECT().UpdateSystemConfig(mConf).Return(nil, nil).Times(1)
+	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).Times(1)
 
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
@@ -47,7 +47,7 @@ func Test_GetSystemConfig(t *testing.T) {
 
 	mConf := genSystemConfigTestCase()
 
-	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil)
+	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).Times(1)
 
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
@@ -65,8 +65,8 @@ func Test_ListSystemConfig(t *testing.T) {
 		PageSize: 10,
 		Name:     "%",
 	}
-	mockObject.cacheStorage.EXPECT().CountSystemConfig(gomock.Any()).Return(1, nil)
-	mockObject.cacheStorage.EXPECT().ListSystemConfig(page.Name, page.PageNo, page.PageSize).Return([]models.SystemConfig{*mConf}, nil)
+	mockObject.cacheStorage.EXPECT().CountSystemConfig(gomock.Any()).Return(1, nil).Times(1)
+	mockObject.cacheStorage.EXPECT().ListSystemConfig(page.Name, page.PageNo, page.PageSize).Return([]models.SystemConfig{*mConf}, nil).Times(1)
 
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
@@ -82,8 +82,8 @@ func Test_CreateSystemConfig(t *testing.T) {
 
 	mConf := genSystemConfigTestCase()
 
-	mockObject.cacheStorage.EXPECT().CreateSystemConfig(mConf).Return(nil, nil).AnyTimes()
-	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).AnyTimes()
+	mockObject.cacheStorage.EXPECT().CreateSystemConfig(mConf).Return(nil, nil).Times(1)
+	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).Times(1)
 
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
@@ -97,8 +97,8 @@ func Test_UpdateSystemConfig(t *testing.T) {
 
 	mConf := genSystemConfigTestCase()
 
-	mockObject.cacheStorage.EXPECT().UpdateSystemConfig(mConf).Return(nil, nil)
-	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).AnyTimes()
+	mockObject.cacheStorage.EXPECT().UpdateSystemConfig(mConf).Return(nil, nil).Times(1)
+	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).Times(1)
 
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
@@ -113,7 +113,7 @@ func Test_DeleteSystemConfig(t *testing.T) {
 
 	mConf := genSystemConfigTestCase()
 
-	mockObject.cacheStorage.EXPECT().DeleteSystemConfig(mConf.Key).Return(nil, nil)
+	mockObject.cacheStorage.EXPECT().DeleteSystemConfig(mConf.Key).Return(nil, nil).Times(1)
 
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
