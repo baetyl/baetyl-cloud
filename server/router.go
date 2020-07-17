@@ -198,3 +198,27 @@ func (s *ActiveServer) InitRoute() {
 		active.GET("/:resource", common.WrapperRaw(s.api.GetResource))
 	}
 }
+
+//// GetRoute get router
+func (s *MisServer) GetRoute() *gin.Engine {
+	return s.router
+}
+func (s *MisServer) InitRoute() {
+	s.router.NoRoute(noRouteHandler)
+	s.router.NoMethod(noMethodHandler)
+	s.router.GET("/health", health)
+
+	s.router.Use(requestIDHandler)
+	s.router.Use(loggerHandler)
+	v1 := s.router.Group("v1")
+	{
+		systemconfig := v1.Group("/system/configs")
+
+		systemconfig.GET("/:key", common.Wrapper(s.api.GetSystemConfig))
+		systemconfig.GET("", common.Wrapper(s.api.ListSystemConfig))
+
+		systemconfig.POST("", common.Wrapper(s.api.CreateSystemConfig))
+		systemconfig.DELETE("/:key", common.Wrapper(s.api.DeleteSystemConfig))
+		systemconfig.PUT("/:key", common.Wrapper(s.api.UpdateSystemConfig))
+	}
+}

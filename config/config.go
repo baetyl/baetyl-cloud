@@ -12,6 +12,7 @@ const (
 	AdminServerPort  = "ADMIN_PORT"
 	NodeServerPort   = "NODE_PORT"
 	ActiveServerPort = "ACTIVE_PORT"
+	MisServerPort    = "MIS_PORT"
 )
 
 // CloudConfig baetyl-cloud config
@@ -19,6 +20,7 @@ type CloudConfig struct {
 	ActiveServer Server     `yaml:"activeServer" json:"activeServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	AdminServer  Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	NodeServer   NodeServer `yaml:"nodeServer" json:"nodeServer" default:"{\"port\":\":9005\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"commonName\":\"common-name\"}"`
+	MisServer    Server     `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
 	Plugin       struct {
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
@@ -29,6 +31,7 @@ type CloudConfig struct {
 		Functions []string `yaml:"functions" json:"functions" default:"[]"`
 
 		// TODO: deprecated
+		CacheStorage string `yaml:"cacheStorage" json:"cacheStorage" default:"database"`
 		ModelStorage    string `yaml:"modelStorage" json:"modelStorage" default:"kubernetes"`
 		DatabaseStorage string `yaml:"databaseStorage" json:"databaseStorage" default:"database"`
 	} `yaml:"plugin" json:"plugin"`
@@ -60,5 +63,9 @@ func SetPortFromEnv(cfg *CloudConfig) {
 	nodePort := os.Getenv(NodeServerPort)
 	if nodePort != "" {
 		cfg.NodeServer.Port = ":" + nodePort
+	}
+	misPort := os.Getenv(MisServerPort)
+	if misPort != "" {
+		cfg.MisServer.Port = ":" + misPort
 	}
 }

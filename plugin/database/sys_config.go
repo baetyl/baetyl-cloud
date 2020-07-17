@@ -36,7 +36,7 @@ func (d *dbStorage) GetSysConfigTx(tx *sqlx.Tx, tp, key string) (*models.SysConf
 	selectSQL := `
 SELECT  
 type, name, value, create_time, update_time 
-FROM baetyl_system_config WHERE type=? AND name=? LIMIT 0,1
+FROM baetyl_system_config WHERE type=? AND name=?
 `
 	var cs []models.SysConfig
 	if err := d.query(tx, selectSQL, &cs, tp, key); err != nil {

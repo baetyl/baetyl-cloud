@@ -22,6 +22,7 @@ type API struct {
 	pkiService         service.PKIService
 	initService        service.InitializeService
 	authService        service.AuthService
+	cacheService 	   service.CacheService
 }
 
 // NewAPI NewAPI
@@ -86,6 +87,10 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
+	cacheService, err := service.NewCacheService(config)
+	if err != nil {
+		return nil, err
+	}
 
 	return &API{
 		applicationService: applicationService,
@@ -103,5 +108,6 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		pkiService:         pkiService,
 		initService:        initService,
 		authService:        authService,
+		cacheService: 		cacheService,
 	}, nil
 }
