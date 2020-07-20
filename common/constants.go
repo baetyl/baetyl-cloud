@@ -211,7 +211,7 @@ var (
 		0x2:  "input",
 		0x4:  "hostName",
 		0x8:  "bootID",
-		0x10: "machineID",
-		0x20: "systemUUID",
+		0x10: "systemUUID",
+		0x20: "machineID",
 	}
 )
