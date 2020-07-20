@@ -13,11 +13,8 @@ type CacheService interface {
 	Get(key string) (interface{}, error)
 	Set(key string, value interface{})(interface{}, error)
 
-	GetSystemConfig(key string) (*models.SystemConfig, error)
-	ListSystemConfig(page *models.Filter) (*models.ListView, error) //分页
-	CreateSystemConfig(sysConfig *models.SystemConfig) (*models.SystemConfig, error)
-	UpdateSystemConfig(sysConfig *models.SystemConfig) (*models.SystemConfig, error)
-	DeleteSystemConfig(key string) error
+	List(page *models.Filter) (*models.ListView, error) //分页
+	Delete(key string) error
 }
 
 type cacheService struct {
@@ -38,36 +35,34 @@ func NewCacheService(config *config.CloudConfig) (CacheService, error) {
 }
 
 func (s *cacheService) Get(key string) (interface{}, error) {
-	return s.dbStorage.GetSystemConfig(key)
+	//读完值后判断是否需要扩展
+	return s.dbStorage.GetCache(key)
 }
-
 func (s *cacheService) Set(key string,value interface{}) (interface{}, error){
-	switch value.(type) {
-	case *models.SystemConfig:
-		_, err := s.dbStorage.UpdateSystemConfig(value.(*models.SystemConfig))
-		if err != nil {
-			return nil, err
-		}
-		res, err := s.dbStorage.GetSystemConfig(key)
+	oldCache, err := s.dbStorage.GetCache(key)
+	if err != nil {
+		return nil, err
+	}
+	if oldCache != nil{
+		_, err := s.dbStorage.ReplaceCache(key, value.(string))
 		if err != nil {
 			return nil, common.Error(common.ErrDatabase, common.Field("error", err))
 		}
-		return res, nil
-	//case 系统模板
+	}else{
+		_, err := s.dbStorage.AddCache(key, value.(string))
+		if err != nil {
+			return nil, err
+		}
 	}
 	return nil, nil
 }
 
-func (s *cacheService) GetSystemConfig(key string) (*models.SystemConfig, error) {
-	return s.dbStorage.GetSystemConfig(key)
-}
-
-func (s *cacheService) ListSystemConfig(page *models.Filter) (*models.ListView, error) {
-	systemConfigs, err := s.dbStorage.ListSystemConfig(page.Name, page.PageNo, page.PageSize)
+func (s *cacheService) List(page *models.Filter) (*models.ListView, error) {
+	systemConfigs, err := s.dbStorage.ListCache(page.Name, page.PageNo, page.PageSize)
 	if err != nil {
 		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
 	}
-	count, err := s.dbStorage.CountSystemConfig(page.Name)
+	count, err := s.dbStorage.CountCache(page.Name)
 	if err != nil {
 		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
 	}
@@ -79,31 +74,7 @@ func (s *cacheService) ListSystemConfig(page *models.Filter) (*models.ListView, 
 	}, nil
 }
 
-func (s *cacheService) CreateSystemConfig(systemConfig *models.SystemConfig) (*models.SystemConfig, error) {
-	_, err := s.dbStorage.CreateSystemConfig(systemConfig)
-	if err != nil {
-		return nil, err
-	}
-	res, err := s.dbStorage.GetSystemConfig(systemConfig.Key)
-	if err != nil {
-		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
-	}
-	return res, nil
-}
-
-func (s *cacheService) DeleteSystemConfig(key string) error {
-	_, err := s.dbStorage.DeleteSystemConfig(key)
+func (s *cacheService) Delete(key string) error {
+	_, err := s.dbStorage.DeleteCache(key)
 	return err
-}
-
-func (s *cacheService) UpdateSystemConfig(systemConfig *models.SystemConfig) (*models.SystemConfig, error) {
-	_, err := s.dbStorage.UpdateSystemConfig(systemConfig)
-	if err != nil {
-		return nil, err
-	}
-	res, err := s.dbStorage.GetSystemConfig(systemConfig.Key)
-	if err != nil {
-		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
-	}
-	return res, nil
 }

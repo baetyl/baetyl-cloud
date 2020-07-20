@@ -12,19 +12,19 @@ import (
 type CacheStorage interface {
 	Transact(func(*sqlx.Tx) error) error
 	// new system config
-	CreateSystemConfig(sysConfig *models.SystemConfig) (sql.Result, error)
-	DeleteSystemConfig(key string) (sql.Result, error)
-	GetSystemConfig(key string) (*models.SystemConfig, error)
-	ListSystemConfig(key string, page, size int) ([]models.SystemConfig, error)
-	CountSystemConfig(key string) (int, error)
-	UpdateSystemConfig(sysConfig *models.SystemConfig) (sql.Result, error)
+	AddCache(key,value string) (sql.Result, error)
+	DeleteCache(key string) (sql.Result, error)
+	GetCache(key string) (*models.Cache, error)
+	ListCache(key string, page, size int) ([]models.Cache, error)
+	CountCache(key string) (int, error)
+	ReplaceCache(key ,value string) (sql.Result, error)
 
-	CreateSystemConfigTx(tx *sqlx.Tx, sysConfig *models.SystemConfig) (sql.Result, error)
-	DeleteSystemConfigTx(tx *sqlx.Tx, key string) (sql.Result, error)
-	GetSystemConfigTx(tx *sqlx.Tx, key string) (*models.SystemConfig, error)
-	ListSystemConfigTx(tx *sqlx.Tx, key string, page, size int) ([]models.SystemConfig, error)
-	CountSystemConfigTx(tx *sqlx.Tx, key string) (int, error)
-	UpdateSystemConfigTx(tx *sqlx.Tx, sysConfig *models.SystemConfig) (sql.Result, error)
+	AddCacheTx(tx *sqlx.Tx, key,value string) (sql.Result, error)
+	DeleteCacheTx(tx *sqlx.Tx, key string) (sql.Result, error)
+	GetCacheTx(tx *sqlx.Tx, key string) (*models.Cache, error)
+	ListCacheTx(tx *sqlx.Tx, key string, page, size int) ([]models.Cache, error)
+	CountCacheTx(tx *sqlx.Tx, key string) (int, error)
+	ReplaceCacheTx(tx *sqlx.Tx, key ,value string) (sql.Result, error)
 
 	io.Closer
 }

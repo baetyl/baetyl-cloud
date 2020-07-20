@@ -3,59 +3,48 @@ package api
 import (
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/models"
-	"time"
 )
 
 // TODO: optimize this layer, general abstraction
 
-// GetSystemConfig get a systemtem config
-func (api *API) GetSystemConfig(c *common.Context) (interface{}, error) {
+// GetCache get a systemtem config
+func (api *API) GetCache(c *common.Context) (interface{}, error) {
 	key := c.Param("key")
-	return api.cacheService.GetSystemConfig(key)
+	return api.cacheService.Get(key)
 }
 
-func (api *API) ListSystemConfig(c *common.Context) (interface{}, error) {
+func (api *API) ListCache(c *common.Context) (interface{}, error) {
 	params := &models.Filter{}
 	if err := c.Bind(params); err != nil {
 		return nil, err
 	}
 	params.Format()
-	return api.cacheService.ListSystemConfig(params)
+	return api.cacheService.List(params)
 }
 
-//// CreateSystemConfig create a systemtem config
-func (api *API) CreateSystemConfig(c *common.Context) (interface{}, error) {
-	systemConfig := &models.SystemConfig{
-		CreateTime: time.Now(),
-		UpdateTime: time.Now(),
-	}
-	err := c.LoadBody(systemConfig)
+//// AddCache create a systemtem config
+func (api *API) AddCache(c *common.Context) (interface{}, error) {
+	var cache models.Cache
+	err := c.LoadBody(cache)
 	if err != nil {
 		return nil, err
 	}
 
-	return api.cacheService.CreateSystemConfig(systemConfig)
+	return api.cacheService.Set(cache.Key,cache.Value)
 }
 
-func (api *API) DeleteSystemConfig(c *common.Context) (interface{}, error) {
+func (api *API) DeleteCache(c *common.Context) (interface{}, error) {
 	key := c.Param("key")
-	return nil, api.cacheService.DeleteSystemConfig(key)
+	return nil, api.cacheService.Delete(key)
 }
 
-func (api *API) UpdateSystemConfig(c *common.Context) (interface{}, error) {
+func (api *API) ReplaceCache(c *common.Context) (interface{}, error) {
 	key := c.Param("key")
-	oldSystemConfig, err := api.cacheService.GetSystemConfig(key)
-	// ensure that the modified data exists
-	if err != nil {
-		return nil, common.Error(common.ErrResourceHasBeenUsed,
-			common.Field("error", "this systemtem config does not exist"))
-	}
-	oldSystemConfig.UpdateTime = time.Now()
-
-	err = c.LoadBody(oldSystemConfig)
+	var cache models.Cache
+	err := c.LoadBody(cache)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
 
-	return api.cacheService.UpdateSystemConfig(oldSystemConfig)
+	return api.cacheService.Set(key,cache.Value)
 }
