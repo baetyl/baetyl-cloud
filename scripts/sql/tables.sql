@@ -146,14 +146,14 @@ CREATE TABLE IF NOT EXISTS `baetyl_certificate` (
   KEY `idx_parent_id` (`parent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='证书表';
 
-CREATE TABLE IF NOT EXISTS `baetyl_cloud_system_config` (
-  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID,主键',
-  `key` varchar(128) NOT NULL DEFAULT '' COMMENT '配置的键',
-  `value` text NOT NULL COMMENT '配置的值',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+CREATE TABLE IF NOT EXISTS `baetyl_property` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+  `key` varchar(128) NOT NULL DEFAULT '',
+  `value` text NOT NULL ,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   PRIMARY KEY (`id`),
   KEY `idx_type_key` (`key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='新的系统配置表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System configuration property table';
 
 COMMIT;

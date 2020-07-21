@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	systemTables = []string{
-		"CREATE TABLE baetyl_cloud_system_config(" +
+	propertyTables = []string{
+		"CREATE TABLE baetyl_property(" +
 			"    `id`               integer       PRIMARY KEY AUTOINCREMENT," +
 			"    `key`              varchar(128)  NOT NULL DEFAULT ''," +
 			"    `value`            varchar(2048) NOT NULL DEFAULT '',  " +
@@ -18,63 +18,55 @@ var (
 	}
 )
 
-func genSystemConfig() *models.SystemConfig {
-	return &models.SystemConfig{
+func genCache() *models.Cache {
+	return &models.Cache{
 		Key:   "baetyl_0.1.0",
 		Value: "http://test.baetyl/0.1.0",
 	}
 }
-func (d *dbStorage) MockCreateSystemTable() {
-	for _, sql := range systemTables {
+func (d *dbStorage) MockCreatePropertyTable() {
+	for _, sql := range propertyTables {
 		_, err := d.exec(nil, sql)
 		if err != nil {
 			panic(fmt.Sprintf("create table exception: %s", err.Error()))
 		}
 	}
 }
-func TestSystemConfig(t *testing.T) {
-	systemConfig := genSystemConfig()
+func TestCache(t *testing.T) {
+	cache := genCache()
 
 	db, err := MockNewDB()
 	assert.NoError(t, err)
-	db.MockCreateSystemTable()
-	res, err := db.CreateSystemConfig(systemConfig)
-	assert.NoError(t, err)
-	num, err := res.RowsAffected()
-	assert.NoError(t, err)
-	assert.Equal(t, int64(1), num)
+	db.MockCreatePropertyTable()
 
-	resSystemConfig, err := db.GetSystemConfig(systemConfig.Key)
+	err = db.SetCache(cache.Key, cache.Value)
 	assert.NoError(t, err)
-	checkSystemConfig(t, systemConfig, resSystemConfig)
+
+	cache.Value = "updated_" + cache.Value
+	err = db.SetCache(cache.Key, cache.Value)
+	assert.NoError(t, err)
+
+	value, err := db.GetCache(cache.Key)
+	assert.NoError(t, err)
+	assert.Equal(t, value, cache.Value)
+	value, err = db.GetCache("bad key")
+	assert.Error(t, err)
 
 	page := &models.Filter{
 		PageNo:   1,
 		PageSize: 2,
 		Name:     "%",
 	}
-	resSystemConfigList, err := db.ListSystemConfig(page.Name, page.PageNo, page.PageSize)
+	resCacheListView, err := db.ListCache(page)
 	assert.NoError(t, err)
-	checkSystemConfig(t, systemConfig, &resSystemConfigList[0])
+	checkCache(t, cache, &resCacheListView.Items.([]models.Cache)[0])
 
-	systemConfig.Value = "updated_value"
-	res, err = db.UpdateSystemConfig(systemConfig)
+	err = db.DeleteCache(cache.Key)
 	assert.NoError(t, err)
-	num, err = res.RowsAffected()
-	assert.NoError(t, err)
-	assert.Equal(t, int64(1), num)
-	resSystemConfig, err = db.GetSystemConfig(systemConfig.Key)
-	assert.NoError(t, err)
-	checkSystemConfig(t, systemConfig, resSystemConfig)
 
-	res, err = db.DeleteSystemConfig(systemConfig.Key)
-	assert.NoError(t, err)
-	num, err = res.RowsAffected()
-	assert.NoError(t, err)
-	assert.Equal(t, int64(1), num)
 }
 
-func checkSystemConfig(t *testing.T, expect, actual *models.SystemConfig) {
+func checkCache(t *testing.T, expect, actual *models.Cache) {
 	assert.Equal(t, expect.Key, actual.Key)
 	assert.Equal(t, expect.Value, actual.Value)
 }

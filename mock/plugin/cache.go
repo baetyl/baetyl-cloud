@@ -5,10 +5,8 @@
 package plugin
 
 import (
-	sql "database/sql"
 	models "github.com/baetyl/baetyl-cloud/models"
 	gomock "github.com/golang/mock/gomock"
-	sqlx "github.com/jmoiron/sqlx"
 	reflect "reflect"
 )
 
@@ -35,198 +33,62 @@ func (m *MockCacheStorage) EXPECT() *MockCacheStorageMockRecorder {
 	return m.recorder
 }
 
-// Transact mocks base method.
-func (m *MockCacheStorage) Transact(arg0 func(*sqlx.Tx) error) error {
+// GetCache mocks base method.
+func (m *MockCacheStorage) GetCache(key string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Transact", arg0)
+	ret := m.ctrl.Call(m, "GetCache", key)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCache indicates an expected call of GetCache.
+func (mr *MockCacheStorageMockRecorder) GetCache(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCache", reflect.TypeOf((*MockCacheStorage)(nil).GetCache), key)
+}
+
+// SetCache mocks base method.
+func (m *MockCacheStorage) SetCache(key, value string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetCache", key, value)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Transact indicates an expected call of Transact.
-func (mr *MockCacheStorageMockRecorder) Transact(arg0 interface{}) *gomock.Call {
+// SetCache indicates an expected call of SetCache.
+func (mr *MockCacheStorageMockRecorder) SetCache(key, value interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transact", reflect.TypeOf((*MockCacheStorage)(nil).Transact), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCache", reflect.TypeOf((*MockCacheStorage)(nil).SetCache), key, value)
 }
 
-// CreateSystemConfig mocks base method.
-func (m *MockCacheStorage) CreateSystemConfig(sysConfig *models.SystemConfig) (sql.Result, error) {
+// DeleteCache mocks base method.
+func (m *MockCacheStorage) DeleteCache(key string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSystemConfig", sysConfig)
-	ret0, _ := ret[0].(sql.Result)
+	ret := m.ctrl.Call(m, "DeleteCache", key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteCache indicates an expected call of DeleteCache.
+func (mr *MockCacheStorageMockRecorder) DeleteCache(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCache", reflect.TypeOf((*MockCacheStorage)(nil).DeleteCache), key)
+}
+
+// ListCache mocks base method.
+func (m *MockCacheStorage) ListCache(page *models.Filter) (*models.ListView, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListCache", page)
+	ret0, _ := ret[0].(*models.ListView)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateSystemConfig indicates an expected call of CreateSystemConfig.
-func (mr *MockCacheStorageMockRecorder) CreateSystemConfig(sysConfig interface{}) *gomock.Call {
+// ListCache indicates an expected call of ListCache.
+func (mr *MockCacheStorageMockRecorder) ListCache(page interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSystemConfig", reflect.TypeOf((*MockCacheStorage)(nil).CreateSystemConfig), sysConfig)
-}
-
-// DeleteSystemConfig mocks base method.
-func (m *MockCacheStorage) DeleteSystemConfig(key string) (sql.Result, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSystemConfig", key)
-	ret0, _ := ret[0].(sql.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// DeleteSystemConfig indicates an expected call of DeleteSystemConfig.
-func (mr *MockCacheStorageMockRecorder) DeleteSystemConfig(key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSystemConfig", reflect.TypeOf((*MockCacheStorage)(nil).DeleteSystemConfig), key)
-}
-
-// GetSystemConfig mocks base method.
-func (m *MockCacheStorage) GetSystemConfig(key string) (*models.SystemConfig, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSystemConfig", key)
-	ret0, _ := ret[0].(*models.SystemConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSystemConfig indicates an expected call of GetSystemConfig.
-func (mr *MockCacheStorageMockRecorder) GetSystemConfig(key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSystemConfig", reflect.TypeOf((*MockCacheStorage)(nil).GetSystemConfig), key)
-}
-
-// ListSystemConfig mocks base method.
-func (m *MockCacheStorage) ListSystemConfig(key string, page, size int) ([]models.SystemConfig, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListSystemConfig", key, page, size)
-	ret0, _ := ret[0].([]models.SystemConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListSystemConfig indicates an expected call of ListSystemConfig.
-func (mr *MockCacheStorageMockRecorder) ListSystemConfig(key, page, size interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSystemConfig", reflect.TypeOf((*MockCacheStorage)(nil).ListSystemConfig), key, page, size)
-}
-
-// CountSystemConfig mocks base method.
-func (m *MockCacheStorage) CountSystemConfig(key string) (int, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountSystemConfig", key)
-	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CountSystemConfig indicates an expected call of CountSystemConfig.
-func (mr *MockCacheStorageMockRecorder) CountSystemConfig(key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountSystemConfig", reflect.TypeOf((*MockCacheStorage)(nil).CountSystemConfig), key)
-}
-
-// UpdateSystemConfig mocks base method.
-func (m *MockCacheStorage) UpdateSystemConfig(sysConfig *models.SystemConfig) (sql.Result, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateSystemConfig", sysConfig)
-	ret0, _ := ret[0].(sql.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateSystemConfig indicates an expected call of UpdateSystemConfig.
-func (mr *MockCacheStorageMockRecorder) UpdateSystemConfig(sysConfig interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSystemConfig", reflect.TypeOf((*MockCacheStorage)(nil).UpdateSystemConfig), sysConfig)
-}
-
-// CreateSystemConfigTx mocks base method.
-func (m *MockCacheStorage) CreateSystemConfigTx(tx *sqlx.Tx, sysConfig *models.SystemConfig) (sql.Result, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSystemConfigTx", tx, sysConfig)
-	ret0, _ := ret[0].(sql.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateSystemConfigTx indicates an expected call of CreateSystemConfigTx.
-func (mr *MockCacheStorageMockRecorder) CreateSystemConfigTx(tx, sysConfig interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSystemConfigTx", reflect.TypeOf((*MockCacheStorage)(nil).CreateSystemConfigTx), tx, sysConfig)
-}
-
-// DeleteSystemConfigTx mocks base method.
-func (m *MockCacheStorage) DeleteSystemConfigTx(tx *sqlx.Tx, key string) (sql.Result, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSystemConfigTx", tx, key)
-	ret0, _ := ret[0].(sql.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// DeleteSystemConfigTx indicates an expected call of DeleteSystemConfigTx.
-func (mr *MockCacheStorageMockRecorder) DeleteSystemConfigTx(tx, key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSystemConfigTx", reflect.TypeOf((*MockCacheStorage)(nil).DeleteSystemConfigTx), tx, key)
-}
-
-// GetSystemConfigTx mocks base method.
-func (m *MockCacheStorage) GetSystemConfigTx(tx *sqlx.Tx, key string) (*models.SystemConfig, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSystemConfigTx", tx, key)
-	ret0, _ := ret[0].(*models.SystemConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSystemConfigTx indicates an expected call of GetSystemConfigTx.
-func (mr *MockCacheStorageMockRecorder) GetSystemConfigTx(tx, key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSystemConfigTx", reflect.TypeOf((*MockCacheStorage)(nil).GetSystemConfigTx), tx, key)
-}
-
-// ListSystemConfigTx mocks base method.
-func (m *MockCacheStorage) ListSystemConfigTx(tx *sqlx.Tx, key string, page, size int) ([]models.SystemConfig, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListSystemConfigTx", tx, key, page, size)
-	ret0, _ := ret[0].([]models.SystemConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListSystemConfigTx indicates an expected call of ListSystemConfigTx.
-func (mr *MockCacheStorageMockRecorder) ListSystemConfigTx(tx, key, page, size interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSystemConfigTx", reflect.TypeOf((*MockCacheStorage)(nil).ListSystemConfigTx), tx, key, page, size)
-}
-
-// CountSystemConfigTx mocks base method.
-func (m *MockCacheStorage) CountSystemConfigTx(tx *sqlx.Tx, key string) (int, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountSystemConfigTx", tx, key)
-	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CountSystemConfigTx indicates an expected call of CountSystemConfigTx.
-func (mr *MockCacheStorageMockRecorder) CountSystemConfigTx(tx, key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountSystemConfigTx", reflect.TypeOf((*MockCacheStorage)(nil).CountSystemConfigTx), tx, key)
-}
-
-// UpdateSystemConfigTx mocks base method.
-func (m *MockCacheStorage) UpdateSystemConfigTx(tx *sqlx.Tx, sysConfig *models.SystemConfig) (sql.Result, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateSystemConfigTx", tx, sysConfig)
-	ret0, _ := ret[0].(sql.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateSystemConfigTx indicates an expected call of UpdateSystemConfigTx.
-func (mr *MockCacheStorageMockRecorder) UpdateSystemConfigTx(tx, sysConfig interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSystemConfigTx", reflect.TypeOf((*MockCacheStorage)(nil).UpdateSystemConfigTx), tx, sysConfig)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCache", reflect.TypeOf((*MockCacheStorage)(nil).ListCache), page)
 }
 
 // Close mocks base method.

@@ -14,7 +14,7 @@ import (
 	"testing"
 )
 
-func initSystemConfigAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
+func initCacheAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 	api := &API{}
 	router := gin.Default()
 	mockCtl := gomock.NewController(t)
@@ -22,108 +22,108 @@ func initSystemConfigAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 
 	v1 := router.Group("v1")
 	{
-		systemconfig := v1.Group("/system/configs")
+		cache := v1.Group("/caches")
 
-		systemconfig.GET("/:key", mockIM, common.Wrapper(api.GetSystemConfig))
-		systemconfig.GET("", mockIM, common.Wrapper(api.ListSystemConfig))
+		cache.GET("/:key", mockIM, common.Wrapper(api.GetCache))
+		cache.GET("", mockIM, common.Wrapper(api.ListCache))
 
-		systemconfig.POST("", mockIM, common.Wrapper(api.CreateSystemConfig))
-		systemconfig.DELETE("/:key", mockIM, common.Wrapper(api.DeleteSystemConfig))
-		systemconfig.PUT("/:key", mockIM, common.Wrapper(api.UpdateSystemConfig))
+		cache.POST("", mockIM, common.Wrapper(api.CreateCache))
+		cache.DELETE("/:key", mockIM, common.Wrapper(api.DeleteCache))
+		cache.PUT("/:key", mockIM, common.Wrapper(api.UpdateCache))
 	}
 	return api, router, mockCtl
 }
 
-func TestAPI_CreateSystemConfig(t *testing.T) {
-	api, router, ctl := initSystemConfigAPI(t)
-	rs := plugin.NewMockCacheService(ctl)
-	api.cacheService = rs
-
-	systemConfig := genSystemConfig()
-
-	rs.EXPECT().CreateSystemConfig(gomock.Any()).Return(systemConfig, nil)
-
-	body, _ := json.Marshal(systemConfig)
-	req, _ := http.NewRequest(http.MethodPost, "/v1/system/configs", bytes.NewReader(body))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-}
-
-func TestAPI_GetSystemConfig(t *testing.T) {
-	api, router, ctl := initSystemConfigAPI(t)
-	rs := plugin.NewMockCacheService(ctl)
-	api.cacheService = rs
-
-	systemConfig := genSystemConfig()
-
-	rs.EXPECT().GetSystemConfig(systemConfig.Key).Return(systemConfig, nil)
-
-	req, _ := http.NewRequest(http.MethodGet, "/v1/system/configs/"+systemConfig.Key, nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-}
-
-func TestAPI_DeleteSystemConfig(t *testing.T) {
-	api, router, ctl := initSystemConfigAPI(t)
-	rs := plugin.NewMockCacheService(ctl)
-	api.cacheService = rs
-
-	systemConfig := genSystemConfig()
-
-	rs.EXPECT().DeleteSystemConfig(gomock.Any()).Return(nil)
-
-	req, _ := http.NewRequest(http.MethodDelete, "/v1/system/configs/"+systemConfig.Key, nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-}
-
-func TestAPI_UpdateSystemConfig(t *testing.T) {
-	api, router, ctl := initSystemConfigAPI(t)
-	rs := plugin.NewMockCacheService(ctl)
-	api.cacheService = rs
-
-	systemConfig := genSystemConfig()
-
-	rs.EXPECT().GetSystemConfig(gomock.Any()).Return(systemConfig, nil).AnyTimes()
-	rs.EXPECT().UpdateSystemConfig(gomock.Any()).Return(systemConfig, nil)
-
-	body, _ := json.Marshal(systemConfig)
-	req, _ := http.NewRequest(http.MethodPut, "/v1/system/configs/"+systemConfig.Key, bytes.NewReader(body))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-}
-
-func genSystemConfig() *models.SystemConfig {
-	return &models.SystemConfig{
+func genCache() *models.Cache {
+	return &models.Cache{
 		Key:   "bae",
 		Value: "http://test",
 	}
 }
 
-func TestAPI_ListSystemConfig(t *testing.T) {
-	api, router, ctl := initSystemConfigAPI(t)
+func TestCreateCache(t *testing.T) {
+	api, router, ctl := initCacheAPI(t)
 	rs := plugin.NewMockCacheService(ctl)
 	api.cacheService = rs
 
-	mConf := genSystemConfig()
+	cache := genCache()
+
+	rs.EXPECT().Set(cache.Key,cache.Value).Return(nil).Times(1)
+
+	body, _ := json.Marshal(cache)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/caches", bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestGetCache(t *testing.T) {
+	api, router, ctl := initCacheAPI(t)
+	rs := plugin.NewMockCacheService(ctl)
+	api.cacheService = rs
+
+	cache := genCache()
+
+	rs.EXPECT().Get(cache.Key).Return(cache.Value, nil)
+
+	req, _ := http.NewRequest(http.MethodGet, "/v1/caches/"+cache.Key, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestDeleteCache(t *testing.T) {
+	api, router, ctl := initCacheAPI(t)
+	rs := plugin.NewMockCacheService(ctl)
+	api.cacheService = rs
+
+	cache := genCache()
+
+	rs.EXPECT().Delete(gomock.Any()).Return(nil).Times(1)
+
+	req, _ := http.NewRequest(http.MethodDelete, "/v1/caches/"+cache.Key, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestUpdateCache(t *testing.T) {
+	api, router, ctl := initCacheAPI(t)
+	rs := plugin.NewMockCacheService(ctl)
+	api.cacheService = rs
+
+	cache := genCache()
+
+	rs.EXPECT().Get(cache.Key).Return(cache.Value, nil).Times(1)
+	rs.EXPECT().Set(cache.Key, cache.Value).Return(nil).Times(1)
+
+	body, _ := json.Marshal(cache)
+	req, _ := http.NewRequest(http.MethodPut, "/v1/caches/"+cache.Key, bytes.NewReader(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestListCache(t *testing.T) {
+	api, router, ctl := initCacheAPI(t)
+	rs := plugin.NewMockCacheService(ctl)
+	api.cacheService = rs
+
+	mConf := genCache()
 
 	page := &models.Filter{
 		PageNo:   1,
 		PageSize: 2,
 		Name:     "%",
 	}
-	rs.EXPECT().ListSystemConfig(page).Return(&models.ListView{
+	rs.EXPECT().List(page).Return(&models.ListView{
 		Total:    1,
 		PageNo:   1,
 		PageSize: 2,
-		Items: []models.SystemConfig{*mConf},
+		Items: []models.Cache{*mConf},
 	},nil)
 
-	req, _ := http.NewRequest(http.MethodGet, "/v1/system/configs?pageNo=1&pageSize=2", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/v1/caches?pageNo=1&pageSize=2", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)

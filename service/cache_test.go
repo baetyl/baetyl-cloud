@@ -2,121 +2,90 @@ package service
 
 import (
 	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func genSystemConfigTestCase() *models.SystemConfig{
-	systemConfig := &models.SystemConfig{
+func genCacheTestCase() *models.Cache{
+	cache := &models.Cache{
 		Key:   "baetyl_0.1.0",
 		Value: "http://test/0.1.0",
 	}
-	return systemConfig
+	return cache
 }
 func TestGet(t *testing.T){
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
-	mConf := genSystemConfigTestCase()
+	mConf := genCacheTestCase()
 
-	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).Times(1)
+	mockObject.cacheStorage.EXPECT().GetCache(mConf.Key).Return(mConf.Value, nil).Times(1)
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
 	res, err := cs.Get(mConf.Key)
 	assert.NoError(t, err)
-	assert.Equal(t, mConf.Value, res.(*models.SystemConfig).Value)
+	assert.Equal(t, res, mConf.Value)
 }
 func TestSet(t *testing.T){
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
-	mConf := genSystemConfigTestCase()
+	mConf := genCacheTestCase()
 
-	mockObject.cacheStorage.EXPECT().UpdateSystemConfig(mConf).Return(nil, nil).Times(1)
-	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).Times(1)
-
-	cs, err := NewCacheService(mockObject.conf)
-	assert.NoError(t, err)
-	res, err := cs.Set(mConf.Key, mConf)
-	assert.NoError(t, err)
-	assert.Equal(t, mConf.Value, res.(*models.SystemConfig).Value)
-
-}
-func Test_GetSystemConfig(t *testing.T) {
-	mockObject := InitMockEnvironment(t)
-	defer mockObject.Close()
-
-	mConf := genSystemConfigTestCase()
-
-	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).Times(1)
+	mockObject.cacheStorage.EXPECT().SetCache(mConf.Key, mConf.Value).Return( nil).Times(1)
+	mockObject.cacheStorage.EXPECT().GetCache(mConf.Key).Return( mConf.Value, nil).Times(1)
 
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
-	res, err := cs.GetSystemConfig(mConf.Key)
+	err = cs.Set(mConf.Key, mConf.Value)
 	assert.NoError(t, err)
-	assert.Equal(t, mConf.Value, res.Value)
+	value, err := cs.Get(mConf.Key)
+	assert.NoError(t, err)
+	assert.Equal(t, value, mConf.Value)
+
 }
 
-func Test_ListSystemConfig(t *testing.T) {
+func TestList(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
-	mConf := genSystemConfigTestCase()
+	mConf := []models.Cache{
+		{
+			Key:   "baetyl_0.1.0",
+			Value: "http://test/0.1.0",
+		},
+	}
 	page := &models.Filter{
 		PageNo:   1,
 		PageSize: 10,
 		Name:     "%",
 	}
-	mockObject.cacheStorage.EXPECT().CountSystemConfig(gomock.Any()).Return(1, nil).Times(1)
-	mockObject.cacheStorage.EXPECT().ListSystemConfig(page.Name, page.PageNo, page.PageSize).Return([]models.SystemConfig{*mConf}, nil).Times(1)
+	mockObject.cacheStorage.EXPECT().ListCache(page).Return(
+		&models.ListView{
+			Total: 1,
+			PageNo: page.PageNo,
+			PageSize: page.PageSize,
+			Items: mConf,
+		}, nil).Times(1)
 
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
-	res, err := cs.ListSystemConfig(page)
+	res, err := cs.List(page)
 	assert.NoError(t, err)
-	assert.EqualValues(t, *mConf, res.Items.([]models.SystemConfig)[0])
-
+	checkCache(t, &mConf[0], &res.Items.([]models.Cache)[0])
 }
 
-func Test_CreateSystemConfig(t *testing.T) {
+func TestDelete(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
-	mConf := genSystemConfigTestCase()
-
-	mockObject.cacheStorage.EXPECT().CreateSystemConfig(mConf).Return(nil, nil).Times(1)
-	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).Times(1)
+	mConf := genCacheTestCase()
+	mockObject.cacheStorage.EXPECT().DeleteCache(mConf.Key).Return(nil).Times(1)
 
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
-	_, err = cs.CreateSystemConfig(mConf)
+	err = cs.Delete(mConf.Key)
 	assert.NoError(t, err)
 }
 
-func Test_UpdateSystemConfig(t *testing.T) {
-	mockObject := InitMockEnvironment(t)
-	defer mockObject.Close()
-
-	mConf := genSystemConfigTestCase()
-
-	mockObject.cacheStorage.EXPECT().UpdateSystemConfig(mConf).Return(nil, nil).Times(1)
-	mockObject.cacheStorage.EXPECT().GetSystemConfig(mConf.Key).Return(mConf, nil).Times(1)
-
-	cs, err := NewCacheService(mockObject.conf)
-	assert.NoError(t, err)
-	res, err := cs.UpdateSystemConfig(mConf)
-	assert.NoError(t, err)
-	assert.Equal(t, mConf.Value, res.Value)
-}
-
-func Test_DeleteSystemConfig(t *testing.T) {
-	mockObject := InitMockEnvironment(t)
-	defer mockObject.Close()
-
-	mConf := genSystemConfigTestCase()
-
-	mockObject.cacheStorage.EXPECT().DeleteSystemConfig(mConf.Key).Return(nil, nil).Times(1)
-
-	cs, err := NewCacheService(mockObject.conf)
-	assert.NoError(t, err)
-	err = cs.DeleteSystemConfig(mConf.Key)
-	assert.NoError(t, err)
+func checkCache(t *testing.T, expect, actual *models.Cache) {
+	assert.Equal(t, expect.Key, actual.Key)
+	assert.Equal(t, expect.Value, actual.Value)
 }

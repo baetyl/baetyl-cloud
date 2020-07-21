@@ -212,13 +212,12 @@ func (s *MisServer) InitRoute() {
 	s.router.Use(loggerHandler)
 	v1 := s.router.Group("v1")
 	{
-		systemconfig := v1.Group("/caches")
+		cache := v1.Group("/caches")
 
-		systemconfig.GET("/:key", common.Wrapper(s.api.GetCache))
-		systemconfig.GET("", common.Wrapper(s.api.ListCache))
-
-		systemconfig.POST("", common.Wrapper(s.api.AddCache))
-		systemconfig.DELETE("/:key", common.Wrapper(s.api.DeleteCache))
-		systemconfig.PUT("/:key", common.Wrapper(s.api.ReplaceCache))
+		cache.POST("", common.Wrapper(s.api.CreateCache))
+		cache.DELETE("/:key", common.Wrapper(s.api.DeleteCache))
+		cache.GET("/:key", common.Wrapper(s.api.GetCache))
+		cache.GET("", common.Wrapper(s.api.ListCache))
+		cache.PUT("/:key", common.Wrapper(s.api.UpdateCache))
 	}
 }

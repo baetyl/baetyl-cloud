@@ -34,10 +34,10 @@ func (m *MockCacheService) EXPECT() *MockCacheServiceMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockCacheService) Get(key string) (interface{}, error) {
+func (m *MockCacheService) Get(key string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", key)
-	ret0, _ := ret[0].(interface{})
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -49,12 +49,11 @@ func (mr *MockCacheServiceMockRecorder) Get(key interface{}) *gomock.Call {
 }
 
 // Set mocks base method.
-func (m *MockCacheService) Set(key string, value interface{}) (interface{}, error) {
+func (m *MockCacheService) Set(key, value string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Set", key, value)
-	ret0, _ := ret[0].(interface{})
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Set indicates an expected call of Set.
@@ -63,76 +62,31 @@ func (mr *MockCacheServiceMockRecorder) Set(key, value interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockCacheService)(nil).Set), key, value)
 }
 
-// GetSystemConfig mocks base method.
-func (m *MockCacheService) GetSystemConfig(key string) (*models.SystemConfig, error) {
+// Delete mocks base method.
+func (m *MockCacheService) Delete(key string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSystemConfig", key)
-	ret0, _ := ret[0].(*models.SystemConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Delete", key)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// GetSystemConfig indicates an expected call of GetSystemConfig.
-func (mr *MockCacheServiceMockRecorder) GetSystemConfig(key interface{}) *gomock.Call {
+// Delete indicates an expected call of Delete.
+func (mr *MockCacheServiceMockRecorder) Delete(key interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSystemConfig", reflect.TypeOf((*MockCacheService)(nil).GetSystemConfig), key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCacheService)(nil).Delete), key)
 }
 
-// ListSystemConfig mocks base method.
-func (m *MockCacheService) ListSystemConfig(page *models.Filter) (*models.ListView, error) {
+// List mocks base method.
+func (m *MockCacheService) List(page *models.Filter) (*models.ListView, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListSystemConfig", page)
+	ret := m.ctrl.Call(m, "List", page)
 	ret0, _ := ret[0].(*models.ListView)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListSystemConfig indicates an expected call of ListSystemConfig.
-func (mr *MockCacheServiceMockRecorder) ListSystemConfig(page interface{}) *gomock.Call {
+// List indicates an expected call of List.
+func (mr *MockCacheServiceMockRecorder) List(page interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSystemConfig", reflect.TypeOf((*MockCacheService)(nil).ListSystemConfig), page)
-}
-
-// CreateSystemConfig mocks base method.
-func (m *MockCacheService) CreateSystemConfig(sysConfig *models.SystemConfig) (*models.SystemConfig, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSystemConfig", sysConfig)
-	ret0, _ := ret[0].(*models.SystemConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateSystemConfig indicates an expected call of CreateSystemConfig.
-func (mr *MockCacheServiceMockRecorder) CreateSystemConfig(sysConfig interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSystemConfig", reflect.TypeOf((*MockCacheService)(nil).CreateSystemConfig), sysConfig)
-}
-
-// UpdateSystemConfig mocks base method.
-func (m *MockCacheService) UpdateSystemConfig(sysConfig *models.SystemConfig) (*models.SystemConfig, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateSystemConfig", sysConfig)
-	ret0, _ := ret[0].(*models.SystemConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateSystemConfig indicates an expected call of UpdateSystemConfig.
-func (mr *MockCacheServiceMockRecorder) UpdateSystemConfig(sysConfig interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSystemConfig", reflect.TypeOf((*MockCacheService)(nil).UpdateSystemConfig), sysConfig)
-}
-
-// DeleteSystemConfig mocks base method.
-func (m *MockCacheService) DeleteSystemConfig(key string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSystemConfig", key)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteSystemConfig indicates an expected call of DeleteSystemConfig.
-func (mr *MockCacheServiceMockRecorder) DeleteSystemConfig(key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSystemConfig", reflect.TypeOf((*MockCacheService)(nil).DeleteSystemConfig), key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockCacheService)(nil).List), page)
 }
