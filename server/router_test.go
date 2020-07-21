@@ -81,7 +81,7 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 		return mLicense, nil
 	})
 	mockCacheStorage := mockPlugin.NewMockCacheStorage(mockCtl)
-	plugin.RegisterFactory(c.Plugin.CacheStorage, func()(plugin.Plugin, error){
+	plugin.RegisterFactory(c.Plugin.CacheStorage, func() (plugin.Plugin, error) {
 		return mockCacheStorage, nil
 	})
 	s, _ := NewAdminServer(c)
@@ -250,7 +250,7 @@ func TestHandler_Active(t *testing.T) {
 	defer aHttp.Close()
 }
 
-func TestHandler_Mis(t *testing.T){
+func TestHandler_Mis(t *testing.T) {
 	t.Skip()
 	_, _, _, _, _, mockCtl, c, m := InitMockEnvironment(t)
 	defer mockCtl.Finish()

@@ -1,8 +1,8 @@
 package common
 
 import (
-	"time"
 	"github.com/gin-contrib/cache/persistence"
+	"time"
 )
 
 const (

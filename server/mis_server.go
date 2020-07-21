@@ -13,11 +13,11 @@ import (
 
 // MisServer admin server
 type MisServer struct {
-	cfg     *config.CloudConfig
-	router  *gin.Engine
-	server  *http.Server
-	api     *api.API
-	auth    service.AuthService
+	cfg    *config.CloudConfig
+	router *gin.Engine
+	server *http.Server
+	api    *api.API
+	auth   service.AuthService
 }
 
 // NewMisServer create Mis server
@@ -40,11 +40,11 @@ func NewMisServer(config *config.CloudConfig) (*MisServer, error) {
 		MaxHeaderBytes: 1 << 20,
 	}
 	return &MisServer{
-		cfg:     config,
-		router:  router,
-		server:  server,
-		auth:    auth,
-		api:     api,
+		cfg:    config,
+		router: router,
+		server: server,
+		auth:   auth,
+		api:    api,
 	}, nil
 }
 

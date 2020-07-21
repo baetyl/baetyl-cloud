@@ -14,7 +14,7 @@ func (api *API) CreateCache(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nil, api.cacheService.Set(cache.Key,cache.Value)
+	return nil, api.cacheService.Set(cache.Key, cache.Value)
 }
 
 func (api *API) DeleteCache(c *common.Context) (interface{}, error) {
@@ -33,25 +33,28 @@ func (api *API) ListCache(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	params.Format()
-	return api.cacheService.List(params)
+	res, err := api.cacheService.List(params)
+	if err != nil {
+		return nil, err
+	}
+	return models.AmisListView{
+		Status: "0",
+		Msg:    "ok",
+		Data: models.AmisData{
+			Count: res.Total,
+			Rows:  res.Items,
+		},
+	}, nil
 }
 
 func (api *API) UpdateCache(c *common.Context) (interface{}, error) {
-	key := c.Param("key")
-	_, err := api.cacheService.Get(key)
-	if err != nil{
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
-	}
 	cache := &models.Cache{
 		UpdateTime: time.Now(),
 	}
-	err = c.LoadBody(cache)
+	err := c.LoadBody(cache)
 	if err != nil {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+		return nil, err
 	}
-	err = api.cacheService.Set(key, cache.Value)
-	if err != nil {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
-	}
-	return nil, nil
+	err = api.cacheService.Set(c.Param("key"), cache.Value)
+	return nil, err
 }

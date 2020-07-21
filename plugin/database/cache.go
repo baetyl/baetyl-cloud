@@ -2,55 +2,39 @@ package database
 
 import (
 	"database/sql"
-	"io/ioutil"
-	"strings"
-
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/models"
 	"github.com/jmoiron/sqlx"
 )
 
-func (d *dbStorage) GetCache(key string) (string, error){
-	cache, err := d.GetCacheTx(nil, key)
+func (d *dbStorage) GetCache(key string) (string, error) {
+	cache, err := d.queryPropertyTx(nil, key)
 	if err != nil {
 		return "", err
 	}
-	if strings.HasPrefix(cache.Value,"file"){
-		buf, err := ioutil.ReadFile(cache.Value) //mock?
-		if err != nil {
-			return cache.Value, nil
-		}
-		cache.Value = string(buf)
-	}
 	return cache.Value, nil
 }
-func (d *dbStorage) SetCache(key, value string) error{
+func (d *dbStorage) SetCache(key, value string) error {
 	_, err := d.GetCache(key)
 	if err != nil {
-		_, err := d.AddCacheTx(nil, key, value)
-		if err != nil {
-			return common.Error(common.ErrDatabase, common.Field("error", err))
-		}
-	}else{
-		_, err := d.ReplaceCacheTx(nil, key, value)
-		if err != nil {
-			return common.Error(common.ErrDatabase, common.Field("error", err))
-		}
+		_, err = d.insertPropertyTx(nil, key, value)
+	} else {
+		_, err = d.updatePropertyTx(nil, key, value)
 	}
-	return nil
+	return err
 }
-func (d *dbStorage) DeleteCache(key string) error{
-	_, err := d.DeleteCacheTx(nil, key)
+func (d *dbStorage) DeleteCache(key string) error {
+	_, err := d.deletePropertyTx(nil, key)
 	return err
 }
 func (d *dbStorage) ListCache(page *models.Filter) (*models.ListView, error) {
-	caches, err := d.ListCacheTx(nil, page.Name, page.PageNo, page.PageSize)
+	caches, err := d.listPropertyTx(nil, page.Name, page.PageNo, page.PageSize)
 	if err != nil {
-		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
+		return nil, err
 	}
-	count, err := d.CountCacheTx(nil, page.Name)
+	count, err := d.countPropertyTx(nil, page.Name)
 	if err != nil {
-		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
+		return nil, err
 	}
 	return &models.ListView{
 		Total:    count,
@@ -60,11 +44,11 @@ func (d *dbStorage) ListCache(page *models.Filter) (*models.ListView, error) {
 	}, nil
 }
 
-func (d *dbStorage) AddCacheTx(tx *sqlx.Tx, key,value string) (sql.Result, error) {
+func (d *dbStorage) insertPropertyTx(tx *sqlx.Tx, key, value string) (sql.Result, error) {
 	insertSQL := "INSERT INTO baetyl_property(`key`, value) VALUES(?,?)"
-	return d.exec(tx, insertSQL, key,value)
+	return d.exec(tx, insertSQL, key, value)
 }
-func (d *dbStorage) GetCacheTx(tx *sqlx.Tx, key string) (*models.Cache, error) {
+func (d *dbStorage) queryPropertyTx(tx *sqlx.Tx, key string) (*models.Cache, error) {
 	selectSQL := "SELECT `key`, value, create_time, update_time " +
 		"FROM baetyl_property " +
 		"WHERE `key`=?"
@@ -80,13 +64,13 @@ func (d *dbStorage) GetCacheTx(tx *sqlx.Tx, key string) (*models.Cache, error) {
 		common.ErrResourceNotFound,
 		common.Field("key", key))
 }
-func (d *dbStorage) DeleteCacheTx(tx *sqlx.Tx, key string) (sql.Result, error) {
+func (d *dbStorage) deletePropertyTx(tx *sqlx.Tx, key string) (sql.Result, error) {
 	deleteSQL := "DELETE FROM baetyl_property " +
 		"where `key`=?"
 	return d.exec(tx, deleteSQL, key)
 }
 
-func (d *dbStorage) ListCacheTx(tx *sqlx.Tx, key string, pageNo, pageSize int) ([]models.Cache, error) {
+func (d *dbStorage) listPropertyTx(tx *sqlx.Tx, key string, pageNo, pageSize int) ([]models.Cache, error) {
 	selectSQL := "SELECT `key`, value, create_time, update_time " +
 		"FROM baetyl_property " +
 		"WHERE `key` LIKE ?" +
@@ -98,7 +82,7 @@ func (d *dbStorage) ListCacheTx(tx *sqlx.Tx, key string, pageNo, pageSize int) (
 	return cs, nil
 }
 
-func (d *dbStorage) CountCacheTx(tx *sqlx.Tx, key string)(int, error){
+func (d *dbStorage) countPropertyTx(tx *sqlx.Tx, key string) (int, error) {
 	selectSQL := "SELECT count(`key`) AS count " +
 		"FROM baetyl_property " +
 		"WHERE `key` LIKE ?"
@@ -111,8 +95,8 @@ func (d *dbStorage) CountCacheTx(tx *sqlx.Tx, key string)(int, error){
 	return res[0].Count, nil
 }
 
-func (d *dbStorage) ReplaceCacheTx(tx *sqlx.Tx, key ,value string) (sql.Result, error) {
+func (d *dbStorage) updatePropertyTx(tx *sqlx.Tx, key, value string) (sql.Result, error) {
 	updateSQL := "UPDATE baetyl_property SET value=?  WHERE `key`=?"
-	res, err :=  d.exec(tx, updateSQL, value, key)
+	res, err := d.exec(tx, updateSQL, value, key)
 	return res, err
 }

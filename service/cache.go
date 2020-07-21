@@ -36,7 +36,7 @@ func NewCacheService(config *config.CloudConfig) (CacheService, error) {
 func (s *cacheService) Get(key string) (string, error) {
 	return s.dbStorage.GetCache(key)
 }
-func (s *cacheService) Set(key string,value string) error{
+func (s *cacheService) Set(key string, value string) error {
 	return s.dbStorage.SetCache(key, value)
 }
 

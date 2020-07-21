@@ -30,6 +30,7 @@ func requestIDHandler(c *gin.Context) {
 }
 
 func loggerHandler(c *gin.Context) {
+
 	cc := common.NewContext(c)
 	log.L().Info("start request",
 		log.Any(cc.GetTrace()),

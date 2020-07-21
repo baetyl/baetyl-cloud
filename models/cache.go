@@ -8,4 +8,3 @@ type Cache struct {
 	CreateTime time.Time `yaml:"createTime,omitempty" json:"createTime,omitempty" db:"create_time"`
 	UpdateTime time.Time `yaml:"updateTime,omitempty" json:"updateTime,omitempty" db:"update_time"`
 }
-

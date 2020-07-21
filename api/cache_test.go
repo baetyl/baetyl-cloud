@@ -48,7 +48,7 @@ func TestCreateCache(t *testing.T) {
 
 	cache := genCache()
 
-	rs.EXPECT().Set(cache.Key,cache.Value).Return(nil).Times(1)
+	rs.EXPECT().Set(cache.Key, cache.Value).Return(nil).Times(1)
 
 	body, _ := json.Marshal(cache)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/caches", bytes.NewReader(body))
@@ -120,8 +120,8 @@ func TestListCache(t *testing.T) {
 		Total:    1,
 		PageNo:   1,
 		PageSize: 2,
-		Items: []models.Cache{*mConf},
-	},nil)
+		Items:    []models.Cache{*mConf},
+	}, nil)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/caches?pageNo=1&pageSize=2", nil)
 	w := httptest.NewRecorder()
