@@ -12,7 +12,7 @@ func (d *dbStorage) GetCache(key string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return cache.Value, nil
+	return cache.Value, err
 }
 func (d *dbStorage) SetCache(key, value string) error {
 	_, err := d.GetCache(key)
@@ -27,7 +27,7 @@ func (d *dbStorage) DeleteCache(key string) error {
 	_, err := d.deletePropertyTx(nil, key)
 	return err
 }
-func (d *dbStorage) ListCache(page *models.Filter) (*models.ListView, error) {
+func (d *dbStorage) ListCache(page *models.Filter) (*models.AmisListView, error) {
 	caches, err := d.listPropertyTx(nil, page.Name, page.PageNo, page.PageSize)
 	if err != nil {
 		return nil, err
@@ -36,11 +36,13 @@ func (d *dbStorage) ListCache(page *models.Filter) (*models.ListView, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &models.ListView{
-		Total:    count,
-		PageNo:   page.PageNo,
-		PageSize: page.PageSize,
-		Items:    caches,
+	return &models.AmisListView{
+		Status: "0",
+		Msg:    "ok",
+		Data: models.AmisData{
+			Count: count,
+			Rows:  caches,
+		},
 	}, nil
 }
 

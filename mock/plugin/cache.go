@@ -77,10 +77,10 @@ func (mr *MockCacheStorageMockRecorder) DeleteCache(key interface{}) *gomock.Cal
 }
 
 // ListCache mocks base method.
-func (m *MockCacheStorage) ListCache(page *models.Filter) (*models.ListView, error) {
+func (m *MockCacheStorage) ListCache(page *models.Filter) (*models.AmisListView, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListCache", page)
-	ret0, _ := ret[0].(*models.ListView)
+	ret0, _ := ret[0].(*models.AmisListView)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

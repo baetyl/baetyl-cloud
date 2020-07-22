@@ -58,18 +58,20 @@ func TestList(t *testing.T) {
 		Name:     "%",
 	}
 	mockObject.cacheStorage.EXPECT().ListCache(page).Return(
-		&models.ListView{
-			Total:    1,
-			PageNo:   page.PageNo,
-			PageSize: page.PageSize,
-			Items:    mConf,
+		&models.AmisListView{
+			Status: "0",
+			Msg:    "ok",
+			Data: models.AmisData{
+				Count: 1,
+				Rows:  mConf,
+			},
 		}, nil).Times(1)
 
 	cs, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
 	res, err := cs.List(page)
 	assert.NoError(t, err)
-	checkCache(t, &mConf[0], &res.Items.([]models.Cache)[0])
+	checkCache(t, &mConf[0], &res.Data.Rows.([]models.Cache)[0])
 }
 
 func TestDelete(t *testing.T) {

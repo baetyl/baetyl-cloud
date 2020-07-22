@@ -52,6 +52,8 @@ func TestCreateCache(t *testing.T) {
 
 	body, _ := json.Marshal(cache)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/caches", bytes.NewReader(body))
+	req.Header.Set("amis_token", "test_token_123")
+	req.Header.Set("amis_user", "1")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -67,6 +69,8 @@ func TestGetCache(t *testing.T) {
 	rs.EXPECT().Get(cache.Key).Return(cache.Value, nil)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/caches/"+cache.Key, nil)
+	req.Header.Set("amis_token", "test_token_123")
+	req.Header.Set("amis_user", "1")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -82,6 +86,8 @@ func TestDeleteCache(t *testing.T) {
 	rs.EXPECT().Delete(gomock.Any()).Return(nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/caches/"+cache.Key, nil)
+	req.Header.Set("amis_token", "test_token_123")
+	req.Header.Set("amis_user", "1")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -99,6 +105,8 @@ func TestUpdateCache(t *testing.T) {
 
 	body, _ := json.Marshal(cache)
 	req, _ := http.NewRequest(http.MethodPut, "/v1/caches/"+cache.Key, bytes.NewReader(body))
+	req.Header.Set("amis_token", "test_token_123")
+	req.Header.Set("amis_user", "1")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -116,14 +124,19 @@ func TestListCache(t *testing.T) {
 		PageSize: 2,
 		Name:     "%",
 	}
-	rs.EXPECT().List(page).Return(&models.ListView{
-		Total:    1,
-		PageNo:   1,
-		PageSize: 2,
-		Items:    []models.Cache{*mConf},
-	}, nil)
+	rs.EXPECT().List(page).Return(
+		&models.AmisListView{
+			Status: "0",
+			Msg:    "ok",
+			Data: models.AmisData{
+				Count: 1,
+				Rows:  mConf,
+			},
+		}, nil)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/caches?pageNo=1&pageSize=2", nil)
+	req.Header.Set("amis_token", "test_token_123")
+	req.Header.Set("amis_user", "1")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)

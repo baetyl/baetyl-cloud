@@ -79,6 +79,9 @@ const (
 	ErrLicenseQuota = "ErrLicenseQuota"
 	// * third server error
 	ErrThirdServer = "ErrThirdServer"
+	// * amis
+	ErrAMisTokenForbidden = "ErrAMisTokenForbidden"
+	ErrAMisUserNotFound   = "ErrAMisUserNotFound"
 )
 
 var templates = map[Code]string{
@@ -142,6 +145,10 @@ var templates = map[Code]string{
 
 	// * third server error
 	ErrThirdServer: "Third server {{if .name}}({{.name}}){{end}} error.{{if .error}} ({{.error}}){{end}}",
+
+	// * amis
+	ErrAMisTokenForbidden: "The token is forbidden.",
+	ErrAMisUserNotFound:   "The requesting user is not found.",
 }
 
 func getHTTPStatus(c Code) int {

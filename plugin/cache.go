@@ -12,7 +12,7 @@ type CacheStorage interface {
 	SetCache(key, value string) error
 
 	DeleteCache(key string) error
-	ListCache(page *models.Filter) (*models.ListView, error) //Pagination
+	ListCache(page *models.Filter) (*models.AmisListView, error) //Pagination
 
 	io.Closer
 }

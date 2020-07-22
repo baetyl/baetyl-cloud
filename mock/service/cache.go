@@ -77,10 +77,10 @@ func (mr *MockCacheServiceMockRecorder) Delete(key interface{}) *gomock.Call {
 }
 
 // List mocks base method.
-func (m *MockCacheService) List(page *models.Filter) (*models.ListView, error) {
+func (m *MockCacheService) List(page *models.Filter) (*models.AmisListView, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", page)
-	ret0, _ := ret[0].(*models.ListView)
+	ret0, _ := ret[0].(*models.AmisListView)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

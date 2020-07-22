@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// MisServer admin server
+// MisServer mis server
 type MisServer struct {
 	cfg    *config.CloudConfig
 	router *gin.Engine

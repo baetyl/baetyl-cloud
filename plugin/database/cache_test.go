@@ -59,7 +59,7 @@ func TestCache(t *testing.T) {
 	}
 	resCacheListView, err := db.ListCache(page)
 	assert.NoError(t, err)
-	checkCache(t, cache, &resCacheListView.Items.([]models.Cache)[0])
+	checkCache(t, cache, &resCacheListView.Data.Rows.([]models.Cache)[0])
 
 	err = db.DeleteCache(cache.Key)
 	assert.NoError(t, err)

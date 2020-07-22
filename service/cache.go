@@ -13,7 +13,7 @@ type CacheService interface {
 	Set(key, value string) error
 
 	Delete(key string) error
-	List(page *models.Filter) (*models.ListView, error) //分页
+	List(page *models.Filter) (*models.AmisListView, error) //分页
 }
 
 type cacheService struct {
@@ -40,7 +40,7 @@ func (s *cacheService) Set(key string, value string) error {
 	return s.dbStorage.SetCache(key, value)
 }
 
-func (s *cacheService) List(page *models.Filter) (*models.ListView, error) {
+func (s *cacheService) List(page *models.Filter) (*models.AmisListView, error) {
 	return s.dbStorage.ListCache(page)
 }
 
