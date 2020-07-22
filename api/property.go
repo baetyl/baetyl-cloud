@@ -4,14 +4,13 @@ import (
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/models"
 	"strings"
-	"time"
 )
 
 // TODO: optimize this layer, general abstraction
 
 func (api *API) amisAccessAuth(c *common.Context) (interface{}, error) {
 	misAccessToken := "test_token_123"
-	//misAccessToken, err := api.cacheService.Get("bce.iot.hubble.showx.access.token")
+	//misAccessToken, err := api.propertyService.Get("bce.iot.hubble.showx.access.token")
 	token := c.Request.Header.Get("amis_token")
 	if strings.Compare(token, misAccessToken) != 0 {
 		return nil, common.Error(common.ErrAMisTokenForbidden, common.Field("error", common.Code(common.ErrAMisTokenForbidden)))
@@ -23,38 +22,36 @@ func (api *API) amisAccessAuth(c *common.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (api *API) CreateCache(c *common.Context) (interface{}, error) {
+func (api *API) CreateProperty(c *common.Context) (interface{}, error) {
 	_, err := api.amisAccessAuth(c)
 	if err != nil {
 		return nil, err
 	}
-	cache := &models.Cache{}
-	err = c.LoadBody(cache)
+	property := &models.Property{}
+	err = c.LoadBody(property)
 	if err != nil {
 		return nil, err
 	}
-	return nil, api.cacheService.Set(cache.Key, cache.Value)
+	return api.propertyService.CreateProperty(property)
 }
 
-func (api *API) DeleteCache(c *common.Context) (interface{}, error) {
+func (api *API) DeleteProperty(c *common.Context) (interface{}, error) {
 	_, err := api.amisAccessAuth(c)
 	if err != nil {
 		return nil, err
 	}
-	key := c.Param("key")
-	return nil, api.cacheService.Delete(key)
+	return nil, api.propertyService.DeleteProperty(c.Param("key"))
 }
 
-func (api *API) GetCache(c *common.Context) (interface{}, error) {
+func (api *API) GetProperty(c *common.Context) (interface{}, error) {
 	_, err := api.amisAccessAuth(c)
 	if err != nil {
 		return nil, err
 	}
-	key := c.Param("key")
-	return api.cacheService.Get(key)
+	return api.propertyService.GetProperty(c.Param("key"))
 }
 
-func (api *API) ListCache(c *common.Context) (interface{}, error) {
+func (api *API) ListProperty(c *common.Context) (interface{}, error) {
 	_, err := api.amisAccessAuth(c)
 	if err != nil {
 		return nil, err
@@ -64,21 +61,20 @@ func (api *API) ListCache(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	params.Format()
-	return api.cacheService.List(params)
+	return api.propertyService.ListProperty(params)
 }
 
-func (api *API) UpdateCache(c *common.Context) (interface{}, error) {
+func (api *API) UpdateProperty(c *common.Context) (interface{}, error) {
 	_, err := api.amisAccessAuth(c)
 	if err != nil {
 		return nil, err
 	}
-	cache := &models.Cache{
-		UpdateTime: time.Now(),
+	property := &models.Property{
+		Key: c.Param("key"),
 	}
-	err = c.LoadBody(cache)
+	err = c.LoadBody(property)
 	if err != nil {
 		return nil, err
 	}
-	err = api.cacheService.Set(c.Param("key"), cache.Value)
-	return nil, err
+	return api.propertyService.UpdateProperty(property)
 }

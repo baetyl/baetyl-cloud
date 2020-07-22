@@ -77,7 +77,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Shadow = "database"
 	expect.Plugin.Functions = []string{}
 	expect.Plugin.Objects = []string{}
-	expect.Plugin.CacheStorage = "database"
+	expect.Plugin.Property = "database"
 
 	// case 0
 	cfg := &CloudConfig{}

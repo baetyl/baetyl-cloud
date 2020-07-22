@@ -18,8 +18,8 @@ var (
 	}
 )
 
-func genCache() *models.Cache {
-	return &models.Cache{
+func genProperty() *models.Property {
+	return &models.Property{
 		Key:   "baetyl_0.1.0",
 		Value: "http://test.baetyl/0.1.0",
 	}
@@ -32,24 +32,26 @@ func (d *dbStorage) MockCreatePropertyTable() {
 		}
 	}
 }
-func TestCache(t *testing.T) {
-	cache := genCache()
+func TestProperty(t *testing.T) {
+	property := genProperty()
 
 	db, err := MockNewDB()
 	assert.NoError(t, err)
 	db.MockCreatePropertyTable()
 
-	err = db.SetCache(cache.Key, cache.Value)
+	_, err = db.CreateProperty(property)
 	assert.NoError(t, err)
 
-	cache.Value = "updated_" + cache.Value
-	err = db.SetCache(cache.Key, cache.Value)
+	newValue := "updated_" + property.Value
+	property.Value = newValue
+	updated_property, err := db.UpdateProperty(property)
 	assert.NoError(t, err)
+	assert.Equal(t, newValue, updated_property.Value)
 
-	value, err := db.GetCache(cache.Key)
+	get_property, err := db.GetProperty(property.Key)
 	assert.NoError(t, err)
-	assert.Equal(t, value, cache.Value)
-	value, err = db.GetCache("bad key")
+	checkProperty(t, get_property, property)
+	_, err = db.GetProperty("bad key")
 	assert.Error(t, err)
 
 	page := &models.Filter{
@@ -57,16 +59,16 @@ func TestCache(t *testing.T) {
 		PageSize: 2,
 		Name:     "%",
 	}
-	resCacheListView, err := db.ListCache(page)
+	resPropertyListView, err := db.ListProperty(page)
 	assert.NoError(t, err)
-	checkCache(t, cache, &resCacheListView.Data.Rows.([]models.Cache)[0])
+	checkProperty(t, property, &resPropertyListView.Data.Rows.([]models.Property)[0])
 
-	err = db.DeleteCache(cache.Key)
+	err = db.DeleteProperty(property.Key)
 	assert.NoError(t, err)
 
 }
 
-func checkCache(t *testing.T, expect, actual *models.Cache) {
+func checkProperty(t *testing.T, expect, actual *models.Property) {
 	assert.Equal(t, expect.Key, actual.Key)
 	assert.Equal(t, expect.Value, actual.Value)
 }

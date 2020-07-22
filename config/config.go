@@ -23,13 +23,13 @@ type CloudConfig struct {
 	MisServer    Server     `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
 	Plugin       struct {
-		PKI          string   `yaml:"pki" json:"pki" default:"defaultpki"`
-		Auth         string   `yaml:"auth" json:"auth" default:"defaultauth"`
-		License      string   `yaml:"license" json:"license" default:"defaultlicense"`
-		Shadow       string   `yaml:"shadow" json:"shadow" default:"database"`
-		Objects      []string `yaml:"objects" json:"objects" default:"[]"`
-		Functions    []string `yaml:"functions" json:"functions" default:"[]"`
-		CacheStorage string   `yaml:"cacheStorage" json:"cacheStorage" default:"database"`
+		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
+		Auth      string   `yaml:"auth" json:"auth" default:"defaultauth"`
+		License   string   `yaml:"license" json:"license" default:"defaultlicense"`
+		Shadow    string   `yaml:"shadow" json:"shadow" default:"database"`
+		Objects   []string `yaml:"objects" json:"objects" default:"[]"`
+		Functions []string `yaml:"functions" json:"functions" default:"[]"`
+		Property  string   `yaml:"property" json:"property" default:"database"`
 		// TODO: deprecated
 
 		ModelStorage    string `yaml:"modelStorage" json:"modelStorage" default:"kubernetes"`

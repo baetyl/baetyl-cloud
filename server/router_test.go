@@ -34,7 +34,7 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9)}
 	c.Plugin.License = common.RandString(9)
-	c.Plugin.CacheStorage = common.RandString(9)
+	c.Plugin.Property = common.RandString(9)
 	c.NodeServer.Certificate.CA = ""
 	c.NodeServer.Certificate.Cert = ""
 	c.NodeServer.Certificate.Key = ""
@@ -80,9 +80,9 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 	plugin.RegisterFactory(c.Plugin.License, func() (plugin.Plugin, error) {
 		return mLicense, nil
 	})
-	mockCacheStorage := mockPlugin.NewMockCacheStorage(mockCtl)
-	plugin.RegisterFactory(c.Plugin.CacheStorage, func() (plugin.Plugin, error) {
-		return mockCacheStorage, nil
+	mockProperty := mockPlugin.NewMockProperty(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
+		return mockProperty, nil
 	})
 	s, _ := NewAdminServer(c)
 	n, _ := NewNodeServer(c)
