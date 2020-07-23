@@ -44,13 +44,13 @@ func TestProperty(t *testing.T) {
 
 	newValue := "updated_" + property.Value
 	property.Value = newValue
-	updated_property, err := db.UpdateProperty(property)
+	updatedProperty, err := db.UpdateProperty(property)
 	assert.NoError(t, err)
-	assert.Equal(t, newValue, updated_property.Value)
+	assert.Equal(t, newValue, updatedProperty.Value)
 
-	get_property, err := db.GetProperty(property.Key)
+	getProperty, err := db.GetProperty(property.Key)
 	assert.NoError(t, err)
-	checkProperty(t, get_property, property)
+	checkProperty(t, getProperty, property)
 	_, err = db.GetProperty("bad key")
 	assert.Error(t, err)
 

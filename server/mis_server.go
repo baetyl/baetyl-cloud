@@ -7,26 +7,23 @@ import (
 
 	"github.com/baetyl/baetyl-cloud/api"
 	"github.com/baetyl/baetyl-cloud/config"
-	"github.com/baetyl/baetyl-cloud/service"
 	"github.com/gin-gonic/gin"
 )
 
 // MisServer mis server
 type MisServer struct {
-	cfg    *config.CloudConfig
-	router *gin.Engine
-	server *http.Server
-	api    *api.API
-	auth   service.AuthService
+	cfg         *config.CloudConfig
+	router      *gin.Engine
+	server      *http.Server
+	api         *api.API
+	authToken   string
+	tokenHeader string
+	userHeader  string
 }
 
 // NewMisServer create Mis server
 func NewMisServer(config *config.CloudConfig) (*MisServer, error) {
 	api, err := api.NewAPI(config)
-	if err != nil {
-		return nil, err
-	}
-	auth, err := service.NewAuthService(config)
 	if err != nil {
 		return nil, err
 	}
@@ -40,11 +37,13 @@ func NewMisServer(config *config.CloudConfig) (*MisServer, error) {
 		MaxHeaderBytes: 1 << 20,
 	}
 	return &MisServer{
-		cfg:    config,
-		router: router,
-		server: server,
-		auth:   auth,
-		api:    api,
+		cfg:         config,
+		router:      router,
+		server:      server,
+		api:         api,
+		authToken:   config.MisServer.AuthToken,
+		tokenHeader: config.MisServer.TokenHeader,
+		userHeader:  config.MisServer.UserHeader,
 	}, nil
 }
 

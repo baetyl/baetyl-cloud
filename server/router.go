@@ -4,6 +4,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/gin-gonic/gin"
+	"strings"
 )
 
 // InitRoute init router
@@ -199,17 +200,19 @@ func (s *ActiveServer) InitRoute() {
 	}
 }
 
-//// GetRoute get router
 func (s *MisServer) GetRoute() *gin.Engine {
 	return s.router
 }
+
 func (s *MisServer) InitRoute() {
+
 	s.router.NoRoute(noRouteHandler)
 	s.router.NoMethod(noMethodHandler)
 	s.router.GET("/health", health)
 
 	s.router.Use(requestIDHandler)
 	s.router.Use(loggerHandler)
+	s.router.Use(s.authHandler)
 	v1 := s.router.Group("v1")
 	{
 		cache := v1.Group("/properties")
@@ -219,5 +222,24 @@ func (s *MisServer) InitRoute() {
 		cache.GET("/:key", common.Wrapper(s.api.GetProperty))
 		cache.GET("", common.Wrapper(s.api.ListProperty))
 		cache.PUT("/:key", common.Wrapper(s.api.UpdateProperty))
+	}
+
+}
+
+// auth handler
+func (s *MisServer) authHandler(c *gin.Context) {
+	cc := common.NewContext(c)
+
+	token := c.Request.Header.Get(s.tokenHeader)
+	if strings.Compare(token, s.authToken) != 0 {
+		err := common.Error(common.ErrMisTokenForbidden, common.Field("error", common.Code(common.ErrMisTokenForbidden)))
+		log.L().Error(common.Code(common.ErrMisTokenForbidden).String(), log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
+		common.PopulateFailedResponse(cc, err, true)
+	}
+	user := c.Request.Header.Get(s.userHeader)
+	if len(user) == 0 {
+		err := common.Error(common.ErrMisUserNotFound, common.Field("error", common.Code(common.ErrMisUserNotFound)))
+		log.L().Error(common.Code(common.ErrMisUserNotFound).String(), log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
+		common.PopulateFailedResponse(cc, err, true)
 	}
 }

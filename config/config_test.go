@@ -13,9 +13,10 @@ func TestSetPortFromEnv(t *testing.T) {
 		ActiveServer: Server{Port: ":1"},
 		AdminServer:  Server{Port: ":2"},
 		NodeServer:   NodeServer{},
-		MisServer:    Server{Port: ":4"},
+		MisServer:    MisServer{},
 	}
 	cfg.NodeServer.Port = ":3"
+	cfg.MisServer.Port = ":4"
 	// no env
 	SetPortFromEnv(cfg)
 	assert.Equal(t, ":1", cfg.ActiveServer.Port)
@@ -62,6 +63,9 @@ func TestDefaultValue(t *testing.T) {
 	expect.MisServer.WriteTimeout = time.Second * 30
 	expect.MisServer.ReadTimeout = time.Second * 30
 	expect.MisServer.ShutdownTime = time.Second * 3
+	expect.MisServer.AuthToken = "test_token_123"
+	expect.MisServer.TokenHeader = "amis_token"
+	expect.MisServer.UserHeader = "amis_user"
 
 	expect.LogInfo.Level = "info"
 	expect.LogInfo.MaxAge = 15

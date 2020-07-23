@@ -14,33 +14,6 @@ func genPropertyTestCase() *models.Property {
 	return property
 }
 
-func TestGetProperty(t *testing.T) {
-	mockObject := InitMockEnvironment(t)
-	defer mockObject.Close()
-	mConf := genPropertyTestCase()
-
-	mockObject.property.EXPECT().GetProperty(mConf.Key).Return(mConf, nil).Times(1)
-	cs, err := NewPropertyService(mockObject.conf)
-	assert.NoError(t, err)
-	res, err := cs.GetProperty(mConf.Key)
-	assert.NoError(t, err)
-	checkProperty(t, res, mConf)
-}
-
-func TestUpdateProperty(t *testing.T) {
-	mockObject := InitMockEnvironment(t)
-	defer mockObject.Close()
-	mConf := genPropertyTestCase()
-
-	mockObject.property.EXPECT().UpdateProperty(mConf).Return(mConf, nil).Times(1)
-
-	cs, err := NewPropertyService(mockObject.conf)
-	assert.NoError(t, err)
-	res, err := cs.UpdateProperty(mConf)
-	assert.NoError(t, err)
-	checkProperty(t, res, mConf)
-}
-
 func TestCreateProperty(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
@@ -51,6 +24,32 @@ func TestCreateProperty(t *testing.T) {
 	cs, err := NewPropertyService(mockObject.conf)
 	assert.NoError(t, err)
 	res, err := cs.CreateProperty(mConf)
+	assert.NoError(t, err)
+	checkProperty(t, res, mConf)
+}
+
+func TestDeleteProperty(t *testing.T) {
+	mockObject := InitMockEnvironment(t)
+	defer mockObject.Close()
+
+	mConf := genPropertyTestCase()
+	mockObject.property.EXPECT().DeleteProperty(mConf.Key).Return(nil).Times(1)
+
+	cs, err := NewPropertyService(mockObject.conf)
+	assert.NoError(t, err)
+	err = cs.DeleteProperty(mConf.Key)
+	assert.NoError(t, err)
+}
+
+func TestGetProperty(t *testing.T) {
+	mockObject := InitMockEnvironment(t)
+	defer mockObject.Close()
+	mConf := genPropertyTestCase()
+
+	mockObject.property.EXPECT().GetProperty(mConf.Key).Return(mConf, nil).Times(1)
+	cs, err := NewPropertyService(mockObject.conf)
+	assert.NoError(t, err)
+	res, err := cs.GetProperty(mConf.Key)
 	assert.NoError(t, err)
 	checkProperty(t, res, mConf)
 }
@@ -86,17 +85,18 @@ func TestListProperty(t *testing.T) {
 	checkProperty(t, &mConf[0], &res.Data.Rows.([]models.Property)[0])
 }
 
-func TestDelete(t *testing.T) {
+func TestUpdateProperty(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
-
 	mConf := genPropertyTestCase()
-	mockObject.property.EXPECT().DeleteProperty(mConf.Key).Return(nil).Times(1)
+
+	mockObject.property.EXPECT().UpdateProperty(mConf).Return(mConf, nil).Times(1)
 
 	cs, err := NewPropertyService(mockObject.conf)
 	assert.NoError(t, err)
-	err = cs.DeleteProperty(mConf.Key)
+	res, err := cs.UpdateProperty(mConf)
 	assert.NoError(t, err)
+	checkProperty(t, res, mConf)
 }
 
 func checkProperty(t *testing.T, expect, actual *models.Property) {

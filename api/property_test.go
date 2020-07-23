@@ -59,23 +59,6 @@ func TestCreateProperty(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-func TestGetProperty(t *testing.T) {
-	api, router, ctl := initPropertyAPI(t)
-	rs := plugin.NewMockPropertyService(ctl)
-	api.propertyService = rs
-
-	property := genProperty()
-
-	rs.EXPECT().GetProperty(property.Key).Return(property, nil)
-
-	req, _ := http.NewRequest(http.MethodGet, "/v1/properties/"+property.Key, nil)
-	req.Header.Set("amis_token", "test_token_123")
-	req.Header.Set("amis_user", "1")
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-}
-
 func TestDeleteProperty(t *testing.T) {
 	api, router, ctl := initPropertyAPI(t)
 	rs := plugin.NewMockPropertyService(ctl)
@@ -93,18 +76,16 @@ func TestDeleteProperty(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-func TestUpdateProperty(t *testing.T) {
+func TestGetProperty(t *testing.T) {
 	api, router, ctl := initPropertyAPI(t)
 	rs := plugin.NewMockPropertyService(ctl)
 	api.propertyService = rs
 
 	property := genProperty()
 
-	rs.EXPECT().GetProperty(property.Key).Return(property, nil).Times(1)
-	rs.EXPECT().UpdateProperty(property).Return(property, nil).Times(1)
+	rs.EXPECT().GetProperty(property.Key).Return(property, nil).Times(2)
 
-	body, _ := json.Marshal(property)
-	req, _ := http.NewRequest(http.MethodPut, "/v1/properties/"+property.Key, bytes.NewReader(body))
+	req, _ := http.NewRequest(http.MethodGet, "/v1/properties/"+property.Key, nil)
 	req.Header.Set("amis_token", "test_token_123")
 	req.Header.Set("amis_user", "1")
 	w := httptest.NewRecorder()
@@ -135,6 +116,25 @@ func TestListProperty(t *testing.T) {
 		}, nil)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/properties?pageNo=1&pageSize=2", nil)
+	req.Header.Set("amis_token", "test_token_123")
+	req.Header.Set("amis_user", "1")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestUpdateProperty(t *testing.T) {
+	api, router, ctl := initPropertyAPI(t)
+	rs := plugin.NewMockPropertyService(ctl)
+	api.propertyService = rs
+
+	property := genProperty()
+
+	rs.EXPECT().GetProperty(property.Key).Return(property, nil).Times(1)
+	rs.EXPECT().UpdateProperty(property).Return(property, nil).Times(1)
+
+	body, _ := json.Marshal(property)
+	req, _ := http.NewRequest(http.MethodPut, "/v1/properties/"+property.Key, bytes.NewReader(body))
 	req.Header.Set("amis_token", "test_token_123")
 	req.Header.Set("amis_user", "1")
 	w := httptest.NewRecorder()

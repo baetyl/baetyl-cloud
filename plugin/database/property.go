@@ -7,9 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func (d *dbStorage) GetProperty(key string) (*models.Property, error) {
-	return d.queryPropertyTx(nil, key)
-}
 func (d *dbStorage) CreateProperty(property *models.Property) (*models.Property, error) {
 	var pro *models.Property
 	err := d.Transact(func(tx *sqlx.Tx) error {
@@ -22,22 +19,14 @@ func (d *dbStorage) CreateProperty(property *models.Property) (*models.Property,
 	})
 	return pro, err
 }
-func (d *dbStorage) UpdateProperty(property *models.Property) (*models.Property, error) {
-	var pro *models.Property
-	err := d.Transact(func(tx *sqlx.Tx) error {
-		_, err := d.updatePropertyTx(tx, property)
-		if err != nil {
-			return err
-		}
-		pro, err = d.queryPropertyTx(tx, property.Key)
-		return err
-	})
-	return pro, err
-}
 
 func (d *dbStorage) DeleteProperty(key string) error {
 	_, err := d.deletePropertyTx(nil, key)
 	return err
+}
+
+func (d *dbStorage) GetProperty(key string) (*models.Property, error) {
+	return d.queryPropertyTx(nil, key)
 }
 
 func (d *dbStorage) ListProperty(page *models.Filter) (*models.AmisListView, error) {
@@ -59,10 +48,30 @@ func (d *dbStorage) ListProperty(page *models.Filter) (*models.AmisListView, err
 	}, nil
 }
 
+func (d *dbStorage) UpdateProperty(property *models.Property) (*models.Property, error) {
+	var pro *models.Property
+	err := d.Transact(func(tx *sqlx.Tx) error {
+		_, err := d.updatePropertyTx(tx, property)
+		if err != nil {
+			return err
+		}
+		pro, err = d.queryPropertyTx(tx, property.Key)
+		return err
+	})
+	return pro, err
+}
+
 func (d *dbStorage) insertPropertyTx(tx *sqlx.Tx, property *models.Property) (sql.Result, error) {
 	insertSQL := "INSERT INTO baetyl_property(`key`, value) VALUES(?,?)"
 	return d.exec(tx, insertSQL, property.Key, property.Value)
 }
+
+func (d *dbStorage) deletePropertyTx(tx *sqlx.Tx, key string) (sql.Result, error) {
+	deleteSQL := "DELETE FROM baetyl_property " +
+		"where `key`=?"
+	return d.exec(tx, deleteSQL, key)
+}
+
 func (d *dbStorage) queryPropertyTx(tx *sqlx.Tx, key string) (*models.Property, error) {
 	selectSQL := "SELECT `key`, value, create_time, update_time " +
 		"FROM baetyl_property " +
@@ -78,11 +87,6 @@ func (d *dbStorage) queryPropertyTx(tx *sqlx.Tx, key string) (*models.Property, 
 	return nil, common.Error(
 		common.ErrResourceNotFound,
 		common.Field("key", key))
-}
-func (d *dbStorage) deletePropertyTx(tx *sqlx.Tx, key string) (sql.Result, error) {
-	deleteSQL := "DELETE FROM baetyl_property " +
-		"where `key`=?"
-	return d.exec(tx, deleteSQL, key)
 }
 
 func (d *dbStorage) listPropertyTx(tx *sqlx.Tx, key string, pageNo, pageSize int) ([]models.Property, error) {

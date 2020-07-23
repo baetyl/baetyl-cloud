@@ -20,7 +20,7 @@ type CloudConfig struct {
 	ActiveServer Server     `yaml:"activeServer" json:"activeServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	AdminServer  Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	NodeServer   NodeServer `yaml:"nodeServer" json:"nodeServer" default:"{\"port\":\":9005\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"commonName\":\"common-name\"}"`
-	MisServer    Server     `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
+	MisServer    MisServer  `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"test_token_123\",\"tokenHeader\":\"amis_token\",\"userHeader\":\"amis_user\"}"`
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
 	Plugin       struct {
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
@@ -40,6 +40,13 @@ type CloudConfig struct {
 type NodeServer struct {
 	Server     `yaml:",inline" json:",inline"`
 	CommonName string `yaml:"commonName" json:"commonName" default:"common-name"`
+}
+
+type MisServer struct {
+	Server      `yaml:",inline" json:",inline"`
+	AuthToken   string `yaml:"authToken" json:"authToken" default:"test_token_123"`
+	TokenHeader string `yaml:"tokenHeader" json:"tokenHeader" default:"amis_token"`
+	UserHeader  string `yaml:"userHeader" json:"userHeader" default:"amis_user"`
 }
 
 // Server server config
