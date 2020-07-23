@@ -48,7 +48,7 @@ func TestCreateProperty(t *testing.T) {
 
 	property := genProperty()
 
-	rs.EXPECT().CreateProperty(property).Return(property, nil).Times(1)
+	rs.EXPECT().CreateProperty(property).Return(nil, nil).Times(1)
 
 	body, _ := json.Marshal(property)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/properties", bytes.NewReader(body))
@@ -106,10 +106,10 @@ func TestListProperty(t *testing.T) {
 		Name:     "%",
 	}
 	rs.EXPECT().ListProperty(page).Return(
-		&models.AmisListView{
+		&models.MisResponse{
 			Status: "0",
 			Msg:    "ok",
-			Data: models.AmisData{
+			Data: models.MisData{
 				Count: 1,
 				Rows:  mConf,
 			},
@@ -130,8 +130,8 @@ func TestUpdateProperty(t *testing.T) {
 
 	property := genProperty()
 
-	rs.EXPECT().GetProperty(property.Key).Return(property, nil).Times(1)
-	rs.EXPECT().UpdateProperty(property).Return(property, nil).Times(1)
+	rs.EXPECT().GetProperty(property.Key).Return(nil, nil).Times(1)
+	rs.EXPECT().UpdateProperty(property).Return(nil, nil).Times(1)
 
 	body, _ := json.Marshal(property)
 	req, _ := http.NewRequest(http.MethodPut, "/v1/properties/"+property.Key, bytes.NewReader(body))

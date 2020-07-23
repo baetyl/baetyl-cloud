@@ -26,13 +26,3 @@ func (f *Filter) Format() {
 		f.PageSize = 20
 	}
 }
-
-type AmisData struct {
-	Count int         `json:"count,omitempty"`
-	Rows  interface{} `json:"rows,omitempty"`
-}
-type AmisListView struct {
-	Status string   `json:"status,omitempty"`
-	Msg    string   `json:"msg,omitempty"`
-	Data   AmisData `json:"data,omitempty"`
-}

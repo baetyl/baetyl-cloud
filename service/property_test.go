@@ -69,10 +69,10 @@ func TestListProperty(t *testing.T) {
 		Name:     "%",
 	}
 	mockObject.property.EXPECT().ListProperty(page).Return(
-		&models.AmisListView{
+		&models.MisResponse{
 			Status: "0",
 			Msg:    "ok",
-			Data: models.AmisData{
+			Data: models.MisData{
 				Count: 1,
 				Rows:  mConf,
 			},

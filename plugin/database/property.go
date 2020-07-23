@@ -29,8 +29,8 @@ func (d *dbStorage) GetProperty(key string) (*models.Property, error) {
 	return d.queryPropertyTx(nil, key)
 }
 
-func (d *dbStorage) ListProperty(page *models.Filter) (*models.AmisListView, error) {
-	caches, err := d.listPropertyTx(nil, page.Name, page.PageNo, page.PageSize)
+func (d *dbStorage) ListProperty(page *models.Filter) (*models.MisResponse, error) {
+	properties, err := d.listPropertyTx(nil, page.Name, page.PageNo, page.PageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -38,12 +38,12 @@ func (d *dbStorage) ListProperty(page *models.Filter) (*models.AmisListView, err
 	if err != nil {
 		return nil, err
 	}
-	return &models.AmisListView{
+	return &models.MisResponse{
 		Status: "0",
 		Msg:    "ok",
-		Data: models.AmisData{
+		Data: models.MisData{
 			Count: count,
-			Rows:  caches,
+			Rows:  properties,
 		},
 	}, nil
 }
@@ -63,7 +63,11 @@ func (d *dbStorage) UpdateProperty(property *models.Property) (*models.Property,
 
 func (d *dbStorage) insertPropertyTx(tx *sqlx.Tx, property *models.Property) (sql.Result, error) {
 	insertSQL := "INSERT INTO baetyl_property(`key`, value) VALUES(?,?)"
-	return d.exec(tx, insertSQL, property.Key, property.Value)
+	_, err := d.exec(tx, insertSQL, property.Key, property.Value)
+	if err != nil {
+		return nil, common.Error(common.ErrDatabase, common.Field("error", "key existed"))
+	}
+	return nil, err
 }
 
 func (d *dbStorage) deletePropertyTx(tx *sqlx.Tx, key string) (sql.Result, error) {

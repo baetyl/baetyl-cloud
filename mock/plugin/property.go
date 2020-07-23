@@ -93,10 +93,10 @@ func (mr *MockPropertyMockRecorder) DeleteProperty(key interface{}) *gomock.Call
 }
 
 // ListProperty mocks base method.
-func (m *MockProperty) ListProperty(page *models.Filter) (*models.AmisListView, error) {
+func (m *MockProperty) ListProperty(page *models.Filter) (*models.MisResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListProperty", page)
-	ret0, _ := ret[0].(*models.AmisListView)
+	ret0, _ := ret[0].(*models.MisResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

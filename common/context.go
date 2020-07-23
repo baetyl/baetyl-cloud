@@ -163,7 +163,6 @@ func Wrapper(handler HandlerFunc) func(c *gin.Context) {
 				PopulateFailedResponse(cc, err, false)
 			}
 		}()
-
 		res, err := handler(cc)
 		if err != nil {
 			log.L().Error("failed to handler request", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
