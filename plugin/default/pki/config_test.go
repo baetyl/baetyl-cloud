@@ -11,7 +11,8 @@ func TestPKI_Config(t *testing.T) {
 	exp := CloudConfig{}
 	exp.PKI.RootCAFile = "etc/config/cloud/ca.pem"
 	exp.PKI.RootCAKeyFile = "etc/config/cloud/ca.key"
-	exp.PKI.Duration = 7300
+	exp.PKI.SubDuration = 7300
+	exp.PKI.RootDuration = 18250
 	exp.PKI.Persistent = Persistent{Kind: "database"}
 	exp.PKI.Persistent.Database.Type = "mysql"
 	exp.PKI.Persistent.Database.URL = "root:12345678@(127.0.0.1:3306)/baetyl_cloud?charset=utf8&loc=Asia%2FShanghai&parseTime=true"

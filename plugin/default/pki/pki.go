@@ -40,7 +40,7 @@ func NewPKI() (plugin.Plugin, error) {
 
 // root cert
 func (p *defaultPkiClient) CreateRootCert(info *x509.CertificateRequest, parentId string) (string, error) {
-	return p.pkiClient.CreateRootCert(info, 50*365, parentId)
+	return p.pkiClient.CreateRootCert(info, p.cfg.PKI.RootDuration, parentId)
 }
 
 func (p *defaultPkiClient) GetRootCert(certId string) ([]byte, error) {
@@ -57,7 +57,7 @@ func (p *defaultPkiClient) DeleteRootCert(rootId string) error {
 
 // server cert
 func (p *defaultPkiClient) CreateServerCert(csr []byte, rootId string) (string, error) {
-	return p.pkiClient.CreateSubCert(csr, p.cfg.PKI.Duration, rootId)
+	return p.pkiClient.CreateSubCert(csr, p.cfg.PKI.SubDuration, rootId)
 }
 
 func (p *defaultPkiClient) GetServerCert(certId string) ([]byte, error) {
@@ -70,7 +70,7 @@ func (p *defaultPkiClient) DeleteServerCert(certId string) error {
 
 // client cert
 func (p *defaultPkiClient) CreateClientCert(csr []byte, rootId string) (string, error) {
-	return p.pkiClient.CreateSubCert(csr, p.cfg.PKI.Duration, rootId)
+	return p.pkiClient.CreateSubCert(csr, p.cfg.PKI.SubDuration, rootId)
 }
 
 func (p *defaultPkiClient) GetClientCert(certId string) ([]byte, error) {

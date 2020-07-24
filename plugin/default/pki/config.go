@@ -5,7 +5,8 @@ type CloudConfig struct {
 	PKI struct {
 		RootCAFile    string     `yaml:"rootCAFile" json:"rootCAFile" validate:"nonzero"`
 		RootCAKeyFile string     `yaml:"rootCAKeyFile" json:"rootCAKeyFile" validate:"nonzero"`
-		Duration      int        `yaml:"duration" json:"duration" default:"7300"`
+		SubDuration   int        `yaml:"subDuration" json:"subDuration" default:"7300"`
+		RootDuration  int        `yaml:"rootDuration" json:"rootDuration" default:"18250"`
 		Persistent    Persistent `yaml:"persistent" json:"persistent" validate:"nonzero"`
 	} `yaml:"defaultpki" json:"defaultpki"`
 }
