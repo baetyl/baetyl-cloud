@@ -5,8 +5,6 @@ import (
 	"github.com/baetyl/baetyl-cloud/models"
 )
 
-// TODO: optimize this layer, general abstraction
-
 func (api *API) CreateProperty(c *common.Context) (interface{}, error) {
 	property := &models.Property{}
 	err := c.LoadBody(property)
@@ -27,7 +25,11 @@ func (api *API) ListProperty(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	params.Format()
-	properties, count, err := api.propertyService.ListProperty(params)
+	properties, err := api.propertyService.ListProperty(params)
+	if err != nil {
+		return api.packageMisResponse(err)
+	}
+	count, err := api.propertyService.CountProperty(params.Name)
 	if err != nil {
 		return api.packageMisResponse(err)
 	}
@@ -53,8 +55,12 @@ func (api *API) UpdateProperty(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) packageMisResponse(err error) (interface{}, error) {
+	var res models.MisResponse
 	if err != nil {
-		return models.FailureMisResponse, err
+		res = models.MisResponseFailure
+		res.Msg = err.Error()
+	}else{
+		res = models.MisResponseSuccess
 	}
-	return models.SuccessMisResponse, err
+	return res, nil
 }

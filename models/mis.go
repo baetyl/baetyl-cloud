@@ -10,11 +10,10 @@ type MisResponse struct {
 	Data   MisData `json:"data,omitempty"`
 }
 
-var FailureMisResponse = MisResponse{
+var MisResponseFailure = MisResponse{
 	Status: "1",
-	Msg:    "failure",
 }
-var SuccessMisResponse = MisResponse{
+var MisResponseSuccess = MisResponse{
 	Status: "0",
 	Msg:    "ok",
 }

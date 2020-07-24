@@ -25,7 +25,6 @@ func initPropertyAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		property := v1.Group("/properties")
 
 		property.GET("", mockIM, common.Wrapper(api.ListProperty))
-
 		property.POST("", mockIM, common.Wrapper(api.CreateProperty))
 		property.DELETE("/:key", mockIM, common.Wrapper(api.DeleteProperty))
 		property.PUT("/:key", mockIM, common.Wrapper(api.UpdateProperty))
@@ -86,7 +85,8 @@ func TestListProperty(t *testing.T) {
 		PageSize: 2,
 		Name:     "%",
 	}
-	rs.EXPECT().ListProperty(page).Return([]models.Property{*mConf}, 1, nil)
+	rs.EXPECT().ListProperty(page).Return([]models.Property{*mConf}, nil).Times(1)
+	rs.EXPECT().CountProperty(page.Name).Return(1, nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/properties?pageNo=1&pageSize=2", nil)
 	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")

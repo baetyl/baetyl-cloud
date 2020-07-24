@@ -58,14 +58,14 @@ func TestProperty(t *testing.T) {
 		PageSize: 2,
 		Name:     "%",
 	}
-	properties, count, err := db.ListProperty(page)
+	properties, err := db.ListProperty(page)
 	assert.NoError(t, err)
-	assert.Equal(t, count, 1)
 	checkProperty(t, property, &properties[0])
+	count, err := db.CountProperty(page.Name)
+	assert.Equal(t, count, 1)
 
 	err = db.DeleteProperty(property.Key)
 	assert.NoError(t, err)
-
 }
 
 func checkProperty(t *testing.T, expect, actual *models.Property) {

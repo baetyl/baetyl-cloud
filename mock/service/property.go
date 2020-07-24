@@ -77,19 +77,33 @@ func (mr *MockPropertyServiceMockRecorder) GetProperty(key interface{}) *gomock.
 }
 
 // ListProperty mocks base method.
-func (m *MockPropertyService) ListProperty(page *models.Filter) ([]models.Property, int, error) {
+func (m *MockPropertyService) ListProperty(page *models.Filter) ([]models.Property, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListProperty", page)
 	ret0, _ := ret[0].([]models.Property)
-	ret1, _ := ret[1].(int)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // ListProperty indicates an expected call of ListProperty.
 func (mr *MockPropertyServiceMockRecorder) ListProperty(page interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProperty", reflect.TypeOf((*MockPropertyService)(nil).ListProperty), page)
+}
+
+// CountProperty mocks base method.
+func (m *MockPropertyService) CountProperty(key string) (int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountProperty", key)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountProperty indicates an expected call of CountProperty.
+func (mr *MockPropertyServiceMockRecorder) CountProperty(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountProperty", reflect.TypeOf((*MockPropertyService)(nil).CountProperty), key)
 }
 
 // UpdateProperty mocks base method.

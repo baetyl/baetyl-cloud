@@ -231,14 +231,15 @@ func (s *MisServer) authHandler(c *gin.Context) {
 
 	token := c.Request.Header.Get(s.cfg.MisServer.TokenHeader)
 	if strings.Compare(token, s.cfg.MisServer.AuthToken) != 0 {
-		err := common.Error(common.ErrMisTokenForbidden, common.Field("error", common.Code(common.ErrMisTokenForbidden)))
-		log.L().Error(common.Code(common.ErrMisTokenForbidden).String(), log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
+		err := common.Error(common.ErrRequestAccessDenied, common.Field("error", common.Code(common.ErrRequestAccessDenied)))
+		log.L().Error(common.Code(common.ErrRequestAccessDenied).String(), log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
 		common.PopulateFailedResponse(cc, err, true)
+		return
 	}
 	user := c.Request.Header.Get(s.cfg.MisServer.UserHeader)
 	if len(user) == 0 {
-		err := common.Error(common.ErrMisUserNotFound, common.Field("error", common.Code(common.ErrMisUserNotFound)))
-		log.L().Error(common.Code(common.ErrMisUserNotFound).String(), log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
+		err := common.Error(common.ErrRequestAccessDenied, common.Field("error", common.Code(common.ErrRequestAccessDenied)))
+		log.L().Error(common.Code(common.ErrRequestAccessDenied).String(), log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
 		common.PopulateFailedResponse(cc, err, true)
 	}
 }
