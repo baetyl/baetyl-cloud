@@ -63,9 +63,9 @@ func TestDefaultValue(t *testing.T) {
 	expect.MisServer.WriteTimeout = time.Second * 30
 	expect.MisServer.ReadTimeout = time.Second * 30
 	expect.MisServer.ShutdownTime = time.Second * 3
-	expect.MisServer.AuthToken = "test_token_123"
-	expect.MisServer.TokenHeader = "amis_token"
-	expect.MisServer.UserHeader = "amis_user"
+	expect.MisServer.AuthToken = "baetyl-cloud-token"
+	expect.MisServer.TokenHeader = "baetyl-cloud-token"
+	expect.MisServer.UserHeader = "baetyl-cloud-user"
 
 	expect.LogInfo.Level = "info"
 	expect.LogInfo.MaxAge = 15

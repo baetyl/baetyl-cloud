@@ -29,23 +29,16 @@ func (d *dbStorage) GetProperty(key string) (*models.Property, error) {
 	return d.queryPropertyTx(nil, key)
 }
 
-func (d *dbStorage) ListProperty(page *models.Filter) (*models.MisResponse, error) {
+func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, int, error) {
 	properties, err := d.listPropertyTx(nil, page.Name, page.PageNo, page.PageSize)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	count, err := d.countPropertyTx(nil, page.Name)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return &models.MisResponse{
-		Status: "0",
-		Msg:    "ok",
-		Data: models.MisData{
-			Count: count,
-			Rows:  properties,
-		},
-	}, nil
+	return properties, count, nil
 }
 
 func (d *dbStorage) UpdateProperty(property *models.Property) (*models.Property, error) {

@@ -146,7 +146,7 @@ var templates = map[Code]string{
 	// * third server error
 	ErrThirdServer: "Third server {{if .name}}({{.name}}){{end}} error.{{if .error}} ({{.error}}){{end}}",
 
-	// * amis
+	// * mis
 	ErrMisTokenForbidden: "The mis token is forbidden.",
 	ErrMisUserNotFound:   "The mis user is not found.",
 }

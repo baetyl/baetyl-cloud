@@ -33,21 +33,6 @@ func (m *MockProperty) EXPECT() *MockPropertyMockRecorder {
 	return m.recorder
 }
 
-// GetProperty mocks base method.
-func (m *MockProperty) GetProperty(key string) (*models.Property, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProperty", key)
-	ret0, _ := ret[0].(*models.Property)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetProperty indicates an expected call of GetProperty.
-func (mr *MockPropertyMockRecorder) GetProperty(key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProperty", reflect.TypeOf((*MockProperty)(nil).GetProperty), key)
-}
-
 // CreateProperty mocks base method.
 func (m *MockProperty) CreateProperty(property *models.Property) (*models.Property, error) {
 	m.ctrl.T.Helper()
@@ -61,21 +46,6 @@ func (m *MockProperty) CreateProperty(property *models.Property) (*models.Proper
 func (mr *MockPropertyMockRecorder) CreateProperty(property interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProperty", reflect.TypeOf((*MockProperty)(nil).CreateProperty), property)
-}
-
-// UpdateProperty mocks base method.
-func (m *MockProperty) UpdateProperty(kproperty *models.Property) (*models.Property, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateProperty", kproperty)
-	ret0, _ := ret[0].(*models.Property)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateProperty indicates an expected call of UpdateProperty.
-func (mr *MockPropertyMockRecorder) UpdateProperty(kproperty interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProperty", reflect.TypeOf((*MockProperty)(nil).UpdateProperty), kproperty)
 }
 
 // DeleteProperty mocks base method.
@@ -92,19 +62,50 @@ func (mr *MockPropertyMockRecorder) DeleteProperty(key interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProperty", reflect.TypeOf((*MockProperty)(nil).DeleteProperty), key)
 }
 
-// ListProperty mocks base method.
-func (m *MockProperty) ListProperty(page *models.Filter) (*models.MisResponse, error) {
+// GetProperty mocks base method.
+func (m *MockProperty) GetProperty(key string) (*models.Property, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListProperty", page)
-	ret0, _ := ret[0].(*models.MisResponse)
+	ret := m.ctrl.Call(m, "GetProperty", key)
+	ret0, _ := ret[0].(*models.Property)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
+}
+
+// GetProperty indicates an expected call of GetProperty.
+func (mr *MockPropertyMockRecorder) GetProperty(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProperty", reflect.TypeOf((*MockProperty)(nil).GetProperty), key)
+}
+
+// ListProperty mocks base method.
+func (m *MockProperty) ListProperty(page *models.Filter) ([]models.Property, int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListProperty", page)
+	ret0, _ := ret[0].([]models.Property)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // ListProperty indicates an expected call of ListProperty.
 func (mr *MockPropertyMockRecorder) ListProperty(page interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProperty", reflect.TypeOf((*MockProperty)(nil).ListProperty), page)
+}
+
+// UpdateProperty mocks base method.
+func (m *MockProperty) UpdateProperty(property *models.Property) (*models.Property, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateProperty", property)
+	ret0, _ := ret[0].(*models.Property)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateProperty indicates an expected call of UpdateProperty.
+func (mr *MockPropertyMockRecorder) UpdateProperty(property interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProperty", reflect.TypeOf((*MockProperty)(nil).UpdateProperty), property)
 }
 
 // Close mocks base method.

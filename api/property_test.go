@@ -52,8 +52,8 @@ func TestCreateProperty(t *testing.T) {
 
 	body, _ := json.Marshal(property)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/properties", bytes.NewReader(body))
-	req.Header.Set("amis_token", "test_token_123")
-	req.Header.Set("amis_user", "1")
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -69,8 +69,8 @@ func TestDeleteProperty(t *testing.T) {
 	rs.EXPECT().DeleteProperty(gomock.Any()).Return(nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/properties/"+property.Key, nil)
-	req.Header.Set("amis_token", "test_token_123")
-	req.Header.Set("amis_user", "1")
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -86,8 +86,8 @@ func TestGetProperty(t *testing.T) {
 	rs.EXPECT().GetProperty(property.Key).Return(property, nil).Times(2)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/properties/"+property.Key, nil)
-	req.Header.Set("amis_token", "test_token_123")
-	req.Header.Set("amis_user", "1")
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -99,25 +99,16 @@ func TestListProperty(t *testing.T) {
 	api.propertyService = rs
 
 	mConf := genProperty()
-
 	page := &models.Filter{
 		PageNo:   1,
 		PageSize: 2,
 		Name:     "%",
 	}
-	rs.EXPECT().ListProperty(page).Return(
-		&models.MisResponse{
-			Status: "0",
-			Msg:    "ok",
-			Data: models.MisData{
-				Count: 1,
-				Rows:  mConf,
-			},
-		}, nil)
+	rs.EXPECT().ListProperty(page).Return([]models.Property{*mConf}, 1, nil)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/properties?pageNo=1&pageSize=2", nil)
-	req.Header.Set("amis_token", "test_token_123")
-	req.Header.Set("amis_user", "1")
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -135,8 +126,8 @@ func TestUpdateProperty(t *testing.T) {
 
 	body, _ := json.Marshal(property)
 	req, _ := http.NewRequest(http.MethodPut, "/v1/properties/"+property.Key, bytes.NewReader(body))
-	req.Header.Set("amis_token", "test_token_123")
-	req.Header.Set("amis_user", "1")
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)

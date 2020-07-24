@@ -59,9 +59,10 @@ func TestProperty(t *testing.T) {
 		PageSize: 2,
 		Name:     "%",
 	}
-	resPropertyListView, err := db.ListProperty(page)
+	properties, count, err := db.ListProperty(page)
 	assert.NoError(t, err)
-	checkProperty(t, property, &resPropertyListView.Data.Rows.([]models.Property)[0])
+	assert.Equal(t, count, 1)
+	checkProperty(t, property, &properties[0])
 
 	err = db.DeleteProperty(property.Key)
 	assert.NoError(t, err)

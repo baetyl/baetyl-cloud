@@ -43,7 +43,18 @@ func (api *API) ListProperty(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	params.Format()
-	return api.propertyService.ListProperty(params)
+	properties, count, err := api.propertyService.ListProperty(params)
+	if err != nil {
+		return api.packageMisResponse(err)
+	}
+	return models.MisResponse{
+		Status: "0",
+		Msg:    "ok",
+		Data: models.MisData{
+			Count: count,
+			Rows:  properties,
+		},
+	}, err
 }
 
 func (api *API) UpdateProperty(c *common.Context) (interface{}, error) {

@@ -12,7 +12,7 @@ type PropertyService interface {
 	CreateProperty(property *models.Property) (*models.Property, error)
 	DeleteProperty(key string) error
 	GetProperty(key string) (*models.Property, error)
-	ListProperty(page *models.Filter) (*models.MisResponse, error) //Pagination
+	ListProperty(page *models.Filter) ([]models.Property, int, error) //Pagination
 	UpdateProperty(property *models.Property) (*models.Property, error)
 }
 
@@ -45,7 +45,7 @@ func (s *propertyService) GetProperty(key string) (*models.Property, error) {
 	return s.dbStorage.GetProperty(key)
 }
 
-func (s *propertyService) ListProperty(page *models.Filter) (*models.MisResponse, error) {
+func (s *propertyService) ListProperty(page *models.Filter) ([]models.Property, int, error) {
 	return s.dbStorage.ListProperty(page)
 }
 

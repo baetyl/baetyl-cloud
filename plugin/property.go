@@ -11,7 +11,7 @@ type Property interface {
 	CreateProperty(property *models.Property) (*models.Property, error)
 	DeleteProperty(key string) error
 	GetProperty(key string) (*models.Property, error)
-	ListProperty(page *models.Filter) (*models.MisResponse, error) //Pagination
+	ListProperty(page *models.Filter) ([]models.Property, int, error) //Pagination
 	UpdateProperty(property *models.Property) (*models.Property, error)
 
 	io.Closer

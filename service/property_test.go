@@ -68,21 +68,14 @@ func TestListProperty(t *testing.T) {
 		PageSize: 10,
 		Name:     "%",
 	}
-	mockObject.property.EXPECT().ListProperty(page).Return(
-		&models.MisResponse{
-			Status: "0",
-			Msg:    "ok",
-			Data: models.MisData{
-				Count: 1,
-				Rows:  mConf,
-			},
-		}, nil).Times(1)
+	mockObject.property.EXPECT().ListProperty(page).Return(mConf, 1, nil).Times(1)
 
 	cs, err := NewPropertyService(mockObject.conf)
 	assert.NoError(t, err)
-	res, err := cs.ListProperty(page)
+	res, count, err := cs.ListProperty(page)
 	assert.NoError(t, err)
-	checkProperty(t, &mConf[0], &res.Data.Rows.([]models.Property)[0])
+	assert.Equal(t, count, 1)
+	checkProperty(t, &mConf[0], &res[0])
 }
 
 func TestUpdateProperty(t *testing.T) {

@@ -12,13 +12,10 @@ import (
 
 // MisServer mis server
 type MisServer struct {
-	cfg         *config.CloudConfig
-	router      *gin.Engine
-	server      *http.Server
-	api         *api.API
-	authToken   string
-	tokenHeader string
-	userHeader  string
+	cfg    *config.CloudConfig
+	router *gin.Engine
+	server *http.Server
+	api    *api.API
 }
 
 // NewMisServer create Mis server
@@ -37,20 +34,17 @@ func NewMisServer(config *config.CloudConfig) (*MisServer, error) {
 		MaxHeaderBytes: 1 << 20,
 	}
 	return &MisServer{
-		cfg:         config,
-		router:      router,
-		server:      server,
-		api:         api,
-		authToken:   config.MisServer.AuthToken,
-		tokenHeader: config.MisServer.TokenHeader,
-		userHeader:  config.MisServer.UserHeader,
+		cfg:    config,
+		router: router,
+		server: server,
+		api:    api,
 	}, nil
 }
 
 // Run run server
 func (s *MisServer) Run() {
 	if err := s.server.ListenAndServe(); err != nil {
-		log.L().Info("admin server stopped", log.Error(err))
+		log.L().Info("mis server stopped", log.Error(err))
 	}
 }
 

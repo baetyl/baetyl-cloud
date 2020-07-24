@@ -230,13 +230,13 @@ func (s *MisServer) InitRoute() {
 func (s *MisServer) authHandler(c *gin.Context) {
 	cc := common.NewContext(c)
 
-	token := c.Request.Header.Get(s.tokenHeader)
-	if strings.Compare(token, s.authToken) != 0 {
+	token := c.Request.Header.Get(s.cfg.MisServer.TokenHeader)
+	if strings.Compare(token, s.cfg.MisServer.AuthToken) != 0 {
 		err := common.Error(common.ErrMisTokenForbidden, common.Field("error", common.Code(common.ErrMisTokenForbidden)))
 		log.L().Error(common.Code(common.ErrMisTokenForbidden).String(), log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
 		common.PopulateFailedResponse(cc, err, true)
 	}
-	user := c.Request.Header.Get(s.userHeader)
+	user := c.Request.Header.Get(s.cfg.MisServer.UserHeader)
 	if len(user) == 0 {
 		err := common.Error(common.ErrMisUserNotFound, common.Field("error", common.Code(common.ErrMisUserNotFound)))
 		log.L().Error(common.Code(common.ErrMisUserNotFound).String(), log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
