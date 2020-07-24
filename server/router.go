@@ -219,7 +219,6 @@ func (s *MisServer) InitRoute() {
 
 		cache.POST("", common.Wrapper(s.api.CreateProperty))
 		cache.DELETE("/:key", common.Wrapper(s.api.DeleteProperty))
-		cache.GET("/:key", common.Wrapper(s.api.GetProperty))
 		cache.GET("", common.Wrapper(s.api.ListProperty))
 		cache.PUT("/:key", common.Wrapper(s.api.UpdateProperty))
 	}

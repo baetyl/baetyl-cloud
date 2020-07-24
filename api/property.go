@@ -21,21 +21,6 @@ func (api *API) DeleteProperty(c *common.Context) (interface{}, error) {
 	return api.packageMisResponse(err)
 }
 
-func (api *API) GetProperty(c *common.Context) (interface{}, error) {
-	property, err := api.propertyService.GetProperty(c.Param("key"))
-	if err != nil {
-		return api.packageMisResponse(err)
-	}
-	return models.MisResponse{
-		Status: "0",
-		Msg:    "ok",
-		Data: models.MisData{
-			Count: 1,
-			Rows:  []models.Property{*property},
-		},
-	}, nil
-}
-
 func (api *API) ListProperty(c *common.Context) (interface{}, error) {
 	params := &models.Filter{}
 	if err := c.Bind(params); err != nil {

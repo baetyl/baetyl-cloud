@@ -76,23 +76,6 @@ func TestDeleteProperty(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-func TestGetProperty(t *testing.T) {
-	api, router, ctl := initPropertyAPI(t)
-	rs := plugin.NewMockPropertyService(ctl)
-	api.propertyService = rs
-
-	property := genProperty()
-
-	rs.EXPECT().GetProperty(property.Key).Return(property, nil).Times(2)
-
-	req, _ := http.NewRequest(http.MethodGet, "/v1/properties/"+property.Key, nil)
-	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
-	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-}
-
 func TestListProperty(t *testing.T) {
 	api, router, ctl := initPropertyAPI(t)
 	rs := plugin.NewMockPropertyService(ctl)
