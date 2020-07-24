@@ -39,14 +39,13 @@ func TestProperty(t *testing.T) {
 	assert.NoError(t, err)
 	db.MockCreatePropertyTable()
 
-	_, err = db.CreateProperty(property)
+	err = db.CreateProperty(property)
 	assert.NoError(t, err)
 
 	newValue := "updated_" + property.Value
 	property.Value = newValue
-	updatedProperty, err := db.UpdateProperty(property)
+	err = db.UpdateProperty(property)
 	assert.NoError(t, err)
-	assert.Equal(t, newValue, updatedProperty.Value)
 
 	getProperty, err := db.GetProperty(property.Key)
 	assert.NoError(t, err)

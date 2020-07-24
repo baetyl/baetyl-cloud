@@ -48,7 +48,7 @@ func TestCreateProperty(t *testing.T) {
 
 	property := genProperty()
 
-	rs.EXPECT().CreateProperty(property).Return(nil, nil).Times(1)
+	rs.EXPECT().CreateProperty(property).Return(nil).Times(1)
 
 	body, _ := json.Marshal(property)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/properties", bytes.NewReader(body))
@@ -122,7 +122,7 @@ func TestUpdateProperty(t *testing.T) {
 	property := genProperty()
 
 	rs.EXPECT().GetProperty(property.Key).Return(nil, nil).Times(1)
-	rs.EXPECT().UpdateProperty(property).Return(nil, nil).Times(1)
+	rs.EXPECT().UpdateProperty(property).Return(nil).Times(1)
 
 	body, _ := json.Marshal(property)
 	req, _ := http.NewRequest(http.MethodPut, "/v1/properties/"+property.Key, bytes.NewReader(body))

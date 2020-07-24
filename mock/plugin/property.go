@@ -34,12 +34,11 @@ func (m *MockProperty) EXPECT() *MockPropertyMockRecorder {
 }
 
 // CreateProperty mocks base method.
-func (m *MockProperty) CreateProperty(property *models.Property) (*models.Property, error) {
+func (m *MockProperty) CreateProperty(property *models.Property) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateProperty", property)
-	ret0, _ := ret[0].(*models.Property)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // CreateProperty indicates an expected call of CreateProperty.
@@ -94,12 +93,11 @@ func (mr *MockPropertyMockRecorder) ListProperty(page interface{}) *gomock.Call 
 }
 
 // UpdateProperty mocks base method.
-func (m *MockProperty) UpdateProperty(property *models.Property) (*models.Property, error) {
+func (m *MockProperty) UpdateProperty(property *models.Property) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateProperty", property)
-	ret0, _ := ret[0].(*models.Property)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // UpdateProperty indicates an expected call of UpdateProperty.

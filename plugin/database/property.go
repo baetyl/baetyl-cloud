@@ -7,17 +7,11 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func (d *dbStorage) CreateProperty(property *models.Property) (*models.Property, error) {
-	var pro *models.Property
-	err := d.Transact(func(tx *sqlx.Tx) error {
+func (d *dbStorage) CreateProperty(property *models.Property) error {
+	return d.Transact(func(tx *sqlx.Tx) error {
 		_, err := d.insertPropertyTx(tx, property)
-		if err != nil {
-			return err
-		}
-		pro, err = d.queryPropertyTx(tx, property.Key)
 		return err
 	})
-	return pro, err
 }
 
 func (d *dbStorage) DeleteProperty(key string) error {
@@ -41,24 +35,18 @@ func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, int, e
 	return properties, count, nil
 }
 
-func (d *dbStorage) UpdateProperty(property *models.Property) (*models.Property, error) {
-	var pro *models.Property
-	err := d.Transact(func(tx *sqlx.Tx) error {
+func (d *dbStorage) UpdateProperty(property *models.Property) error {
+	return d.Transact(func(tx *sqlx.Tx) error {
 		_, err := d.updatePropertyTx(tx, property)
-		if err != nil {
-			return err
-		}
-		pro, err = d.queryPropertyTx(tx, property.Key)
 		return err
 	})
-	return pro, err
 }
 
 func (d *dbStorage) insertPropertyTx(tx *sqlx.Tx, property *models.Property) (sql.Result, error) {
 	insertSQL := "INSERT INTO baetyl_property(`key`, value) VALUES(?,?)"
 	_, err := d.exec(tx, insertSQL, property.Key, property.Value)
 	if err != nil {
-		return nil, common.Error(common.ErrDatabase, common.Field("error", "key existed"))
+		return nil, common.Error(common.ErrDatabase, common.Field("error", "data existed"))
 	}
 	return nil, err
 }

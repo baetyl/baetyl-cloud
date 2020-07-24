@@ -19,13 +19,12 @@ func TestCreateProperty(t *testing.T) {
 	defer mockObject.Close()
 	mConf := genPropertyTestCase()
 
-	mockObject.property.EXPECT().CreateProperty(mConf).Return(mConf, nil).Times(1)
+	mockObject.property.EXPECT().CreateProperty(mConf).Return(nil).Times(1)
 
 	cs, err := NewPropertyService(mockObject.conf)
 	assert.NoError(t, err)
-	res, err := cs.CreateProperty(mConf)
+	err = cs.CreateProperty(mConf)
 	assert.NoError(t, err)
-	checkProperty(t, res, mConf)
 }
 
 func TestDeleteProperty(t *testing.T) {
@@ -83,13 +82,12 @@ func TestUpdateProperty(t *testing.T) {
 	defer mockObject.Close()
 	mConf := genPropertyTestCase()
 
-	mockObject.property.EXPECT().UpdateProperty(mConf).Return(mConf, nil).Times(1)
+	mockObject.property.EXPECT().UpdateProperty(mConf).Return(nil).Times(1)
 
 	cs, err := NewPropertyService(mockObject.conf)
 	assert.NoError(t, err)
-	res, err := cs.UpdateProperty(mConf)
+	err = cs.UpdateProperty(mConf)
 	assert.NoError(t, err)
-	checkProperty(t, res, mConf)
 }
 
 func checkProperty(t *testing.T, expect, actual *models.Property) {

@@ -8,11 +8,11 @@ import (
 //go:generate mockgen -destination=../mock/plugin/cache.go -package=plugin github.com/baetyl/baetyl-cloud/plugin Property
 
 type Property interface {
-	CreateProperty(property *models.Property) (*models.Property, error)
+	CreateProperty(property *models.Property) error
 	DeleteProperty(key string) error
 	GetProperty(key string) (*models.Property, error)
 	ListProperty(page *models.Filter) ([]models.Property, int, error) //Pagination
-	UpdateProperty(property *models.Property) (*models.Property, error)
+	UpdateProperty(property *models.Property) error
 
 	io.Closer
 }

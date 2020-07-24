@@ -10,10 +10,9 @@ import (
 func (api *API) CreateProperty(c *common.Context) (interface{}, error) {
 	property := &models.Property{}
 	err := c.LoadBody(property)
-	if err != nil {
-		return api.packageMisResponse(err)
+	if err == nil {
+		err = api.propertyService.CreateProperty(property)
 	}
-	_, err = api.propertyService.CreateProperty(property)
 	return api.packageMisResponse(err)
 }
 
@@ -34,7 +33,7 @@ func (api *API) GetProperty(c *common.Context) (interface{}, error) {
 			Count: 1,
 			Rows:  []models.Property{*property},
 		},
-	}, err
+	}, nil
 }
 
 func (api *API) ListProperty(c *common.Context) (interface{}, error) {
@@ -54,7 +53,7 @@ func (api *API) ListProperty(c *common.Context) (interface{}, error) {
 			Count: count,
 			Rows:  properties,
 		},
-	}, err
+	}, nil
 }
 
 func (api *API) UpdateProperty(c *common.Context) (interface{}, error) {
@@ -62,10 +61,9 @@ func (api *API) UpdateProperty(c *common.Context) (interface{}, error) {
 		Key: c.Param("key"),
 	}
 	err := c.LoadBody(property)
-	if err != nil {
-		return api.packageMisResponse(err)
+	if err == nil {
+		err = api.propertyService.UpdateProperty(property)
 	}
-	_, err = api.propertyService.UpdateProperty(property)
 	return api.packageMisResponse(err)
 }
 
