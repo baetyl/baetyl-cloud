@@ -24,7 +24,6 @@ func initPropertyAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 	{
 		property := v1.Group("/properties")
 
-		property.GET("/:key", mockIM, common.Wrapper(api.GetProperty))
 		property.GET("", mockIM, common.Wrapper(api.ListProperty))
 
 		property.POST("", mockIM, common.Wrapper(api.CreateProperty))
