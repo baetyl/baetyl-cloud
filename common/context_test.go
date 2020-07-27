@@ -226,3 +226,69 @@ func (s *stringReaderCloser) Read(p []byte) (n int, err error) {
 func (s *stringReaderCloser) Close() error {
 	return nil
 }
+
+func TestWrapperMis(t *testing.T) {
+	test200 := func(c *Context) (interface{}, error) {
+		return nil, nil
+	}
+	test404 := func(c *Context) (interface{}, error) {
+		return nil, Error(ErrResourceNotFound, Field("name", "test"))
+	}
+
+	test401 := func(c *Context) (interface{}, error) {
+		return nil, Error(ErrRequestAccessDenied)
+	}
+	test400 := func(c *Context) (interface{}, error) {
+		return nil, Error(ErrRequestParamInvalid)
+	}
+
+	testPanic := func(c *Context) (interface{}, error) {
+		panic("panic test")
+	}
+	router := gin.Default()
+	router.GET("/200", WrapperMis(test200))
+	router.GET("/404", WrapperMis(test404))
+	router.GET("/400", WrapperMis(test400))
+	router.GET("/401", WrapperMis(test401))
+	router.GET("/panic", WrapperMis(testPanic))
+
+	// 200
+	req, _ := http.NewRequest(http.MethodGet, "/200", nil)
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
+	w1 := httptest.NewRecorder()
+	router.ServeHTTP(w1, req)
+	assert.Equal(t, http.StatusOK, w1.Code)
+
+	// 400
+	req, _ = http.NewRequest(http.MethodGet, "/404", nil)
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
+	w2 := httptest.NewRecorder()
+	router.ServeHTTP(w2, req)
+	assert.Equal(t, http.StatusOK, w2.Code)
+
+	// 500
+	req, _ = http.NewRequest(http.MethodGet, "/panic", nil)
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
+	w3 := httptest.NewRecorder()
+	router.ServeHTTP(w3, req)
+	assert.Equal(t, http.StatusOK, w3.Code)
+
+	// 401
+	req, _ = http.NewRequest(http.MethodGet, "/401", nil)
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
+	w4 := httptest.NewRecorder()
+	router.ServeHTTP(w4, req)
+	assert.Equal(t, http.StatusOK, w4.Code)
+
+	// 400
+	req, _ = http.NewRequest(http.MethodGet, "/400", nil)
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
+	w5 := httptest.NewRecorder()
+	router.ServeHTTP(w5, req)
+	assert.Equal(t, http.StatusOK, w5.Code)
+}

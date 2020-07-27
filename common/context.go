@@ -9,7 +9,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/gin-gonic/gin"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -249,7 +249,7 @@ func PopulateFailedMisResponse(cc *Context, err error, abort bool) {
 	if abort {
 		cc.AbortWithStatusJSON(status, body)
 	} else {
-		cc.JSON(status, body) //
+		cc.JSON(status, body)
 	}
 }
 
