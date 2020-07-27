@@ -12,10 +12,8 @@ github.com/abiosoft/ishell v2.0.0+incompatible/go.mod h1:HQR9AqF2R3P4XXpMpI0NAzg
 github.com/abiosoft/readline v0.0.0-20180607040430-155bce2042db/go.mod h1:rB3B4rKii8V21ydCbIzH5hZiCQE7f5E9SzUb/ZZx530=
 github.com/aws/aws-sdk-go v1.32.8 h1:ULxiQqR1eZ+k2/1gqv3GYAjkunlS7ncVU2eL801t08M=
 github.com/aws/aws-sdk-go v1.32.8/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
-github.com/baetyl/baetyl-go v0.1.83 h1:LOfjRCsZDFWZY+Hm2MhhqKsCXn7KLlnP/N7wgcKU3zM=
 github.com/baetyl/baetyl-go/v2 v2.0.4 h1:wVQcPiW1MRMjc82LcrRGk03ztKjpYVlQb/gJnEAmBQs=
 github.com/baetyl/baetyl-go/v2 v2.0.4/go.mod h1:54GtSwbklxG6DlPjQVrtCGH5irBeMdreMRi8imJNKV8=
-github.com/baetyl/baetyl-go/v2 v2.0.8 h1:EnoAcQQPyK+rwysOwBT1iet/gT3nWbMVIT+ZagsnXJs=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/bradfitz/gomemcache v0.0.0-20170208213004-1952afaa557d/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=
 github.com/bradfitz/gomemcache v0.0.0-20180710155616-bc664df96737 h1:rRISKWyXfVxvoa702s91Zl5oREZTrR3yv+tXrrX7G/g=
