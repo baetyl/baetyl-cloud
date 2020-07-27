@@ -234,10 +234,18 @@ func (s *MisServer) authHandler(c *gin.Context) {
 	if strings.Compare(token, s.cfg.MisServer.AuthToken) == 0 {
 		user := c.Request.Header.Get(s.cfg.MisServer.UserHeader)
 		if len(user) != 0 {
+			log.L().Info("mis server accessed",
+				log.Any("user", user),
+				log.Any(cc.GetTrace()),
+			)
 			return
 		}
 	}
 	err := common.Error(common.ErrRequestAccessDenied, common.Field("error", common.Code(common.ErrRequestAccessDenied)))
-	log.L().Error(common.Code(common.ErrRequestAccessDenied).String(), log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
+	log.L().Error(common.Code(common.ErrRequestAccessDenied).String(),
+		log.Any(cc.GetTrace()),
+		log.Code(err),
+		log.Error(err),
+	)
 	common.PopulateFailedResponse(cc, err, true)
 }
