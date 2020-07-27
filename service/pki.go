@@ -58,18 +58,18 @@ func NewPKIService(config *config.CloudConfig) (PKIService, error) {
 }
 
 func (p *pkiService) GetCA() ([]byte, error) {
-	// 先判断系统配置中是否存在
-	sysConf, _ := p.db.GetSysConfig(Certificate, CertRoot)
-	if sysConf != nil {
+	// determine whether it exists in the system configuration
+	sysConf, err := p.db.GetSysConfig(Certificate, CertRoot)
+	if err == nil {
 		return p.pki.GetRootCert(sysConf.Value)
 	}
-	// 系统配置中不存在则向 pki 服务申请创建根证书
+	// if it does not exist in the system configuration, apply to the pki service to create a root certificate
 	certInfo := p.genDefaultCSR("baetyl.ca")
 	rootId, err := p.pki.CreateRootCert(certInfo, "")
 	if err != nil {
 		return nil, err
 	}
-	// 将申请的根证书保存到系统配置中
+	// save the applied root certificate to the system configuration
 	rootCertConfig := &models.SysConfig{
 		Type:  Certificate,
 		Key:   CertRoot,

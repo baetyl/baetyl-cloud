@@ -2,6 +2,7 @@ package pki
 
 import (
 	"crypto/x509"
+
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-cloud/plugin"
 	"github.com/baetyl/baetyl-go/v2/pki"
@@ -39,11 +40,15 @@ func NewPKI() (plugin.Plugin, error) {
 
 // root cert
 func (p *defaultPkiClient) CreateRootCert(info *x509.CertificateRequest, parentId string) (string, error) {
-	return p.pkiClient.CreateRootCert(info, parentId)
+	return p.pkiClient.CreateRootCert(info, p.cfg.PKI.RootDuration, parentId)
 }
 
-func (p *defaultPkiClient) GetRootCert(rootId string) ([]byte, error) {
-	return p.pkiClient.GetCert(rootId)
+func (p *defaultPkiClient) GetRootCert(certId string) ([]byte, error) {
+	ca, err := p.pkiClient.GetRootCert(certId)
+	if err != nil {
+		return nil, err
+	}
+	return ca.Crt, nil
 }
 
 func (p *defaultPkiClient) DeleteRootCert(rootId string) error {
@@ -52,11 +57,11 @@ func (p *defaultPkiClient) DeleteRootCert(rootId string) error {
 
 // server cert
 func (p *defaultPkiClient) CreateServerCert(csr []byte, rootId string) (string, error) {
-	return p.pkiClient.CreateSubCert(csr, rootId)
+	return p.pkiClient.CreateSubCert(csr, p.cfg.PKI.SubDuration, rootId)
 }
 
 func (p *defaultPkiClient) GetServerCert(certId string) ([]byte, error) {
-	return p.pkiClient.GetCert(certId)
+	return p.pkiClient.GetSubCert(certId)
 }
 
 func (p *defaultPkiClient) DeleteServerCert(certId string) error {
@@ -65,11 +70,11 @@ func (p *defaultPkiClient) DeleteServerCert(certId string) error {
 
 // client cert
 func (p *defaultPkiClient) CreateClientCert(csr []byte, rootId string) (string, error) {
-	return p.pkiClient.CreateSubCert(csr, rootId)
+	return p.pkiClient.CreateSubCert(csr, p.cfg.PKI.SubDuration, rootId)
 }
 
 func (p *defaultPkiClient) GetClientCert(certId string) ([]byte, error) {
-	return p.pkiClient.GetCert(certId)
+	return p.pkiClient.GetSubCert(certId)
 }
 
 func (p *defaultPkiClient) DeleteClientCert(certId string) error {

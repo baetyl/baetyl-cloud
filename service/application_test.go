@@ -1,17 +1,16 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 
+	ms "github.com/baetyl/baetyl-cloud/mock/service"
 	"github.com/baetyl/baetyl-cloud/models"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-
-	"encoding/json"
-	ms "github.com/baetyl/baetyl-cloud/mock/service"
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-	"time"
 )
 
 func genAppTestCase() (*specV1.Application, *specV1.Application) {
