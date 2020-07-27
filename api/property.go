@@ -5,46 +5,48 @@ import (
 	"github.com/baetyl/baetyl-cloud/models"
 )
 
-func (api *API) CreateProperty(c *common.Context) (interface{}, error) {
+func (api *API) CreateProperty(c *common.Context) error {
 	property := &models.Property{}
 	err := c.LoadBody(property)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return nil, api.propertyService.CreateProperty(property)
+	return api.propertyService.CreateProperty(property)
 }
 
-func (api *API) DeleteProperty(c *common.Context) (interface{}, error) {
-	return nil, api.propertyService.DeleteProperty(c.Param("key"))
+func (api *API) DeleteProperty(c *common.Context) error {
+	return api.propertyService.DeleteProperty(c.Param("key"))
 }
 
-func (api *API) ListProperty(c *common.Context) (interface{}, error) {
+func (api *API) ListProperty(c *common.Context) error {
 	params := &models.Filter{}
 	if err := c.Bind(params); err != nil {
-		return nil, err
+		return err
 	}
 	params.Format()
 	properties, err := api.propertyService.ListProperty(params)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	count, err := api.propertyService.CountProperty(params.Name)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return models.MisData{
+	res := models.MisData{
 		Count: count,
 		Rows:  properties,
-	}, nil
+	}
+	c.PureJSON(common.PackageMisResponse(res))
+	return nil
 }
 
-func (api *API) UpdateProperty(c *common.Context) (interface{}, error) {
+func (api *API) UpdateProperty(c *common.Context) error {
 	property := &models.Property{
 		Key: c.Param("key"),
 	}
 	err := c.LoadBody(property)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return nil, api.propertyService.UpdateProperty(property)
+	return api.propertyService.UpdateProperty(property)
 }

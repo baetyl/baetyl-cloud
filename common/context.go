@@ -212,7 +212,10 @@ func _toJsonString(obj interface{}) string {
 	return string(data)
 }
 
-func WrapperMis(handler HandlerFunc) func(c *gin.Context) {
+// MisHandlerFunc MisHandlerFunc
+type MisHandlerFunc func(c *Context) error
+
+func WrapperMis(handler MisHandlerFunc) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		cc := NewContext(c)
 		defer func() {
@@ -225,15 +228,17 @@ func WrapperMis(handler HandlerFunc) func(c *gin.Context) {
 				PopulateFailedMisResponse(cc, err, false)
 			}
 		}()
-		res, err := handler(cc)
+		err := handler(cc)
 		if err != nil {
 			log.L().Error("failed to handler request", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
 			PopulateFailedMisResponse(cc, err, false)
 			return
 		}
-		log.L().Debug("process success", log.Any(cc.GetTrace()), log.Any("response", _toJsonString(res)))
-		// unlike JSON, does not replace special html characters with their unicode entities. eg: JSON(&)->'\u0026' PureJSON(&)->'&'
-		cc.PureJSON(PackageMisResponse(res))
+		log.L().Debug("process success", log.Any(cc.GetTrace()))
+		if cc.Request.Method != "GET" {
+			// unlike JSON, does not replace special html characters with their unicode entities. eg: JSON(&)->'\u0026' PureJSON(&)->'&'
+			cc.PureJSON(PackageMisResponse(nil))
+		}
 	}
 }
 

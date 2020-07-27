@@ -228,21 +228,21 @@ func (s *stringReaderCloser) Close() error {
 }
 
 func TestWrapperMis(t *testing.T) {
-	test200 := func(c *Context) (interface{}, error) {
-		return nil, nil
+	test200 := func(c *Context) error {
+		return nil
 	}
-	test404 := func(c *Context) (interface{}, error) {
-		return nil, Error(ErrResourceNotFound, Field("name", "test"))
-	}
-
-	test401 := func(c *Context) (interface{}, error) {
-		return nil, Error(ErrRequestAccessDenied)
-	}
-	test400 := func(c *Context) (interface{}, error) {
-		return nil, Error(ErrRequestParamInvalid)
+	test404 := func(c *Context) error {
+		return Error(ErrResourceNotFound, Field("name", "test"))
 	}
 
-	testPanic := func(c *Context) (interface{}, error) {
+	test401 := func(c *Context) error {
+		return Error(ErrRequestAccessDenied)
+	}
+	test400 := func(c *Context) error {
+		return Error(ErrRequestParamInvalid)
+	}
+
+	testPanic := func(c *Context) error {
 		panic("panic test")
 	}
 	router := gin.Default()
