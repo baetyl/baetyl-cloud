@@ -29,11 +29,6 @@ func (d *dbStorage) GetProperty(key string) (*models.Property, error) {
 	if len(cs) == 1 {
 		return &cs[0], nil
 	}
-	if len(cs) > 1 {
-		return nil, common.Error(
-			common.ErrDatabase,
-			common.Field("key", key))
-	}
 	return nil, common.Error(
 		common.ErrResourceNotFound,
 		common.Field("key", key))

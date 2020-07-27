@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS `baetyl_property` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ,
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   PRIMARY KEY (`id`),
-  KEY `idx_type_key` (`key`)
+  UNIQUE KEY `idx_type_key` (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System configuration property table';
 
 COMMIT;

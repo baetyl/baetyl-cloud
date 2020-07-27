@@ -2,17 +2,18 @@ package database
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/baetyl/baetyl-cloud/models"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var (
 	propertyTables = []string{
 		"CREATE TABLE baetyl_property(" +
 			"    `id`               integer       PRIMARY KEY AUTOINCREMENT," +
-			"    `key`              varchar(128)  NOT NULL DEFAULT ''," +
-			"    `value`            varchar(2048) NOT NULL DEFAULT '',  " +
+			"    `key`              varchar(128)  UNIQUE NOT NULL DEFAULT ''," +
+			"    `value`            varchar(2048) NOT NULL DEFAULT ''," +
 			"    `create_time`      timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP," +
 			"    `update_time`      timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP);",
 	}
@@ -41,9 +42,11 @@ func TestProperty(t *testing.T) {
 
 	err = db.CreateProperty(property)
 	assert.NoError(t, err)
+	// key existed
+	err = db.CreateProperty(property)
+	assert.Error(t, err)
 
-	newValue := "updated_" + property.Value
-	property.Value = newValue
+	property.Value = "updated_" + property.Value
 	err = db.UpdateProperty(property)
 	assert.NoError(t, err)
 

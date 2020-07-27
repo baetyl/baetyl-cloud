@@ -231,6 +231,7 @@ func TestWrapperMis(t *testing.T) {
 	test200 := func(c *Context) (interface{}, error) {
 		return nil, nil
 	}
+
 	test404 := func(c *Context) (interface{}, error) {
 		return nil, Error(ErrResourceNotFound, Field("name", "test"))
 	}
@@ -262,8 +263,6 @@ func TestWrapperMis(t *testing.T) {
 
 	// 400
 	req, _ = http.NewRequest(http.MethodGet, "/404", nil)
-	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
-	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req)
 	assert.Equal(t, http.StatusOK, w2.Code)

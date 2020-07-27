@@ -251,29 +251,34 @@ func TestHandler_Active(t *testing.T) {
 }
 
 func TestHandler_Mis(t *testing.T) {
-	t.Skip()
-	_, _, _, _, _, mockCtl, c, m := InitMockEnvironment(t)
+	_, _, _, _, _, mockCtl, _, m := InitMockEnvironment(t)
 	defer mockCtl.Finish()
 
-	// https 200
 	m.InitRoute()
+	m.router.Use(m.authHandler)
+	// https 200
 	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "1")
 	w := httptest.NewRecorder()
 	m.GetRoute().ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 	go m.Run()
 	defer m.Close()
 	// http 200
-	c.ActiveServer.Certificate.Key = ""
-	c.ActiveServer.Certificate.Cert = ""
-	mHttp, err := NewMisServer(c)
-	assert.NoError(t, err)
-	mHttp.InitRoute()
-	req, err = http.NewRequest(http.MethodGet, "/health", nil)
-	assert.NoError(t, err)
+	req, _ = http.NewRequest(http.MethodGet, "/health", nil)
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "")
 	w = httptest.NewRecorder()
-	mHttp.GetRoute().ServeHTTP(w, req)
+	m.GetRoute().ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	go mHttp.Run()
-	defer mHttp.Close()
+	go m.Run()
+	defer m.Close()
+	// http 200
+	req, _ = http.NewRequest(http.MethodGet, "/health", nil)
+	w = httptest.NewRecorder()
+	m.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	go m.Run()
+	defer m.Close()
 }
