@@ -32,13 +32,9 @@ func (api *API) ListProperty(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return models.MisResponse{
-		Status: "0",
-		Msg:    "ok",
-		Data: models.MisData{
-			Count: count,
-			Rows:  properties,
-		},
+	return models.MisData{
+		Count: count,
+		Rows:  properties,
 	}, nil
 }
 

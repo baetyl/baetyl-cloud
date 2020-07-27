@@ -9,7 +9,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -255,10 +255,11 @@ func PopulateFailedMisResponse(cc *Context, err error, abort bool) {
 
 func PackageMisResponse(res interface{}) (int, interface{}) {
 	if res == nil {
-		res = gin.H{
-			"status": 0,
-			"msg":    "ok",
-		}
+		res = "[]"
 	}
-	return http.StatusOK, res
+	return http.StatusOK, gin.H{
+		"status": 0,
+		"msg":    "ok",
+		"data":   res,
+	}
 }
