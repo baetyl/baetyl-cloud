@@ -1,10 +1,11 @@
 package server
 
 import (
+	"strings"
+
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/gin-gonic/gin"
-	"strings"
 )
 
 // InitRoute init router
@@ -217,10 +218,10 @@ func (s *MisServer) InitRoute() {
 	{
 		cache := v1.Group("/properties")
 
-		cache.POST("", common.Wrapper(s.api.CreateProperty))
-		cache.DELETE("/:key", common.Wrapper(s.api.DeleteProperty))
-		cache.GET("", common.Wrapper(s.api.ListProperty))
-		cache.PUT("/:key", common.Wrapper(s.api.UpdateProperty))
+		cache.POST("", common.WrapperMis(s.api.CreateProperty))
+		cache.DELETE("/:key", common.WrapperMis(s.api.DeleteProperty))
+		cache.GET("", common.WrapperMis(s.api.ListProperty))
+		cache.PUT("/:key", common.WrapperMis(s.api.UpdateProperty))
 	}
 
 }

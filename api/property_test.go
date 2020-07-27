@@ -24,10 +24,10 @@ func initPropertyAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 	{
 		property := v1.Group("/properties")
 
-		property.GET("", mockIM, common.Wrapper(api.ListProperty))
-		property.POST("", mockIM, common.Wrapper(api.CreateProperty))
-		property.DELETE("/:key", mockIM, common.Wrapper(api.DeleteProperty))
-		property.PUT("/:key", mockIM, common.Wrapper(api.UpdateProperty))
+		property.GET("", mockIM, common.WrapperMis(api.ListProperty))
+		property.POST("", mockIM, common.WrapperMis(api.CreateProperty))
+		property.DELETE("/:key", mockIM, common.WrapperMis(api.DeleteProperty))
+		property.PUT("/:key", mockIM, common.WrapperMis(api.UpdateProperty))
 	}
 	return api, router, mockCtl
 }
