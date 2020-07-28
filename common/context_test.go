@@ -255,8 +255,6 @@ func TestWrapperMis(t *testing.T) {
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/200", nil)
-	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
-	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
 	w1 := httptest.NewRecorder()
 	router.ServeHTTP(w1, req)
 	assert.Equal(t, http.StatusOK, w1.Code)
@@ -269,24 +267,18 @@ func TestWrapperMis(t *testing.T) {
 
 	// 500
 	req, _ = http.NewRequest(http.MethodGet, "/panic", nil)
-	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
-	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
 	w3 := httptest.NewRecorder()
 	router.ServeHTTP(w3, req)
 	assert.Equal(t, http.StatusOK, w3.Code)
 
 	// 401
 	req, _ = http.NewRequest(http.MethodGet, "/401", nil)
-	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
-	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
 	w4 := httptest.NewRecorder()
 	router.ServeHTTP(w4, req)
 	assert.Equal(t, http.StatusOK, w4.Code)
 
 	// 400
 	req, _ = http.NewRequest(http.MethodGet, "/400", nil)
-	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
-	req.Header.Set("baetyl-cloud-user", "baetyl-cloud-user")
 	w5 := httptest.NewRecorder()
 	router.ServeHTTP(w5, req)
 	assert.Equal(t, http.StatusOK, w5.Code)
