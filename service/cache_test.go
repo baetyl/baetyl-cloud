@@ -19,13 +19,13 @@ func TestCacheService(t *testing.T) {
 	}
 	mockObject.property.EXPECT().GetProperty(mConf.Key).Return(mConf, nil).AnyTimes()
 
-	cache, err := NewCacheService(mockObject.property)
+	cache, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
-	res, err := cache.Get(mConf.Key)
+	res, err := cache.Get(mConf.Key, mockObject.property.GetProperty)
 	assert.NoError(t, err)
 	assert.Equal(t, res, mConf.Value)
 	// good case2: get from cache
-	res, err = cache.Get(mConf.Key)
+	res, err = cache.Get(mConf.Key, mockObject.property.GetProperty)
 	assert.NoError(t, err)
 	assert.Equal(t, res, mConf.Value)
 
@@ -35,7 +35,7 @@ func TestCacheService(t *testing.T) {
 		common.ErrResourceNotFound,
 		common.Field("key", key)))
 	assert.NoError(t, err)
-	res, err = cache.Get(key)
+	res, err = cache.Get(key, mockObject.property.GetProperty)
 	assert.Error(t, err)
 
 }

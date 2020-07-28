@@ -92,7 +92,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
-	cacheService, err := service.NewCacheService(propertyService)
+	cacheService, err := service.NewCacheService(config)
 	if err != nil {
 		return nil, err
 	}

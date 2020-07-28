@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/baetyl/baetyl-cloud/config"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/models"
@@ -9,41 +10,29 @@ import (
 
 //go:generate mockgen -destination=../mock/service/cache.go -package=plugin github.com/baetyl/baetyl-cloud/service CacheService
 
-var ExpireDuration = time.Minute * 10
-
-type CacheService interface {
-	Get(key string) (string, error)
-	Set(key, value string) error
+type CacheService struct {
+	cache          persistence.CacheStore
+	expireDuration time.Duration
 }
 
-type cacheService struct {
-	cache           persistence.CacheStore
-	propertyService PropertyService
-}
-
-func NewCacheService(propertyService PropertyService) (CacheService, error) {
-	return &cacheService{
-		cache:           persistence.NewInMemoryStore(ExpireDuration),
-		propertyService: propertyService,
+func NewCacheService(config *config.CloudConfig) (CacheService, error) {
+	return CacheService{
+		cache:          persistence.NewInMemoryStore(config.CacheExpirationDuration),
+		expireDuration: config.CacheExpirationDuration,
 	}, nil
 }
 
-func (c *cacheService) get(GetProperty func(string) (*models.Property, error), key string) (string, error) {
+func (c *CacheService) Get(key string, load func(string) (*models.Property, error)) (string, error) {
 	var value string
 	if err := c.cache.Get(key, &value); err == nil {
 		return value, nil
 	}
-	property, err := GetProperty(key)
+	property, err := load(key)
 	if err != nil {
 		return "", err
 	}
 	return property.Value, c.Set(key, property.Value)
 }
-
-func (c *cacheService) Get(k string) (string, error) {
-	return c.get(c.propertyService.GetProperty, k)
-}
-
-func (c *cacheService) Set(key, value string) error {
-	return c.cache.Set(key, value, ExpireDuration)
+func (c *CacheService) Set(key, value string) error {
+	return c.cache.Set(key, value, c.expireDuration)
 }
