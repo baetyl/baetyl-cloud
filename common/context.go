@@ -233,7 +233,11 @@ func WrapperMis(handler HandlerFunc) func(c *gin.Context) {
 		}
 		log.L().Debug("process success", log.Any(cc.GetTrace()), log.Any("response", _toJsonString(res)))
 		// unlike JSON, does not replace special html characters with their unicode entities. eg: JSON(&)->'\u0026' PureJSON(&)->'&'
-		cc.PureJSON(PackageMisResponse(res))
+		cc.PureJSON(http.StatusOK, gin.H{
+			"status": 0,
+			"msg":    "ok",
+			"data":   res,
+		})
 	}
 }
 
@@ -250,13 +254,5 @@ func PopulateFailedMisResponse(cc *Context, err error, abort bool) {
 		cc.AbortWithStatusJSON(status, body)
 	} else {
 		cc.JSON(status, body)
-	}
-}
-
-func PackageMisResponse(res interface{}) (int, interface{}) {
-	return http.StatusOK, gin.H{
-		"status": 0,
-		"msg":    "ok",
-		"data":   res,
 	}
 }
