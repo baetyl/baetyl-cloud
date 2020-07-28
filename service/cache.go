@@ -30,17 +30,14 @@ func NewCacheService(propertyService PropertyService) (CacheService, error) {
 
 func (c *cacheService) get(GetProperty func(PropertyService, string) (*models.Property, error), propertyService PropertyService, key string) (string, error) {
 	var value string
-	err := c.cache.Get(key, &value)
-	if err != persistence.ErrCacheMiss {
+	if err := c.cache.Get(key, &value); err == nil {
 		return value, nil
 	}
-
 	property, err := GetProperty(propertyService, key)
 	if err != nil {
 		return "", err
 	}
-	err = c.Set(key, property.Value)
-	return property.Value, err
+	return property.Value, c.Set(key, property.Value)
 }
 
 func (c *cacheService) Get(k string) (string, error) {
