@@ -28,12 +28,12 @@ func NewCacheService(propertyService PropertyService) (CacheService, error) {
 	}, nil
 }
 
-func (c *cacheService) get(GetProperty func(PropertyService, string) (*models.Property, error), propertyService PropertyService, key string) (string, error) {
+func (c *cacheService) get(GetProperty func(string) (*models.Property, error), key string) (string, error) {
 	var value string
 	if err := c.cache.Get(key, &value); err == nil {
 		return value, nil
 	}
-	property, err := GetProperty(propertyService, key)
+	property, err := GetProperty(key)
 	if err != nil {
 		return "", err
 	}
@@ -41,7 +41,7 @@ func (c *cacheService) get(GetProperty func(PropertyService, string) (*models.Pr
 }
 
 func (c *cacheService) Get(k string) (string, error) {
-	return c.get(PropertyService.GetProperty, c.propertyService, k)
+	return c.get(c.propertyService.GetProperty, k)
 }
 
 func (c *cacheService) Set(key, value string) error {
