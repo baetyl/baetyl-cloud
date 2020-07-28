@@ -254,9 +254,6 @@ func PopulateFailedMisResponse(cc *Context, err error, abort bool) {
 }
 
 func PackageMisResponse(res interface{}) (int, interface{}) {
-	if res == nil {
-		res = "[]"
-	}
 	return http.StatusOK, gin.H{
 		"status": 0,
 		"msg":    "ok",
