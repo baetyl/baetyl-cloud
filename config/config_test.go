@@ -83,7 +83,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Objects = []string{}
 	expect.Plugin.Property = "database"
 
-	expect.CacheConfig.ExpirationDuration = time.Minute * 10
+	expect.Cache.ExpirationDuration = time.Minute * 10
 	// case 0
 	cfg := &CloudConfig{}
 	err := utils.UnmarshalYAML(nil, cfg)

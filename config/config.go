@@ -22,9 +22,9 @@ type CloudConfig struct {
 	NodeServer   NodeServer `yaml:"nodeServer" json:"nodeServer" default:"{\"port\":\":9005\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"commonName\":\"common-name\"}"`
 	MisServer    MisServer  `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
-	CacheConfig  struct {
+	Cache        struct {
 		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
-	} `yaml:"cacheConfig" json:"cacheConfig"`
+	} `yaml:"cache" json:"cache"`
 	Plugin struct {
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
 		Auth      string   `yaml:"auth" json:"auth" default:"defaultauth"`
