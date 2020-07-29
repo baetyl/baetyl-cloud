@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/baetyl/baetyl-cloud/config"
-	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/baetyl/baetyl-cloud/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/config"
+	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 //go:generate mockgen -destination=../mock/service/property.go -package=plugin github.com/baetyl/baetyl-cloud/service PropertyService

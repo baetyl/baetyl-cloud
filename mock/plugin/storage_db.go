@@ -6,8 +6,8 @@ package plugin
 
 import (
 	sql "database/sql"
-	common "github.com/baetyl/baetyl-cloud/common"
-	models "github.com/baetyl/baetyl-cloud/models"
+	common "github.com/baetyl/baetyl-cloud/v2/common"
+	models "github.com/baetyl/baetyl-cloud/v2/models"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	gomock "github.com/golang/mock/gomock"
 	sqlx "github.com/jmoiron/sqlx"

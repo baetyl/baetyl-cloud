@@ -2,7 +2,7 @@ package kube
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/jinzhu/copier"
 	"k8s.io/api/core/v1"

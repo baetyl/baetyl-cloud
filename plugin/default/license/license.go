@@ -1,7 +1,7 @@
 package license
 
 import (
-	"github.com/baetyl/baetyl-cloud/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 type license struct {

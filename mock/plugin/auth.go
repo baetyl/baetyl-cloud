@@ -5,7 +5,7 @@
 package plugin
 
 import (
-	common "github.com/baetyl/baetyl-cloud/common"
+	common "github.com/baetyl/baetyl-cloud/v2/common"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

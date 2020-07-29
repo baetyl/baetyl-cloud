@@ -21,7 +21,7 @@ package versioned
 import (
 	"fmt"
 
-	cloudv1alpha1 "github.com/baetyl/baetyl-cloud/plugin/kube/client/clientset/versioned/typed/cloud/v1alpha1"
+	cloudv1alpha1 "github.com/baetyl/baetyl-cloud/v2/plugin/kube/client/clientset/versioned/typed/cloud/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

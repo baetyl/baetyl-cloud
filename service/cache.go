@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/config"
+	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/gin-contrib/cache/persistence"
 )
 

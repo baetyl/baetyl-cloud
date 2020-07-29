@@ -1,4 +1,4 @@
-module github.com/baetyl/baetyl-cloud
+module github.com/baetyl/baetyl-cloud/v2
 
 go 1.13
 

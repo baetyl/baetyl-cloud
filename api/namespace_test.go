@@ -5,13 +5,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	ms "github.com/baetyl/baetyl-cloud/mock/service"
+	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 )
 
 func getMockNS(name string) *models.Namespace {

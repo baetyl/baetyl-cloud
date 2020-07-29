@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/common"
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/stretchr/testify/assert"
 )
 

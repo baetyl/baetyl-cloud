@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/common"
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/jmoiron/sqlx"
 )
 

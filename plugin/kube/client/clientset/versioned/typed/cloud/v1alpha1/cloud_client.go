@@ -19,8 +19,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/baetyl/baetyl-cloud/plugin/kube/apis/cloud/v1alpha1"
-	"github.com/baetyl/baetyl-cloud/plugin/kube/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
+	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/client/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

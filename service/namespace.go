@@ -3,10 +3,10 @@ package service
 import (
 	"strings"
 
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/config"
-	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/baetyl/baetyl-cloud/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/config"
+	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 //go:generate mockgen -destination=../mock/service/namespace.go -package=plugin github.com/baetyl/baetyl-cloud/service NamespaceService

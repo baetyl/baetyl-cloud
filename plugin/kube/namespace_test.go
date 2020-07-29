@@ -4,7 +4,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/log"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

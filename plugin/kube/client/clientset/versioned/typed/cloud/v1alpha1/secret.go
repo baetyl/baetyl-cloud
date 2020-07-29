@@ -21,8 +21,8 @@ package v1alpha1
 import (
 	"time"
 
-	v1alpha1 "github.com/baetyl/baetyl-cloud/plugin/kube/apis/cloud/v1alpha1"
-	scheme "github.com/baetyl/baetyl-cloud/plugin/kube/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
+	scheme "github.com/baetyl/baetyl-cloud/v2/plugin/kube/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

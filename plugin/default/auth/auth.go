@@ -2,9 +2,9 @@ package auth
 
 import (
 	"crypto/rsa"
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/common/util"
-	"github.com/baetyl/baetyl-cloud/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/common/util"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"io/ioutil"
 )
 

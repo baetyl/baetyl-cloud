@@ -5,7 +5,7 @@
 package plugin
 
 import (
-	plugin "github.com/baetyl/baetyl-cloud/plugin"
+	plugin "github.com/baetyl/baetyl-cloud/v2/plugin"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

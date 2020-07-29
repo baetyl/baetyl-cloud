@@ -12,9 +12,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/baetyl/baetyl-cloud/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/jinzhu/copier"
 )
 

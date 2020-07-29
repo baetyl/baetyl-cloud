@@ -5,9 +5,9 @@ import (
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/baetyl/baetyl-cloud/plugin/kube/apis/cloud/v1alpha1"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/jinzhu/copier"

@@ -3,8 +3,8 @@ package service
 import (
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/common"
-	_ "github.com/baetyl/baetyl-cloud/plugin/default/auth"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/auth"
 	"github.com/stretchr/testify/assert"
 )
 

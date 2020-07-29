@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func (api *API) CreateProperty(c *common.Context) (interface{}, error) {

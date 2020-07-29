@@ -3,10 +3,10 @@ package service
 import (
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/config"
-	mockPlugin "github.com/baetyl/baetyl-cloud/mock/plugin"
-	"github.com/baetyl/baetyl-cloud/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/config"
+	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
