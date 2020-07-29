@@ -12,7 +12,7 @@ func TestCacheService(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
-	// good case1: get from db
+	// good case
 	mConf := &models.Property{
 		Key:   "baetyl_0.1.0",
 		Value: "http://test.baetyl/0.1.0",
@@ -23,11 +23,7 @@ func TestCacheService(t *testing.T) {
 	assert.NoError(t, err)
 	res, err := cache.Get(mConf.Key, mockObject.property.GetProperty)
 	assert.NoError(t, err)
-	assert.Equal(t, res, mConf.Value)
-	// good case2: get from cache
-	res, err = cache.Get(mConf.Key, mockObject.property.GetProperty)
-	assert.NoError(t, err)
-	assert.Equal(t, res, mConf.Value)
+	assert.Equal(t, res.(*models.Property).Value, mConf.Value)
 
 	// bad case
 	key := "bad key"

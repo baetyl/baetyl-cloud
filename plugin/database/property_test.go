@@ -52,7 +52,7 @@ func TestProperty(t *testing.T) {
 
 	getProperty, err := db.GetProperty(property.Key)
 	assert.NoError(t, err)
-	checkProperty(t, getProperty, property)
+	checkProperty(t, getProperty.(*models.Property), property)
 	_, err = db.GetProperty("bad key")
 	assert.Error(t, err)
 

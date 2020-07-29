@@ -20,7 +20,7 @@ func (d *dbStorage) DeleteProperty(key string) error {
 	return err
 }
 
-func (d *dbStorage) GetProperty(key string) (*models.Property, error) {
+func (d *dbStorage) GetProperty(key string) (interface{}, error) {
 	selectSQL := "SELECT `key`, value, create_time, update_time FROM baetyl_property WHERE `key`=?"
 	var cs []models.Property
 	if err := d.query(nil, selectSQL, &cs, key); err != nil {

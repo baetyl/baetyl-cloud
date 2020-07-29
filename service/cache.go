@@ -1,10 +1,9 @@
 package service
 
 import (
-	"github.com/baetyl/baetyl-cloud/config"
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/config"
 	"github.com/gin-contrib/cache/persistence"
 )
 
@@ -17,22 +16,19 @@ type CacheService struct {
 
 func NewCacheService(config *config.CloudConfig) (CacheService, error) {
 	return CacheService{
-		cache:          persistence.NewInMemoryStore(config.CacheExpirationDuration),
-		expireDuration: config.CacheExpirationDuration,
+		cache:          persistence.NewInMemoryStore(config.CacheConfig.ExpirationDuration),
+		expireDuration: config.CacheConfig.ExpirationDuration,
 	}, nil
 }
 
-func (c *CacheService) Get(key string, load func(string) (*models.Property, error)) (string, error) {
-	var value string
+func (c *CacheService) Get(key string, load func(string) (interface{}, error)) (interface{}, error) {
+	var value interface{}
 	if err := c.cache.Get(key, &value); err == nil {
 		return value, nil
 	}
-	property, err := load(key)
+	value, err := load(key)
 	if err != nil {
 		return "", err
 	}
-	return property.Value, c.Set(key, property.Value)
-}
-func (c *CacheService) Set(key, value string) error {
-	return c.cache.Set(key, value, c.expireDuration)
+	return value, nil
 }

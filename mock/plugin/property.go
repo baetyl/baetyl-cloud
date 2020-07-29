@@ -62,10 +62,10 @@ func (mr *MockPropertyMockRecorder) DeleteProperty(key interface{}) *gomock.Call
 }
 
 // GetProperty mocks base method.
-func (m *MockProperty) GetProperty(key string) (*models.Property, error) {
+func (m *MockProperty) GetProperty(key string) (interface{}, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProperty", key)
-	ret0, _ := ret[0].(*models.Property)
+	ret0, _ := ret[0].(interface{})
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
