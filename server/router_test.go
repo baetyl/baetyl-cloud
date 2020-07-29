@@ -24,7 +24,7 @@ import (
 )
 
 func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer,
-	*mockPlugin.MockAuth, *mockPlugin.MockLicense, *gomock.Controller, *config.CloudConfig) {
+	*mockPlugin.MockAuth, *mockPlugin.MockLicense, *gomock.Controller, *config.CloudConfig, *MisServer) {
 	c := &config.CloudConfig{}
 	c.Plugin.Auth = common.RandString(9)
 	c.Plugin.ModelStorage = common.RandString(9)
@@ -34,6 +34,7 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9)}
 	c.Plugin.License = common.RandString(9)
+	c.Plugin.Property = common.RandString(9)
 	c.NodeServer.Certificate.CA = ""
 	c.NodeServer.Certificate.Cert = ""
 	c.NodeServer.Certificate.Key = ""
@@ -79,15 +80,20 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 	plugin.RegisterFactory(c.Plugin.License, func() (plugin.Plugin, error) {
 		return mLicense, nil
 	})
-
+	mockProperty := mockPlugin.NewMockProperty(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
+		return mockProperty, nil
+	})
 	s, _ := NewAdminServer(c)
 	n, _ := NewNodeServer(c)
 	a, _ := NewActiveServer(c)
-	return s, n, a, mockAuth, mLicense, mockCtl, c
+	m, _ := NewMisServer(c)
+
+	return s, n, a, mockAuth, mLicense, mockCtl, c, m
 }
 
 func TestHandler(t *testing.T) {
-	s, _, _, mkAuth, mkLicense, mockCtl, _ := InitMockEnvironment(t)
+	s, _, _, mkAuth, mkLicense, mockCtl, _, _ := InitMockEnvironment(t)
 	defer mockCtl.Finish()
 
 	s.InitRoute()
@@ -141,7 +147,7 @@ func TestHandler(t *testing.T) {
 
 func TestHandler_Node(t *testing.T) {
 	t.Skip()
-	_, n, _, mkAuth, _, mockCtl, c := InitMockEnvironment(t)
+	_, n, _, mkAuth, _, mockCtl, c, _ := InitMockEnvironment(t)
 	defer mockCtl.Finish()
 
 	n.InitRoute()
@@ -218,7 +224,7 @@ func TestHandler_Node(t *testing.T) {
 
 func TestHandler_Active(t *testing.T) {
 	t.Skip()
-	_, _, a, _, _, mockCtl, c := InitMockEnvironment(t)
+	_, _, a, _, _, mockCtl, c, _ := InitMockEnvironment(t)
 	defer mockCtl.Finish()
 
 	// https 200
@@ -242,4 +248,37 @@ func TestHandler_Active(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	go aHttp.Run()
 	defer aHttp.Close()
+}
+
+func TestHandler_Mis(t *testing.T) {
+	_, _, _, _, _, mockCtl, _, m := InitMockEnvironment(t)
+	defer mockCtl.Finish()
+
+	m.InitRoute()
+	m.router.Use(m.authHandler)
+	// https 200
+	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "1")
+	w := httptest.NewRecorder()
+	m.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	go m.Run()
+	defer m.Close()
+	// http 200
+	req, _ = http.NewRequest(http.MethodGet, "/health", nil)
+	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
+	req.Header.Set("baetyl-cloud-user", "")
+	w = httptest.NewRecorder()
+	m.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	go m.Run()
+	defer m.Close()
+	// http 200
+	req, _ = http.NewRequest(http.MethodGet, "/health", nil)
+	w = httptest.NewRecorder()
+	m.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	go m.Run()
+	defer m.Close()
 }

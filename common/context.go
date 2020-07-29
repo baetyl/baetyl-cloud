@@ -9,7 +9,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -210,4 +210,49 @@ func WrapperRaw(handler HandlerFunc) func(c *gin.Context) {
 func _toJsonString(obj interface{}) string {
 	data, _ := json.Marshal(obj)
 	return string(data)
+}
+
+func WrapperMis(handler HandlerFunc) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		cc := NewContext(c)
+		defer func() {
+			if r := recover(); r != nil {
+				err, ok := r.(error)
+				if !ok {
+					err = Error(ErrUnknown, Field("error", r))
+				}
+				log.L().Info("handle a panic", log.Any(cc.GetTrace()), log.Code(err), log.Error(err), log.Any("panic", string(debug.Stack())))
+				PopulateFailedMisResponse(cc, err, false)
+			}
+		}()
+		res, err := handler(cc)
+		if err != nil {
+			log.L().Error("failed to handler request", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
+			PopulateFailedMisResponse(cc, err, false)
+			return
+		}
+		log.L().Debug("process success", log.Any(cc.GetTrace()), log.Any("response", _toJsonString(res)))
+		// unlike JSON, does not replace special html characters with their unicode entities. eg: JSON(&)->'\u0026' PureJSON(&)->'&'
+		cc.PureJSON(http.StatusOK, gin.H{
+			"status": 0,
+			"msg":    "ok",
+			"data":   res,
+		})
+	}
+}
+
+// PopulateFailedMisResponse PopulateFailedMisResponse
+func PopulateFailedMisResponse(cc *Context, err error, abort bool) {
+	var status int = http.StatusOK
+	log.L().Error("process failed.", log.Any(cc.GetTrace()), log.Code(err))
+
+	body := gin.H{
+		"status": 1,
+		"msg":    err.Error(),
+	}
+	if abort {
+		cc.AbortWithStatusJSON(status, body)
+	} else {
+		cc.JSON(status, body)
+	}
 }

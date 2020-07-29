@@ -1,6 +1,8 @@
 package server
 
 import (
+	"strings"
+
 	"github.com/baetyl/baetyl-cloud/common"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/gin-gonic/gin"
@@ -197,4 +199,53 @@ func (s *ActiveServer) InitRoute() {
 		active.POST("/", common.Wrapper(s.api.Active))
 		active.GET("/:resource", common.WrapperRaw(s.api.GetResource))
 	}
+}
+
+func (s *MisServer) GetRoute() *gin.Engine {
+	return s.router
+}
+
+func (s *MisServer) InitRoute() {
+
+	s.router.NoRoute(noRouteHandler)
+	s.router.NoMethod(noMethodHandler)
+	s.router.GET("/health", health)
+
+	s.router.Use(requestIDHandler)
+	s.router.Use(loggerHandler)
+	s.router.Use(s.authHandler)
+	v1 := s.router.Group("v1")
+	{
+		cache := v1.Group("/properties")
+
+		cache.POST("", common.WrapperMis(s.api.CreateProperty))
+		cache.DELETE("/:key", common.WrapperMis(s.api.DeleteProperty))
+		cache.GET("", common.WrapperMis(s.api.ListProperty))
+		cache.PUT("/:key", common.WrapperMis(s.api.UpdateProperty))
+	}
+
+}
+
+// auth handler
+func (s *MisServer) authHandler(c *gin.Context) {
+	cc := common.NewContext(c)
+
+	token := c.Request.Header.Get(s.cfg.MisServer.TokenHeader)
+	if strings.Compare(token, s.cfg.MisServer.AuthToken) == 0 {
+		user := c.Request.Header.Get(s.cfg.MisServer.UserHeader)
+		if len(user) != 0 {
+			log.L().Info("mis server accessed",
+				log.Any("user", user),
+				log.Any(cc.GetTrace()),
+			)
+			return
+		}
+	}
+	err := common.Error(common.ErrRequestAccessDenied, common.Field("error", common.Code(common.ErrRequestAccessDenied)))
+	log.L().Error(common.Code(common.ErrRequestAccessDenied).String(),
+		log.Any(cc.GetTrace()),
+		log.Code(err),
+		log.Error(err),
+	)
+	common.PopulateFailedResponse(cc, err, true)
 }

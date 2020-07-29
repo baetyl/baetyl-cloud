@@ -22,6 +22,7 @@ type MockServices struct {
 	auth           *mockPlugin.MockAuth
 	shadowStorage  *mockPlugin.MockShadow
 	license        *mockPlugin.MockLicense
+	property       *mockPlugin.MockProperty
 }
 
 func (m *MockServices) Close() {
@@ -96,6 +97,7 @@ func mockTestConfig() *config.CloudConfig {
 	conf.Plugin.Functions = []string{common.RandString(9)}
 	conf.Plugin.Shadow = conf.Plugin.DatabaseStorage
 	conf.Plugin.License = common.RandString(9)
+	conf.Plugin.Property = common.RandString(9)
 	return conf
 }
 
@@ -131,6 +133,8 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 	_, err := NewSyncService(conf)
 	assert.Nil(t, err)
 
+	mProperty := mockPlugin.NewMockProperty(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Property, mockProperty(mProperty))
 	return &MockServices{
 		conf:           conf,
 		ctl:            mockCtl,
@@ -141,6 +145,7 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 		pki:            mPKI,
 		auth:           mAuth,
 		license:        mLicense,
+		property:       mProperty,
 	}
 }
 
@@ -162,4 +167,11 @@ func InitEmptyMockEnvironment(t *testing.T) *MockServices {
 		objectStorage:  mockObjectStorage,
 		functionPlugin: mockFunctionPlugin,
 	}
+}
+
+func mockProperty(mock plugin.Property) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return factory
 }

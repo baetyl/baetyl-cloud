@@ -12,6 +12,7 @@ const (
 	AdminServerPort  = "ADMIN_PORT"
 	NodeServerPort   = "NODE_PORT"
 	ActiveServerPort = "ACTIVE_PORT"
+	MisServerPort    = "MIS_PORT"
 )
 
 // CloudConfig baetyl-cloud config
@@ -19,16 +20,21 @@ type CloudConfig struct {
 	ActiveServer Server     `yaml:"activeServer" json:"activeServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	AdminServer  Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	NodeServer   NodeServer `yaml:"nodeServer" json:"nodeServer" default:"{\"port\":\":9005\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"commonName\":\"common-name\"}"`
+	MisServer    MisServer  `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
-	Plugin       struct {
+	Cache        struct {
+		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
+	} `yaml:"cache" json:"cache"`
+	Plugin struct {
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
 		Auth      string   `yaml:"auth" json:"auth" default:"defaultauth"`
 		License   string   `yaml:"license" json:"license" default:"defaultlicense"`
 		Shadow    string   `yaml:"shadow" json:"shadow" default:"database"`
 		Objects   []string `yaml:"objects" json:"objects" default:"[]"`
 		Functions []string `yaml:"functions" json:"functions" default:"[]"`
-
+		Property  string   `yaml:"property" json:"property" default:"database"`
 		// TODO: deprecated
+
 		ModelStorage    string `yaml:"modelStorage" json:"modelStorage" default:"kubernetes"`
 		DatabaseStorage string `yaml:"databaseStorage" json:"databaseStorage" default:"database"`
 	} `yaml:"plugin" json:"plugin"`
@@ -37,6 +43,13 @@ type CloudConfig struct {
 type NodeServer struct {
 	Server     `yaml:",inline" json:",inline"`
 	CommonName string `yaml:"commonName" json:"commonName" default:"common-name"`
+}
+
+type MisServer struct {
+	Server      `yaml:",inline" json:",inline"`
+	AuthToken   string `yaml:"authToken" json:"authToken" default:"baetyl-cloud-token"`
+	TokenHeader string `yaml:"tokenHeader" json:"tokenHeader" default:"baetyl-cloud-token"`
+	UserHeader  string `yaml:"userHeader" json:"userHeader" default:"baetyl-cloud-user"`
 }
 
 // Server server config
@@ -60,5 +73,9 @@ func SetPortFromEnv(cfg *CloudConfig) {
 	nodePort := os.Getenv(NodeServerPort)
 	if nodePort != "" {
 		cfg.NodeServer.Port = ":" + nodePort
+	}
+	misPort := os.Getenv(MisServerPort)
+	if misPort != "" {
+		cfg.MisServer.Port = ":" + misPort
 	}
 }
