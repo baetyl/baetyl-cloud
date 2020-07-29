@@ -61,21 +61,6 @@ func (mr *MockPropertyMockRecorder) DeleteProperty(key interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProperty", reflect.TypeOf((*MockProperty)(nil).DeleteProperty), key)
 }
 
-// GetProperty mocks base method.
-func (m *MockProperty) GetProperty(key string) (interface{}, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProperty", key)
-	ret0, _ := ret[0].(interface{})
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetProperty indicates an expected call of GetProperty.
-func (mr *MockPropertyMockRecorder) GetProperty(key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProperty", reflect.TypeOf((*MockProperty)(nil).GetProperty), key)
-}
-
 // ListProperty mocks base method.
 func (m *MockProperty) ListProperty(page *models.Filter) ([]models.Property, error) {
 	m.ctrl.T.Helper()
@@ -118,6 +103,21 @@ func (m *MockProperty) UpdateProperty(property *models.Property) error {
 func (mr *MockPropertyMockRecorder) UpdateProperty(property interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProperty", reflect.TypeOf((*MockProperty)(nil).UpdateProperty), property)
+}
+
+// GetPropertyValue mocks base method.
+func (m *MockProperty) GetPropertyValue(key string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPropertyValue", key)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPropertyValue indicates an expected call of GetPropertyValue.
+func (mr *MockPropertyMockRecorder) GetPropertyValue(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPropertyValue", reflect.TypeOf((*MockProperty)(nil).GetPropertyValue), key)
 }
 
 // Close mocks base method.

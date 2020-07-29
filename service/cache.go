@@ -21,8 +21,8 @@ func NewCacheService(config *config.CloudConfig) (CacheService, error) {
 	}, nil
 }
 
-func (c *CacheService) Get(key string, load func(string) (interface{}, error)) (interface{}, error) {
-	var value interface{}
+func (c *CacheService) Get(key string, load func(string) (string, error)) (string, error) {
+	var value string
 	if err := c.cache.Get(key, &value); err == nil {
 		return value, nil
 	}

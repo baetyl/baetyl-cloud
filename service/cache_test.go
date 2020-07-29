@@ -17,21 +17,21 @@ func TestCacheService(t *testing.T) {
 		Key:   "baetyl_0.1.0",
 		Value: "http://test.baetyl/0.1.0",
 	}
-	mockObject.property.EXPECT().GetProperty(mConf.Key).Return(mConf, nil).AnyTimes()
+	mockObject.property.EXPECT().GetPropertyValue(mConf.Key).Return(mConf.Value, nil).AnyTimes()
 
 	cache, err := NewCacheService(mockObject.conf)
 	assert.NoError(t, err)
-	res, err := cache.Get(mConf.Key, mockObject.property.GetProperty)
+	res, err := cache.Get(mConf.Key, mockObject.property.GetPropertyValue)
 	assert.NoError(t, err)
-	assert.Equal(t, res.(*models.Property).Value, mConf.Value)
+	assert.Equal(t, res, mConf.Value)
 
 	// bad case
 	key := "bad key"
-	mockObject.property.EXPECT().GetProperty(key).Return(nil, common.Error(
+	mockObject.property.EXPECT().GetPropertyValue(key).Return("", common.Error(
 		common.ErrResourceNotFound,
 		common.Field("key", key)))
 	assert.NoError(t, err)
-	res, err = cache.Get(key, mockObject.property.GetProperty)
+	res, err = cache.Get(key, mockObject.property.GetPropertyValue)
 	assert.Error(t, err)
 
 }

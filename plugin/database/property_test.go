@@ -50,10 +50,10 @@ func TestProperty(t *testing.T) {
 	err = db.UpdateProperty(property)
 	assert.NoError(t, err)
 
-	getProperty, err := db.GetProperty(property.Key)
+	value, err := db.GetPropertyValue(property.Key)
 	assert.NoError(t, err)
-	checkProperty(t, getProperty.(*models.Property), property)
-	_, err = db.GetProperty("bad key")
+	assert.Equal(t, property.Value, value)
+	_, err = db.GetPropertyValue("bad key")
 	assert.Error(t, err)
 
 	page := &models.Filter{

@@ -20,16 +20,16 @@ func (d *dbStorage) DeleteProperty(key string) error {
 	return err
 }
 
-func (d *dbStorage) GetProperty(key string) (interface{}, error) {
+func (d *dbStorage) GetPropertyValue(key string) (string, error) {
 	selectSQL := "SELECT `key`, value, create_time, update_time FROM baetyl_property WHERE `key`=?"
 	var cs []models.Property
 	if err := d.query(nil, selectSQL, &cs, key); err != nil {
-		return nil, err
+		return "", err
 	}
 	if len(cs) == 1 {
-		return &cs[0], nil
+		return (&cs[0]).Value, nil
 	}
-	return nil, common.Error(
+	return "", common.Error(
 		common.ErrResourceNotFound,
 		common.Field("key", key))
 }

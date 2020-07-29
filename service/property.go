@@ -11,10 +11,11 @@ import (
 type PropertyService interface {
 	CreateProperty(property *models.Property) error
 	DeleteProperty(key string) error
-	GetProperty(key string) (interface{}, error)
 	ListProperty(page *models.Filter) ([]models.Property, error) //Pagination
 	CountProperty(key string) (int, error)
 	UpdateProperty(property *models.Property) error
+
+	GetPropertyValue(key string) (string, error)
 }
 
 // NewPropertyService

@@ -24,7 +24,7 @@ type CloudConfig struct {
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
 	CacheConfig  struct {
 		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
-	}
+	} `yaml:"cacheConfig" json:"cacheConfig"`
 	Plugin struct {
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
 		Auth      string   `yaml:"auth" json:"auth" default:"defaultauth"`
