@@ -4,9 +4,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/config"
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/config"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )

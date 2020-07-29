@@ -7,7 +7,7 @@
 package v1alpha1
 
 import (
-	"github.com/baetyl/baetyl-cloud/plugin/kube/apis/cloud"
+	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"

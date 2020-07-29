@@ -3,9 +3,9 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/baetyl/baetyl-cloud/common"
-	ms "github.com/baetyl/baetyl-cloud/mock/service"
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"

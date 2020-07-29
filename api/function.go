@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 // ListFunctionSources ListFunctionSources

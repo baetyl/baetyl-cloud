@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/baetyl/baetyl-cloud/config"
-	"github.com/baetyl/baetyl-cloud/service"
+	"github.com/baetyl/baetyl-cloud/v2/config"
+	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 // API baetyl api server

@@ -2,8 +2,8 @@ package database
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/stretchr/testify/assert"
 	"path"
 	"testing"

@@ -2,7 +2,7 @@ package models
 
 import (
 	"encoding/json"
-	"github.com/baetyl/baetyl-cloud/common"
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-go/v2/spec/v1"
 	"time"
 )

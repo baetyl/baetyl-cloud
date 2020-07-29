@@ -9,9 +9,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/baetyl/baetyl-cloud/common"
-	ms "github.com/baetyl/baetyl-cloud/mock/service"
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func TestAPI_GenSysApp(t *testing.T) {

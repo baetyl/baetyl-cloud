@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/baetyl/baetyl-cloud/common"
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 

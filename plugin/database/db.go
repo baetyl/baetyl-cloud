@@ -2,8 +2,8 @@ package database
 
 import (
 	"database/sql"
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/jmoiron/sqlx"
 	"time"
 )

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/common"
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )

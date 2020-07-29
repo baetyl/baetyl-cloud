@@ -19,9 +19,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.com/baetyl/baetyl-cloud/plugin/kube/client/clientset/versioned"
-	cloudv1alpha1 "github.com/baetyl/baetyl-cloud/plugin/kube/client/clientset/versioned/typed/cloud/v1alpha1"
-	fakecloudv1alpha1 "github.com/baetyl/baetyl-cloud/plugin/kube/client/clientset/versioned/typed/cloud/v1alpha1/fake"
+	clientset "github.com/baetyl/baetyl-cloud/v2/plugin/kube/client/clientset/versioned"
+	cloudv1alpha1 "github.com/baetyl/baetyl-cloud/v2/plugin/kube/client/clientset/versioned/typed/cloud/v1alpha1"
+	fakecloudv1alpha1 "github.com/baetyl/baetyl-cloud/v2/plugin/kube/client/clientset/versioned/typed/cloud/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

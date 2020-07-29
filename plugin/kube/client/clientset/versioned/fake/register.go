@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	cloudv1alpha1 "github.com/baetyl/baetyl-cloud/plugin/kube/apis/cloud/v1alpha1"
+	cloudv1alpha1 "github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

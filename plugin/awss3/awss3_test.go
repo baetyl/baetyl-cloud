@@ -2,9 +2,9 @@ package awss3
 
 import (
 	"bytes"
-	"github.com/baetyl/baetyl-cloud/common"
-	"github.com/baetyl/baetyl-cloud/models"
-	"github.com/baetyl/baetyl-cloud/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"

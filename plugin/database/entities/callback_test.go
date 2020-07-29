@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

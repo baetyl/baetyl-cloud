@@ -3,7 +3,7 @@ package plugin
 import (
 	"io"
 
-	"github.com/baetyl/baetyl-cloud/models"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 //go:generate mockgen -destination=../mock/plugin/object.go -package=plugin github.com/baetyl/baetyl-cloud/plugin Object

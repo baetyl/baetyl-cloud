@@ -1,7 +1,7 @@
 package plugin
 
 import (
-	"github.com/baetyl/baetyl-cloud/common"
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"io"
 )
 
