@@ -1,5 +1,5 @@
 # Change database's url with real account and address.
-# Go into scripts/demo/native fold in this project, then start baetyl-cloud by ../../../../
+# Go into scripts/demo/native fold in this project, then start baetyl-cloud by ../../../output/baetyl-cloud -c ./conf/cloud.yml
 nodeServer:
   port: ":9005"
   ca: "./certs/client_ca.crt"
