@@ -18,48 +18,45 @@ type Plugin interface {
 type Factory func() (Plugin, error)
 
 // PluginFactory contains all supported plugin factory
-var pluginFactory = make(map[string]Factory)
-var plugins = map[string]Plugin{}
-var mu sync.Mutex
+//var pluginFactory = make(map[string]Factory)
+//var plugins = map[string]Plugin{}
+
+var pluginFactory sync.Map
+var plugins sync.Map
 
 // RegisterFactory adds a supported plugin
 func RegisterFactory(name string, f Factory) {
-	mu.Lock()
-	defer mu.Unlock()
-	if _, ok := pluginFactory[name]; ok {
+	if _, ok := pluginFactory.Load(name); ok {
 		log.L().Info("plugin already exists, skip", log.Any("plugin", name))
 		return
 	}
-	pluginFactory[name] = f
+	pluginFactory.Store(name, f)
 	log.L().Info("plugin is registered", log.Any("plugin", name))
 }
 
 // GetPlugin GetPlugin
 func GetPlugin(name string) (Plugin, error) {
 	name = strings.ToLower(name)
-	if p, ok := plugins[name]; ok {
-		return p, nil
+	if p, ok := plugins.Load(name); ok {
+		return p.(Plugin), nil
 	}
-	mu.Lock()
-	defer mu.Unlock()
-	f, ok := pluginFactory[name]
+	f, ok := pluginFactory.Load(name)
 	if !ok {
 		return nil, common.Error(common.ErrPluginNotFound, common.Field("name", name))
 	}
-	p, err := f()
+	p, err := f.(Factory)()
 	if err != nil {
 		log.L().Error("plugin create failed", log.Error(err))
 		return nil, err
 	}
-	plugins[name] = p
+	plugins.Store(name, p)
 	return p, nil
 }
 
 // ClosePlugins ClosePlugins
 func ClosePlugins() {
-	mu.Lock()
-	defer mu.Unlock()
-	for _, v := range plugins {
-		v.Close()
-	}
+	plugins.Range(func(key, value interface{}) bool {
+		value.(Plugin).Close()
+		return true
+	})
 }
