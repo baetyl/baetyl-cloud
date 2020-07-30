@@ -18,7 +18,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     # Reference to upper's `metadata.name`
-    name: default
+    name: baetyl-cloud
     # Reference to upper's `metadata.namespace`
     namespace: default
 roleRef:
