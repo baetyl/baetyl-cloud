@@ -2,11 +2,10 @@ package pki
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-go/v2/pki"
-	"github.com/baetyl/baetyl-go/v2/pki/models"
 	"testing"
 	"time"
 
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
@@ -51,11 +50,11 @@ func mockNewDB(cfg Persistent) (*dbStorage, error) {
 	return &dbStorage{db: db}, nil
 }
 
-func genCertificate() *models.Cert {
-	return &models.Cert{
+func genCertificate() *plugin.Cert {
+	return &plugin.Cert{
 		CertId:      "123",
 		ParentId:    "456",
-		Type:        pki.TypeIssuingCA,
+		Type:        TypeIssuingCA,
 		CommonName:  "cn",
 		Csr:         csr,
 		Content:     content,
@@ -111,7 +110,7 @@ func TestCertificate(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, err = db.GetCert(certificate.CertId)
-	assert.NoError(t, err)
+	assert.Error(t, err)
 
 	// test new
 	_, err = NewStorageDatabase(cfg)
@@ -121,7 +120,7 @@ func TestCertificate(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func checkCertificate(t *testing.T, expect, actual *models.Cert) {
+func checkCertificate(t *testing.T, expect, actual *plugin.Cert) {
 	assert.Equal(t, expect.CertId, actual.CertId)
 	assert.Equal(t, expect.ParentId, actual.ParentId)
 	assert.Equal(t, expect.Description, actual.Description)

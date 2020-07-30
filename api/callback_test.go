@@ -46,7 +46,7 @@ func genCallback() *models.Callback {
 
 func TestAPI_CreateCallback(t *testing.T) {
 	api, router, ctl := initCallBackAPI(t)
-	rs := plugin.NewMockCallbackService(ctl)
+	rs := service.NewMockCallbackService(ctl)
 	api.callbackService = rs
 
 	callback := genCallback()
@@ -62,7 +62,7 @@ func TestAPI_CreateCallback(t *testing.T) {
 
 func TestAPI_GetCallback(t *testing.T) {
 	api, router, ctl := initCallBackAPI(t)
-	rs := plugin.NewMockCallbackService(ctl)
+	rs := service.NewMockCallbackService(ctl)
 	api.callbackService = rs
 
 	callback := genCallback()
@@ -76,7 +76,7 @@ func TestAPI_GetCallback(t *testing.T) {
 
 func TestAPI_GetCallback_Err(t *testing.T) {
 	api, router, ctl := initCallBackAPI(t)
-	rs := plugin.NewMockCallbackService(ctl)
+	rs := service.NewMockCallbackService(ctl)
 	api.callbackService = rs
 
 	rs.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
@@ -88,7 +88,7 @@ func TestAPI_GetCallback_Err(t *testing.T) {
 
 func TestAPI_UpdateCallback(t *testing.T) {
 	api, router, ctl := initCallBackAPI(t)
-	rs := plugin.NewMockCallbackService(ctl)
+	rs := service.NewMockCallbackService(ctl)
 	api.callbackService = rs
 
 	callback := genCallback()
@@ -107,7 +107,7 @@ func TestAPI_UpdateCallback(t *testing.T) {
 
 func TestAPI_UpdateCallback_Err(t *testing.T) {
 	api, router, ctl := initCallBackAPI(t)
-	rs := plugin.NewMockCallbackService(ctl)
+	rs := service.NewMockCallbackService(ctl)
 	api.callbackService = rs
 
 	callback := genCallback()
@@ -126,7 +126,7 @@ func TestAPI_UpdateCallback_Err(t *testing.T) {
 
 func TestAPI_DeleteCallback(t *testing.T) {
 	api, router, ctl := initCallBackAPI(t)
-	rs := plugin.NewMockCallbackService(ctl)
+	rs := service.NewMockCallbackService(ctl)
 	api.callbackService = rs
 
 	callback := genCallback()

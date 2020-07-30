@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-//go:generate mockgen -destination=../mock/service/node.go -package=plugin github.com/baetyl/baetyl-cloud/service NodeService
+//go:generate mockgen -destination=../mock/service/node.go -package=service github.com/baetyl/baetyl-cloud/v2/service NodeService
 
 // NodeService NodeService
 type NodeService interface {

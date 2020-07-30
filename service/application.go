@@ -11,7 +11,7 @@ import (
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
-//go:generate mockgen -destination=../mock/service/application.go -package=plugin github.com/baetyl/baetyl-cloud/service ApplicationService
+//go:generate mockgen -destination=../mock/service/application.go -package=service github.com/baetyl/baetyl-cloud/v2/service ApplicationService
 
 // ApplicationService ApplicationService
 type ApplicationService interface {

@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-//go:generate mockgen -destination=../mock/plugin/auth.go -package=plugin github.com/baetyl/baetyl-cloud/plugin Auth
+//go:generate mockgen -destination=../mock/plugin/auth.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin Auth
 
 // Auth interfaces of auth
 type Auth interface {

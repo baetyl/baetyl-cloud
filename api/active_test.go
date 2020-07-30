@@ -35,8 +35,8 @@ func initActiveAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 
 func TestAPI_GetResource(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	init := plugin.NewMockInitializeService(ctl)
-	ss := plugin.NewMockSysConfigService(ctl)
+	init := service.NewMockInitializeService(ctl)
+	ss := service.NewMockSysConfigService(ctl)
 	api.sysConfigService = ss
 	api.initService = init
 
@@ -88,7 +88,7 @@ func TestApi_genInitYaml(t *testing.T) {
 	token := "ac40cc632e217d7675abfdfbf64e285f7b22657870697279223a333630302c226b696e64223a226e6f6465222c226e616d65223a22303431353031222c226e616d657370616365223a2264656661756c74222c2274696d657374616d70223a313538363935363931367d"
 	kube := "k3s"
 	api, _, ctl := initActiveAPI(t)
-	auth := plugin.NewMockAuthService(ctl)
+	auth := service.NewMockAuthService(ctl)
 	api.authService = auth
 	auth.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(1)
 	res, err := api.getInitYaml(token, kube)
@@ -100,7 +100,7 @@ func TestApi_genSetupScript(t *testing.T) {
 	// bad case : sys config not found
 	token := "ac40cc632e217d7675abfdfbf64e285f7b22657870697279223a333630302c226b696e64223a226e6f6465222c226e616d65223a22303431353031222c226e616d657370616365223a2264656661756c74222c2274696d657374616d70223a313538363935363931367d"
 	api, _, ctl := initActiveAPI(t)
-	ss := plugin.NewMockSysConfigService(ctl)
+	ss := service.NewMockSysConfigService(ctl)
 	api.sysConfigService = ss
 
 	ss.EXPECT().GetSysConfig("address", common.AddressActive).Return(nil, fmt.Errorf("not found")).Times(1)
@@ -115,8 +115,8 @@ func TestApi_genSetupScript(t *testing.T) {
 func TestApi_genCmd(t *testing.T) {
 	token := "ac40cc632e217d7675abfdfbf64e285f7b22657870697279223a333630302c226b696e64223a226e6f6465222c226e616d65223a22303431353031222c226e616d657370616365223a2264656661756c74222c2274696d657374616d70223a313538363935363931367d"
 	api, _, ctl := initActiveAPI(t)
-	ss := plugin.NewMockSysConfigService(ctl)
-	auth := plugin.NewMockAuthService(ctl)
+	ss := service.NewMockSysConfigService(ctl)
+	auth := service.NewMockAuthService(ctl)
 	api.authService = auth
 	api.sysConfigService = ss
 
@@ -140,7 +140,7 @@ func TestApi_genCmd(t *testing.T) {
 
 func TestAPI_Active_ErrBatch(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	rs := plugin.NewMockRegisterService(ctl)
+	rs := service.NewMockRegisterService(ctl)
 	api.registerService = rs
 
 	mBatch := &models.Batch{
@@ -169,9 +169,9 @@ func TestAPI_Active_ErrBatch(t *testing.T) {
 
 func TestAPI_Active_ErrRecord(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	rs := plugin.NewMockRegisterService(ctl)
-	cs := plugin.NewMockCallbackService(ctl)
-	ns := plugin.NewMockNodeService(ctl)
+	rs := service.NewMockRegisterService(ctl)
+	cs := service.NewMockCallbackService(ctl)
+	ns := service.NewMockNodeService(ctl)
 	api.callbackService = cs
 	api.registerService = rs
 	api.nodeService = ns
@@ -212,9 +212,9 @@ func TestAPI_Active_ErrRecord(t *testing.T) {
 
 func TestAPI_Active_ErrNode(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	rs := plugin.NewMockRegisterService(ctl)
-	cs := plugin.NewMockCallbackService(ctl)
-	ns := plugin.NewMockNodeService(ctl)
+	rs := service.NewMockRegisterService(ctl)
+	cs := service.NewMockCallbackService(ctl)
+	ns := service.NewMockNodeService(ctl)
 	api.callbackService = cs
 	api.registerService = rs
 	api.nodeService = ns
@@ -264,9 +264,9 @@ func TestAPI_Active_ErrNode(t *testing.T) {
 
 func TestAPI_Active_ErrSys(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	rs := plugin.NewMockRegisterService(ctl)
-	cs := plugin.NewMockCallbackService(ctl)
-	ns := plugin.NewMockNodeService(ctl)
+	rs := service.NewMockRegisterService(ctl)
+	cs := service.NewMockCallbackService(ctl)
+	ns := service.NewMockNodeService(ctl)
 	api.callbackService = cs
 	api.registerService = rs
 	api.nodeService = ns
@@ -315,16 +315,16 @@ func TestAPI_Active_ErrSys(t *testing.T) {
 
 func TestAPI_Active_ErrSecret(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	rs := plugin.NewMockRegisterService(ctl)
-	as := plugin.NewMockApplicationService(ctl)
-	cs := plugin.NewMockCallbackService(ctl)
-	ns := plugin.NewMockNodeService(ctl)
-	ss := plugin.NewMockSecretService(ctl)
-	ccs := plugin.NewMockConfigService(ctl)
-	scs := plugin.NewMockSysConfigService(ctl)
-	pki := plugin.NewMockPKIService(ctl)
-	is := plugin.NewMockIndexService(ctl)
-	init := plugin.NewMockInitializeService(ctl)
+	rs := service.NewMockRegisterService(ctl)
+	as := service.NewMockApplicationService(ctl)
+	cs := service.NewMockCallbackService(ctl)
+	ns := service.NewMockNodeService(ctl)
+	ss := service.NewMockSecretService(ctl)
+	ccs := service.NewMockConfigService(ctl)
+	scs := service.NewMockSysConfigService(ctl)
+	pki := service.NewMockPKIService(ctl)
+	is := service.NewMockIndexService(ctl)
+	init := service.NewMockInitializeService(ctl)
 
 	api.callbackService = cs
 	api.registerService = rs
@@ -426,16 +426,16 @@ func TestAPI_Active_ErrSecret(t *testing.T) {
 
 func TestAPI_Active(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	rs := plugin.NewMockRegisterService(ctl)
-	as := plugin.NewMockApplicationService(ctl)
-	cs := plugin.NewMockCallbackService(ctl)
-	ns := plugin.NewMockNodeService(ctl)
-	ss := plugin.NewMockSecretService(ctl)
-	ccs := plugin.NewMockConfigService(ctl)
-	scs := plugin.NewMockSysConfigService(ctl)
-	pki := plugin.NewMockPKIService(ctl)
-	is := plugin.NewMockIndexService(ctl)
-	init := plugin.NewMockInitializeService(ctl)
+	rs := service.NewMockRegisterService(ctl)
+	as := service.NewMockApplicationService(ctl)
+	cs := service.NewMockCallbackService(ctl)
+	ns := service.NewMockNodeService(ctl)
+	ss := service.NewMockSecretService(ctl)
+	ccs := service.NewMockConfigService(ctl)
+	scs := service.NewMockSysConfigService(ctl)
+	pki := service.NewMockPKIService(ctl)
+	is := service.NewMockIndexService(ctl)
+	init := service.NewMockInitializeService(ctl)
 	api.callbackService = cs
 	api.registerService = rs
 	api.nodeService = ns
@@ -591,9 +591,9 @@ func TestAPI_Active(t *testing.T) {
 
 func TestAPI_getInitYaml(t *testing.T) {
 	api, _, ctl := initActiveAPI(t)
-	as := plugin.NewMockAuthService(ctl)
-	rs := plugin.NewMockRegisterService(ctl)
-	init := plugin.NewMockInitializeService(ctl)
+	as := service.NewMockAuthService(ctl)
+	rs := service.NewMockRegisterService(ctl)
+	init := service.NewMockInitializeService(ctl)
 	api.authService = as
 	api.initService = init
 	api.registerService = rs

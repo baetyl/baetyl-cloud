@@ -11,7 +11,7 @@ import (
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
-//go:generate mockgen -destination=../mock/service/config.go -package=plugin github.com/baetyl/baetyl-cloud/service ConfigService
+//go:generate mockgen -destination=../mock/service/config.go -package=service github.com/baetyl/baetyl-cloud/v2/service ConfigService
 
 // ConfigService ConfigService
 type ConfigService interface {

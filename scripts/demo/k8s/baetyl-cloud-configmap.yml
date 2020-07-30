@@ -97,6 +97,7 @@ data:
     defaultpki:
       rootCAFile: "/etc/baetyl/client_ca.crt"
       rootCAKeyFile: "/etc/baetyl/client_ca.key"
+      rootCertId: "98ec3bc552f0478298aa1c6702a95427"
       persistent:
         kind: "database"
         database:

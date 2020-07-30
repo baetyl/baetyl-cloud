@@ -24,39 +24,11 @@ func TestPkiService_GetCA(t *testing.T) {
 	ps, err := NewPKIService(mc.conf)
 	assert.NoError(t, err)
 
-	// good case 0
-	sysConf := &models.SysConfig{
-		Type:  Certificate,
-		Key:   CertRoot,
-		Value: "12345678",
-	}
-	mc.dbStorage.EXPECT().GetSysConfig(Certificate, CertRoot).Return(sysConf, nil).Times(1)
-	mc.pki.EXPECT().GetRootCert(sysConf.Value).Return([]byte(sysConf.Value), nil).Times(1)
+	mc.pki.EXPECT().GetRootCertId().Return("123").Times(1)
+	mc.pki.EXPECT().GetRootCert("123").Return([]byte("test"), nil).Times(1)
 	res, err := ps.GetCA()
 	assert.NoError(t, err)
-	assert.Equal(t, []byte(sysConf.Value), res)
-
-	// good case 1
-	mc.dbStorage.EXPECT().GetSysConfig(Certificate, CertRoot).Return(nil, os.ErrNotExist).Times(1)
-	mc.pki.EXPECT().CreateRootCert(gomock.Any(), "").Return(sysConf.Value, nil).Times(1)
-	mc.dbStorage.EXPECT().CreateSysConfig(sysConf).Return(nil, nil).Times(1)
-	mc.pki.EXPECT().GetRootCert(sysConf.Value).Return([]byte(sysConf.Value), nil).Times(1)
-	res, err = ps.GetCA()
-	assert.NoError(t, err)
-	assert.Equal(t, []byte(sysConf.Value), res)
-
-	//bad case 0
-	mc.dbStorage.EXPECT().GetSysConfig(Certificate, CertRoot).Return(nil, os.ErrNotExist).Times(1)
-	mc.pki.EXPECT().CreateRootCert(gomock.Any(), "").Return("", os.ErrNotExist).Times(1)
-	_, err = ps.GetCA()
-	assert.Error(t, err)
-
-	// bad case 1
-	mc.dbStorage.EXPECT().GetSysConfig(Certificate, CertRoot).Return(nil, os.ErrNotExist).Times(1)
-	mc.pki.EXPECT().CreateRootCert(gomock.Any(), "").Return(sysConf.Value, nil).Times(1)
-	mc.dbStorage.EXPECT().CreateSysConfig(sysConf).Return(nil, os.ErrNotExist).Times(1)
-	_, err = ps.GetCA()
-	assert.Error(t, err)
+	assert.Equal(t, "test", string(res))
 }
 
 func TestPkiService_SignClientCertificate(t *testing.T) {

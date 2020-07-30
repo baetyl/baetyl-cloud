@@ -2,14 +2,29 @@ package pki
 
 import (
 	"crypto/x509"
-
+	"encoding/base64"
+	"errors"
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-go/v2/pki"
+	"io/ioutil"
+)
+
+const (
+	// TypeIssuingCA is a root certificate that can be used to issue sub-certificates
+	TypeIssuingCA = "IssuingCA"
+	// TypeIssuingSubCert is an issuing sub cert which is signed by issuing ca
+	TypeIssuingSubCert = "IssuingSubCertificate"
+)
+
+var (
+	ErrParseCert  = errors.New("error parsing certificate")
+	ErrCertInUsed = errors.New("there are also sub-certificates issued according to this certificate in use and cannot be deleted")
 )
 
 type defaultPkiClient struct {
 	cfg       CloudConfig
+	sto       Storage
 	pkiClient pki.PKI
 }
 
@@ -23,64 +38,187 @@ func NewPKI() (plugin.Plugin, error) {
 	if err := common.LoadConfig(&cfg); err != nil {
 		return nil, err
 	}
-
 	sto, err := NewStorage(cfg.PKI.Persistent)
 	if err != nil {
 		return nil, err
 	}
-	pkiClient, err := pki.NewPKIClient(cfg.PKI.RootCAKeyFile, cfg.PKI.RootCAFile, sto)
+	pkiClient, err := pki.NewPKIClient()
 	if err != nil {
 		return nil, err
 	}
-	return &defaultPkiClient{
+	cli := &defaultPkiClient{
 		cfg:       cfg,
+		sto:       sto,
 		pkiClient: pkiClient,
-	}, nil
+	}
+	err = cli.checkRootCA()
+	if err != nil {
+		return nil, err
+	}
+	return cli, nil
+}
+
+func (p *defaultPkiClient) GetRootCertId() string {
+	return p.cfg.PKI.RootCertId
 }
 
 // root cert
 func (p *defaultPkiClient) CreateRootCert(info *x509.CertificateRequest, parentId string) (string, error) {
-	return p.pkiClient.CreateRootCert(info, p.cfg.PKI.RootDuration, parentId)
+	if parentId == "" {
+		parentId = p.cfg.PKI.RootCertId
+	}
+	parent, err := p.getRootCA(parentId)
+	if err != nil {
+		return "", err
+	}
+	cert, err := p.pkiClient.CreateRootCert(info, (int)(p.cfg.PKI.RootDuration.Hours()/24), parent)
+	if err != nil {
+		return "", err
+	}
+	certId := common.UUIDPrune()
+	err = p.saveCert(certId, cert, []byte(""))
+	if err != nil {
+		return "", err
+	}
+	return certId, nil
 }
 
 func (p *defaultPkiClient) GetRootCert(certId string) ([]byte, error) {
-	ca, err := p.pkiClient.GetRootCert(certId)
+	ca, err := p.sto.GetCert(certId)
 	if err != nil {
 		return nil, err
 	}
-	return ca.Crt, nil
+	return base64.StdEncoding.DecodeString(ca.Content)
 }
 
 func (p *defaultPkiClient) DeleteRootCert(rootId string) error {
-	return p.pkiClient.DeleteRootCert(rootId)
+	num, err := p.sto.CountCertByParentId(rootId)
+	if err != nil {
+		return err
+	}
+	if num != 0 {
+		return ErrCertInUsed
+	}
+	return p.sto.DeleteCert(rootId)
 }
 
 // server cert
 func (p *defaultPkiClient) CreateServerCert(csr []byte, rootId string) (string, error) {
-	return p.pkiClient.CreateSubCert(csr, p.cfg.PKI.SubDuration, rootId)
+	return p.createSubCert(csr, rootId)
 }
 
 func (p *defaultPkiClient) GetServerCert(certId string) ([]byte, error) {
-	return p.pkiClient.GetSubCert(certId)
+	return p.getCert(certId)
 }
 
 func (p *defaultPkiClient) DeleteServerCert(certId string) error {
-	return p.pkiClient.DeleteSubCert(certId)
+	return p.sto.DeleteCert(certId)
 }
 
 // client cert
 func (p *defaultPkiClient) CreateClientCert(csr []byte, rootId string) (string, error) {
-	return p.pkiClient.CreateSubCert(csr, p.cfg.PKI.SubDuration, rootId)
+	return p.createSubCert(csr, rootId)
 }
 
 func (p *defaultPkiClient) GetClientCert(certId string) ([]byte, error) {
-	return p.pkiClient.GetSubCert(certId)
+	return p.getCert(certId)
 }
 
 func (p *defaultPkiClient) DeleteClientCert(certId string) error {
-	return p.pkiClient.DeleteSubCert(certId)
+	return p.sto.DeleteCert(certId)
 }
 
 func (p *defaultPkiClient) Close() error {
-	return p.pkiClient.Close()
+	return p.sto.Close()
+}
+
+func (p *defaultPkiClient) checkRootCA() error {
+	_, err := p.sto.GetCert(p.cfg.PKI.RootCertId)
+	if err == nil {
+		return nil
+	}
+	crt, err := ioutil.ReadFile(p.cfg.PKI.RootCAFile)
+	if err != nil {
+		return err
+	}
+	key, err := ioutil.ReadFile(p.cfg.PKI.RootCAKeyFile)
+	if err != nil {
+		return err
+	}
+	return p.saveCert(p.cfg.PKI.RootCertId, &pki.CertPem{
+		Crt: crt,
+		Key: key,
+	}, []byte(""))
+}
+
+func (p *defaultPkiClient) createSubCert(csr []byte, rootId string) (string, error) {
+	parent, err := p.getRootCA(rootId)
+	if err != nil {
+		return "", err
+	}
+	crt, err := p.pkiClient.CreateSubCert(csr, (int)(p.cfg.PKI.SubDuration.Hours()/24), parent)
+	if err != nil {
+		return "", err
+	}
+	certId := common.UUIDPrune()
+	err = p.saveCert(certId, &pki.CertPem{
+		Crt: crt,
+		Key: []byte(""),
+	}, csr)
+	if err != nil {
+		return "", err
+	}
+	return certId, nil
+}
+
+func (p *defaultPkiClient) getCert(certId string) ([]byte, error) {
+	cert, err := p.sto.GetCert(certId)
+	if err != nil {
+		return nil, err
+	}
+	return base64.StdEncoding.DecodeString(cert.Content)
+}
+
+func (p *defaultPkiClient) saveCert(certId string, cert *pki.CertPem, csr []byte) error {
+	crtInfo, err := pki.ParseCertificates(cert.Crt)
+	if err != nil {
+		return err
+	}
+	if len(crtInfo) != 1 {
+		return ErrParseCert
+	}
+	tp := TypeIssuingSubCert
+	if crtInfo[0].IsCA {
+		tp = TypeIssuingCA
+	}
+	certView := plugin.Cert{
+		CertId:     certId,
+		Type:       tp,
+		CommonName: crtInfo[0].Subject.CommonName,
+		Content:    base64.StdEncoding.EncodeToString(cert.Crt),
+		PrivateKey: base64.StdEncoding.EncodeToString(cert.Key),
+		Csr:        base64.StdEncoding.EncodeToString(csr),
+		NotBefore:  crtInfo[0].NotBefore,
+		NotAfter:   crtInfo[0].NotAfter,
+	}
+	return p.sto.CreateCert(certView)
+}
+
+func (p *defaultPkiClient) getRootCA(certId string) (*pki.CertPem, error) {
+	res, err := p.sto.GetCert(certId)
+	if err != nil {
+		return nil, err
+	}
+	crt, err := base64.StdEncoding.DecodeString(res.Content)
+	if err != nil {
+		return nil, err
+	}
+	key, err := base64.StdEncoding.DecodeString(res.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
+	return &pki.CertPem{
+		Crt: crt,
+		Key: key,
+	}, nil
 }

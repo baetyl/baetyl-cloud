@@ -3,8 +3,8 @@ package pki
 import (
 	"time"
 
-	"github.com/baetyl/baetyl-go/v2/pki"
-	"github.com/baetyl/baetyl-go/v2/pki/models"
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -12,7 +12,7 @@ type dbStorage struct {
 	db *sqlx.DB
 }
 
-func NewStorageDatabase(cfg Persistent) (pki.Storage, error) {
+func NewStorageDatabase(cfg Persistent) (Storage, error) {
 	db, err := sqlx.Open(cfg.Database.Type, cfg.Database.URL)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func NewStorageDatabase(cfg Persistent) (pki.Storage, error) {
 	}, nil
 }
 
-func (d dbStorage) CreateCert(cert models.Cert) error {
+func (d dbStorage) CreateCert(cert plugin.Cert) error {
 	insertSQL := `
 INSERT INTO baetyl_certificate (
 cert_id, parent_id, type, common_name, 
@@ -51,7 +51,7 @@ DELETE FROM baetyl_certificate where cert_id=?
 	return err
 }
 
-func (d dbStorage) UpdateCert(cert models.Cert) error {
+func (d dbStorage) UpdateCert(cert plugin.Cert) error {
 	updateSQL := `
 UPDATE baetyl_certificate SET parent_id=?,type=?,
 common_name=?,description=?,csr=?,content=?,private_key=?,
@@ -64,21 +64,21 @@ WHERE cert_id=?
 	return err
 }
 
-func (d dbStorage) GetCert(certId string) (*models.Cert, error) {
+func (d dbStorage) GetCert(certId string) (*plugin.Cert, error) {
 	selectSQL := `
 SELECT cert_id, parent_id, type, common_name, 
 description, csr, content, private_key, not_before, not_after
 FROM baetyl_certificate 
 WHERE cert_id=? LIMIT 0,1
 `
-	var cert []models.Cert
+	var cert []plugin.Cert
 	if err := d.db.Select(&cert, selectSQL, certId); err != nil {
 		return nil, err
 	}
 	if len(cert) > 0 {
 		return &cert[0], nil
 	}
-	return nil, nil
+	return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "certificate"), common.Field("name", certId))
 }
 
 func (d dbStorage) CountCertByParentId(parentId string) (int, error) {

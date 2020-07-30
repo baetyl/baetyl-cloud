@@ -15,7 +15,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-//go:generate mockgen -destination=../mock/service/object.go -package=plugin github.com/baetyl/baetyl-cloud/service ObjectService
+//go:generate mockgen -destination=../mock/service/object.go -package=service github.com/baetyl/baetyl-cloud/v2/service ObjectService
 
 type ObjectService interface {
 	ListSources() []models.ObjectStorageSource

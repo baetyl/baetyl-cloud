@@ -1,13 +1,16 @@
 package pki
 
+import "time"
+
 // CloudConfig baetyl-cloud config
 type CloudConfig struct {
 	PKI struct {
-		RootCAFile    string     `yaml:"rootCAFile" json:"rootCAFile" validate:"nonzero"`
-		RootCAKeyFile string     `yaml:"rootCAKeyFile" json:"rootCAKeyFile" validate:"nonzero"`
-		SubDuration   int        `yaml:"subDuration" json:"subDuration" default:"7300"`
-		RootDuration  int        `yaml:"rootDuration" json:"rootDuration" default:"18250"`
-		Persistent    Persistent `yaml:"persistent" json:"persistent" validate:"nonzero"`
+		RootCAFile    string        `yaml:"rootCAFile" json:"rootCAFile" validate:"nonzero"`
+		RootCAKeyFile string        `yaml:"rootCAKeyFile" json:"rootCAKeyFile" validate:"nonzero"`
+		RootCertId    string        `yaml:"rootCertId" json:"rootCertId" validate:"nonzero"`
+		SubDuration   time.Duration `yaml:"subDuration" json:"subDuration" default:"175200h"`   // 20*365*24
+		RootDuration  time.Duration `yaml:"rootDuration" json:"rootDuration" default:"438000h"` // 50*365*24
+		Persistent    Persistent    `yaml:"persistent" json:"persistent" validate:"nonzero"`
 	} `yaml:"defaultpki" json:"defaultpki"`
 }
 

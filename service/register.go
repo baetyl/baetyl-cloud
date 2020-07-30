@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-//go:generate mockgen -destination=../mock/service/register.go -package=plugin github.com/baetyl/baetyl-cloud/service RegisterService
+//go:generate mockgen -destination=../mock/service/register.go -package=service github.com/baetyl/baetyl-cloud/v2/service RegisterService
 
 type RegisterService interface {
 	GetBatch(name, ns string) (*models.Batch, error)

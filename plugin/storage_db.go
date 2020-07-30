@@ -8,7 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-//go:generate mockgen -destination=../mock/plugin/storage_db.go -package=plugin github.com/baetyl/baetyl-cloud/plugin DBStorage
+//go:generate mockgen -destination=../mock/plugin/storage_db.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin DBStorage
 
 // DBStorage DBStorage
 type DBStorage interface {

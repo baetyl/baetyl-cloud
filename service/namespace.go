@@ -9,7 +9,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-//go:generate mockgen -destination=../mock/service/namespace.go -package=plugin github.com/baetyl/baetyl-cloud/service NamespaceService
+//go:generate mockgen -destination=../mock/service/namespace.go -package=service github.com/baetyl/baetyl-cloud/v2/service NamespaceService
 
 // NamespaceService NamespaceService
 type NamespaceService interface {
