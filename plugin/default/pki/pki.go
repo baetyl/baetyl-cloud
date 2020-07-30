@@ -4,10 +4,11 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"errors"
+	"io/ioutil"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-go/v2/pki"
-	"io/ioutil"
 )
 
 const (

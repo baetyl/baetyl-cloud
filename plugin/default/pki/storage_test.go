@@ -1,9 +1,10 @@
 package pki
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewStorage(t *testing.T) {

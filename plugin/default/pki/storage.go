@@ -1,9 +1,10 @@
 package pki
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"io"
 	"os"
+
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 //go:generate mockgen -destination=../../../mock/plugin/default/pki/storage.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin/default/pki Storage
