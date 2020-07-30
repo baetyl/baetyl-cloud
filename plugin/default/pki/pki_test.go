@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
-	mockPKI "github.com/baetyl/baetyl-cloud/v2/mock/plugin/default/pki"
+	mockPKI "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-go/v2/pki"
 	"github.com/golang/mock/gomock"
@@ -23,12 +23,7 @@ var (
 defaultpki:
   rootCAFile: "{{.CA_PATH}}/ca.pem"
   rootCAKeyFile: "{{.CA_PATH}}/ca.key"
-  rootCertId: "98ec3bc552f0478298aa1c6702a95427"
-  persistent:
-    kind: "database"
-    database:
-      type: "sqlite3"
-      url: ":memory:"
+  persistent: "database"
 `
 	caPem = `-----BEGIN CERTIFICATE-----
 MIID7DCCAtSgAwIBAgIDAYagMA0GCSqGSIb3DQEBCwUAMIGlMQswCQYDVQQGEwJD
@@ -107,9 +102,9 @@ func genPKIConf(t *testing.T) string {
 	return tempDir
 }
 
-func genDefaultPkiClient(t *testing.T) (*defaultPkiClient, *mockPKI.MockStorage) {
+func genDefaultPkiClient(t *testing.T) (*defaultPkiClient, *mockPKI.MockPKIStorage) {
 	mockCtl := gomock.NewController(t)
-	mockSto := mockPKI.NewMockStorage(mockCtl)
+	mockSto := mockPKI.NewMockPKIStorage(mockCtl)
 
 	cfg := &CloudConfig{}
 	common.SetConfFile(path.Join(genPKIConf(t), "config.yml"))
@@ -152,22 +147,22 @@ func TestDefaultPkiClient_CheckRootCertId(t *testing.T) {
 	p, s := genDefaultPkiClient(t)
 
 	// good case 0
-	s.EXPECT().GetCert(p.cfg.PKI.RootCertId).Return(nil, nil).Times(1)
+	s.EXPECT().GetCert(RootCertId).Return(nil, nil).Times(1)
+	s.EXPECT().DeleteCert(RootCertId).Return(nil).Times(1)
+	s.EXPECT().CreateCert(gomock.Any()).Return(nil).Times(2)
 	err := p.checkRootCA()
 	assert.NoError(t, err)
 
 	// good case 1
-	s.EXPECT().GetCert(p.cfg.PKI.RootCertId).Return(nil, os.ErrNotExist).Times(1)
-	s.EXPECT().CreateCert(gomock.Any()).Return(nil).Times(1)
+	s.EXPECT().GetCert(RootCertId).Return(nil, os.ErrNotExist).Times(1)
 	err = p.checkRootCA()
 	assert.NoError(t, err)
 }
 
 func TestDefaultPkiClient_GetRootCertId(t *testing.T) {
-	exp := "98ec3bc552f0478298aa1c6702a95427"
 	p, _ := genDefaultPkiClient(t)
 	res := p.GetRootCertId()
-	assert.Equal(t, exp, res)
+	assert.Equal(t, RootCertId, res)
 }
 
 func TestDefaultPkiClient_CreateRootCert(t *testing.T) {
@@ -187,7 +182,7 @@ func TestDefaultPkiClient_CreateRootCert(t *testing.T) {
 		EmailAddresses: []string{"baetyl@lists.lfedge.org"},
 	}
 
-	s.EXPECT().GetCert(p.cfg.PKI.RootCertId).Return(genRootCAView(), nil).Times(1)
+	s.EXPECT().GetCert(RootCertId).Return(genRootCAView(), nil).Times(1)
 	s.EXPECT().CreateCert(gomock.Any()).Return(nil).Times(1)
 
 	res, err := p.CreateRootCert(csrInfo, "")
@@ -197,8 +192,8 @@ func TestDefaultPkiClient_CreateRootCert(t *testing.T) {
 
 func TestDefaultPkiClient_GetRootCert(t *testing.T) {
 	p, s := genDefaultPkiClient(t)
-	s.EXPECT().GetCert(p.cfg.PKI.RootCertId).Return(genRootCAView(), nil).Times(1)
-	res, err := p.GetRootCert(p.cfg.PKI.RootCertId)
+	s.EXPECT().GetCert(RootCertId).Return(genRootCAView(), nil).Times(1)
+	res, err := p.GetRootCert(RootCertId)
 	assert.NoError(t, err)
 	assert.Equal(t, caPem, string(res))
 }
@@ -206,68 +201,68 @@ func TestDefaultPkiClient_GetRootCert(t *testing.T) {
 func TestDefaultPkiClient_DeleteRootCert(t *testing.T) {
 	p, s := genDefaultPkiClient(t)
 	// good case
-	s.EXPECT().CountCertByParentId(p.cfg.PKI.RootCertId).Return(0, nil).Times(1)
-	s.EXPECT().DeleteCert(p.cfg.PKI.RootCertId).Return(nil).Times(2)
-	err := p.DeleteRootCert(p.cfg.PKI.RootCertId)
+	s.EXPECT().CountCertByParentId(RootCertId).Return(0, nil).Times(1)
+	s.EXPECT().DeleteCert(RootCertId).Return(nil).Times(2)
+	err := p.DeleteRootCert(RootCertId)
 	assert.NoError(t, err)
 
 	// bad case
-	s.EXPECT().CountCertByParentId(p.cfg.PKI.RootCertId).Return(1, nil).Times(1)
-	err = p.DeleteRootCert(p.cfg.PKI.RootCertId)
+	s.EXPECT().CountCertByParentId(RootCertId).Return(1, nil).Times(1)
+	err = p.DeleteRootCert(RootCertId)
 	assert.Error(t, err, ErrCertInUsed.Error())
 }
 
 func TestDefaultPkiClient_CreateServerCert(t *testing.T) {
 	p, s := genDefaultPkiClient(t)
-	s.EXPECT().GetCert(p.cfg.PKI.RootCertId).Return(genRootCAView(), nil).Times(1)
+	s.EXPECT().GetCert(RootCertId).Return(genRootCAView(), nil).Times(1)
 	s.EXPECT().CreateCert(gomock.Any()).Return(nil).Times(1)
 
 	csr, err := base64.StdEncoding.DecodeString(base64CSR)
 	assert.NoError(t, err)
-	res, err := p.CreateServerCert(csr, p.cfg.PKI.RootCertId)
+	res, err := p.CreateServerCert(csr, RootCertId)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "", res)
 }
 
 func TestDefaultPkiClient_GetServerCert(t *testing.T) {
 	p, s := genDefaultPkiClient(t)
-	s.EXPECT().GetCert(p.cfg.PKI.RootCertId).Return(genRootCAView(), nil).Times(1)
-	res, err := p.GetServerCert(p.cfg.PKI.RootCertId)
+	s.EXPECT().GetCert(RootCertId).Return(genRootCAView(), nil).Times(1)
+	res, err := p.GetServerCert(RootCertId)
 	assert.NoError(t, err)
 	assert.Equal(t, caPem, string(res))
 }
 
 func TestDefaultPkiClient_DeleteServerCert(t *testing.T) {
 	p, s := genDefaultPkiClient(t)
-	s.EXPECT().DeleteCert(p.cfg.PKI.RootCertId).Return(nil).Times(1)
-	err := p.DeleteServerCert(p.cfg.PKI.RootCertId)
+	s.EXPECT().DeleteCert(RootCertId).Return(nil).Times(1)
+	err := p.DeleteServerCert(RootCertId)
 	assert.NoError(t, err)
 }
 
 func TestDefaultPkiClient_CreateClientCert(t *testing.T) {
 	p, s := genDefaultPkiClient(t)
-	s.EXPECT().GetCert(p.cfg.PKI.RootCertId).Return(genRootCAView(), nil).Times(1)
+	s.EXPECT().GetCert(RootCertId).Return(genRootCAView(), nil).Times(1)
 	s.EXPECT().CreateCert(gomock.Any()).Return(nil).Times(1)
 
 	csr, err := base64.StdEncoding.DecodeString(base64CSR)
 	assert.NoError(t, err)
-	res, err := p.CreateClientCert(csr, p.cfg.PKI.RootCertId)
+	res, err := p.CreateClientCert(csr, RootCertId)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "", res)
 }
 
 func TestDefaultPkiClient_GetClientCert(t *testing.T) {
 	p, s := genDefaultPkiClient(t)
-	s.EXPECT().GetCert(p.cfg.PKI.RootCertId).Return(genRootCAView(), nil).Times(1)
-	res, err := p.GetClientCert(p.cfg.PKI.RootCertId)
+	s.EXPECT().GetCert(RootCertId).Return(genRootCAView(), nil).Times(1)
+	res, err := p.GetClientCert(RootCertId)
 	assert.NoError(t, err)
 	assert.Equal(t, caPem, string(res))
 }
 
 func TestDefaultPkiClient_DeleteClientCert(t *testing.T) {
 	p, s := genDefaultPkiClient(t)
-	s.EXPECT().DeleteCert(p.cfg.PKI.RootCertId).Return(nil).Times(1)
-	err := p.DeleteClientCert(p.cfg.PKI.RootCertId)
+	s.EXPECT().DeleteCert(RootCertId).Return(nil).Times(1)
+	err := p.DeleteClientCert(RootCertId)
 	assert.NoError(t, err)
 }
 

@@ -113,6 +113,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	list := []common.SystemApplication{
 		common.BaetylCore,
 		common.BaetylFunction,
+		common.BaetylBroker,
 	}
 	_, err = api.GenSysApp(name, ns, list)
 	if err != nil {

@@ -36,12 +36,12 @@ func RegisterFactory(name string, f Factory) {
 
 // GetPlugin GetPlugin
 func GetPlugin(name string) (Plugin, error) {
-	mu.Lock()
-	defer mu.Unlock()
 	name = strings.ToLower(name)
 	if p, ok := plugins[name]; ok {
 		return p, nil
 	}
+	mu.Lock()
+	defer mu.Unlock()
 	f, ok := pluginFactory[name]
 	if !ok {
 		return nil, common.Error(common.ErrPluginNotFound, common.Field("name", name))

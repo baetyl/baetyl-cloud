@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-//go:generate mockgen -destination=../mock/plugin/pki.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin PKI
+//go:generate mockgen -destination=../mock/plugin/pki.go -package=plugin -source=pki.go
 
 type Cert struct {
 	CertId      string    `db:"cert_id"`
@@ -40,5 +40,14 @@ type PKI interface {
 	DeleteClientCert(certId string) error
 
 	// close
+	io.Closer
+}
+
+type PKIStorage interface {
+	CreateCert(cert Cert) error
+	DeleteCert(certId string) error
+	UpdateCert(cert Cert) error
+	GetCert(certId string) (*Cert, error)
+	CountCertByParentId(parentId string) (int, error)
 	io.Closer
 }

@@ -16,16 +16,19 @@ const (
 	TypeIssuingCA = "IssuingCA"
 	// TypeIssuingSubCert is an issuing sub cert which is signed by issuing ca
 	TypeIssuingSubCert = "IssuingSubCertificate"
+	// Root cert ID
+	RootCertId = "baetyl-cert-root"
 )
 
 var (
 	ErrParseCert  = errors.New("error parsing certificate")
 	ErrCertInUsed = errors.New("there are also sub-certificates issued according to this certificate in use and cannot be deleted")
+	ErrPlugin     = errors.New("plugin type conversion error")
 )
 
 type defaultPkiClient struct {
 	cfg       CloudConfig
-	sto       Storage
+	sto       plugin.PKIStorage
 	pkiClient pki.PKI
 }
 
@@ -39,10 +42,16 @@ func NewPKI() (plugin.Plugin, error) {
 	if err := common.LoadConfig(&cfg); err != nil {
 		return nil, err
 	}
-	sto, err := NewStorage(cfg.PKI.Persistent)
+
+	db, err := plugin.GetPlugin(cfg.PKI.Persistent)
 	if err != nil {
 		return nil, err
 	}
+	sto, ok := db.(plugin.PKIStorage)
+	if !ok {
+		return nil, ErrPlugin
+	}
+
 	pkiClient, err := pki.NewPKIClient()
 	if err != nil {
 		return nil, err
@@ -60,13 +69,13 @@ func NewPKI() (plugin.Plugin, error) {
 }
 
 func (p *defaultPkiClient) GetRootCertId() string {
-	return p.cfg.PKI.RootCertId
+	return RootCertId
 }
 
 // root cert
 func (p *defaultPkiClient) CreateRootCert(info *x509.CertificateRequest, parentId string) (string, error) {
 	if parentId == "" {
-		parentId = p.cfg.PKI.RootCertId
+		parentId = RootCertId
 	}
 	parent, err := p.getRootCA(parentId)
 	if err != nil {
@@ -134,9 +143,11 @@ func (p *defaultPkiClient) Close() error {
 }
 
 func (p *defaultPkiClient) checkRootCA() error {
-	_, err := p.sto.GetCert(p.cfg.PKI.RootCertId)
+	_, err := p.sto.GetCert(RootCertId)
 	if err == nil {
-		return nil
+		if err := p.sto.DeleteCert(RootCertId); err != nil {
+			return err
+		}
 	}
 	crt, err := ioutil.ReadFile(p.cfg.PKI.RootCAFile)
 	if err != nil {
@@ -146,7 +157,7 @@ func (p *defaultPkiClient) checkRootCA() error {
 	if err != nil {
 		return err
 	}
-	return p.saveCert(p.cfg.PKI.RootCertId, &pki.CertPem{
+	return p.saveCert(RootCertId, &pki.CertPem{
 		Crt: crt,
 		Key: key,
 	}, []byte(""))

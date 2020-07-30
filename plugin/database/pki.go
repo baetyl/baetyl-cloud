@@ -1,33 +1,9 @@
-package pki
+package database
 
 import (
-	"time"
-
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"github.com/jmoiron/sqlx"
+	"os"
 )
-
-type dbStorage struct {
-	db *sqlx.DB
-}
-
-func NewStorageDatabase(cfg Persistent) (Storage, error) {
-	db, err := sqlx.Open(cfg.Database.Type, cfg.Database.URL)
-	if err != nil {
-		return nil, err
-	}
-	db.SetMaxIdleConns(cfg.Database.MaxIdleConns)
-	db.SetMaxOpenConns(cfg.Database.MaxConns)
-	db.SetConnMaxLifetime(time.Duration(cfg.Database.ConnMaxLifetime) * time.Second)
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-	return &dbStorage{
-		db: db,
-	}, nil
-}
 
 func (d dbStorage) CreateCert(cert plugin.Cert) error {
 	insertSQL := `
@@ -78,7 +54,7 @@ WHERE cert_id=? LIMIT 0,1
 	if len(cert) > 0 {
 		return &cert[0], nil
 	}
-	return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "certificate"), common.Field("name", certId))
+	return nil, os.ErrNotExist
 }
 
 func (d dbStorage) CountCertByParentId(parentId string) (int, error) {
@@ -94,8 +70,4 @@ WHERE parent_id=?
 		return 0, err
 	}
 	return res[0].Count, nil
-}
-
-func (d dbStorage) Close() error {
-	return d.db.Close()
 }

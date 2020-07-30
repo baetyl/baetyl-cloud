@@ -538,8 +538,8 @@ func TestAPI_Active(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
-	ccs.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(conf, nil).Times(2)
-	as.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(app, nil).Times(2)
+	ccs.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(conf, nil).Times(3)
+	as.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(app, nil).Times(3)
 	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(mBatch, nil).Times(1)
 	rs.EXPECT().GetRecordByFingerprint(mBatch.Name, mBatch.Namespace, mRecord.FingerprintValue).Return(mRecord, nil).Times(1)
 	rs.EXPECT().UpdateRecord(mRecord).Return(nil, nil).Times(1)
@@ -551,8 +551,8 @@ func TestAPI_Active(t *testing.T) {
 	scs.EXPECT().GetSysConfig(gomock.Any(), gomock.Any()).Return(sysConf, nil).AnyTimes()
 	pki.EXPECT().SignClientCertificate(gomock.Any(), gomock.Any()).Return(certPEM, nil).AnyTimes()
 	pki.EXPECT().GetCA().Return([]byte("test"), nil).AnyTimes()
-	ns.EXPECT().UpdateNodeAppVersion(mRecord.Namespace, gomock.Any()).Return(nodeList, nil).Times(2)
-	is.EXPECT().RefreshNodesIndexByApp(mRecord.Namespace, gomock.Any(), nodeList).Times(2)
+	ns.EXPECT().UpdateNodeAppVersion(mRecord.Namespace, gomock.Any()).Return(nodeList, nil).Times(3)
+	is.EXPECT().RefreshNodesIndexByApp(mRecord.Namespace, gomock.Any(), nodeList).Times(3)
 	init.EXPECT().GetResource(gomock.Any()).Return("{}", nil).AnyTimes()
 	init.EXPECT().GetSyncCert(mRecord.Namespace, mRecord.NodeName).Return(secret, nil).Times(1)
 
@@ -563,8 +563,8 @@ func TestAPI_Active(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	ccs.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(conf, nil).Times(2)
-	as.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(app, nil).Times(2)
+	ccs.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(conf, nil).Times(3)
+	as.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(app, nil).Times(3)
 	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(mBatch, nil).Times(1)
 	rs.EXPECT().GetRecordByFingerprint(mBatch.Name, mBatch.Namespace, mRecord.FingerprintValue).Return(mRecord, nil).Times(1)
 	rs.EXPECT().UpdateRecord(mRecord).Return(nil, nil).Times(1)
@@ -576,8 +576,8 @@ func TestAPI_Active(t *testing.T) {
 	scs.EXPECT().GetSysConfig(gomock.Any(), gomock.Any()).Return(sysConf, nil).AnyTimes()
 	pki.EXPECT().SignClientCertificate(gomock.Any(), gomock.Any()).Return(certPEM, nil).AnyTimes()
 	pki.EXPECT().GetCA().Return([]byte("test"), nil).AnyTimes()
-	ns.EXPECT().UpdateNodeAppVersion(mRecord.Namespace, gomock.Any()).Return(nodeList, nil).Times(2)
-	is.EXPECT().RefreshNodesIndexByApp(mRecord.Namespace, gomock.Any(), nodeList).Times(2)
+	ns.EXPECT().UpdateNodeAppVersion(mRecord.Namespace, gomock.Any()).Return(nodeList, nil).Times(3)
+	is.EXPECT().RefreshNodesIndexByApp(mRecord.Namespace, gomock.Any(), nodeList).Times(3)
 	init.EXPECT().GetResource(gomock.Any()).Return("{}", nil).AnyTimes()
 	init.EXPECT().GetSyncCert(mRecord.Namespace, mRecord.NodeName).Return(secret, nil).Times(1)
 

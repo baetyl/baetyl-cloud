@@ -41,6 +41,7 @@ func TestAPI_GenSysApp(t *testing.T) {
 	list := []common.SystemApplication{
 		common.BaetylCore,
 		common.BaetylFunction,
+		common.BaetylBroker,
 	}
 	conf := &specV1.Configuration{
 		Name:      "testConf",
@@ -72,20 +73,20 @@ func TestAPI_GenSysApp(t *testing.T) {
 		Data:      certMap,
 		Version:   "123",
 	}
-	cs.EXPECT().Create(node.Namespace, gomock.Any()).Return(conf, nil).Times(2)
-	as.EXPECT().Create(node.Namespace, gomock.Any()).Return(app, nil).Times(2)
+	cs.EXPECT().Create(node.Namespace, gomock.Any()).Return(conf, nil).Times(3)
+	as.EXPECT().Create(node.Namespace, gomock.Any()).Return(app, nil).Times(3)
 	ss.EXPECT().Get(node.Namespace, gomock.Any(), "").Return(secret, nil).AnyTimes()
 	scs.EXPECT().GetSysConfig(gomock.Any(), gomock.Any()).Return(sysConf, nil).AnyTimes()
 	pki.EXPECT().SignClientCertificate(gomock.Any(), gomock.Any()).Return(certPEM, nil).AnyTimes()
 	pki.EXPECT().GetCA().Return([]byte("test"), nil).AnyTimes()
 	ss.EXPECT().Create(node.Namespace, gomock.Any()).Return(secret, nil).AnyTimes()
-	ns.EXPECT().UpdateNodeAppVersion(node.Namespace, gomock.Any()).Return(nodeList, nil).Times(2)
-	is.EXPECT().RefreshNodesIndexByApp(node.Namespace, gomock.Any(), nodeList).Times(2)
+	ns.EXPECT().UpdateNodeAppVersion(node.Namespace, gomock.Any()).Return(nodeList, nil).Times(3)
+	is.EXPECT().RefreshNodesIndexByApp(node.Namespace, gomock.Any(), nodeList).Times(3)
 	init.EXPECT().GetResource(gomock.Any()).Return("{}", nil).AnyTimes()
 
 	apps, err := api.GenSysApp(node.Name, node.Namespace, list)
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(apps))
+	assert.Equal(t, 3, len(apps))
 }
 
 func TestAPI_GenSysApp_ErrUpdateNode(t *testing.T) {
