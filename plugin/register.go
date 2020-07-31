@@ -49,8 +49,14 @@ func GetPlugin(name string) (Plugin, error) {
 		log.L().Error("plugin create failed", log.Error(err))
 		return nil, err
 	}
-	plugins.Store(name, p)
-	return p, nil
+	act, ok := plugins.LoadOrStore(name, p)
+	if ok {
+		err := p.Close()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return act.(Plugin), nil
 }
 
 // ClosePlugins ClosePlugins
