@@ -53,10 +53,11 @@ func GetPlugin(name string) (Plugin, error) {
 	if ok {
 		err := p.Close()
 		if err != nil {
-			return nil, err
+			log.L().Warn("plugin close failed", log.Error(err))
 		}
+		return act.(Plugin), nil
 	}
-	return act.(Plugin), nil
+	return p, nil
 }
 
 // ClosePlugins ClosePlugins
