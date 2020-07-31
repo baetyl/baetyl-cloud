@@ -17,6 +17,7 @@ var (
 	}
 )
 
+// todo more general, initialize according to list
 func (api *API) GenSysApp(nodeName, ns string, appList []common.SystemApplication) ([]specV1.Application, error) {
 	var apps []specV1.Application
 	isSysApp := true

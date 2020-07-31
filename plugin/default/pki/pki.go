@@ -17,11 +17,11 @@ const (
 	// TypeIssuingSubCert is an issuing sub cert which is signed by issuing ca
 	TypeIssuingSubCert = "IssuingSubCertificate"
 	// Root cert ID
-	RootCertId = "baetyl-cert-root"
+	RootCertId = "baetyl-cloud-system-cert-root"
 )
 
 var (
-	ErrParseCert  = errors.New("error parsing certificate")
+	ErrParseCert  = errors.New("failed to parse certificate")
 	ErrCertInUsed = errors.New("there are also sub-certificates issued according to this certificate in use and cannot be deleted")
 	ErrPlugin     = errors.New("plugin type conversion error")
 )
