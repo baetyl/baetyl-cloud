@@ -46,14 +46,14 @@ func GetPlugin(name string) (Plugin, error) {
 	}
 	p, err := f.(Factory)()
 	if err != nil {
-		log.L().Error("plugin create failed", log.Error(err))
+		log.L().Error("failed to create plugin", log.Error(err))
 		return nil, err
 	}
 	act, ok := plugins.LoadOrStore(name, p)
 	if ok {
 		err := p.Close()
 		if err != nil {
-			log.L().Warn("plugin close failed", log.Error(err))
+			log.L().Warn("failed to close plugin", log.Error(err))
 		}
 		return act.(Plugin), nil
 	}
