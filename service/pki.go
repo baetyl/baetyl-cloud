@@ -12,7 +12,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-//go:generate mockgen -destination=../mock/service/pki.go -package=plugin github.com/baetyl/baetyl-cloud/service PKIService
+//go:generate mockgen -destination=../mock/service/pki.go -package=service github.com/baetyl/baetyl-cloud/v2/service PKIService
 
 type PKIService interface {
 	// GetCA get ca
@@ -58,28 +58,7 @@ func NewPKIService(config *config.CloudConfig) (PKIService, error) {
 }
 
 func (p *pkiService) GetCA() ([]byte, error) {
-	// determine whether it exists in the system configuration
-	sysConf, err := p.db.GetSysConfig(Certificate, CertRoot)
-	if err == nil {
-		return p.pki.GetRootCert(sysConf.Value)
-	}
-	// if it does not exist in the system configuration, apply to the pki service to create a root certificate
-	certInfo := p.genDefaultCSR("baetyl.ca")
-	rootId, err := p.pki.CreateRootCert(certInfo, "")
-	if err != nil {
-		return nil, err
-	}
-	// save the applied root certificate to the system configuration
-	rootCertConfig := &models.SysConfig{
-		Type:  Certificate,
-		Key:   CertRoot,
-		Value: rootId,
-	}
-	_, err = p.db.CreateSysConfig(rootCertConfig)
-	if err != nil {
-		return nil, err
-	}
-	return p.pki.GetRootCert(rootId)
+	return p.pki.GetRootCert(p.pki.GetRootCertId())
 }
 
 func (p *pkiService) DeleteServerCertificate(certId string) error {

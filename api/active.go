@@ -27,6 +27,7 @@ var (
 	SystemApps      = []common.SystemApplication{
 		common.BaetylCore,
 		common.BaetylFunction,
+		common.BaetylBroker,
 	}
 )
 

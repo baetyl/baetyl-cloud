@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-//go:generate mockgen -destination=../mock/plugin/shadow.go -package=plugin github.com/baetyl/baetyl-cloud/plugin Shadow
+//go:generate mockgen -destination=../mock/plugin/shadow.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin Shadow
 
 // Shadow
 type Shadow interface {

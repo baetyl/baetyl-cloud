@@ -5,7 +5,7 @@ import (
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
-//go:generate mockgen -destination=../mock/plugin/storage_model.go -package=plugin github.com/baetyl/baetyl-cloud/plugin ModelStorage
+//go:generate mockgen -destination=../mock/plugin/storage_model.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin ModelStorage
 
 // ModelStorage ModelStorage
 type ModelStorage interface {

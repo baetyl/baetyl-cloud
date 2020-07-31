@@ -7,8 +7,6 @@ import (
 	"github.com/gin-contrib/cache/persistence"
 )
 
-//go:generate mockgen -destination=../mock/service/cache.go -package=plugin github.com/baetyl/baetyl-cloud/service CacheService
-
 type CacheService struct {
 	cache          persistence.CacheStore
 	expireDuration time.Duration

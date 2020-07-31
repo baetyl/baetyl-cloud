@@ -1,35 +1,11 @@
-package pki
+package database
 
 import (
-	"time"
-
-	"github.com/baetyl/baetyl-go/v2/pki"
-	"github.com/baetyl/baetyl-go/v2/pki/models"
-	"github.com/jmoiron/sqlx"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"os"
 )
 
-type dbStorage struct {
-	db *sqlx.DB
-}
-
-func NewStorageDatabase(cfg Persistent) (pki.Storage, error) {
-	db, err := sqlx.Open(cfg.Database.Type, cfg.Database.URL)
-	if err != nil {
-		return nil, err
-	}
-	db.SetMaxIdleConns(cfg.Database.MaxIdleConns)
-	db.SetMaxOpenConns(cfg.Database.MaxConns)
-	db.SetConnMaxLifetime(time.Duration(cfg.Database.ConnMaxLifetime) * time.Second)
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-	return &dbStorage{
-		db: db,
-	}, nil
-}
-
-func (d dbStorage) CreateCert(cert models.Cert) error {
+func (d dbStorage) CreateCert(cert plugin.Cert) error {
 	insertSQL := `
 INSERT INTO baetyl_certificate (
 cert_id, parent_id, type, common_name, 
@@ -51,7 +27,7 @@ DELETE FROM baetyl_certificate where cert_id=?
 	return err
 }
 
-func (d dbStorage) UpdateCert(cert models.Cert) error {
+func (d dbStorage) UpdateCert(cert plugin.Cert) error {
 	updateSQL := `
 UPDATE baetyl_certificate SET parent_id=?,type=?,
 common_name=?,description=?,csr=?,content=?,private_key=?,
@@ -64,21 +40,21 @@ WHERE cert_id=?
 	return err
 }
 
-func (d dbStorage) GetCert(certId string) (*models.Cert, error) {
+func (d dbStorage) GetCert(certId string) (*plugin.Cert, error) {
 	selectSQL := `
 SELECT cert_id, parent_id, type, common_name, 
 description, csr, content, private_key, not_before, not_after
 FROM baetyl_certificate 
 WHERE cert_id=? LIMIT 0,1
 `
-	var cert []models.Cert
+	var cert []plugin.Cert
 	if err := d.db.Select(&cert, selectSQL, certId); err != nil {
 		return nil, err
 	}
 	if len(cert) > 0 {
 		return &cert[0], nil
 	}
-	return nil, nil
+	return nil, os.ErrNotExist
 }
 
 func (d dbStorage) CountCertByParentId(parentId string) (int, error) {
@@ -94,8 +70,4 @@ WHERE parent_id=?
 		return 0, err
 	}
 	return res[0].Count, nil
-}
-
-func (d dbStorage) Close() error {
-	return d.db.Close()
 }

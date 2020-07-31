@@ -6,7 +6,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-//go:generate mockgen -destination=../mock/service/property.go -package=plugin github.com/baetyl/baetyl-cloud/service PropertyService
+//go:generate mockgen -destination=../mock/service/property.go -package=service github.com/baetyl/baetyl-cloud/v2/service PropertyService
 
 type PropertyService interface {
 	CreateProperty(property *models.Property) error

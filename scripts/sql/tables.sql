@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS `baetyl_certificate` (
 CREATE TABLE IF NOT EXISTS `baetyl_property` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
   `key` varchar(128) NOT NULL DEFAULT '',
-  `value` text NOT NULL DEFAULT '',
+  `value` text NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ,
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
   PRIMARY KEY (`id`),

@@ -10,7 +10,7 @@ import (
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
-//go:generate mockgen -destination=../mock/service/secret.go -package=plugin github.com/baetyl/baetyl-cloud/service SecretService
+//go:generate mockgen -destination=../mock/service/secret.go -package=service github.com/baetyl/baetyl-cloud/v2/service SecretService
 
 // SecretService SecretService
 type SecretService interface {

@@ -6,7 +6,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
-//go:generate mockgen -destination=../mock/plugin/object.go -package=plugin github.com/baetyl/baetyl-cloud/plugin Object
+//go:generate mockgen -destination=../mock/plugin/object.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin Object
 
 // Object Object
 //TODO: userID doesn't belong to Object, should in the metedata

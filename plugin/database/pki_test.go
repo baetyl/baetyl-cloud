@@ -1,13 +1,12 @@
-package pki
+package database
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-go/v2/pki"
-	"github.com/baetyl/baetyl-go/v2/pki/models"
 	"testing"
 	"time"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/plugin/default/pki"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 )
@@ -39,20 +38,8 @@ CREATE TABLE baetyl_certificate
 	}
 )
 
-func mockNewDB(cfg Persistent) (*dbStorage, error) {
-	db, err := sqlx.Open(cfg.Database.Type, cfg.Database.URL)
-	if err != nil {
-		return nil, err
-	}
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-	return &dbStorage{db: db}, nil
-}
-
-func genCertificate() *models.Cert {
-	return &models.Cert{
+func genCertificate() *plugin.Cert {
+	return &plugin.Cert{
 		CertId:      "123",
 		ParentId:    "456",
 		Type:        pki.TypeIssuingCA,
@@ -76,19 +63,15 @@ func (d *dbStorage) MockCreateCertificateTable() {
 }
 
 func TestCertificate(t *testing.T) {
-	var cfg Persistent
-	cfg.Database.Type = "sqlite3"
-	cfg.Database.URL = ":memory:"
-
-	db, err := mockNewDB(cfg)
+	db, err := MockNewDB()
 	if err != nil {
 		fmt.Printf("get mock sqlite3 error = %s", err.Error())
 		t.Fail()
 		return
 	}
+	db.MockCreateCertificateTable()
 
 	certificate := genCertificate()
-	db.MockCreateCertificateTable()
 	err = db.CreateCert(*certificate)
 	assert.NoError(t, err)
 
@@ -111,17 +94,13 @@ func TestCertificate(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, err = db.GetCert(certificate.CertId)
-	assert.NoError(t, err)
-
-	// test new
-	_, err = NewStorageDatabase(cfg)
-	assert.NoError(t, err)
+	assert.Error(t, err)
 
 	err = db.Close()
 	assert.NoError(t, err)
 }
 
-func checkCertificate(t *testing.T, expect, actual *models.Cert) {
+func checkCertificate(t *testing.T, expect, actual *plugin.Cert) {
 	assert.Equal(t, expect.CertId, actual.CertId)
 	assert.Equal(t, expect.ParentId, actual.ParentId)
 	assert.Equal(t, expect.Description, actual.Description)

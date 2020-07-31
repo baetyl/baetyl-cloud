@@ -6,7 +6,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-//go:generate mockgen -destination=../mock/service/index.go -package=plugin github.com/baetyl/baetyl-cloud/service IndexService
+//go:generate mockgen -destination=../mock/service/index.go -package=service github.com/baetyl/baetyl-cloud/v2/service IndexService
 
 type IndexService interface {
 	// comment

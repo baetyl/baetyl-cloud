@@ -11,7 +11,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/log"
 )
 
-//go:generate mockgen -destination=../mock/service/callback.go -package=plugin github.com/baetyl/baetyl-cloud/service CallbackService
+//go:generate mockgen -destination=../mock/service/callback.go -package=service github.com/baetyl/baetyl-cloud/v2/service CallbackService
 
 type CallbackService interface {
 	Create(callback *models.Callback) (*models.Callback, error)

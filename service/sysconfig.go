@@ -6,7 +6,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-//go:generate mockgen -destination=../mock/service/sysconfig.go -package=plugin github.com/baetyl/baetyl-cloud/service SysConfigService
+//go:generate mockgen -destination=../mock/service/sysconfig.go -package=service github.com/baetyl/baetyl-cloud/v2/service SysConfigService
 
 type SysConfigService interface {
 	GetSysConfig(tp, key string) (*models.SysConfig, error)

@@ -17,6 +17,7 @@ var (
 	}
 )
 
+// todo more general, initialize according to list
 func (api *API) GenSysApp(nodeName, ns string, appList []common.SystemApplication) ([]specV1.Application, error) {
 	var apps []specV1.Application
 	isSysApp := true
@@ -31,6 +32,12 @@ func (api *API) GenSysApp(nodeName, ns string, appList []common.SystemApplicatio
 			app = *res
 		case common.BaetylFunction:
 			res, err := api.GenFunctionApp(nodeName, ns, isSysApp)
+			if err != nil {
+				return nil, err
+			}
+			app = *res
+		case common.BaetylBroker:
+			res, err := api.GenBrokerApp(nodeName, ns, true)
 			if err != nil {
 				return nil, err
 			}
@@ -119,6 +126,39 @@ func (api *API) GenFunctionApp(nodeName, ns string, isSys bool) (*specV1.Applica
 		"AppType":       common.ContainerApp,
 	}
 	return api.genApp(ns, common.TemplateJsonAppFunction, appMap, isSys)
+}
+
+func (api *API) GenBrokerApp(nodeName, ns string, isSys bool) (*specV1.Application, error) {
+	// get sys config
+	imageConf, err := api.sysConfigService.GetSysConfig(common.BaetylModule, string(common.BaetylBroker))
+	if err != nil {
+		return nil, err
+	}
+
+	appName := fmt.Sprintf("%s-%s", common.BaetylBroker, common.RandString(9))
+	// create config
+	confMap := map[string]string{
+		"AppName":    appName,
+		"NodeName":   nodeName,
+		"Namespace":  ns,
+		"ConfigName": fmt.Sprintf("%s-%s-config-%s", common.BaetylBroker, nodeName, common.RandString(9)),
+	}
+	conf, err := api.genConfig(ns, common.TemplateJsonConfigBroker, confMap, isSys)
+	if err != nil {
+		return nil, err
+	}
+
+	// create application
+	appMap := map[string]string{
+		"AppName":       appName,
+		"Image":         imageConf.Value,
+		"NodeName":      nodeName,
+		"Namespace":     ns,
+		"ConfigName":    conf.Name,
+		"ConfigVersion": conf.Version,
+		"AppType":       common.ContainerApp,
+	}
+	return api.genApp(ns, common.TemplateJsonAppBroker, appMap, isSys)
 }
 
 func (api *API) genCertSync(appName, nodeName, ns string, module common.SystemApplication, isSys bool) (*specV1.Secret, error) {

@@ -165,8 +165,10 @@ const (
 
 	TemplateJsonAppCore        = "app-core.json"
 	TemplateJsonAppFunction    = "app-function.json"
+	TemplateJsonAppBroker      = "app-broker.json"
 	TemplateJsonConfigCore     = "config-core.json"
 	TemplateJsonConfigFunction = "config-function.json"
+	TemplateJsonConfigBroker   = "config-broker.json"
 
 	Sync     CertType = "sync"
 	Internal CertType = "internal"

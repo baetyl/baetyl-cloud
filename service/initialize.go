@@ -14,7 +14,7 @@ import (
 	"text/template"
 )
 
-//go:generate mockgen -destination=../mock/service/initialize.go -package=plugin github.com/baetyl/baetyl-cloud/service InitializeService
+//go:generate mockgen -destination=../mock/service/initialize.go -package=service github.com/baetyl/baetyl-cloud/v2/service InitializeService
 
 type InitializeService interface {
 	InitWithNode(ns, nodeName, edgeKubeNodeName string) ([]byte, error)

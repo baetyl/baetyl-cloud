@@ -10,7 +10,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-//go:generate mockgen -destination=../mock/service/auth.go -package=plugin github.com/baetyl/baetyl-cloud/service AuthService
+//go:generate mockgen -destination=../mock/service/auth.go -package=service github.com/baetyl/baetyl-cloud/v2/service AuthService
 
 type AuthService interface {
 	Authenticate(c *common.Context) error

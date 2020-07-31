@@ -13,7 +13,7 @@ import (
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
-//go:generate mockgen -destination=../mock/service/sync.go -package=plugin github.com/baetyl/baetyl-cloud/service SyncService
+//go:generate mockgen -destination=../mock/service/sync.go -package=service github.com/baetyl/baetyl-cloud/v2/service SyncService
 
 // SyncService sync service
 type SyncService interface {

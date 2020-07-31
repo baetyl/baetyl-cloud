@@ -8,7 +8,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-//go:generate mockgen -destination=../mock/service/function.go -package=plugin github.com/baetyl/baetyl-cloud/service FunctionService
+//go:generate mockgen -destination=../mock/service/function.go -package=service github.com/baetyl/baetyl-cloud/v2/service FunctionService
 
 type FunctionService interface {
 	List(userID, source string) ([]models.Function, error)
