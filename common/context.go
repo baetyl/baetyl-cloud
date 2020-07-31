@@ -125,7 +125,7 @@ func PopulateFailedResponse(cc *Context, err error, abort bool) {
 	switch e := err.(type) {
 	case errors.Coder:
 		code = e.Code()
-		status = getHTTPStatus(Code(e.Code()))
+		status = GetHTTPStatus(Code(e.Code()))
 	default:
 		code = ErrUnknown
 		status = http.StatusInternalServerError

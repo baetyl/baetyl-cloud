@@ -10,12 +10,12 @@ import (
 
 // InitRoute init router
 func (s *AdminServer) InitRoute() {
-	s.router.NoRoute(noRouteHandler)
-	s.router.NoMethod(noMethodHandler)
-	s.router.GET("/health", health)
+	s.router.NoRoute(NoRouteHandler)
+	s.router.NoMethod(NoMethodHandler)
+	s.router.GET("/health", Health)
 
-	s.router.Use(requestIDHandler)
-	s.router.Use(loggerHandler)
+	s.router.Use(RequestIDHandler)
+	s.router.Use(LoggerHandler)
 	s.router.Use(s.authHandler)
 	v1 := s.router.Group("v1")
 	{
@@ -161,12 +161,12 @@ func (s *NodeServer) GetRoute() *gin.Engine {
 }
 
 func (s *NodeServer) InitRoute() {
-	s.router.NoRoute(noRouteHandler)
-	s.router.NoMethod(noMethodHandler)
-	s.router.GET("/health", health)
+	s.router.NoRoute(NoRouteHandler)
+	s.router.NoMethod(NoMethodHandler)
+	s.router.GET("/health", Health)
 
-	s.router.Use(requestIDHandler)
-	s.router.Use(loggerHandler)
+	s.router.Use(RequestIDHandler)
+	s.router.Use(LoggerHandler)
 	if s.server.TLSConfig == nil {
 		HeaderCommonName = s.cfg.NodeServer.CommonName
 		s.router.Use(extractNodeCommonNameFromHeader)
@@ -187,12 +187,12 @@ func (s *ActiveServer) GetRoute() *gin.Engine {
 }
 
 func (s *ActiveServer) InitRoute() {
-	s.router.NoRoute(noRouteHandler)
-	s.router.NoMethod(noMethodHandler)
-	s.router.GET("/health", health)
+	s.router.NoRoute(NoRouteHandler)
+	s.router.NoMethod(NoMethodHandler)
+	s.router.GET("/health", Health)
 
-	s.router.Use(requestIDHandler)
-	s.router.Use(loggerHandler)
+	s.router.Use(RequestIDHandler)
+	s.router.Use(LoggerHandler)
 	v1 := s.router.Group("v1")
 	{
 		active := v1.Group("/active")

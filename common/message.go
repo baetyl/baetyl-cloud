@@ -144,7 +144,7 @@ var templates = map[Code]string{
 	ErrThirdServer: "Third server {{if .name}}({{.name}}){{end}} error.{{if .error}} ({{.error}}){{end}}",
 }
 
-func getHTTPStatus(c Code) int {
+func GetHTTPStatus(c Code) int {
 	switch c {
 	case ErrResourceNotFound, ErrRequestMethodNotFound:
 		return http.StatusNotFound
