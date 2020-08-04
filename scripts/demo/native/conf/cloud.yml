@@ -25,7 +25,7 @@ kubernetes:
 
 database:
   type: "mysql"
-  url: "root:secretpassword@(kubernetes.docker.internal:3306)/baetyl_cloud?charset=utf8&parseTime=true" 
+  url: "root:12345678@(kubernetes.docker.internal:3306)/baetyl_cloud?charset=utf8&parseTime=true" 
   
 defaultpki:
   rootCAFile: "./certs/client_ca.crt"
@@ -34,7 +34,7 @@ defaultpki:
     kind: "database"
     database:
       type: "mysql"
-      url: "root:secretpassword@(kubernetes.docker.internal:3306)/baetyl_cloud?charset=utf8&parseTime=true"
+      url: "root:12345678@(kubernetes.docker.internal:3306)/baetyl_cloud?charset=utf8&parseTime=true"
 
 defaultauth:
   keyFile: "./conf/token.key"
