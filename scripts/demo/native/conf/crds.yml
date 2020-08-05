@@ -1,0 +1,176 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: baetyl-cloud
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  # name must match the spec fields below, and be in the form: <plural>.<group>
+  name: nodes.cloud.baetyl.io
+spec:
+  # group name to use for REST API: /apis/<group>/<version>
+  group: cloud.baetyl.io
+  # list of versions supported by this CustomResourceDefinition
+  versions:
+    - name: v1alpha1
+      # Each version can be enabled/disabled by Served flag.
+      served: true
+      # One and only one version must be marked as the storage version.
+      storage: true
+  # either Namespaced or Cluster
+  scope: Namespaced
+  names:
+    # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+    plural: nodes
+    # singular name to be used as an alias on the CLI and for display
+    singular: node
+    # kind is normally the CamelCased singular type. Your resource manifests use this.
+    kind: Node
+    # shortNames allow shorter string to match your resource on the CLI
+    shortNames:
+      - node
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  # name must match the spec fields below, and be in the form: <plural>.<group>
+  name: applications.cloud.baetyl.io
+spec:
+  # group name to use for REST API: /apis/<group>/<version>
+  group: cloud.baetyl.io
+  # list of versions supported by this CustomResourceDefinition
+  versions:
+    - name: v1alpha1
+      # Each version can be enabled/disabled by Served flag.
+      served: true
+      # One and only one version must be marked as the storage version.
+      storage: true
+  # either Namespaced or Cluster
+  scope: Namespaced
+  names:
+    # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+    plural: applications
+    # singular name to be used as an alias on the CLI and for display
+    singular: application
+    # kind is normally the CamelCased singular type. Your resource manifests use this.
+    kind: Application
+    # shortNames allow shorter string to match your resource on the CLI
+    shortNames:
+      - app
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  # name must match the spec fields below, and be in the form: <plural>.<group>
+  name: configurations.cloud.baetyl.io
+spec:
+  # group name to use for REST API: /apis/<group>/<version>
+  group: cloud.baetyl.io
+  # list of versions supported by this CustomResourceDefinition
+  versions:
+    - name: v1alpha1
+      # Each version can be enabled/disabled by Served flag.
+      served: true
+      # One and only one version must be marked as the storage version.
+      storage: true
+  # either Namespaced or Cluster
+  scope: Namespaced
+  names:
+    # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+    plural: configurations
+    # singular name to be used as an alias on the CLI and for display
+    singular: configuration
+    # kind is normally the CamelCased singular type. Your resource manifests use this.
+    kind: Configuration
+    # shortNames allow shorter string to match your resource on the CLI
+    shortNames:
+      - config
+      - cfg
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  # name must match the spec fields below, and be in the form: <plural>.<group>
+  name: secrets.cloud.baetyl.io
+spec:
+  # group name to use for REST API: /apis/<group>/<version>
+  # group name to use for REST API: /apis/<group>/<version>
+  group: cloud.baetyl.io
+  # list of versions supported by this CustomResourceDefinition
+  versions:
+    - name: v1alpha1
+      # Each version can be enabled/disabled by Served flag.
+      served: true
+      # One and only one version must be marked as the storage version.
+      storage: true
+  # either Namespaced or Cluster
+  scope: Namespaced
+  names:
+    # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+    plural: secrets
+    # singular name to be used as an alias on the CLI and for display
+    singular: secret
+    # kind is normally the CamelCased singular type. Your resource manifests use this.
+    kind: Secret
+    # shortNames allow shorter string to match your resource on the CLI
+    shortNames:
+      - secret
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  # name must match the spec fields below, and be in the form: <plural>.<group>
+  name: nodedesires.cloud.baetyl.io
+spec:
+  # group name to use for REST API: /apis/<group>/<version>
+  group: cloud.baetyl.io
+  # list of versions supported by this CustomResourceDefinition
+  versions:
+    - name: v1alpha1
+      # Each version can be enabled/disabled by Served flag.
+      served: true
+      # One and only one version must be marked as the storage version.
+      storage: true
+  # either Namespaced or Cluster
+  scope: Namespaced
+  names:
+    # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+    plural: nodedesires
+    # singular name to be used as an alias on the CLI and for display
+    singular: nodedesire
+    # kind is normally the CamelCased singular type. Your resource manifests use this.
+    kind: NodeDesire
+    # shortNames allow shorter string to match your resource on the CLI
+    shortNames:
+      - ndesire
+      - nd
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  # name must match the spec fields below, and be in the form: <plural>.<group>
+  name: nodereports.cloud.baetyl.io
+spec:
+  # group name to use for REST API: /apis/<group>/<version>
+  group: cloud.baetyl.io
+  # list of versions supported by this CustomResourceDefinition
+  versions:
+    - name: v1alpha1
+      # Each version can be enabled/disabled by Served flag.
+      served: true
+      # One and only one version must be marked as the storage version.
+      storage: true
+  # either Namespaced or Cluster
+  scope: Namespaced
+  names:
+    # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+    plural: nodereports
+    # singular name to be used as an alias on the CLI and for display
+    singular: nodereport
+    # kind is normally the CamelCased singular type. Your resource manifests use this.
+    kind: NodeReport
+    # shortNames allow shorter string to match your resource on the CLI
+    shortNames:
+      - nreport
+      - nr

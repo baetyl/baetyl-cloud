@@ -14,6 +14,7 @@ spec:
         app: baetyl-cloud
     spec:
       hostNetwork: true
+      serviceAccountName: baetyl-cloud
       containers:
       - image: hub.baidubce.com/baetyl/cloud:v2.0.0
         imagePullPolicy: IfNotPresent
