@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: baetyl-cloud
+  labels:
+    app: baetyl-cloud
+spec:
+  type: NodePort
+  ports:
+    - name: active-port
+      nodePort: 30003
+      port: 9003
+      protocol: TCP
+      targetPort: 9003
+    - name: admin-port
+      nodePort: 30004
+      port: 9004
+      protocol: TCP
+      targetPort: 9004
+    - name: node-port
+      nodePort: 30005
+      port: 9005
+      protocol: TCP
+      targetPort: 9005
+  selector:
+    app: baetyl-cloud

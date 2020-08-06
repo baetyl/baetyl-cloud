@@ -30,11 +30,7 @@ database:
 defaultpki:
   rootCAFile: "./certs/client_ca.crt"
   rootCAKeyFile: "./certs/client_ca.key"
-  persistent:
-    kind: "database"
-    database:
-      type: "mysql"
-      url: "root:secretpassword@(kubernetes.docker.internal:3306)/baetyl_cloud?charset=utf8&parseTime=true"
+  persistent: "database"
 
 defaultauth:
   keyFile: "./conf/token.key"

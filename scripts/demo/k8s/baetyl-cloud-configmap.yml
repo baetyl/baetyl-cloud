@@ -105,7 +105,7 @@ data:
           url: "root:12345678@(host.docker.internal:3306)/baetyl_cloud?charset=utf8&parseTime=true"
 
     defaultauth:
-      namespace: "baetyl-cloud"
+      namespace: "default"
       keyFile: "/etc/baetyl/token.key"
   token.key: |-
     -----BEGIN RSA PRIVATE KEY-----
