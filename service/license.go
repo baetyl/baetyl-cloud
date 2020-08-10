@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
@@ -17,10 +16,6 @@ type licenseService struct {
 }
 
 func NewLicenseService(config *config.CloudConfig) (LicenseService, error) {
-	if p := common.GetEasyPack(); p != "" {
-		// overwrite the config if easypack is enabled
-		config.Plugin.License = p
-	}
 	l, err := plugin.GetPlugin(config.Plugin.License)
 	if err != nil {
 		return nil, err

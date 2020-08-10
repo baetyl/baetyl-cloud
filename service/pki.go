@@ -6,7 +6,6 @@ import (
 	"crypto/x509/pkix"
 	"github.com/baetyl/baetyl-go/v2/pki"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
@@ -99,15 +98,7 @@ func (p *pkiService) signCertificate(cn string, altNames models.AltNames, create
 		return nil, err
 	}
 
-	sysConf, _ := p.db.GetSysConfig(Certificate, CertRoot)
-	if sysConf == nil {
-		return nil, common.Error(
-			common.ErrResourceNotFound,
-			common.Field("type", Certificate),
-			common.Field("name", CertRoot))
-	}
-
-	certId, err := create(csr, sysConf.Value)
+	certId, err := create(csr, p.pki.GetRootCertId())
 	if err != nil {
 		return nil, err
 	}

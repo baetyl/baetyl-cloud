@@ -2,12 +2,14 @@ package server
 
 import (
 	"context"
+	"crypto/tls"
+	"net/http"
+
 	"github.com/baetyl/baetyl-cloud/v2/api"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type NodeServer struct {
@@ -32,9 +34,10 @@ func NewNodeServer(config *config.CloudConfig) (*NodeServer, error) {
 		config.NodeServer.Certificate.Key != "" &&
 		config.NodeServer.Certificate.CA != "" {
 		t, err := utils.NewTLSConfigServer(utils.Certificate{
-			CA:   config.NodeServer.Certificate.CA,
-			Cert: config.NodeServer.Certificate.Cert,
-			Key:  config.NodeServer.Certificate.Key,
+			CA:             config.NodeServer.Certificate.CA,
+			Cert:           config.NodeServer.Certificate.Cert,
+			Key:            config.NodeServer.Certificate.Key,
+			ClientAuthType: tls.RequireAnyClientCert,
 		})
 		if err != nil {
 			return nil, err
