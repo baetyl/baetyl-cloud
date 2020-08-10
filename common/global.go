@@ -13,24 +13,9 @@ const (
 	ValueTraceKey    = "requestId"
 	KeyTraceHeader   = "TraceHeader"
 	ValueTraceHeader = "x-bce-request-id" // TODO: change to x-baetyl-request-id when support configuration
-	KeyEasyPack      = "EasyPack"
-	ValueEasyPack    = "baidueasypack"
 )
 
 var cache = persistence.NewInMemoryStore(time.Minute * 10)
-
-func SetEasyPack() {
-	cache.Set(KeyEasyPack, ValueEasyPack, -1)
-}
-
-func GetEasyPack() string {
-	res := ValueEasyPack
-	err := cache.Get(KeyEasyPack, &res)
-	if err == persistence.ErrCacheMiss {
-		return ""
-	}
-	return res
-}
 
 func SetConfFile(v string) {
 	cache.Set(KeyConfFile, v, -1)
