@@ -85,14 +85,6 @@ func (s *AdminServer) InitRoute() {
 		register.GET("/:batchName/record", common.Wrapper(s.api.ListRecord))
 	}
 	{
-		callback := v1.Group("/callback")
-		callback.POST("", common.Wrapper(s.api.CreateCallback))
-		callback.PUT("/:callbackName", common.Wrapper(s.api.UpdateCallback))
-		callback.DELETE("/:callbackName", common.Wrapper(s.api.DeleteCallback))
-		callback.GET("/:callbackName", common.Wrapper(s.api.GetCallback))
-
-	}
-	{
 		namespace := v1.Group("/namespace")
 		namespace.POST("", common.Wrapper(s.api.CreateNamespace))
 		namespace.GET("", common.Wrapper(s.api.GetNamespace))
