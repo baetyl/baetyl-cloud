@@ -161,14 +161,17 @@ const (
 	BaetylCore            SystemApplication = "baetyl-core"
 	BaetylBroker          SystemApplication = "baetyl-broker"
 	BaetylFunction        SystemApplication = "baetyl-function"
+	BaetylRule            SystemApplication = "baetyl-rule"
 	BaetylState           SystemApplication = "baetyl-state"
 
 	TemplateJsonAppCore        = "app-core.json"
 	TemplateJsonAppFunction    = "app-function.json"
 	TemplateJsonAppBroker      = "app-broker.json"
+	TemplateJsonAppRule        = "app-rule.json"
 	TemplateJsonConfigCore     = "config-core.json"
 	TemplateJsonConfigFunction = "config-function.json"
 	TemplateJsonConfigBroker   = "config-broker.json"
+	TemplateJsonConfigRule     = "config-rule.json"
 
 	Sync     CertType = "sync"
 	Internal CertType = "internal"
