@@ -15,21 +15,21 @@ var (
 	HeaderCommonName = "common-name"
 )
 
-func noRouteHandler(c *gin.Context) {
+func NoRouteHandler(c *gin.Context) {
 	common.PopulateFailedResponse(common.NewContext(c), common.Error(common.ErrRequestMethodNotFound), true)
 }
 
-func noMethodHandler(c *gin.Context) {
+func NoMethodHandler(c *gin.Context) {
 	common.PopulateFailedResponse(common.NewContext(c), common.Error(common.ErrRequestMethodNotFound), true)
 }
 
-func requestIDHandler(c *gin.Context) {
+func RequestIDHandler(c *gin.Context) {
 	cc := common.NewContext(c)
 	cc.SetTrace()
 	cc.Next()
 }
 
-func loggerHandler(c *gin.Context) {
+func LoggerHandler(c *gin.Context) {
 	cc := common.NewContext(c)
 	log.L().Info("start request",
 		log.Any(cc.GetTrace()),
@@ -55,11 +55,11 @@ func loggerHandler(c *gin.Context) {
 	)
 }
 
-func health(c *gin.Context) {
+func Health(c *gin.Context) {
 	c.JSON(common.PackageResponse(nil))
 }
 
-func extractNodeCommonNameFromCert(c *gin.Context) {
+func ExtractNodeCommonNameFromCert(c *gin.Context) {
 	cc := common.NewContext(c)
 	if len(c.Request.TLS.PeerCertificates) == 0 {
 		common.PopulateFailedResponse(cc, common.Error(common.ErrRequestAccessDenied), true)
@@ -69,7 +69,7 @@ func extractNodeCommonNameFromCert(c *gin.Context) {
 	extractNodeCommonName(cc, cert.Subject.CommonName)
 }
 
-func extractNodeCommonNameFromHeader(c *gin.Context) {
+func ExtractNodeCommonNameFromHeader(c *gin.Context) {
 	cc := common.NewContext(c)
 	extractNodeCommonName(cc, c.GetHeader(HeaderCommonName))
 }
