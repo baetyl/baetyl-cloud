@@ -6,7 +6,10 @@ import (
 )
 
 func (d *dbStorage) CreateProperty(property *models.Property) error {
-	insertSQL := "INSERT INTO baetyl_property(name, value) VALUES(?,?)"
+	insertSQL := `
+		INSERT INTO baetyl_property(name, value) 
+		VALUES (?,?)
+	`
 	_, err := d.exec(nil, insertSQL, property.Name, property.Value)
 	if err != nil {
 		return common.Error(common.ErrDatabase, common.Field("error", "name existed"))
@@ -15,13 +18,21 @@ func (d *dbStorage) CreateProperty(property *models.Property) error {
 }
 
 func (d *dbStorage) DeleteProperty(name string) error {
-	deleteSQL := "DELETE FROM baetyl_property WHERE name=?"
+	deleteSQL := `
+		DELETE FROM baetyl_property 
+		WHERE name=?
+	`
 	_, err := d.exec(nil, deleteSQL, name)
 	return err
 }
 
 func (d *dbStorage) GetPropertyValue(name string) (string, error) {
-	selectSQL := "SELECT name, value, create_time, update_time FROM baetyl_property WHERE name=?"
+	selectSQL := `
+		SELECT 
+		name, value, create_time, update_time 
+			FROM baetyl_property 
+		WHERE name=?
+	`
 	var cs []models.Property
 	if err := d.query(nil, selectSQL, &cs, name); err != nil {
 		return "", err
@@ -35,7 +46,13 @@ func (d *dbStorage) GetPropertyValue(name string) (string, error) {
 }
 
 func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error) {
-	selectSQL := "SELECT name, value, create_time, update_time FROM baetyl_property WHERE name LIKE ? LIMIT ?,?"
+	selectSQL := `
+		SELECT 
+		name, value, create_time, update_time 
+			FROM baetyl_property 
+		WHERE name LIKE ? 
+		LIMIT ?,?
+	`
 	cs := []models.Property{}
 	if err := d.query(nil, selectSQL, &cs, page.Name, (page.PageNo-1)*page.PageSize, page.PageSize); err != nil {
 		return nil, err
@@ -44,7 +61,12 @@ func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error)
 }
 
 func (d *dbStorage) CountProperty(name string) (int, error) {
-	selectSQL := "SELECT count(name) AS count FROM baetyl_property WHERE name LIKE ?"
+	selectSQL := `
+		SELECT 
+		count(name) AS count 
+			FROM baetyl_property 
+		WHERE name LIKE ?
+	`
 	var res []struct {
 		Count int `db:"count"`
 	}
@@ -55,7 +77,11 @@ func (d *dbStorage) CountProperty(name string) (int, error) {
 }
 
 func (d *dbStorage) UpdateProperty(property *models.Property) error {
-	updateSQL := "UPDATE baetyl_property SET value=? WHERE name=?"
+	updateSQL := `
+		UPDATE baetyl_property 
+			SET value=? 
+		WHERE name=?
+	`
 	_, err := d.exec(nil, updateSQL, property.Value, property.Name)
 	return err
 }
