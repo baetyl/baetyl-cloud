@@ -6,7 +6,7 @@ import (
 )
 
 func (d *dbStorage) CreateProperty(property *models.Property) error {
-	insertSQL := "INSERT INTO baetyl_property(`key`, value) VALUES(?,?)"
+	insertSQL := "INSERT INTO baetyl_property(k, v) VALUES(?,?)"
 	_, err := d.exec(nil, insertSQL, property.Key, property.Value)
 	if err != nil {
 		return common.Error(common.ErrDatabase, common.Field("error", "key existed"))
@@ -15,13 +15,13 @@ func (d *dbStorage) CreateProperty(property *models.Property) error {
 }
 
 func (d *dbStorage) DeleteProperty(key string) error {
-	deleteSQL := "DELETE FROM baetyl_property WHERE `key`=?"
+	deleteSQL := "DELETE FROM baetyl_property WHERE k=?"
 	_, err := d.exec(nil, deleteSQL, key)
 	return err
 }
 
 func (d *dbStorage) GetPropertyValue(key string) (string, error) {
-	selectSQL := "SELECT `key`, value, create_time, update_time FROM baetyl_property WHERE `key`=?"
+	selectSQL := "SELECT k, v, create_time, update_time FROM baetyl_property WHERE k=?"
 	var cs []models.Property
 	if err := d.query(nil, selectSQL, &cs, key); err != nil {
 		return "", err
@@ -35,7 +35,7 @@ func (d *dbStorage) GetPropertyValue(key string) (string, error) {
 }
 
 func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error) {
-	selectSQL := "SELECT `key`, value, create_time, update_time FROM baetyl_property WHERE `key` LIKE ? LIMIT ?,?"
+	selectSQL := "SELECT k, v, create_time, update_time FROM baetyl_property WHERE k LIKE ? LIMIT ?,?"
 	cs := []models.Property{}
 	if err := d.query(nil, selectSQL, &cs, page.Name, (page.PageNo-1)*page.PageSize, page.PageSize); err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error)
 }
 
 func (d *dbStorage) CountProperty(key string) (int, error) {
-	selectSQL := "SELECT count(`key`) AS count FROM baetyl_property WHERE `key` LIKE ?"
+	selectSQL := "SELECT count(k) AS count FROM baetyl_property WHERE k LIKE ?"
 	var res []struct {
 		Count int `db:"count"`
 	}
@@ -55,7 +55,7 @@ func (d *dbStorage) CountProperty(key string) (int, error) {
 }
 
 func (d *dbStorage) UpdateProperty(property *models.Property) error {
-	updateSQL := "UPDATE baetyl_property SET value=? WHERE `key`=?"
+	updateSQL := "UPDATE baetyl_property SET v=? WHERE k=?"
 	_, err := d.exec(nil, updateSQL, property.Value, property.Key)
 	return err
 }

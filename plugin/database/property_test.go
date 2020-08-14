@@ -12,8 +12,8 @@ var (
 	propertyTables = []string{
 		"CREATE TABLE baetyl_property(" +
 			"    `id`               integer       PRIMARY KEY AUTOINCREMENT," +
-			"    `key`              varchar(128)  UNIQUE NOT NULL DEFAULT ''," +
-			"    `value`            varchar(2048) NOT NULL DEFAULT ''," +
+			"    `k`              varchar(128)  UNIQUE NOT NULL DEFAULT ''," +
+			"    `v`            varchar(2048) NOT NULL DEFAULT ''," +
 			"    `create_time`      timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP," +
 			"    `update_time`      timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP);",
 	}
