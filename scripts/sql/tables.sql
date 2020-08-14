@@ -147,13 +147,13 @@ CREATE TABLE IF NOT EXISTS `baetyl_certificate` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='证书表';
 
 CREATE TABLE IF NOT EXISTS `baetyl_property` (
-  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
-  `key` varchar(128) NOT NULL DEFAULT '',
-  `value` text NOT NULL,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP ,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_type_key` (`key`)
+ `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+ `k` varchar(128) NOT NULL DEFAULT '' COMMENT 'key',
+ `v` text NOT NULL COMMENT 'value',
+ `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create_time',
+ `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update_time',
+ PRIMARY KEY (`id`),
+ UNIQUE KEY `unique_key` (`k`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System configuration property table';
 
 COMMIT;
