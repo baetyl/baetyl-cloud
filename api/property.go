@@ -15,7 +15,7 @@ func (api *API) CreateProperty(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) DeleteProperty(c *common.Context) (interface{}, error) {
-	return nil, api.propertyService.DeleteProperty(c.Param("key"))
+	return nil, api.propertyService.DeleteProperty(c.Param("name"))
 }
 
 func (api *API) ListProperty(c *common.Context) (interface{}, error) {
@@ -40,7 +40,7 @@ func (api *API) ListProperty(c *common.Context) (interface{}, error) {
 
 func (api *API) UpdateProperty(c *common.Context) (interface{}, error) {
 	property := &models.Property{
-		Key: c.Param("key"),
+		Name: c.Param("name"),
 	}
 	err := c.LoadBody(property)
 	if err != nil {

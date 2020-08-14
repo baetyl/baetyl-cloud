@@ -12,8 +12,8 @@ var (
 	propertyTables = []string{
 		"CREATE TABLE baetyl_property(" +
 			"    `id`               integer       PRIMARY KEY AUTOINCREMENT," +
-			"    `k`              varchar(128)  UNIQUE NOT NULL DEFAULT ''," +
-			"    `v`            varchar(2048) NOT NULL DEFAULT ''," +
+			"    `name`             varchar(128)  UNIQUE NOT NULL DEFAULT ''," +
+			"    `value`            varchar(2048) NOT NULL DEFAULT ''," +
 			"    `create_time`      timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP," +
 			"    `update_time`      timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP);",
 	}
@@ -21,7 +21,7 @@ var (
 
 func genProperty() *models.Property {
 	return &models.Property{
-		Key:   "baetyl_0.1.0",
+		Name:  "baetyl_0.1.0",
 		Value: "http://test.baetyl/0.1.0",
 	}
 }
@@ -42,7 +42,7 @@ func TestProperty(t *testing.T) {
 
 	err = db.CreateProperty(property)
 	assert.NoError(t, err)
-	// key existed
+	// name existed
 	err = db.CreateProperty(property)
 	assert.Error(t, err)
 
@@ -50,10 +50,10 @@ func TestProperty(t *testing.T) {
 	err = db.UpdateProperty(property)
 	assert.NoError(t, err)
 
-	value, err := db.GetPropertyValue(property.Key)
+	value, err := db.GetPropertyValue(property.Name)
 	assert.NoError(t, err)
 	assert.Equal(t, property.Value, value)
-	_, err = db.GetPropertyValue("bad key")
+	_, err = db.GetPropertyValue("bad name")
 	assert.Error(t, err)
 
 	page := &models.Filter{
@@ -67,11 +67,11 @@ func TestProperty(t *testing.T) {
 	count, err := db.CountProperty(page.Name)
 	assert.Equal(t, count, 1)
 
-	err = db.DeleteProperty(property.Key)
+	err = db.DeleteProperty(property.Name)
 	assert.NoError(t, err)
 }
 
 func checkProperty(t *testing.T, expect, actual *models.Property) {
-	assert.Equal(t, expect.Key, actual.Key)
+	assert.Equal(t, expect.Name, actual.Name)
 	assert.Equal(t, expect.Value, actual.Value)
 }

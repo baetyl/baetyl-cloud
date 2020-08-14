@@ -211,9 +211,9 @@ func (s *MisServer) InitRoute() {
 		cache := v1.Group("/properties")
 
 		cache.POST("", common.WrapperMis(s.api.CreateProperty))
-		cache.DELETE("/:key", common.WrapperMis(s.api.DeleteProperty))
+		cache.DELETE("/:name", common.WrapperMis(s.api.DeleteProperty))
 		cache.GET("", common.WrapperMis(s.api.ListProperty))
-		cache.PUT("/:key", common.WrapperMis(s.api.UpdateProperty))
+		cache.PUT("/:name", common.WrapperMis(s.api.UpdateProperty))
 	}
 
 }
