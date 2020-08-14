@@ -12,7 +12,7 @@ func (d *dbStorage) CreateProperty(property *models.Property) error {
 	`
 	_, err := d.exec(nil, insertSQL, property.Name, property.Value)
 	if err != nil {
-		return common.Error(common.ErrDatabase, common.Field("error", "name existed"))
+		return common.Error(common.ErrDatabase, common.Field("error", err.Error()))
 	}
 	return nil
 }
