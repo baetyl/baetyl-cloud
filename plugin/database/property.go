@@ -6,24 +6,35 @@ import (
 )
 
 func (d *dbStorage) CreateProperty(property *models.Property) error {
-	insertSQL := "INSERT INTO baetyl_property(`key`, value) VALUES(?,?)"
-	_, err := d.exec(nil, insertSQL, property.Key, property.Value)
+	insertSQL := `
+		INSERT INTO baetyl_property(name, value) 
+		VALUES (?,?)
+	`
+	_, err := d.exec(nil, insertSQL, property.Name, property.Value)
 	if err != nil {
-		return common.Error(common.ErrDatabase, common.Field("error", "key existed"))
+		return common.Error(common.ErrDatabase, common.Field("error", err.Error()))
 	}
 	return nil
 }
 
-func (d *dbStorage) DeleteProperty(key string) error {
-	deleteSQL := "DELETE FROM baetyl_property WHERE `key`=?"
-	_, err := d.exec(nil, deleteSQL, key)
+func (d *dbStorage) DeleteProperty(name string) error {
+	deleteSQL := `
+		DELETE FROM baetyl_property 
+		WHERE name=?
+	`
+	_, err := d.exec(nil, deleteSQL, name)
 	return err
 }
 
-func (d *dbStorage) GetPropertyValue(key string) (string, error) {
-	selectSQL := "SELECT `key`, value, create_time, update_time FROM baetyl_property WHERE `key`=?"
+func (d *dbStorage) GetPropertyValue(name string) (string, error) {
+	selectSQL := `
+		SELECT 
+		name, value, create_time, update_time 
+			FROM baetyl_property 
+		WHERE name=?
+	`
 	var cs []models.Property
-	if err := d.query(nil, selectSQL, &cs, key); err != nil {
+	if err := d.query(nil, selectSQL, &cs, name); err != nil {
 		return "", err
 	}
 	if len(cs) == 1 {
@@ -31,11 +42,17 @@ func (d *dbStorage) GetPropertyValue(key string) (string, error) {
 	}
 	return "", common.Error(
 		common.ErrResourceNotFound,
-		common.Field("key", key))
+		common.Field("name", name))
 }
 
 func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error) {
-	selectSQL := "SELECT `key`, value, create_time, update_time FROM baetyl_property WHERE `key` LIKE ? LIMIT ?,?"
+	selectSQL := `
+		SELECT 
+		name, value, create_time, update_time 
+			FROM baetyl_property 
+		WHERE name LIKE ? 
+		LIMIT ?,?
+	`
 	cs := []models.Property{}
 	if err := d.query(nil, selectSQL, &cs, page.Name, (page.PageNo-1)*page.PageSize, page.PageSize); err != nil {
 		return nil, err
@@ -43,19 +60,28 @@ func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error)
 	return cs, nil
 }
 
-func (d *dbStorage) CountProperty(key string) (int, error) {
-	selectSQL := "SELECT count(`key`) AS count FROM baetyl_property WHERE `key` LIKE ?"
+func (d *dbStorage) CountProperty(name string) (int, error) {
+	selectSQL := `
+		SELECT 
+		count(name) AS count 
+			FROM baetyl_property 
+		WHERE name LIKE ?
+	`
 	var res []struct {
 		Count int `db:"count"`
 	}
-	if err := d.query(nil, selectSQL, &res, key); err != nil {
+	if err := d.query(nil, selectSQL, &res, name); err != nil {
 		return 0, err
 	}
 	return res[0].Count, nil
 }
 
 func (d *dbStorage) UpdateProperty(property *models.Property) error {
-	updateSQL := "UPDATE baetyl_property SET value=? WHERE `key`=?"
-	_, err := d.exec(nil, updateSQL, property.Value, property.Key)
+	updateSQL := `
+		UPDATE baetyl_property 
+			SET value=? 
+		WHERE name=?
+	`
+	_, err := d.exec(nil, updateSQL, property.Value, property.Name)
 	return err
 }

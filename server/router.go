@@ -10,12 +10,12 @@ import (
 
 // InitRoute init router
 func (s *AdminServer) InitRoute() {
-	s.router.NoRoute(noRouteHandler)
-	s.router.NoMethod(noMethodHandler)
-	s.router.GET("/health", health)
+	s.router.NoRoute(NoRouteHandler)
+	s.router.NoMethod(NoMethodHandler)
+	s.router.GET("/health", Health)
 
-	s.router.Use(requestIDHandler)
-	s.router.Use(loggerHandler)
+	s.router.Use(RequestIDHandler)
+	s.router.Use(LoggerHandler)
 	s.router.Use(s.authHandler)
 	v1 := s.router.Group("v1")
 	{
@@ -88,14 +88,6 @@ func (s *AdminServer) InitRoute() {
 		register.GET("/:batchName/record", common.Wrapper(s.api.ListRecord))
 	}
 	{
-		callback := v1.Group("/callback")
-		callback.POST("", common.Wrapper(s.api.CreateCallback))
-		callback.PUT("/:callbackName", common.Wrapper(s.api.UpdateCallback))
-		callback.DELETE("/:callbackName", common.Wrapper(s.api.DeleteCallback))
-		callback.GET("/:callbackName", common.Wrapper(s.api.GetCallback))
-
-	}
-	{
 		namespace := v1.Group("/namespace")
 		namespace.POST("", common.Wrapper(s.api.CreateNamespace))
 		namespace.GET("", common.Wrapper(s.api.GetNamespace))
@@ -164,17 +156,17 @@ func (s *NodeServer) GetRoute() *gin.Engine {
 }
 
 func (s *NodeServer) InitRoute() {
-	s.router.NoRoute(noRouteHandler)
-	s.router.NoMethod(noMethodHandler)
-	s.router.GET("/health", health)
+	s.router.NoRoute(NoRouteHandler)
+	s.router.NoMethod(NoMethodHandler)
+	s.router.GET("/health", Health)
 
-	s.router.Use(requestIDHandler)
-	s.router.Use(loggerHandler)
+	s.router.Use(RequestIDHandler)
+	s.router.Use(LoggerHandler)
 	if s.server.TLSConfig == nil {
 		HeaderCommonName = s.cfg.NodeServer.CommonName
-		s.router.Use(extractNodeCommonNameFromHeader)
+		s.router.Use(ExtractNodeCommonNameFromHeader)
 	} else {
-		s.router.Use(extractNodeCommonNameFromCert)
+		s.router.Use(ExtractNodeCommonNameFromCert)
 	}
 	v1 := s.router.Group("v1")
 	{
@@ -190,12 +182,12 @@ func (s *ActiveServer) GetRoute() *gin.Engine {
 }
 
 func (s *ActiveServer) InitRoute() {
-	s.router.NoRoute(noRouteHandler)
-	s.router.NoMethod(noMethodHandler)
-	s.router.GET("/health", health)
+	s.router.NoRoute(NoRouteHandler)
+	s.router.NoMethod(NoMethodHandler)
+	s.router.GET("/health", Health)
 
-	s.router.Use(requestIDHandler)
-	s.router.Use(loggerHandler)
+	s.router.Use(RequestIDHandler)
+	s.router.Use(LoggerHandler)
 	v1 := s.router.Group("v1")
 	{
 		active := v1.Group("/active")
@@ -210,21 +202,21 @@ func (s *MisServer) GetRoute() *gin.Engine {
 
 func (s *MisServer) InitRoute() {
 
-	s.router.NoRoute(noRouteHandler)
-	s.router.NoMethod(noMethodHandler)
-	s.router.GET("/health", health)
+	s.router.NoRoute(NoRouteHandler)
+	s.router.NoMethod(NoMethodHandler)
+	s.router.GET("/health", Health)
 
-	s.router.Use(requestIDHandler)
-	s.router.Use(loggerHandler)
+	s.router.Use(RequestIDHandler)
+	s.router.Use(LoggerHandler)
 	s.router.Use(s.authHandler)
 	v1 := s.router.Group("v1")
 	{
 		cache := v1.Group("/properties")
 
 		cache.POST("", common.WrapperMis(s.api.CreateProperty))
-		cache.DELETE("/:key", common.WrapperMis(s.api.DeleteProperty))
+		cache.DELETE("/:name", common.WrapperMis(s.api.DeleteProperty))
 		cache.GET("", common.WrapperMis(s.api.ListProperty))
-		cache.PUT("/:key", common.WrapperMis(s.api.UpdateProperty))
+		cache.PUT("/:name", common.WrapperMis(s.api.UpdateProperty))
 	}
 
 }
