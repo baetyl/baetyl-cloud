@@ -22,6 +22,7 @@ type RegisterService interface {
 	DeleteRecord(batchName, recordName, ns string) error
 	DownloadRecords(batchName, ns string) ([]byte, error)
 	GenRecordRandom(ns, batchName string, num int) ([]string, error)
+	GenRecordFromUpload(ns, batch string, fingerprint []string) ([]string, error)
 	ListBatch(ns string, page *models.Filter) (*models.ListView, error)
 	ListRecord(batchName, ns string, page *models.Filter) (*models.ListView, error)
 }
@@ -243,6 +244,40 @@ func (r *registerService) GenRecordRandom(ns, batchName string, num int) ([]stri
 		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
 	}
 	return data, nil
+}
+
+func (r *registerService) GenRecordFromUpload(ns, batchName string, fvs []string) ([]string, error) {
+	batch, err := r.GetBatch(batchName, ns)
+	if err != nil {
+		return nil, err
+	}
+	count, err := r.dbStorage.CountRecord(batchName, "%", ns)
+	if err != nil {
+		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
+	}
+	if len(fvs) < 1 || (len(fvs) + count) > batch.QuotaNum {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "num error"))
+	}
+
+	records := []models.Record{}
+	for i := 0; i < len(fvs); i++ {
+		fv := fvs[i]
+		record := models.Record{
+			Name:             fv,
+			Namespace:        ns,
+			BatchName:        batchName,
+			FingerprintValue: fv,
+			NodeName:         fv,
+			Active:           common.Inactivated,
+			ActiveTime:       time.Unix(common.DefaultActiveTime, 0),
+		}
+		records = append(records, record)
+	}
+	_, err = r.dbStorage.CreateRecord(records)
+	if err != nil {
+		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
+	}
+	return fvs, nil
 }
 
 func (r *registerService) ListBatch(ns string, page *models.Filter) (*models.ListView, error) {

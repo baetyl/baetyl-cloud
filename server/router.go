@@ -78,6 +78,9 @@ func (s *AdminServer) InitRoute() {
 		register.GET("/:batchName/download", common.WrapperRaw(s.api.DownloadRecords))
 		register.POST("/:batchName/generate", common.Wrapper(s.api.GenRecordRandom))
 
+		register.GET("/:batchName/templateDownload", common.WrapperRaw(s.api.DownloadTemplateFile))
+		register.POST("/:batchName/upload", common.Wrapper(s.api.GenRecordFromUpload))
+
 		register.POST("/:batchName/record", common.Wrapper(s.api.CreateRecord))
 		register.PUT("/:batchName/record/:recordName", common.Wrapper(s.api.UpdateRecord))
 		register.DELETE("/:batchName/record/:recordName", common.Wrapper(s.api.DeleteRecord))

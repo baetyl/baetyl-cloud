@@ -1,8 +1,13 @@
 package api
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/csv"
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	"io"
+	"net/http"
 	"path"
 	"strings"
 	"time"
@@ -148,6 +153,59 @@ func (api *API) GenRecordRandom(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	return map[string]interface{}{
+		"total": len(items),
+		"items": items,
+	}, nil
+}
+
+func (api *API) DownloadTemplateFile(c *common.Context) (interface{}, error) {
+	batchName := c.Param("batchName")
+	bytesBuffer := &bytes.Buffer{}
+
+	writer := csv.NewWriter(bytesBuffer)
+	_ = writer.Write([]string{batchName + "_registerNode1"})
+	_ = writer.Write([]string{batchName + "_Node1"})
+	_ = writer.Write([]string{batchName + "_1234"})
+
+	writer.Flush()
+
+	c.Header("Content-Disposition", "attachment;filename=template.csv")
+	c.Data(http.StatusOK, "text/csv", bytesBuffer.Bytes())
+
+	return nil, nil
+}
+
+func (api *API) GenRecordFromUpload(c *common.Context) (interface{}, error) {
+	ns, batchName := c.GetNamespace(), c.Param("batchName")
+	f, err := c.FormFile("file")
+	if err != nil {
+		err = common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+		return nil, err
+	}
+
+	file, err := f.Open()
+	if err != nil {
+		return nil, err
+	}
+	reader := csv.NewReader(bufio.NewReader(file))
+	var fvs []string
+	for {
+		fv, err := reader.Read()
+		if fv == nil || err == io.EOF {
+			break
+		}
+		fvs = append(fvs, fv[0])
+	}
+	if len(fvs) == 0 {
+		err = common.Error(common.ErrRequestParamInvalid, common.Field("error", "file is empty"))
+		return nil, err
+	}
+	items, err := api.registerService.GenRecordFromUpload(ns, batchName, fvs)
+	if err != nil {
+		return nil, err
+	}
+
 	return map[string]interface{}{
 		"total": len(items),
 		"items": items,

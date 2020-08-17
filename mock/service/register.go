@@ -225,3 +225,18 @@ func (mr *MockRegisterServiceMockRecorder) UpdateRecord(arg0 interface{}) *gomoc
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRecord", reflect.TypeOf((*MockRegisterService)(nil).UpdateRecord), arg0)
 }
+
+// GenRecordFromUpload mocks base method
+func (m *MockRegisterService) GenRecordFromUpload(arg0, arg1 string, arg2 []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenRecordFromUpload", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GenRecordFromUpload indicates an expected call of GenRecordFromUpload
+func (mr *MockRegisterServiceMockRecorder) GenRecordFromUpload(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenRecordFromUpload", reflect.TypeOf((*MockRegisterService)(nil).GenRecordFromUpload), arg0, arg1, arg2)
+}
