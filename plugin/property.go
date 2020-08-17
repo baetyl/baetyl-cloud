@@ -9,12 +9,12 @@ import (
 
 type Property interface {
 	CreateProperty(property *models.Property) error
-	DeleteProperty(key string) error
+	DeleteProperty(name string) error
 	ListProperty(page *models.Filter) ([]models.Property, error) //Pagination
-	CountProperty(key string) (int, error)
+	CountProperty(name string) (int, error)
 	UpdateProperty(property *models.Property) error
 
-	GetPropertyValue(key string) (string, error)
+	GetPropertyValue(name string) (string, error)
 
 	io.Closer
 }
