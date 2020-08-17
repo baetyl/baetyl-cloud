@@ -21,7 +21,6 @@ type CloudConfig struct {
 	AdminServer  Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	NodeServer   NodeServer `yaml:"nodeServer" json:"nodeServer" default:"{\"port\":\":9005\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"commonName\":\"common-name\"}"`
 	MisServer    MisServer  `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
-	SyncServer   SyncServer `yaml:"nodeServer" json:"nodeServer" default:"{\"port\":\":9007\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"type\":\"http\"}"`
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
 	Cache        struct {
 		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
@@ -51,11 +50,6 @@ type MisServer struct {
 	AuthToken   string `yaml:"authToken" json:"authToken" default:"baetyl-cloud-token"`
 	TokenHeader string `yaml:"tokenHeader" json:"tokenHeader" default:"baetyl-cloud-token"`
 	UserHeader  string `yaml:"userHeader" json:"userHeader" default:"baetyl-cloud-user"`
-}
-
-type SyncServer struct {
-	Type string `yaml:"type" json:"type" default:"http"`
-	Server `yaml:",inline" json:",inline"`
 }
 
 // Server server config
