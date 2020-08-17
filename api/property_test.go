@@ -28,15 +28,15 @@ func initPropertyAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 
 		property.GET("", mockIM, common.WrapperMis(api.ListProperty))
 		property.POST("", mockIM, common.WrapperMis(api.CreateProperty))
-		property.DELETE("/:key", mockIM, common.WrapperMis(api.DeleteProperty))
-		property.PUT("/:key", mockIM, common.WrapperMis(api.UpdateProperty))
+		property.DELETE("/:name", mockIM, common.WrapperMis(api.DeleteProperty))
+		property.PUT("/:name", mockIM, common.WrapperMis(api.UpdateProperty))
 	}
 	return api, router, mockCtl
 }
 
 func genProperty() *models.Property {
 	return &models.Property{
-		Key:   "bae",
+		Name:  "bae",
 		Value: "http://test",
 	}
 }
@@ -72,7 +72,7 @@ func TestDeleteProperty(t *testing.T) {
 
 	rs.EXPECT().DeleteProperty(gomock.Any()).Return(nil).Times(1)
 
-	req, _ := http.NewRequest(http.MethodDelete, "/v1/properties/"+property.Key, nil)
+	req, _ := http.NewRequest(http.MethodDelete, "/v1/properties/"+property.Name, nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -127,12 +127,12 @@ func TestUpdateProperty(t *testing.T) {
 	rs.EXPECT().UpdateProperty(property).Return(nil).Times(1)
 	// good case
 	body, _ := json.Marshal(property)
-	req, _ := http.NewRequest(http.MethodPut, "/v1/properties/"+property.Key, bytes.NewReader(body))
+	req, _ := http.NewRequest(http.MethodPut, "/v1/properties/"+property.Name, bytes.NewReader(body))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 	// empty body
-	req, _ = http.NewRequest(http.MethodPut, "/v1/properties/"+property.Key, nil)
+	req, _ = http.NewRequest(http.MethodPut, "/v1/properties/"+property.Name, nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
