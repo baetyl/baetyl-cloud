@@ -82,10 +82,12 @@ func TestSyncDesire(t *testing.T) {
 	as := ms.NewMockApplicationService(mockObject.ctl)
 	os := ms.NewMockObjectService(mockObject.ctl)
 	sync := syncService{
-		cs:            cs,
-		as:            as,
-		objectService: os,
+		cs:               cs,
+		as:               as,
+		objectService:    os,
+		methodRouteTable: map[string]interface{}{},
 	}
+	sync.methodRouteTable[MethodPopulateConfig] = HandlerPopulateConfig(sync.populateConfig)
 	reqs := []specV1.ResourceInfo{
 		{
 			Kind:    specV1.KindApplication,
@@ -143,7 +145,7 @@ func TestSyncDesire(t *testing.T) {
 	as.EXPECT().Get(namespace, reqs[0].Name, reqs[0].Version).Return(app, nil).Times(1)
 	cs.EXPECT().Get(namespace, reqs[1].Name, "").Return(config, nil).Times(1)
 	os.EXPECT().GenObjectURL(namespace, param).Return(objURL, nil).Times(1)
-	res, err := sync.Desire(namespace, reqs)
+	res, err := sync.Desire(namespace, "", reqs)
 	assert.NoError(t, err)
 
 	resApp := res[0].Value.Value.(*specV1.Application)

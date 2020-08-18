@@ -97,6 +97,11 @@ func TestHandler(t *testing.T) {
 	defer mockCtl.Finish()
 
 	s.InitRoute()
+	r := s.GetRoute()
+	assert.NotNil(t, r)
+	a := s.GetAPI()
+	assert.NotNil(t, a)
+
 	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
@@ -151,6 +156,11 @@ func TestHandler_Node(t *testing.T) {
 	defer mockCtl.Finish()
 
 	n.InitRoute()
+	r := n.GetRoute()
+	assert.NotNil(t, r)
+	a := n.GetAPI()
+	assert.NotNil(t, a)
+
 	n.GetRoute().GET("/device", func(c *gin.Context) {
 		cc := common.NewContext(c)
 		c.JSON(common.PackageResponse(&struct {
@@ -229,6 +239,11 @@ func TestHandler_Active(t *testing.T) {
 
 	// https 200
 	a.InitRoute()
+	r := a.GetRoute()
+	assert.NotNil(t, r)
+	ap := a.GetAPI()
+	assert.NotNil(t, ap)
+
 	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
 	w := httptest.NewRecorder()
 	a.GetRoute().ServeHTTP(w, req)
@@ -256,6 +271,10 @@ func TestHandler_Mis(t *testing.T) {
 
 	m.InitRoute()
 	m.router.Use(m.authHandler)
+	r := m.GetRoute()
+	assert.NotNil(t, r)
+	a := m.GetAPI()
+	assert.NotNil(t, a)
 	// https 200
 	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
 	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")

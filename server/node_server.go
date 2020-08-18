@@ -71,6 +71,10 @@ func (s *NodeServer) Run() {
 	}
 }
 
+func (s *NodeServer) GetAPI() *api.API {
+	return s.api
+}
+
 // Close close server
 func (s *NodeServer) Close() {
 	ctx, _ := context.WithTimeout(context.Background(), s.cfg.NodeServer.ShutdownTime)

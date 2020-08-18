@@ -66,6 +66,10 @@ func (s *ActiveServer) Run() {
 	}
 }
 
+func (s *ActiveServer) GetAPI() *api.API {
+	return s.api
+}
+
 // Close close server
 func (s *ActiveServer) Close() {
 	ctx, _ := context.WithTimeout(context.Background(), s.cfg.ActiveServer.ShutdownTime)

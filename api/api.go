@@ -116,3 +116,11 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		cacheService:       cacheService,
 	}, nil
 }
+
+func (api *API) GetObjectService() service.ObjectService {
+	return api.objectService
+}
+
+func (api *API) GetSyncService() service.SyncService {
+	return api.syncService
+}

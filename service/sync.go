@@ -18,17 +18,25 @@ import (
 // SyncService sync service
 type SyncService interface {
 	Report(namespace, name string, report specV1.Report) (specV1.Desire, error)
-	Desire(namespace string, infos []specV1.ResourceInfo) ([]specV1.ResourceValue, error)
+	Desire(namespace, platform string, infos []specV1.ResourceInfo) ([]specV1.ResourceValue, error)
+	GetMethodRouteTable() map[string]interface{}
 }
+
+type HandlerPopulateConfig func(platform string, cfg *specV1.Configuration) error
+
+const (
+	MethodPopulateConfig = "populateConfig"
+)
 
 type syncService struct {
 	plugin.ModelStorage
 	plugin.DBStorage
-	cs            ConfigService
-	ns            NodeService
-	as            ApplicationService
-	secretService SecretService
-	objectService ObjectService
+	cs               ConfigService
+	ns               NodeService
+	as               ApplicationService
+	secretService    SecretService
+	objectService    ObjectService
+	methodRouteTable map[string]interface{}
 }
 
 // NewSyncService new SyncService
@@ -42,8 +50,9 @@ func NewSyncService(config *config.CloudConfig) (SyncService, error) {
 		return nil, err
 	}
 	es := &syncService{
-		ModelStorage: ms.(plugin.ModelStorage),
-		DBStorage:    db.(plugin.DBStorage),
+		ModelStorage:     ms.(plugin.ModelStorage),
+		DBStorage:        db.(plugin.DBStorage),
+		methodRouteTable: map[string]interface{}{},
 	}
 	es.cs, err = NewConfigService(config)
 	if err != nil {
@@ -65,6 +74,7 @@ func NewSyncService(config *config.CloudConfig) (SyncService, error) {
 	if err != nil {
 		return nil, err
 	}
+	es.methodRouteTable[MethodPopulateConfig] = HandlerPopulateConfig(es.populateConfig)
 	return es, nil
 }
 
@@ -100,7 +110,7 @@ func (t *syncService) Report(namespace, name string, report specV1.Report) (spec
 	return delta, nil
 }
 
-func (t *syncService) Desire(namespace string, crdInfos []specV1.ResourceInfo) ([]specV1.ResourceValue, error) {
+func (t *syncService) Desire(namespace, platform string, crdInfos []specV1.ResourceInfo) ([]specV1.ResourceValue, error) {
 	var crdDatas []specV1.ResourceValue
 	for _, info := range crdInfos {
 		crdData := specV1.ResourceValue{
@@ -116,16 +126,16 @@ func (t *syncService) Desire(namespace string, crdInfos []specV1.ResourceInfo) (
 			}
 			crdData.Value.Value = app
 		case specV1.KindConfiguration, specV1.KindConfig:
-			config, err := t.cs.Get(namespace, info.Name, "")
+			cfg, err := t.cs.Get(namespace, info.Name, "")
 			if err != nil {
 				log.L().Error("failed to get config", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
 			}
-			if err = t.populateConfig(config); err != nil {
+			if err = t.methodRouteTable[MethodPopulateConfig].(HandlerPopulateConfig)(platform, cfg); err != nil {
 				log.L().Error("failed to populate config", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
 			}
-			crdData.Value.Value = config
+			crdData.Value.Value = cfg
 		case specV1.KindSecret:
 			secret, err := t.secretService.Get(namespace, info.Name, "")
 			if err != nil {
@@ -141,7 +151,7 @@ func (t *syncService) Desire(namespace string, crdInfos []specV1.ResourceInfo) (
 	return crdDatas, nil
 }
 
-func (t *syncService) populateConfig(cfg *specV1.Configuration) error {
+func (t *syncService) populateConfig(_ string, cfg *specV1.Configuration) error {
 	for k, v := range cfg.Data {
 		if strings.HasPrefix(k, common.ConfigObjectPrefix) {
 			obj := new(specV1.ConfigurationObject)
@@ -176,6 +186,10 @@ func (t *syncService) populateConfig(cfg *specV1.Configuration) error {
 		}
 	}
 	return nil
+}
+
+func (t *syncService) GetMethodRouteTable() map[string]interface{} {
+	return t.methodRouteTable
 }
 
 func checkSysapp(name string, desire *specV1.Desire) error {

@@ -10,7 +10,10 @@ func (api *API) Report(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetName()
 	var report specV1.Report
 	err := c.BindJSON(&report)
-	if ns == "" || n == "" || err != nil {
+	if ns == "" || n == "" {
+		return nil, common.Error(common.ErrRequestParamInvalid)
+	}
+	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
 	return api.syncService.Report(ns, n, report)
@@ -21,10 +24,13 @@ func (api *API) Desire(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
 	var request specV1.DesireRequest
 	err := c.BindJSON(&request)
-	if ns == "" || err != nil {
+	if ns == "" {
+		return nil, common.Error(common.ErrRequestParamInvalid)
+	}
+	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
-	res, err := api.syncService.Desire(ns, request.Infos)
+	res, err := api.syncService.Desire(ns, c.GetHeader("platform"), request.Infos)
 	if err != nil {
 		return nil, err
 	}

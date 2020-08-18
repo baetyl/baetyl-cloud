@@ -48,6 +48,10 @@ func (s *MisServer) Run() {
 	}
 }
 
+func (s *MisServer) GetAPI() *api.API {
+	return s.api
+}
+
 // Close close server
 func (s *MisServer) Close() {
 	ctx, _ := context.WithTimeout(context.Background(), s.cfg.MisServer.ShutdownTime)

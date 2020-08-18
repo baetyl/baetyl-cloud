@@ -87,7 +87,7 @@ func TestDesire(t *testing.T) {
 	api.syncService = mSync
 	var response []specV1.ResourceValue
 	var request []specV1.ResourceInfo
-	mSync.EXPECT().Desire(gomock.Any(), gomock.Any()).Return(response, nil)
+	mSync.EXPECT().Desire(gomock.Any(), "", gomock.Any()).Return(response, nil)
 	data, err := json.Marshal(request)
 	assert.NoError(t, err)
 	r := bytes.NewReader(data)

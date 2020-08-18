@@ -55,11 +55,14 @@ func NewAdminServer(config *config.CloudConfig) (*AdminServer, error) {
 	}, nil
 }
 
-// Run run server
 func (s *AdminServer) Run() {
 	if err := s.server.ListenAndServe(); err != nil {
 		log.L().Info("admin server stopped", log.Error(err))
 	}
+}
+
+func (s *AdminServer) GetAPI() *api.API {
+	return s.api
 }
 
 // Close close server
