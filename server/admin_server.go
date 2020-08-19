@@ -23,10 +23,6 @@ type AdminServer struct {
 
 // NewAdminServer create admin server
 func NewAdminServer(config *config.CloudConfig) (*AdminServer, error) {
-	api, err := api.NewAPI(config)
-	if err != nil {
-		return nil, err
-	}
 	auth, err := service.NewAuthService(config)
 	if err != nil {
 		return nil, err
@@ -50,16 +46,18 @@ func NewAdminServer(config *config.CloudConfig) (*AdminServer, error) {
 		router:  router,
 		server:  server,
 		auth:    auth,
-		api:     api,
 		license: ls,
 	}, nil
 }
 
-// Run run server
 func (s *AdminServer) Run() {
 	if err := s.server.ListenAndServe(); err != nil {
 		log.L().Info("admin server stopped", log.Error(err))
 	}
+}
+
+func (s *AdminServer) SetAPI(api *api.API) {
+	s.api = api
 }
 
 // Close close server

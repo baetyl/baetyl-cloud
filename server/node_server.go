@@ -13,10 +13,10 @@ import (
 )
 
 type NodeServer struct {
-	cfg    *config.CloudConfig
-	router *gin.Engine
-	server *http.Server
-	api    *api.API
+	cfg     *config.CloudConfig
+	router  *gin.Engine
+	server  *http.Server
+	syncAPI *api.SyncAPI
 }
 
 // NewNodeServer new server
@@ -45,16 +45,10 @@ func NewNodeServer(config *config.CloudConfig) (*NodeServer, error) {
 		server.TLSConfig = t
 	}
 
-	newAPI, err := api.NewAPI(config)
-	if err != nil {
-		return nil, err
-	}
-
 	return &NodeServer{
 		cfg:    config,
 		router: router,
 		server: server,
-		api:    newAPI,
 	}, nil
 }
 
@@ -69,6 +63,10 @@ func (s *NodeServer) Run() {
 			log.L().Info("node server https stopped", log.Error(err))
 		}
 	}
+}
+
+func (s *NodeServer) SetSyncAPI(api *api.SyncAPI) {
+	s.syncAPI = api
 }
 
 // Close close server

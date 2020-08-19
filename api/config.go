@@ -240,7 +240,10 @@ func needUpdateApp(config *specV1.Configuration, app *specV1.Application) bool {
 
 func (api *API) toConfigurationView(config *specV1.Configuration) (*models.ConfigurationView, error) {
 	configView := new(models.ConfigurationView)
-	copier.Copy(configView, config)
+	err := copier.Copy(configView, config)
+	if err != nil {
+		return nil, err
+	}
 
 	for k, v := range config.Data {
 		obj := models.ConfigDataItem{
@@ -253,6 +256,7 @@ func (api *API) toConfigurationView(config *specV1.Configuration) (*models.Confi
 			if err != nil {
 				return nil, err
 			}
+			delete(object.Metadata, "userID")
 			obj.Value = object.Metadata
 		} else {
 			obj.Key = k
@@ -268,7 +272,10 @@ func (api *API) toConfigurationView(config *specV1.Configuration) (*models.Confi
 
 func (api *API) toConfiguration(userID string, configView *models.ConfigurationView) (*specV1.Configuration, error) {
 	config := new(specV1.Configuration)
-	copier.Copy(config, configView)
+	err := copier.Copy(config, configView)
+	if err != nil {
+		return nil, err
+	}
 
 	config.Data = map[string]string{}
 	for _, v := range configView.Data {

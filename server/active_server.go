@@ -40,16 +40,10 @@ func NewActiveServer(config *config.CloudConfig) (*ActiveServer, error) {
 		server.TLSConfig = t
 	}
 
-	api, err := api.NewAPI(config)
-	if err != nil {
-		return nil, err
-	}
-
 	return &ActiveServer{
 		cfg:    config,
 		router: router,
 		server: server,
-		api:    api,
 	}, nil
 }
 
@@ -64,6 +58,10 @@ func (s *ActiveServer) Run() {
 			log.L().Info("active server https stopped", log.Error(err))
 		}
 	}
+}
+
+func (s *ActiveServer) SetAPI(api *api.API) {
+	s.api = api
 }
 
 // Close close server
