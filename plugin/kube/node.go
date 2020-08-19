@@ -138,6 +138,7 @@ func (c *client) ListNode(namespace string, listOptions *models.ListOptions) (*m
 	if err != nil {
 		return nil, err
 	}
+	listOptions.Continue = list.Continue
 	res, err := toNodeListModel(list), nil
 	if err != nil {
 		return nil, err
