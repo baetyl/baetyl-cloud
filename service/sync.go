@@ -24,7 +24,7 @@ type SyncService interface {
 type HandlerPopulateConfig func(cfg *specV1.Configuration, metadata map[string]string) error
 
 const (
-	MethodPopulateConfig = "populateConfig"
+	HookNamePopulateConfig = "populateConfig"
 )
 
 type SyncServiceImpl struct {
@@ -74,7 +74,7 @@ func NewSyncService(config *config.CloudConfig) (SyncService, error) {
 	if err != nil {
 		return nil, err
 	}
-	es.Hooks[MethodPopulateConfig] = HandlerPopulateConfig(es.populateConfig)
+	es.Hooks[HookNamePopulateConfig] = HandlerPopulateConfig(es.populateConfig)
 	return es, nil
 }
 
@@ -131,7 +131,7 @@ func (t *SyncServiceImpl) Desire(namespace string, crdInfos []specV1.ResourceInf
 				log.L().Error("failed to get config", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
 			}
-			if err = t.Hooks[MethodPopulateConfig].(HandlerPopulateConfig)(cfg, metadata); err != nil {
+			if err = t.Hooks[HookNamePopulateConfig].(HandlerPopulateConfig)(cfg, metadata); err != nil {
 				log.L().Error("failed to populate config", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
 			}
