@@ -67,27 +67,6 @@ func (s *AdminServer) InitRoute() {
 		apps.GET("", common.Wrapper(s.api.ListApplication))
 	}
 	{
-		register := v1.Group("/register")
-		register.GET("", common.Wrapper(s.api.ListBatch))
-		register.POST("", common.Wrapper(s.api.CreateBatch))
-		register.PUT("/:batchName", common.Wrapper(s.api.UpdateBatch))
-		register.DELETE("/:batchName", common.Wrapper(s.api.DeleteBatch))
-		register.GET("/:batchName", common.Wrapper(s.api.GetBatch))
-		register.GET("/:batchName/init", common.Wrapper(s.api.GenInitCmdFromBatch))
-
-		register.GET("/:batchName/download", common.WrapperRaw(s.api.DownloadRecords))
-		register.POST("/:batchName/generate", common.Wrapper(s.api.GenRecordRandom))
-
-		register.GET("/:batchName/templateDownload", common.WrapperRaw(s.api.DownloadTemplateFile))
-		register.POST("/:batchName/upload", common.Wrapper(s.api.GenRecordFromUpload))
-
-		register.POST("/:batchName/record", common.Wrapper(s.api.CreateRecord))
-		register.PUT("/:batchName/record/:recordName", common.Wrapper(s.api.UpdateRecord))
-		register.DELETE("/:batchName/record/:recordName", common.Wrapper(s.api.DeleteRecord))
-		register.GET("/:batchName/record/:recordName", common.Wrapper(s.api.GetRecord))
-		register.GET("/:batchName/record", common.Wrapper(s.api.ListRecord))
-	}
-	{
 		namespace := v1.Group("/namespace")
 		namespace.POST("", common.Wrapper(s.api.CreateNamespace))
 		namespace.GET("", common.Wrapper(s.api.GetNamespace))
@@ -175,7 +154,7 @@ func (s *NodeServer) InitRoute() {
 		node.POST("/desire", common.Wrapper(s.api.Desire))
 	}
 }
-
+/*
 // GetRoute get router
 func (s *ActiveServer) GetRoute() *gin.Engine {
 	return s.router
@@ -195,7 +174,7 @@ func (s *ActiveServer) InitRoute() {
 		active.GET("/:resource", common.WrapperRaw(s.api.GetResource))
 	}
 }
-
+*/
 func (s *MisServer) GetRoute() *gin.Engine {
 	return s.router
 }

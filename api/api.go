@@ -12,15 +12,12 @@ type API struct {
 	nodeService        service.NodeService
 	configService      service.ConfigService
 	syncService        service.SyncService
-	registerService    service.RegisterService
 	secretService      service.SecretService
 	indexService       service.IndexService
 	functionService    service.FunctionService
 	objectService      service.ObjectService
 	sysConfigService   service.SysConfigService
-	callbackService    service.CallbackService
 	pkiService         service.PKIService
-	initService        service.InitializeService
 	authService        service.AuthService
 	propertyService    service.PropertyService
 	cacheService       service.CacheService
@@ -41,10 +38,6 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		return nil, err
 	}
 	syncService, err := service.NewSyncService(config)
-	if err != nil {
-		return nil, err
-	}
-	registerService, err := service.NewRegisterService(config)
 	if err != nil {
 		return nil, err
 	}
@@ -72,15 +65,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
-	callbackService, err := service.NewCallbackService(config)
-	if err != nil {
-		return nil, err
-	}
 	pkiService, err := service.NewPKIService(config)
-	if err != nil {
-		return nil, err
-	}
-	initService, err := service.NewInitializeService(config)
 	if err != nil {
 		return nil, err
 	}
@@ -101,16 +86,13 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		nodeService:        nodeService,
 		configService:      configService,
 		syncService:        syncService,
-		registerService:    registerService,
 		namespaceService:   namespaceService,
 		secretService:      secretService,
 		indexService:       indexService,
 		functionService:    functionService,
 		objectService:      objectService,
 		sysConfigService:   sysConfigService,
-		callbackService:    callbackService,
 		pkiService:         pkiService,
-		initService:        initService,
 		authService:        authService,
 		propertyService:    propertyService,
 		cacheService:       cacheService,

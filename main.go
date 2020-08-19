@@ -1,8 +1,7 @@
 package main
 
 import (
-	"runtime"
-
+	"github.com/baetyl/baetyl-cloud/v2/api"
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
@@ -16,6 +15,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/log"
 	_ "github.com/go-sql-driver/mysql"
+	"runtime"
 )
 
 func main() {
@@ -34,7 +34,11 @@ func main() {
 		common.SetConfFile(ctx.ConfFile())
 		config.SetPortFromEnv(&cfg)
 
-		s, err := server.NewAdminServer(&cfg)
+		api, err := api.NewAPI(&cfg)
+		if err != nil {
+			return err
+		}
+		s, err := server.NewAdminServer(&cfg, api)
 		if err != nil {
 			return err
 		}
@@ -43,7 +47,7 @@ func main() {
 		defer s.Close()
 		ctx.Log().Info("admin server starting")
 
-		ts, err := server.NewNodeServer(&cfg)
+		ts, err := server.NewNodeServer(&cfg, api)
 		if err != nil {
 			return err
 		}
@@ -51,15 +55,6 @@ func main() {
 		go ts.Run()
 		defer ts.Close()
 		ctx.Log().Info("node server starting")
-
-		as, err := server.NewActiveServer(&cfg)
-		if err != nil {
-			return err
-		}
-		as.InitRoute()
-		go as.Run()
-		defer as.Close()
-		ctx.Log().Info("active server starting")
 
 		ctx.Wait()
 		return nil

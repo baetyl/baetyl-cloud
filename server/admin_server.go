@@ -22,11 +22,7 @@ type AdminServer struct {
 }
 
 // NewAdminServer create admin server
-func NewAdminServer(config *config.CloudConfig) (*AdminServer, error) {
-	api, err := api.NewAPI(config)
-	if err != nil {
-		return nil, err
-	}
+func NewAdminServer(config *config.CloudConfig, api *api.API) (*AdminServer, error) {
 	auth, err := service.NewAuthService(config)
 	if err != nil {
 		return nil, err

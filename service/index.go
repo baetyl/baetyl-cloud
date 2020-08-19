@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/base64"
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
@@ -26,6 +27,8 @@ type IndexService interface {
 	RefreshSecretIndexByApp(namespace, app string, secrets []string) error
 	RefreshNodesIndexByApp(namespace, appName string, nodes []string) error
 	RefreshAppsIndexByNode(namespace, node string, apps []string) error
+
+	GetResource(key string) (string, error)
 }
 
 type indexService struct {
@@ -90,4 +93,27 @@ func (i *indexService) RefreshSecretIndexByApp(namespace, app string, secrets []
 
 func (i *indexService) ListAppIndexBySecret(namespace, secret string) ([]string, error) {
 	return i.ListIndex(namespace, common.Application, common.Secret, secret)
+}
+
+func (i *indexService) GetResource(key string) (string, error) {
+	if common.Cache == nil {
+		common.Cache = map[string]string{}
+	}
+	if tl, ok := common.Cache[key]; ok {
+		return tl, nil
+	}
+	sysConf, _ := i.storage.GetSysConfig("resource", key)
+	if sysConf == nil {
+		return "", common.Error(
+			common.ErrResourceNotFound,
+			common.Field("type", "resource"),
+			common.Field("name", key))
+	}
+	data, err := base64.StdEncoding.DecodeString(sysConf.Value)
+	if err != nil {
+		return "", err
+	}
+	tl := string(data)
+	common.Cache[key] = tl
+	return tl, nil
 }

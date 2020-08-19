@@ -19,12 +19,7 @@ type MisServer struct {
 }
 
 // NewMisServer create Mis server
-func NewMisServer(config *config.CloudConfig) (*MisServer, error) {
-	api, err := api.NewAPI(config)
-	if err != nil {
-		return nil, err
-	}
-
+func NewMisServer(config *config.CloudConfig, api *api.API) (*MisServer, error) {
 	router := gin.New()
 	server := &http.Server{
 		Addr:           config.MisServer.Port,

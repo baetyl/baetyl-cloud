@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -12,7 +13,13 @@ import (
 )
 
 const offlineDuration = 40 * time.Second
-
+const (
+	InfoKind      = "k"
+	InfoName      = "n"
+	InfoNamespace = "ns"
+	InfoTimestamp = "ts"
+	InfoExpiry    = "e"
+)
 var (
 	CmdExpirationInSeconds = int64(60 * 60)
 )
@@ -281,11 +288,30 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	cmd, err := api.genCmd(string(common.Node), ns, name)
+	cmd, err := api.GenCmd(string(common.Node), ns, name)
 	if err != nil {
 		return nil, err
 	}
 	return map[string]string{"cmd": cmd}, nil
+}
+
+func (api *API) GenCmd(kind, ns, name string) (string, error) {
+	info := map[string]interface{}{
+		InfoKind:      kind,
+		InfoName:      name,
+		InfoNamespace: ns,
+		InfoExpiry:    CmdExpirationInSeconds,
+		InfoTimestamp: time.Now().Unix(),
+	}
+	token, err := api.authService.GenToken(info)
+	if err != nil {
+		return "", err
+	}
+	host, err := api.sysConfigService.GetSysConfig("address", common.AddressActive)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf(`curl -skfL '%s/v1/active/setup.sh?token=%s' -osetup.sh && sh setup.sh`, host.Value, token), nil
 }
 
 // GetNodeDeployHistory list node // TODO will support later

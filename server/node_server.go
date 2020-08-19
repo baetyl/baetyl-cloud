@@ -20,7 +20,7 @@ type NodeServer struct {
 }
 
 // NewNodeServer new server
-func NewNodeServer(config *config.CloudConfig) (*NodeServer, error) {
+func NewNodeServer(config *config.CloudConfig, api *api.API) (*NodeServer, error) {
 	router := gin.New()
 	server := &http.Server{
 		Addr:           config.NodeServer.Port,
@@ -45,16 +45,11 @@ func NewNodeServer(config *config.CloudConfig) (*NodeServer, error) {
 		server.TLSConfig = t
 	}
 
-	newAPI, err := api.NewAPI(config)
-	if err != nil {
-		return nil, err
-	}
-
 	return &NodeServer{
 		cfg:    config,
 		router: router,
 		server: server,
-		api:    newAPI,
+		api:    api,
 	}, nil
 }
 
