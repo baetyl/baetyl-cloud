@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"github.com/baetyl/baetyl-cloud/v2/api"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -38,9 +39,9 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 	c.NodeServer.Certificate.CA = ""
 	c.NodeServer.Certificate.Cert = ""
 	c.NodeServer.Certificate.Key = ""
-	c.ActiveServer.Certificate.CA = "../test/cloud/ca.pem"
-	c.ActiveServer.Certificate.Cert = "../test/cloud/server.pem"
-	c.ActiveServer.Certificate.Key = "../test/cloud/server.key"
+	c.ActiveServer.Certificate.CA = "../scripts/demo/native/certs/client_ca.crt"
+	c.ActiveServer.Certificate.Cert = "../scripts/demo/native/certs/server.crt"
+	c.ActiveServer.Certificate.Key = "../scripts/demo/native/certs/server.key"
 	mockCtl := gomock.NewController(t)
 
 	mockModelStorage := mockPlugin.NewMockModelStorage(mockCtl)
@@ -84,10 +85,24 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
 		return mockProperty, nil
 	})
-	s, _ := NewAdminServer(c)
-	n, _ := NewNodeServer(c)
-	a, _ := NewActiveServer(c)
-	m, _ := NewMisServer(c)
+
+	mockAPI, err := api.NewAPI(c)
+	assert.NoError(t, err)
+	mockSyncAPI, err := api.NewSyncAPI(c)
+	assert.NoError(t, err)
+
+	s, err := NewAdminServer(c)
+	assert.NoError(t, err)
+	s.SetAPI(mockAPI)
+	n, err := NewNodeServer(c)
+	assert.NoError(t, err)
+	n.SetSyncAPI(mockSyncAPI)
+	a, err := NewActiveServer(c)
+	assert.NoError(t, err)
+	a.SetAPI(mockAPI)
+	m, err := NewMisServer(c)
+	assert.NoError(t, err)
+	m.SetAPI(mockAPI)
 
 	return s, n, a, mockAuth, mLicense, mockCtl, c, m
 }
@@ -99,8 +114,6 @@ func TestHandler(t *testing.T) {
 	s.InitRoute()
 	r := s.GetRoute()
 	assert.NotNil(t, r)
-	a := s.GetAPI()
-	assert.NotNil(t, a)
 
 	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
 	// 200
@@ -158,8 +171,6 @@ func TestHandler_Node(t *testing.T) {
 	n.InitRoute()
 	r := n.GetRoute()
 	assert.NotNil(t, r)
-	a := n.GetAPI()
-	assert.NotNil(t, a)
 
 	n.GetRoute().GET("/device", func(c *gin.Context) {
 		cc := common.NewContext(c)
@@ -241,8 +252,6 @@ func TestHandler_Active(t *testing.T) {
 	a.InitRoute()
 	r := a.GetRoute()
 	assert.NotNil(t, r)
-	ap := a.GetAPI()
-	assert.NotNil(t, ap)
 
 	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
 	w := httptest.NewRecorder()
@@ -273,8 +282,6 @@ func TestHandler_Mis(t *testing.T) {
 	m.router.Use(m.authHandler)
 	r := m.GetRoute()
 	assert.NotNil(t, r)
-	a := m.GetAPI()
-	assert.NotNil(t, a)
 	// https 200
 	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
 	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")

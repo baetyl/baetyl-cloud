@@ -34,7 +34,7 @@ func (m *MockSyncService) EXPECT() *MockSyncServiceMockRecorder {
 }
 
 // Desire mocks base method
-func (m *MockSyncService) Desire(arg0, arg1 string, arg2 []v1.ResourceInfo) ([]v1.ResourceValue, error) {
+func (m *MockSyncService) Desire(arg0 string, arg1 []v1.ResourceInfo, arg2 map[string]string) ([]v1.ResourceValue, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Desire", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]v1.ResourceValue)
@@ -46,20 +46,6 @@ func (m *MockSyncService) Desire(arg0, arg1 string, arg2 []v1.ResourceInfo) ([]v
 func (mr *MockSyncServiceMockRecorder) Desire(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Desire", reflect.TypeOf((*MockSyncService)(nil).Desire), arg0, arg1, arg2)
-}
-
-// GetMethodRouteTable mocks base method
-func (m *MockSyncService) GetMethodRouteTable() map[string]interface{} {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMethodRouteTable")
-	ret0, _ := ret[0].(map[string]interface{})
-	return ret0
-}
-
-// GetMethodRouteTable indicates an expected call of GetMethodRouteTable
-func (mr *MockSyncServiceMockRecorder) GetMethodRouteTable() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMethodRouteTable", reflect.TypeOf((*MockSyncService)(nil).GetMethodRouteTable))
 }
 
 // Report mocks base method

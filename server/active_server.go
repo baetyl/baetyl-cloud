@@ -40,16 +40,10 @@ func NewActiveServer(config *config.CloudConfig) (*ActiveServer, error) {
 		server.TLSConfig = t
 	}
 
-	api, err := api.NewAPI(config)
-	if err != nil {
-		return nil, err
-	}
-
 	return &ActiveServer{
 		cfg:    config,
 		router: router,
 		server: server,
-		api:    api,
 	}, nil
 }
 
@@ -66,8 +60,8 @@ func (s *ActiveServer) Run() {
 	}
 }
 
-func (s *ActiveServer) GetAPI() *api.API {
-	return s.api
+func (s *ActiveServer) SetAPI(api *api.API) {
+	s.api = api
 }
 
 // Close close server

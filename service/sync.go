@@ -18,25 +18,25 @@ import (
 // SyncService sync service
 type SyncService interface {
 	Report(namespace, name string, report specV1.Report) (specV1.Desire, error)
-	Desire(namespace, platform string, infos []specV1.ResourceInfo) ([]specV1.ResourceValue, error)
-	GetMethodRouteTable() map[string]interface{}
+	Desire(namespace string, infos []specV1.ResourceInfo, metadata map[string]string) ([]specV1.ResourceValue, error)
 }
 
-type HandlerPopulateConfig func(platform string, cfg *specV1.Configuration) error
+type HandlerPopulateConfig func(cfg *specV1.Configuration, metadata map[string]string) error
 
 const (
 	MethodPopulateConfig = "populateConfig"
 )
 
-type syncService struct {
+type SyncServiceStruct struct {
 	plugin.ModelStorage
 	plugin.DBStorage
-	cs               ConfigService
-	ns               NodeService
-	as               ApplicationService
-	secretService    SecretService
-	objectService    ObjectService
-	methodRouteTable map[string]interface{}
+
+	ConfigService ConfigService
+	NodeService   NodeService
+	AppService    ApplicationService
+	SecretService SecretService
+	ObjectService ObjectService
+	Hooks         map[string]interface{}
 }
 
 // NewSyncService new SyncService
@@ -49,37 +49,37 @@ func NewSyncService(config *config.CloudConfig) (SyncService, error) {
 	if err != nil {
 		return nil, err
 	}
-	es := &syncService{
-		ModelStorage:     ms.(plugin.ModelStorage),
-		DBStorage:        db.(plugin.DBStorage),
-		methodRouteTable: map[string]interface{}{},
+	es := &SyncServiceStruct{
+		ModelStorage: ms.(plugin.ModelStorage),
+		DBStorage:    db.(plugin.DBStorage),
+		Hooks:        map[string]interface{}{},
 	}
-	es.cs, err = NewConfigService(config)
+	es.ConfigService, err = NewConfigService(config)
 	if err != nil {
 		return nil, err
 	}
-	es.ns, err = NewNodeService(config)
+	es.NodeService, err = NewNodeService(config)
 	if err != nil {
 		return nil, err
 	}
-	es.as, err = NewApplicationService(config)
+	es.AppService, err = NewApplicationService(config)
 	if err != nil {
 		return nil, err
 	}
-	es.secretService, err = NewSecretService(config)
+	es.SecretService, err = NewSecretService(config)
 	if err != nil {
 		return nil, err
 	}
-	es.objectService, err = NewObjectService(config)
+	es.ObjectService, err = NewObjectService(config)
 	if err != nil {
 		return nil, err
 	}
-	es.methodRouteTable[MethodPopulateConfig] = HandlerPopulateConfig(es.populateConfig)
+	es.Hooks[MethodPopulateConfig] = HandlerPopulateConfig(es.populateConfig)
 	return es, nil
 }
 
-func (t *syncService) Report(namespace, name string, report specV1.Report) (specV1.Desire, error) {
-	shadow, err := t.ns.UpdateReport(namespace, name, report)
+func (t *SyncServiceStruct) Report(namespace, name string, report specV1.Report) (specV1.Desire, error) {
+	shadow, err := t.NodeService.UpdateReport(namespace, name, report)
 	if err != nil {
 		log.L().Error("failed to update node reported status",
 			log.Any(common.KeyContextNamespace, namespace),
@@ -110,7 +110,7 @@ func (t *syncService) Report(namespace, name string, report specV1.Report) (spec
 	return delta, nil
 }
 
-func (t *syncService) Desire(namespace, platform string, crdInfos []specV1.ResourceInfo) ([]specV1.ResourceValue, error) {
+func (t *SyncServiceStruct) Desire(namespace string, crdInfos []specV1.ResourceInfo, metadata map[string]string) ([]specV1.ResourceValue, error) {
 	var crdDatas []specV1.ResourceValue
 	for _, info := range crdInfos {
 		crdData := specV1.ResourceValue{
@@ -119,25 +119,25 @@ func (t *syncService) Desire(namespace, platform string, crdInfos []specV1.Resou
 		log.L().Info("sync get crd", log.Any("kind", info.Kind), log.Any("name", info.Name))
 		switch info.Kind {
 		case specV1.KindApplication, specV1.KindApp:
-			app, err := t.as.Get(namespace, info.Name, info.Version)
+			app, err := t.AppService.Get(namespace, info.Name, info.Version)
 			if err != nil {
 				log.L().Error("failed to get application", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
 			}
 			crdData.Value.Value = app
 		case specV1.KindConfiguration, specV1.KindConfig:
-			cfg, err := t.cs.Get(namespace, info.Name, "")
+			cfg, err := t.ConfigService.Get(namespace, info.Name, "")
 			if err != nil {
 				log.L().Error("failed to get config", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
 			}
-			if err = t.methodRouteTable[MethodPopulateConfig].(HandlerPopulateConfig)(platform, cfg); err != nil {
+			if err = t.Hooks[MethodPopulateConfig].(HandlerPopulateConfig)(cfg, metadata); err != nil {
 				log.L().Error("failed to populate config", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
 			}
 			crdData.Value.Value = cfg
 		case specV1.KindSecret:
-			secret, err := t.secretService.Get(namespace, info.Name, "")
+			secret, err := t.SecretService.Get(namespace, info.Name, "")
 			if err != nil {
 				log.L().Error("failed to get secret", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
@@ -151,45 +151,56 @@ func (t *syncService) Desire(namespace, platform string, crdInfos []specV1.Resou
 	return crdDatas, nil
 }
 
-func (t *syncService) populateConfig(_ string, cfg *specV1.Configuration) error {
+func (t *SyncServiceStruct) populateConfig(cfg *specV1.Configuration, metadata map[string]string) error {
 	for k, v := range cfg.Data {
 		if strings.HasPrefix(k, common.ConfigObjectPrefix) {
-			obj := new(specV1.ConfigurationObject)
-			err := json.Unmarshal([]byte(v), &obj)
+			err := t.PopulateConfigObject(k, v, cfg)
 			if err != nil {
 				return err
 			}
-			if obj.URL != "" {
-				continue
-			}
-
-			bytes, _ := json.Marshal(obj.Metadata)
-			var configObject models.ConfigObjectItem
-			err = json.Unmarshal(bytes, &configObject)
-			res, err := t.objectService.GenObjectURL(obj.Metadata["userID"], configObject)
-			if err != nil {
-				return err
-			}
-			obj.URL = res.URL
-			obj.Token = res.Token
-			if res.MD5 != "" {
-				obj.MD5 = res.MD5
-			}
-			obj.Unpack = configObject.Unpack
-			obj.Metadata = nil
-
-			data, err := json.Marshal(obj)
-			if err != nil {
-				return err
-			}
-			cfg.Data[k] = string(data)
 		}
 	}
 	return nil
 }
 
-func (t *syncService) GetMethodRouteTable() map[string]interface{} {
-	return t.methodRouteTable
+func (t *SyncServiceStruct) PopulateConfigObject(k, v string, cfg *specV1.Configuration) error {
+	obj := new(specV1.ConfigurationObject)
+	err := json.Unmarshal([]byte(v), obj)
+	if err != nil {
+		return err
+	}
+	if obj.URL != "" {
+		return nil
+	}
+
+	bytes, err := json.Marshal(obj.Metadata)
+	if err != nil {
+		return err
+	}
+	var item models.ConfigObjectItem
+	err = json.Unmarshal(bytes, &item)
+	if err != nil {
+		return err
+	}
+
+	res, err := t.ObjectService.GenObjectURL(obj.Metadata["userID"], item)
+	if err != nil {
+		return err
+	}
+	obj.URL = res.URL
+	obj.Token = res.Token
+	if res.MD5 != "" {
+		obj.MD5 = res.MD5
+	}
+	obj.Unpack = item.Unpack
+	obj.Metadata = nil
+
+	data, err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+	cfg.Data[k] = string(data)
+	return nil
 }
 
 func checkSysapp(name string, desire *specV1.Desire) error {

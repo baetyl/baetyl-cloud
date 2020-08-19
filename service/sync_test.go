@@ -35,8 +35,8 @@ func TestReport(t *testing.T) {
 
 	ns.EXPECT().UpdateReport(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 
-	sync := syncService{
-		ns: ns,
+	sync := SyncServiceStruct{
+		NodeService: ns,
 	}
 	info := specV1.Report{}
 	response, err := sync.Report(namespace, name, info)
@@ -81,13 +81,13 @@ func TestSyncDesire(t *testing.T) {
 	cs := ms.NewMockConfigService(mockObject.ctl)
 	as := ms.NewMockApplicationService(mockObject.ctl)
 	os := ms.NewMockObjectService(mockObject.ctl)
-	sync := syncService{
-		cs:               cs,
-		as:               as,
-		objectService:    os,
-		methodRouteTable: map[string]interface{}{},
+	sync := SyncServiceStruct{
+		ConfigService: cs,
+		AppService:    as,
+		ObjectService: os,
+		Hooks:         map[string]interface{}{},
 	}
-	sync.methodRouteTable[MethodPopulateConfig] = HandlerPopulateConfig(sync.populateConfig)
+	sync.Hooks[MethodPopulateConfig] = HandlerPopulateConfig(sync.populateConfig)
 	reqs := []specV1.ResourceInfo{
 		{
 			Kind:    specV1.KindApplication,
@@ -145,7 +145,7 @@ func TestSyncDesire(t *testing.T) {
 	as.EXPECT().Get(namespace, reqs[0].Name, reqs[0].Version).Return(app, nil).Times(1)
 	cs.EXPECT().Get(namespace, reqs[1].Name, "").Return(config, nil).Times(1)
 	os.EXPECT().GenObjectURL(namespace, param).Return(objURL, nil).Times(1)
-	res, err := sync.Desire(namespace, "", reqs)
+	res, err := sync.Desire(namespace, reqs, map[string]string{})
 	assert.NoError(t, err)
 
 	resApp := res[0].Value.Value.(*specV1.Application)
@@ -173,8 +173,8 @@ func TestSyncService_Report(t *testing.T) {
 	defer mockObject.Close()
 
 	mockNs := ms.NewMockNodeService(mockObject.ctl)
-	ss := &syncService{
-		ns: mockNs,
+	ss := &SyncServiceStruct{
+		NodeService: mockNs,
 	}
 	namespace := "namespace01"
 	name := "name"

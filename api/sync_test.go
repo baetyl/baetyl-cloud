@@ -15,10 +15,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func initSyncAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
+func initSyncAPI(t *testing.T) (*SyncAPI, *gin.Engine, *gomock.Controller) {
 	mockCtl := gomock.NewController(t)
 
-	api := &API{}
+	api := &SyncAPI{}
 	router := gin.Default()
 	router.Use(func(c *gin.Context) {
 		cc := common.NewContext(c)
@@ -39,7 +39,7 @@ func TestReport(t *testing.T) {
 	defer mockCtl.Finish()
 
 	mSync := ms.NewMockSyncService(mockCtl)
-	api.syncService = mSync
+	api.SyncService = mSync
 
 	// TODO: use real tls cert
 	// info := &specV1.Report{}
@@ -84,10 +84,10 @@ func TestDesire(t *testing.T) {
 	api, router, mockCtl := initSyncAPI(t)
 	defer mockCtl.Finish()
 	mSync := ms.NewMockSyncService(mockCtl)
-	api.syncService = mSync
+	api.SyncService = mSync
 	var response []specV1.ResourceValue
 	var request []specV1.ResourceInfo
-	mSync.EXPECT().Desire(gomock.Any(), "", gomock.Any()).Return(response, nil)
+	mSync.EXPECT().Desire(gomock.Any(), gomock.Any(), gomock.Any()).Return(response, nil)
 	data, err := json.Marshal(request)
 	assert.NoError(t, err)
 	r := bytes.NewReader(data)

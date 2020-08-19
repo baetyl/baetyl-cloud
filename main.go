@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/baetyl/baetyl-cloud/v2/api"
 	"runtime"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -34,10 +35,20 @@ func main() {
 		common.SetConfFile(ctx.ConfFile())
 		config.SetPortFromEnv(&cfg)
 
+		a, err := api.NewAPI(&cfg)
+		if err != nil {
+			return err
+		}
+		sa, err := api.NewSyncAPI(&cfg)
+		if err != nil {
+			return err
+		}
+
 		s, err := server.NewAdminServer(&cfg)
 		if err != nil {
 			return err
 		}
+		s.SetAPI(a)
 		s.InitRoute()
 		go s.Run()
 		defer s.Close()
@@ -47,6 +58,7 @@ func main() {
 		if err != nil {
 			return err
 		}
+		ts.SetSyncAPI(sa)
 		ts.InitRoute()
 		go ts.Run()
 		defer ts.Close()
@@ -56,6 +68,7 @@ func main() {
 		if err != nil {
 			return err
 		}
+		as.SetAPI(a)
 		as.InitRoute()
 		go as.Run()
 		defer as.Close()
