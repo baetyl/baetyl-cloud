@@ -34,18 +34,18 @@ func (m *MockSyncService) EXPECT() *MockSyncServiceMockRecorder {
 }
 
 // Desire mocks base method
-func (m *MockSyncService) Desire(arg0 string, arg1 []v1.ResourceInfo) ([]v1.ResourceValue, error) {
+func (m *MockSyncService) Desire(arg0 string, arg1 []v1.ResourceInfo, arg2 map[string]string) ([]v1.ResourceValue, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Desire", arg0, arg1)
+	ret := m.ctrl.Call(m, "Desire", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]v1.ResourceValue)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Desire indicates an expected call of Desire
-func (mr *MockSyncServiceMockRecorder) Desire(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockSyncServiceMockRecorder) Desire(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Desire", reflect.TypeOf((*MockSyncService)(nil).Desire), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Desire", reflect.TypeOf((*MockSyncService)(nil).Desire), arg0, arg1, arg2)
 }
 
 // Report mocks base method
