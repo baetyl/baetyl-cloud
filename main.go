@@ -1,21 +1,22 @@
 package main
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/api"
 	"runtime"
 
+	"github.com/baetyl/baetyl-cloud/v2/api"
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/server"
+	"github.com/baetyl/baetyl-go/v2/context"
+	"github.com/baetyl/baetyl-go/v2/log"
+
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/awss3"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/database"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/auth"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/license"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/pki"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/kube"
-	"github.com/baetyl/baetyl-cloud/v2/server"
-	"github.com/baetyl/baetyl-go/v2/context"
-	"github.com/baetyl/baetyl-go/v2/log"
 	_ "github.com/go-sql-driver/mysql"
 )
 

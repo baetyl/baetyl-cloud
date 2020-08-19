@@ -35,7 +35,7 @@ func TestReport(t *testing.T) {
 
 	ns.EXPECT().UpdateReport(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 
-	sync := SyncServiceStruct{
+	sync := SyncServiceImpl{
 		NodeService: ns,
 	}
 	info := specV1.Report{}
@@ -81,7 +81,7 @@ func TestSyncDesire(t *testing.T) {
 	cs := ms.NewMockConfigService(mockObject.ctl)
 	as := ms.NewMockApplicationService(mockObject.ctl)
 	os := ms.NewMockObjectService(mockObject.ctl)
-	sync := SyncServiceStruct{
+	sync := SyncServiceImpl{
 		ConfigService: cs,
 		AppService:    as,
 		ObjectService: os,
@@ -173,7 +173,7 @@ func TestSyncService_Report(t *testing.T) {
 	defer mockObject.Close()
 
 	mockNs := ms.NewMockNodeService(mockObject.ctl)
-	ss := &SyncServiceStruct{
+	ss := &SyncServiceImpl{
 		NodeService: mockNs,
 	}
 	namespace := "namespace01"

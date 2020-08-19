@@ -27,7 +27,7 @@ const (
 	MethodPopulateConfig = "populateConfig"
 )
 
-type SyncServiceStruct struct {
+type SyncServiceImpl struct {
 	plugin.ModelStorage
 	plugin.DBStorage
 
@@ -49,7 +49,7 @@ func NewSyncService(config *config.CloudConfig) (SyncService, error) {
 	if err != nil {
 		return nil, err
 	}
-	es := &SyncServiceStruct{
+	es := &SyncServiceImpl{
 		ModelStorage: ms.(plugin.ModelStorage),
 		DBStorage:    db.(plugin.DBStorage),
 		Hooks:        map[string]interface{}{},
@@ -78,7 +78,7 @@ func NewSyncService(config *config.CloudConfig) (SyncService, error) {
 	return es, nil
 }
 
-func (t *SyncServiceStruct) Report(namespace, name string, report specV1.Report) (specV1.Desire, error) {
+func (t *SyncServiceImpl) Report(namespace, name string, report specV1.Report) (specV1.Desire, error) {
 	shadow, err := t.NodeService.UpdateReport(namespace, name, report)
 	if err != nil {
 		log.L().Error("failed to update node reported status",
@@ -110,7 +110,7 @@ func (t *SyncServiceStruct) Report(namespace, name string, report specV1.Report)
 	return delta, nil
 }
 
-func (t *SyncServiceStruct) Desire(namespace string, crdInfos []specV1.ResourceInfo, metadata map[string]string) ([]specV1.ResourceValue, error) {
+func (t *SyncServiceImpl) Desire(namespace string, crdInfos []specV1.ResourceInfo, metadata map[string]string) ([]specV1.ResourceValue, error) {
 	var crdDatas []specV1.ResourceValue
 	for _, info := range crdInfos {
 		crdData := specV1.ResourceValue{
@@ -151,7 +151,7 @@ func (t *SyncServiceStruct) Desire(namespace string, crdInfos []specV1.ResourceI
 	return crdDatas, nil
 }
 
-func (t *SyncServiceStruct) populateConfig(cfg *specV1.Configuration, metadata map[string]string) error {
+func (t *SyncServiceImpl) populateConfig(cfg *specV1.Configuration, metadata map[string]string) error {
 	for k, v := range cfg.Data {
 		if strings.HasPrefix(k, common.ConfigObjectPrefix) {
 			err := t.PopulateConfigObject(k, v, cfg)
@@ -163,7 +163,7 @@ func (t *SyncServiceStruct) populateConfig(cfg *specV1.Configuration, metadata m
 	return nil
 }
 
-func (t *SyncServiceStruct) PopulateConfigObject(k, v string, cfg *specV1.Configuration) error {
+func (t *SyncServiceImpl) PopulateConfigObject(k, v string, cfg *specV1.Configuration) error {
 	obj := new(specV1.ConfigurationObject)
 	err := json.Unmarshal([]byte(v), obj)
 	if err != nil {
