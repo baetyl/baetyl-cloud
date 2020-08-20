@@ -2,7 +2,7 @@ package kube
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-go/v2/utils"
+	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -10,6 +10,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/jinzhu/copier"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -122,6 +123,12 @@ func (c *client) UpdateSecret(namespace string, secretMapModel *specV1.Secret) (
 func (c *client) DeleteSecret(namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "DeleteSecret")()
 	err := c.customClient.CloudV1alpha1().Secrets(namespace).Delete(name, &metav1.DeleteOptions{})
+	if err != nil{
+		if strings.Contains(err.Error(), "not found"){
+			return nil
+		}
+		log.L().Error("delete secret failed", log.Error(err))
+	}
 	return err
 }
 
