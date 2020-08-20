@@ -10,8 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -113,6 +116,8 @@ func initRegisterAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		register.GET("", mockIM, common.Wrapper(api.ListBatch))
 		register.GET("/:batchName/record", mockIM, common.Wrapper(api.ListRecord))
 		register.GET("/:batchName/download", mockIM, common.Wrapper(api.DownloadRecords))
+		register.GET("/:batchName/templateDownload", mockIM, common.WrapperRaw(api.DownloadTemplateFile))
+		register.POST("/:batchName/upload", mockIM, common.Wrapper(api.GenRecordFromUpload))
 
 	}
 	return api, router, mockCtl
@@ -477,4 +482,36 @@ func TestAPI_DownloadRecords(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestAPI_DownloadTemplateFile(t *testing.T) {
+	_, router, mockCtl := initRegisterAPI(t)
+	defer mockCtl.Finish()
+
+	req, _ := http.NewRequest(http.MethodGet, "/v1/register/test/templateDownload", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestAPI_GenRecordFromUpload(t *testing.T) {
+	api, router, mockCtl := initRegisterAPI(t)
+	defer mockCtl.Finish()
+	rs := ms.NewMockRegisterService(mockCtl)
+	api.registerService = rs
+
+	rs.EXPECT().GenRecordFromUpload("default", "test", "1234").Return([]string{"1234"}, nil).Times(1)
+
+	buf := new(bytes.Buffer)
+	w := multipart.NewWriter(buf)
+	fw, _ := w.CreateFormFile("file", "data.csv")
+	io.Copy(fw, strings.NewReader("1234"))
+	w.Close()
+
+	req, _ := http.NewRequest(http.MethodPost, "/v1/register/test/upload", buf)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+
+	re := httptest.NewRecorder()
+	router.ServeHTTP(re, req)
+	assert.Equal(t, http.StatusOK, re.Code)
 }

@@ -150,8 +150,8 @@ func (s *NodeServer) InitRoute() {
 	v1 := s.router.Group("v1")
 	{
 		node := v1.Group("/sync")
-		node.POST("/report", common.Wrapper(s.api.Report))
-		node.POST("/desire", common.Wrapper(s.api.Desire))
+		node.POST("/report", common.Wrapper(s.syncAPI.Report))
+		node.POST("/desire", common.Wrapper(s.syncAPI.Desire))
 	}
 }
 /*
