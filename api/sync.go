@@ -1,6 +1,8 @@
 package api
 
 import (
+	"strings"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/service"
@@ -48,7 +50,7 @@ func (s *SyncAPI) Desire(c *common.Context) (interface{}, error) {
 	}
 	metadata := map[string]string{}
 	for k := range c.Request.Header {
-		metadata[k] = c.GetHeader(k)
+		metadata[strings.ToLower(k)] = c.GetHeader(k)
 	}
 	res, err := s.SyncService.Desire(ns, request.Infos, metadata)
 	if err != nil {
