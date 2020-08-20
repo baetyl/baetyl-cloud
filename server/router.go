@@ -154,27 +154,7 @@ func (s *NodeServer) InitRoute() {
 		node.POST("/desire", common.Wrapper(s.syncAPI.Desire))
 	}
 }
-/*
-// GetRoute get router
-func (s *ActiveServer) GetRoute() *gin.Engine {
-	return s.router
-}
 
-func (s *ActiveServer) InitRoute() {
-	s.router.NoRoute(NoRouteHandler)
-	s.router.NoMethod(NoMethodHandler)
-	s.router.GET("/health", Health)
-
-	s.router.Use(RequestIDHandler)
-	s.router.Use(LoggerHandler)
-	v1 := s.router.Group("v1")
-	{
-		active := v1.Group("/active")
-		active.POST("/", common.Wrapper(s.api.Active))
-		active.GET("/:resource", common.WrapperRaw(s.api.GetResource))
-	}
-}
-*/
 func (s *MisServer) GetRoute() *gin.Engine {
 	return s.router
 }

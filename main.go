@@ -65,16 +65,6 @@ func main() {
 		defer ts.Close()
 		ctx.Log().Info("node server starting")
 
-		as, err := server.NewActiveServer(&cfg)
-		if err != nil {
-			return err
-		}
-		as.SetAPI(a)
-		as.InitRoute()
-		go as.Run()
-		defer as.Close()
-		ctx.Log().Info("active server starting")
-
 		ctx.Wait()
 		return nil
 	})

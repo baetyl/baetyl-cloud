@@ -11,7 +11,6 @@ type API struct {
 	applicationService service.ApplicationService
 	nodeService        service.NodeService
 	configService      service.ConfigService
-	registerService    service.RegisterService
 	secretService      service.SecretService
 	indexService       service.IndexService
 	functionService    service.FunctionService
@@ -34,10 +33,6 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		return nil, err
 	}
 	configService, err := service.NewConfigService(config)
-	if err != nil {
-		return nil, err
-	}
-	registerService, err := service.NewRegisterService(config)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +80,6 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		applicationService: applicationService,
 		nodeService:        nodeService,
 		configService:      configService,
-		registerService:    registerService,
 		namespaceService:   namespaceService,
 		secretService:      secretService,
 		indexService:       indexService,
