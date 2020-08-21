@@ -27,7 +27,7 @@ func (api *API) ListSysConfig(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) ParseTemplate(key string, data map[string]string) ([]byte, error) {
-	tl, err := api.indexService.GetResource(key)
+	tl, err := api.initService.GetResource(key)
 	if err != nil {
 		return nil, err
 	}

@@ -128,7 +128,24 @@ func (s *AdminServer) nodeQuotaHandler(c *gin.Context) {
 		common.PopulateFailedResponse(cc, err, true)
 	}
 }
+// GetRoute get router
+func (s *ActiveServer) GetRoute() *gin.Engine {
+	return s.router
+}
 
+func (s *ActiveServer) InitRoute() {
+	s.router.NoRoute(NoRouteHandler)
+	s.router.NoMethod(NoMethodHandler)
+	s.router.GET("/health", Health)
+
+	s.router.Use(RequestIDHandler)
+	s.router.Use(LoggerHandler)
+	v1 := s.router.Group("v1")
+	{
+		active := v1.Group("/active")
+		active.GET("/:resource", common.WrapperRaw(s.api.GetResource))
+	}
+}
 // GetRoute get router
 func (s *NodeServer) GetRoute() *gin.Engine {
 	return s.router

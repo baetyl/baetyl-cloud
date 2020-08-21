@@ -13,13 +13,7 @@ import (
 )
 
 const offlineDuration = 40 * time.Second
-const (
-	InfoKind      = "k"
-	InfoName      = "n"
-	InfoNamespace = "ns"
-	InfoTimestamp = "ts"
-	InfoExpiry    = "e"
-)
+
 var (
 	CmdExpirationInSeconds = int64(60 * 60)
 )

@@ -20,15 +20,7 @@ const (
 	FunctionCodePrefix        = "baetyl-function-code"
 	FunctionDefaultConfigFile = "service.yml"
 )
-var (
-	SystemApps      = []common.SystemApplication{
-		common.BaetylCore,
-		common.BaetylFunction,
-		// TODO Set as system module after stability
-		//common.BaetylBroker,
-		//common.BaetylRule,
-	}
-)
+
 // GetApplication get a application
 func (api *API) GetApplication(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()

@@ -55,6 +55,16 @@ func main() {
 		defer s.Close()
 		ctx.Log().Info("admin server starting")
 
+		as, err := server.NewActiveServer(&cfg)
+		if err != nil {
+			return err
+		}
+		as.SetAPI(a)
+		as.InitRoute()
+		go as.Run()
+		defer as.Close()
+		ctx.Log().Info("active server starting")
+
 		ts, err := server.NewNodeServer(&cfg)
 		if err != nil {
 			return err
