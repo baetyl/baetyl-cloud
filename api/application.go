@@ -18,7 +18,7 @@ const (
 	ConfigDir                 = "/etc/baetyl"
 	FunctionConfigPrefix      = "baetyl-function-config"
 	FunctionCodePrefix        = "baetyl-function-code"
-	FunctionDefaultConfigFile = "service.yml"
+	FunctionDefaultConfigFile = "conf.yml"
 )
 
 // GetApplication get a application
