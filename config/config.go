@@ -26,6 +26,7 @@ type CloudConfig struct {
 		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
 	} `yaml:"cache" json:"cache"`
 	Plugin struct {
+		MQ        string   `yaml:"mq" json:"mq" default:"defaultmq"`
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
 		Auth      string   `yaml:"auth" json:"auth" default:"defaultauth"`
 		License   string   `yaml:"license" json:"license" default:"defaultlicense"`
@@ -33,6 +34,7 @@ type CloudConfig struct {
 		Objects   []string `yaml:"objects" json:"objects" default:"[]"`
 		Functions []string `yaml:"functions" json:"functions" default:"[]"`
 		Property  string   `yaml:"property" json:"property" default:"database"`
+		SyncLink  string   `yaml:"syncLink" json:"syncLink" default:"httplink"`
 		// TODO: deprecated
 
 		ModelStorage    string `yaml:"modelStorage" json:"modelStorage" default:"kubernetes"`

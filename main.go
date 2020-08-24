@@ -3,13 +3,16 @@ package main
 import (
 	"runtime"
 
+	"github.com/baetyl/baetyl-go/v2/context"
+	"github.com/baetyl/baetyl-go/v2/log"
+
 	"github.com/baetyl/baetyl-cloud/v2/api"
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/server"
-	"github.com/baetyl/baetyl-go/v2/context"
-	"github.com/baetyl/baetyl-go/v2/log"
+
+	_ "github.com/go-sql-driver/mysql"
 
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/awss3"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/database"
@@ -17,7 +20,7 @@ import (
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/license"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/pki"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/kube"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/baetyl/baetyl-cloud/v2/plugin/link/httplink"
 )
 
 func main() {
@@ -55,15 +58,19 @@ func main() {
 		defer s.Close()
 		ctx.Log().Info("admin server starting")
 
-		ts, err := server.NewNodeServer(&cfg)
+		link, err := plugin.GetPlugin(cfg.Plugin.SyncLink)
 		if err != nil {
 			return err
 		}
-		ts.SetSyncAPI(sa)
-		ts.InitRoute()
-		go ts.Run()
-		defer ts.Close()
-		ctx.Log().Info("node server starting")
+		sync := link.(plugin.SyncLink)
+		msgRouter := &server.MsgRouter{
+			SyncAPI: sa,
+			Link:    sync,
+		}
+		msgRouter.InitMsgRouter()
+		go sync.Run()
+		defer sync.Close()
+		ctx.Log().Info("sync server starting")
 
 		as, err := server.NewActiveServer(&cfg)
 		if err != nil {
