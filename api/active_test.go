@@ -551,8 +551,8 @@ func TestAPI_Active(t *testing.T) {
 	scs.EXPECT().GetSysConfig(gomock.Any(), gomock.Any()).Return(sysConf, nil).AnyTimes()
 	pki.EXPECT().SignClientCertificate(gomock.Any(), gomock.Any()).Return(certPEM, nil).AnyTimes()
 	pki.EXPECT().GetCA().Return([]byte("test"), nil).AnyTimes()
-	ns.EXPECT().UpdateNodeAppVersion(mRecord.Namespace, gomock.Any()).Return(nodeList, nil).Times(3)
-	is.EXPECT().RefreshNodesIndexByApp(mRecord.Namespace, gomock.Any(), nodeList).Times(3)
+	ns.EXPECT().UpdateNodeAppVersion(mRecord.Namespace, gomock.Any()).Return(nodeList, nil).Times(5)
+	is.EXPECT().RefreshNodesIndexByApp(mRecord.Namespace, gomock.Any(), nodeList).Times(5)
 	init.EXPECT().GetResource(gomock.Any()).Return("{}", nil).AnyTimes()
 	init.EXPECT().GetSyncCert(mRecord.Namespace, mRecord.NodeName).Return(secret, nil).Times(1)
 
