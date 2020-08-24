@@ -27,7 +27,6 @@ func initActiveAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 	v1 := router.Group("v1")
 	{
 		active := v1.Group("/active")
-		active.POST("", mockIM, common.Wrapper(api.Active))
 		active.GET("/:resource", mockIM, common.WrapperRaw(api.GetResource))
 	}
 	return api, router, mockCtl
@@ -138,85 +137,9 @@ func TestApi_genCmd(t *testing.T) {
 	assert.Equal(t, "", res)
 }
 
-func TestAPI_Active_ErrBatch(t *testing.T) {
-	api, router, ctl := initActiveAPI(t)
-	rs := service.NewMockRegisterService(ctl)
-	api.registerService = rs
-
-	mBatch := &models.Batch{
-		Name:         "test",
-		Namespace:    "default",
-		SecurityType: "Token",
-		SecurityKey:  "123",
-	}
-	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-
-	info := &specV1.ActiveRequest{
-		BatchName:        "test",
-		Namespace:        "default",
-		FingerprintValue: "123123",
-		SecurityType:     "Token",
-		SecurityValue:    "123",
-		PenetrateData:    map[string]string{"a": "b"},
-	}
-	body, err := json.Marshal(info)
-	assert.NoError(t, err)
-	req, _ := http.NewRequest(http.MethodPost, "/v1/active", bytes.NewReader(body))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusNotFound, w.Code)
-}
-
-func TestAPI_Active_ErrRecord(t *testing.T) {
-	api, router, ctl := initActiveAPI(t)
-	rs := service.NewMockRegisterService(ctl)
-	cs := service.NewMockCallbackService(ctl)
-	ns := service.NewMockNodeService(ctl)
-	api.callbackService = cs
-	api.registerService = rs
-	api.nodeService = ns
-
-	mBatch := &models.Batch{
-		Name:         "test",
-		Namespace:    "default",
-		SecurityType: "Token",
-		SecurityKey:  "123",
-	}
-	mRecord := &models.Record{
-		Name:             "r0",
-		Namespace:        mBatch.Namespace,
-		BatchName:        mBatch.Name,
-		Active:           0,
-		FingerprintValue: "123123",
-		NodeName:         "123123",
-	}
-	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(mBatch, nil).Times(1)
-	rs.EXPECT().GetRecordByFingerprint(mBatch.Name, mBatch.Namespace, mRecord.FingerprintValue).Return(nil, nil).Times(2)
-	rs.EXPECT().CreateRecord(gomock.Any()).Return(nil, nil).Times(1)
-
-	info := &specV1.ActiveRequest{
-		BatchName:        "test",
-		Namespace:        "default",
-		FingerprintValue: "123123",
-		SecurityType:     "Token",
-		SecurityValue:    "123",
-		PenetrateData:    map[string]string{"a": "b"},
-	}
-	body, err := json.Marshal(info)
-	assert.NoError(t, err)
-	req, _ := http.NewRequest(http.MethodPost, "/v1/active", bytes.NewReader(body))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusNotFound, w.Code)
-}
-
 func TestAPI_Active_ErrNode(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	rs := service.NewMockRegisterService(ctl)
-	cs := service.NewMockCallbackService(ctl)
 	ns := service.NewMockNodeService(ctl)
-	api.callbackService = cs
-	api.registerService = rs
 	api.nodeService = ns
 
 	mBatch := &models.Batch{
@@ -241,8 +164,6 @@ func TestAPI_Active_ErrNode(t *testing.T) {
 		},
 	}
 
-	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(mBatch, nil).Times(1)
-	rs.EXPECT().GetRecordByFingerprint(mBatch.Name, mBatch.Namespace, mRecord.FingerprintValue).Return(mRecord, nil).Times(1)
 	ns.EXPECT().Get(mRecord.Namespace, mRecord.NodeName).Return(nil, nil).Times(1)
 	ns.EXPECT().Create(mNode.Namespace, mNode).Return(nil, common.Error(common.ErrK8S, common.Field("error", "node error"))).Times(1)
 
@@ -264,11 +185,7 @@ func TestAPI_Active_ErrNode(t *testing.T) {
 
 func TestAPI_Active_ErrSys(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	rs := service.NewMockRegisterService(ctl)
-	cs := service.NewMockCallbackService(ctl)
 	ns := service.NewMockNodeService(ctl)
-	api.callbackService = cs
-	api.registerService = rs
 	api.nodeService = ns
 
 	mBatch := &models.Batch{
@@ -292,8 +209,6 @@ func TestAPI_Active_ErrSys(t *testing.T) {
 			common.LabelNodeName: "123123",
 		},
 	}
-	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(mBatch, nil).Times(1)
-	rs.EXPECT().GetRecordByFingerprint(mBatch.Name, mBatch.Namespace, mRecord.FingerprintValue).Return(mRecord, nil).Times(1)
 	ns.EXPECT().Get(mRecord.Namespace, mRecord.NodeName).Return(nil, nil).Times(1)
 	ns.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil).Times(1)
 
@@ -315,9 +230,7 @@ func TestAPI_Active_ErrSys(t *testing.T) {
 
 func TestAPI_Active_ErrSecret(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	rs := service.NewMockRegisterService(ctl)
 	as := service.NewMockApplicationService(ctl)
-	cs := service.NewMockCallbackService(ctl)
 	ns := service.NewMockNodeService(ctl)
 	ss := service.NewMockSecretService(ctl)
 	ccs := service.NewMockConfigService(ctl)
@@ -326,8 +239,6 @@ func TestAPI_Active_ErrSecret(t *testing.T) {
 	is := service.NewMockIndexService(ctl)
 	init := service.NewMockInitializeService(ctl)
 
-	api.callbackService = cs
-	api.registerService = rs
 	api.nodeService = ns
 	api.configService = ccs
 	api.applicationService = as
@@ -392,13 +303,9 @@ func TestAPI_Active_ErrSecret(t *testing.T) {
 	}
 	ccs.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(conf, nil).Times(2)
 	as.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(app, nil).Times(2)
-	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(mBatch, nil).Times(1)
-	rs.EXPECT().GetRecordByFingerprint(mBatch.Name, mBatch.Namespace, mRecord.FingerprintValue).Return(mRecord, nil).Times(1)
-	rs.EXPECT().UpdateRecord(mRecord).Return(nil, nil).Times(1)
 	ns.EXPECT().Get(mRecord.Namespace, mRecord.NodeName).Return(nil, nil).Times(1)
 	ns.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil).Times(1)
 	ss.EXPECT().Get(mRecord.Namespace, gomock.Any(), "").Return(nil, nil).AnyTimes()
-	cs.EXPECT().Callback(mBatch.CallbackName, mBatch.Namespace, gomock.Any()).Return(nil, nil).Times(1)
 	scs.EXPECT().GetSysConfig(gomock.Any(), gomock.Any()).Return(sysConf, nil).AnyTimes()
 	pki.EXPECT().SignClientCertificate(gomock.Any(), gomock.Any()).Return(certPEM, nil).AnyTimes()
 	pki.EXPECT().GetCA().Return([]byte("test"), nil).AnyTimes()
@@ -426,9 +333,7 @@ func TestAPI_Active_ErrSecret(t *testing.T) {
 
 func TestAPI_Active(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
-	rs := service.NewMockRegisterService(ctl)
 	as := service.NewMockApplicationService(ctl)
-	cs := service.NewMockCallbackService(ctl)
 	ns := service.NewMockNodeService(ctl)
 	ss := service.NewMockSecretService(ctl)
 	ccs := service.NewMockConfigService(ctl)
@@ -436,8 +341,6 @@ func TestAPI_Active(t *testing.T) {
 	pki := service.NewMockPKIService(ctl)
 	is := service.NewMockIndexService(ctl)
 	init := service.NewMockInitializeService(ctl)
-	api.callbackService = cs
-	api.registerService = rs
 	api.nodeService = ns
 	api.configService = ccs
 	api.applicationService = as
@@ -502,9 +405,6 @@ func TestAPI_Active(t *testing.T) {
 	}
 	ccs.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(conf, nil).Times(2)
 	as.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(app, nil).Times(2)
-	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(mBatch, nil).Times(1)
-	rs.EXPECT().GetRecordByFingerprint(mBatch.Name, mBatch.Namespace, mRecord.FingerprintValue).Return(mRecord, nil).Times(1)
-	rs.EXPECT().UpdateRecord(mRecord).Return(nil, nil).Times(1)
 	ns.EXPECT().Get(mRecord.Namespace, mRecord.NodeName).Return(nil, fmt.Errorf("error")).Times(1)
 
 	info := &specV1.ActiveRequest{
@@ -525,9 +425,6 @@ func TestAPI_Active(t *testing.T) {
 
 	ccs.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(conf, nil).Times(2)
 	as.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(app, nil).Times(2)
-	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(mBatch, nil).Times(1)
-	rs.EXPECT().GetRecordByFingerprint(mBatch.Name, mBatch.Namespace, mRecord.FingerprintValue).Return(mRecord, nil).Times(1)
-	rs.EXPECT().UpdateRecord(mRecord).Return(nil, nil).Times(1)
 	ns.EXPECT().Get(mRecord.Namespace, mRecord.NodeName).Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	ns.EXPECT().Create(mNode.Namespace, mNode).Return(nil, fmt.Errorf("error")).Times(1)
 
@@ -540,14 +437,10 @@ func TestAPI_Active(t *testing.T) {
 
 	ccs.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(conf, nil).Times(3)
 	as.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(app, nil).Times(3)
-	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(mBatch, nil).Times(1)
-	rs.EXPECT().GetRecordByFingerprint(mBatch.Name, mBatch.Namespace, mRecord.FingerprintValue).Return(mRecord, nil).Times(1)
-	rs.EXPECT().UpdateRecord(mRecord).Return(nil, nil).Times(1)
 	ns.EXPECT().Get(mRecord.Namespace, mRecord.NodeName).Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	ns.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil).Times(1)
 	ss.EXPECT().Get(mRecord.Namespace, gomock.Any(), "").Return(secret, nil).AnyTimes()
 	ss.EXPECT().Create(mRecord.Namespace, gomock.Any()).Return(secret, nil).AnyTimes()
-	cs.EXPECT().Callback(mBatch.CallbackName, mBatch.Namespace, gomock.Any()).Return(nil, nil).Times(1)
 	scs.EXPECT().GetSysConfig(gomock.Any(), gomock.Any()).Return(sysConf, nil).AnyTimes()
 	pki.EXPECT().SignClientCertificate(gomock.Any(), gomock.Any()).Return(certPEM, nil).AnyTimes()
 	pki.EXPECT().GetCA().Return([]byte("test"), nil).AnyTimes()
@@ -565,14 +458,10 @@ func TestAPI_Active(t *testing.T) {
 
 	ccs.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(conf, nil).Times(3)
 	as.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(app, nil).Times(3)
-	rs.EXPECT().GetBatch(mBatch.Name, mBatch.Namespace).Return(mBatch, nil).Times(1)
-	rs.EXPECT().GetRecordByFingerprint(mBatch.Name, mBatch.Namespace, mRecord.FingerprintValue).Return(mRecord, nil).Times(1)
-	rs.EXPECT().UpdateRecord(mRecord).Return(nil, nil).Times(1)
 	ns.EXPECT().Get(mRecord.Namespace, mRecord.NodeName).Return(mNode, nil).Times(1)
 	ns.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil).Times(1)
 	ss.EXPECT().Get(mRecord.Namespace, gomock.Any(), "").Return(secret, nil).AnyTimes()
 	ss.EXPECT().Create(mRecord.Namespace, gomock.Any()).Return(secret, nil).AnyTimes()
-	cs.EXPECT().Callback(mBatch.CallbackName, mBatch.Namespace, gomock.Any()).Return(nil, nil).Times(1)
 	scs.EXPECT().GetSysConfig(gomock.Any(), gomock.Any()).Return(sysConf, nil).AnyTimes()
 	pki.EXPECT().SignClientCertificate(gomock.Any(), gomock.Any()).Return(certPEM, nil).AnyTimes()
 	pki.EXPECT().GetCA().Return([]byte("test"), nil).AnyTimes()
@@ -592,11 +481,9 @@ func TestAPI_Active(t *testing.T) {
 func TestAPI_getInitYaml(t *testing.T) {
 	api, _, ctl := initActiveAPI(t)
 	as := service.NewMockAuthService(ctl)
-	rs := service.NewMockRegisterService(ctl)
 	init := service.NewMockInitializeService(ctl)
 	api.authService = as
 	api.initService = init
-	api.registerService = rs
 
 	info := map[string]interface{}{
 		InfoKind:      "node",
@@ -628,7 +515,6 @@ func TestAPI_getInitYaml(t *testing.T) {
 	b := &models.Batch{}
 
 	as.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(1)
-	rs.EXPECT().GetBatch("n0", "default").Return(b, nil).Times(1)
 	init.EXPECT().InitWithBitch(b, kube).Return(nil, nil).Times(1)
 	_, err = api.getInitYaml(token, kube)
 	assert.NoError(t, err)
