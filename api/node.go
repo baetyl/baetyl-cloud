@@ -1,6 +1,7 @@
 package api
 
 import (
+	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -32,6 +33,25 @@ func (api *API) GetNode(c *common.Context) (interface{}, error) {
 
 	view.Desire = nil
 	return view, nil
+}
+
+func (api *API) GetNodes(c *common.Context) (interface{}, error) {
+	ns, names := c.GetNamespace(), c.GetNameFromParam()
+	nameArray := strings.Split(names, ",")
+	var nodesView = []*v1.NodeView{}
+	for _, name := range nameArray {
+		node, err := api.nodeService.Get(ns, name)
+		if err != nil {
+			continue
+		}
+		view, err := node.View(offlineDuration)
+		if err != nil {
+			continue
+		}
+		view.Desire = nil
+		nodesView = append(nodesView, view)
+	}
+	return nodesView, nil
 }
 
 // GetNodeStats get a node stats
