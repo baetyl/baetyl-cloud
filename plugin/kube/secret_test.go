@@ -128,7 +128,6 @@ func TestUpdateSecret(t *testing.T) {
 	cfg.Name = cfg.Name + "NULL"
 	_, err = c.UpdateSecret(cfg.Namespace, cfg)
 	assert.NotNil(t, err)
-
 }
 
 func TestDeleteSecret(t *testing.T) {
