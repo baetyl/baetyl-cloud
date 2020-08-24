@@ -65,5 +65,5 @@ func TestDeleteNamespace(t *testing.T) {
 
 	ns.Name = "test"
 	err = c.DeleteNamespace(ns)
-	assert.Error(t, err)
+	assert.NoError(t, err)
 }

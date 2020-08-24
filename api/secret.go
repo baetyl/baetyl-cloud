@@ -81,10 +81,6 @@ func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
 // DeleteSecret delete the secret
 func (api *API) DeleteSecret(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	_, err := wrapSecret(api.secretService.Get(ns, n, ""))
-	if err != nil {
-		return nil, err
-	}
 	return api.deleteSecret(ns, n, "secret")
 }
 

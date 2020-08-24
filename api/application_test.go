@@ -1301,18 +1301,11 @@ func TestDeleteApplication(t *testing.T) {
 		Name:      "abc",
 	}
 
-	// 404
-	mkApplicationService.EXPECT().Get(gomock.Any(), "abc", gomock.Any()).Return(nil, common.Error(common.ErrResourceNotFound))
-	req, _ := http.NewRequest(http.MethodDelete, "/v1/apps/abc", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusNotFound, w.Code)
-
 	// 500
 	mkApplicationService.EXPECT().Get(gomock.Any(), "abc", gomock.Any()).Return(app, nil).Times(1)
 	mkApplicationService.EXPECT().Delete(app.Namespace, app.Name, "").Return(fmt.Errorf("error")).Times(1)
-	req, _ = http.NewRequest(http.MethodDelete, "/v1/apps/abc", nil)
-	w = httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodDelete, "/v1/apps/abc", nil)
+	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
@@ -1330,6 +1323,13 @@ func TestDeleteApplication(t *testing.T) {
 	mkApplicationService.EXPECT().Delete(app.Namespace, app.Name, "").Return(nil).Times(1)
 	mkIndexService.EXPECT().RefreshNodesIndexByApp(app.Namespace, app.Name, gomock.Any()).Return(nil).Times(1)
 	mkNodeService.EXPECT().DeleteNodeAppVersion(gomock.Any(), gomock.Any()).Return(nil, nil).Times(1)
+	req, _ = http.NewRequest(http.MethodDelete, "/v1/apps/abc", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// 200 delete non-existent app
+	mkApplicationService.EXPECT().Get(gomock.Any(), "abc", gomock.Any()).Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/apps/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)

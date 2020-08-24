@@ -155,6 +155,9 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 	ns, name := c.GetNamespace(), c.GetNameFromParam()
 	app, err := api.applicationService.Get(ns, name, "")
 	if err != nil {
+		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
 
