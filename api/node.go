@@ -190,6 +190,9 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	node, err := api.nodeService.Get(ns, n)
 	if err != nil {
+		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
 

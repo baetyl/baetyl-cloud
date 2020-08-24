@@ -119,6 +119,9 @@ func (api *API) DeleteConfig(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	res, err := api.configService.Get(ns, n, "")
 	if err != nil {
+		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
+			return nil, nil
+		}
 		log.L().Error("get config failed", log.Error(err))
 		return nil, err
 	}

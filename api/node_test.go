@@ -737,7 +737,7 @@ func TestDeleteNode(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 
 	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	mkNodeService.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(errors.New("error"))

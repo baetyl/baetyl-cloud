@@ -571,6 +571,14 @@ func TestDeleteConfig(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	// 200 non-existent config
+	mkConfigService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, common.Error(common.ErrResourceNotFound))
+	req, _ = http.NewRequest(http.MethodDelete, "/v1/configs/abc", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
 }
 
 func TestGetAppByConfig(t *testing.T) {

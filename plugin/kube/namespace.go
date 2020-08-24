@@ -2,6 +2,8 @@ package kube
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/jinzhu/copier"
@@ -49,6 +51,9 @@ func (c *client) DeleteNamespace(namespace *models.Namespace) error {
 	defer utils.Trace(c.log.Debug, "DeleteNamespace")()
 	err := c.coreV1.Namespaces().Delete(namespace.Name, &metav1.DeleteOptions{})
 	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return nil
+		}
 		return err
 	}
 	if n, _ := c.coreV1.Namespaces().Get(namespace.Name, metav1.GetOptions{}); n != nil {
