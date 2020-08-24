@@ -22,9 +22,8 @@ var (
 	SystemApps      = []common.SystemApplication{
 		common.BaetylCore,
 		common.BaetylFunction,
-		// TODO Set as system module after stability
-		//common.BaetylBroker,
-		//common.BaetylRule,
+		common.BaetylBroker,
+		common.BaetylRule,
 	}
 )
 
