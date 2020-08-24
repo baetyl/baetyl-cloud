@@ -1,60 +1,32 @@
 package api
 
 import (
-	"bytes"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
+	"os"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/config"
+	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 )
 
-func initSyncAPI(t *testing.T) (*SyncAPI, *gin.Engine, *gomock.Controller) {
-	mockCtl := gomock.NewController(t)
-
-	api := &SyncAPI{}
-	router := gin.Default()
-	router.Use(func(c *gin.Context) {
-		cc := common.NewContext(c)
-		cc.SetNamespace("default")
-		cc.SetName("test")
-	})
-	v1 := router.Group("v1")
-	{
-		sync := v1.Group("/sync")
-		sync.POST("/report", common.Wrapper(api.Report))
-		sync.POST("/desire", common.Wrapper(api.Desire))
-	}
-	return api, router, mockCtl
+func TestNewSyncAPI(t *testing.T) {
+	// bad case
+	_, err := NewSyncAPI(&config.CloudConfig{})
+	assert.Error(t, err)
 }
 
-func TestReport(t *testing.T) {
-	api, router, mockCtl := initSyncAPI(t)
+func TestSyncAPIImpl_Report(t *testing.T) {
+	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
-
+	sync := &SyncAPIImpl{}
 	mSync := ms.NewMockSyncService(mockCtl)
-	api.SyncService = mSync
+	sync.SyncService = mSync
 
-	// TODO: use real tls cert
-	// info := &specV1.Report{}
-	// data, err := json.Marshal(info)
-	// assert.NoError(t, err)
-	// r := bytes.NewReader(data)
-	// req, err := http.NewRequest(http.MethodPost, "/v1/sync/report", r)
-	// w := httptest.NewRecorder()
-	// router.ServeHTTP(w, req)
-	// assert.Equal(t, http.StatusOK, w.Code)
-	// assert.NoError(t, err)
-
-	response := specV1.Desire{}
-	mSync.EXPECT().Report(gomock.Any(), gomock.Any(), gomock.Any()).Return(response, nil)
-	info := &specV1.Report{
+	// good case 0
+	info := specV1.Report{
 		"apps": []specV1.AppInfo{
 			{
 				Name:    "app01",
@@ -62,39 +34,55 @@ func TestReport(t *testing.T) {
 			},
 		},
 	}
-	data, err := json.Marshal(info)
-	r := bytes.NewReader(data)
-	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodPost, "/v1/sync/report", r)
-	router.ServeHTTP(w, req)
+	msg := specV1.Message{
+		Kind:     specV1.MessageReport,
+		Metadata: map[string]string{"name": "test", "namespace": "default"},
+		Content:  info,
+	}
+	resp := specV1.Desire{}
+	expMsg := &specV1.Message{
+		Kind:     msg.Kind,
+		Metadata: msg.Metadata,
+		Content:  resp,
+	}
+	mSync.EXPECT().Report("default", "test", info).Return(resp, nil).Times(1)
+	res, err := sync.Report(msg)
 	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.EqualValues(t, expMsg, res)
 
-	report := &specV1.Report{}
-	data, _ = json.Marshal(report)
-
-	mSync.EXPECT().Report(gomock.Any(), gomock.Any(), gomock.Any()).Return(response, nil)
-	w = httptest.NewRecorder()
-	req, _ = http.NewRequest(http.MethodPost, "/v1/sync/report", bytes.NewReader(data))
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
+	// bad case 0
+	mSync.EXPECT().Report("default", "test", info).Return(nil, os.ErrInvalid).Times(1)
+	_, err = sync.Report(msg)
+	assert.Error(t, err)
 }
 
-func TestDesire(t *testing.T) {
-	api, router, mockCtl := initSyncAPI(t)
+func TestSyncAPIImpl_Desire(t *testing.T) {
+	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
+	sync := &SyncAPIImpl{}
 	mSync := ms.NewMockSyncService(mockCtl)
-	api.SyncService = mSync
-	var response []specV1.ResourceValue
-	var request []specV1.ResourceInfo
-	mSync.EXPECT().Desire(gomock.Any(), gomock.Any(), gomock.Any()).Return(response, nil)
-	data, err := json.Marshal(request)
-	assert.NoError(t, err)
-	r := bytes.NewReader(data)
+	sync.SyncService = mSync
 
-	req, err := http.NewRequest(http.MethodPost, "/v1/sync/desire", r)
+	// good case 0
+	infos := specV1.DesireRequest{}
+	msg := specV1.Message{
+		Kind:     specV1.MessageDesire,
+		Metadata: map[string]string{"namespace": "default"},
+		Content:  infos,
+	}
+	resp := []specV1.ResourceValue{}
+	expMsg := &specV1.Message{
+		Kind:     msg.Kind,
+		Metadata: msg.Metadata,
+		Content:  specV1.DesireResponse{Values: resp},
+	}
+	mSync.EXPECT().Desire("default", nil, msg.Metadata).Return(resp, nil).Times(1)
+	res, err := sync.Desire(msg)
 	assert.NoError(t, err)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.EqualValues(t, expMsg, res)
+
+	// bad case 0
+	mSync.EXPECT().Desire("default", nil, msg.Metadata).Return(nil, os.ErrInvalid).Times(1)
+	_, err = sync.Desire(msg)
+	assert.Error(t, err)
 }

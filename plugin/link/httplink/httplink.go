@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"net/http"
+	"os"
 
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
@@ -11,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/server"
 )
@@ -70,6 +72,7 @@ func NewHTTPLink() (plugin.Plugin, error) {
 		msgRouter: map[string]interface{}{},
 	}
 	link.initRouter()
+	link.setPortFromEnv()
 	return link, nil
 }
 
@@ -106,5 +109,12 @@ func (l *httpLink) initRouter() {
 		sync := v1.Group("/sync")
 		sync.POST("/report", common.Wrapper(l.Wrapper(specV1.MessageReport)))
 		sync.POST("/desire", common.Wrapper(l.Wrapper(specV1.MessageDesire)))
+	}
+}
+
+func (l *httpLink) setPortFromEnv() {
+	nodePort := os.Getenv(config.NodeServerPort)
+	if nodePort != "" {
+		l.cfg.HTTPLink.Port = ":" + nodePort
 	}
 }
