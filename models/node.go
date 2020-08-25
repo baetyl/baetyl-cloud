@@ -24,3 +24,7 @@ type ListOptions struct {
 	Limit         int64  `json:"limit,omitempty"`
 	Continue      string `json:"continue,omitempty"`
 }
+
+type NodeNames struct {
+	Names []string `json:"names"`
+}
