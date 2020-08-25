@@ -122,7 +122,6 @@ func TestGenInitCmd(t *testing.T) {
 		Namespace: node.Namespace,
 		Version:   "123",
 	}
-	batch := genBatchTestCase()
 	shadow := &models.Shadow{
 		Name:      node.Name,
 		Namespace: node.Namespace,
@@ -147,18 +146,6 @@ func TestGenInitCmd(t *testing.T) {
 	assert.NoError(t, err)
 
 	res, err := is.InitWithNode(node.Namespace, node.Name, kube)
-	assert.NoError(t, err)
-	assert.Equal(t, "123", string(res))
-
-	batch.Fingerprint.Type = common.FingerprintSN
-	batch.Fingerprint.SnPath = "sn"
-	res, err = is.InitWithBitch(batch, kube)
-	assert.NoError(t, err)
-	assert.Equal(t, "123", string(res))
-
-	batch.Fingerprint.Type = common.FingerprintInput
-	batch.Fingerprint.InputField = "sn"
-	res, err = is.InitWithBitch(batch, kube)
 	assert.NoError(t, err)
 	assert.Equal(t, "123", string(res))
 }
