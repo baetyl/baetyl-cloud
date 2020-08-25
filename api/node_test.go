@@ -42,7 +42,7 @@ func initNodeAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 	{
 		configs := v1.Group("/nodes")
 		configs.GET("/:name", mockIM, common.Wrapper(api.GetNode))
-		configs.GET("/:name/batch", mockIM, common.Wrapper(api.GetNodes))
+		configs.POST("/batch", mockIM, common.Wrapper(api.GetNodes))
 		configs.GET("/:name/stats", mockIM, common.Wrapper(api.GetNodeStats))
 		configs.GET("/:name/apps", mockIM, common.Wrapper(api.GetAppByNode))
 		configs.PUT("/:name", mockIM, common.Wrapper(api.UpdateNode))
@@ -144,24 +144,32 @@ func TestGetNodes(t *testing.T) {
 	mkNodeService.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
 
 	// 200
-	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc,abc2/batch", nil)
+	nodeNames := &models.NodeNames{
+		Names: []string{"abc","abc2"},
+	}
+	body, err := json.Marshal(nodeNames)
+	assert.NoError(t, err)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/nodes/batch", bytes.NewReader(body))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	bytes := w.Body.Bytes()
-	assert.Equal(t, string(bytes), "[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"ready\":false}]\n")
+	assert.Equal(t, string(w.Body.Bytes()), "[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"ready\":false}]\n")
 
 	//error node name
 	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
 	mkNodeService.EXPECT().Get(mNode.Namespace, "err_abc").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	mkNodeService.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
 	// 200
-	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc,err_abc,abc2/batch", nil)
+	nodeNames = &models.NodeNames{
+		Names: []string{"abc","err_abc","abc2"},
+	}
+	body, err = json.Marshal(nodeNames)
+	assert.NoError(t, err)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes/batch", bytes.NewReader(body))
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	bytes = w.Body.Bytes()
-	assert.Equal(t, string(bytes), "[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"ready\":false}]\n")
+	assert.Equal(t, string(w.Body.Bytes()), "[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"ready\":false}]\n")
 }
 
 func TestGetNodeStats(t *testing.T) {
