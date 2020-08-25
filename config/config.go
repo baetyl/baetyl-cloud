@@ -33,7 +33,7 @@ type CloudConfig struct {
 		Objects   []string `yaml:"objects" json:"objects" default:"[]"`
 		Functions []string `yaml:"functions" json:"functions" default:"[]"`
 		Property  string   `yaml:"property" json:"property" default:"database"`
-		SyncLink  string   `yaml:"syncLink" json:"syncLink" default:"httplink"`
+		SyncLinks []string `yaml:"synclinks" json:"synclinks" default:"[\"httplink\"]"`
 		// TODO: deprecated
 
 		ModelStorage    string `yaml:"modelStorage" json:"modelStorage" default:"kubernetes"`

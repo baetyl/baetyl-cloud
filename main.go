@@ -58,19 +58,14 @@ func main() {
 		defer s.Close()
 		ctx.Log().Info("admin server starting")
 
-		link, err := plugin.GetPlugin(cfg.Plugin.SyncLink)
+		ss, err := server.NewSyncServer(&cfg)
 		if err != nil {
 			return err
 		}
-		sync := link.(plugin.SyncLink)
-		msgRouter := &server.MsgRouter{
-			SyncAPI: sa,
-			Link:    sync,
-		}
-		msgRouter.InitMsgRouter()
-		go sync.Run()
-		defer sync.Close()
-		ctx.Log().Info("sync server starting")
+		ss.SetSyncAPI(sa)
+		ss.InitMsgRouter()
+		ss.Run()
+		defer ss.Close()
 
 		as, err := server.NewActiveServer(&cfg)
 		if err != nil {

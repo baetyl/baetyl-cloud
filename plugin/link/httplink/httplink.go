@@ -76,7 +76,7 @@ func NewHTTPLink() (plugin.Plugin, error) {
 	return link, nil
 }
 
-func (l *httpLink) Run() {
+func (l *httpLink) Start() {
 	if l.svr.TLSConfig == nil {
 		if err := l.svr.ListenAndServe(); err != nil {
 			log.L().Info("sync server http stopped", log.Error(err))
@@ -107,8 +107,8 @@ func (l *httpLink) initRouter() {
 	v1 := l.router.Group("v1")
 	{
 		sync := v1.Group("/sync")
-		sync.POST("/report", common.Wrapper(l.Wrapper(specV1.MessageReport)))
-		sync.POST("/desire", common.Wrapper(l.Wrapper(specV1.MessageDesire)))
+		sync.POST("/report", common.Wrapper(l.wrapper(specV1.MessageReport)))
+		sync.POST("/desire", common.Wrapper(l.wrapper(specV1.MessageDesire)))
 	}
 }
 

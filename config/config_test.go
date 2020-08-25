@@ -71,7 +71,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Functions = []string{}
 	expect.Plugin.Objects = []string{}
 	expect.Plugin.Property = "database"
-	expect.Plugin.SyncLink = "httplink"
+	expect.Plugin.SyncLinks = []string{"httplink"}
 	expect.Plugin.MQ = "defaultmq"
 
 	expect.Cache.ExpirationDuration = time.Minute * 10
