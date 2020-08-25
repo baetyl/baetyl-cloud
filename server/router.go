@@ -49,7 +49,7 @@ func (s *AdminServer) InitRoute() {
 	{
 		nodes := v1.Group("/nodes")
 		nodes.GET("/:name", common.Wrapper(s.api.GetNode))
-		nodes.GET("/:name/batch", common.Wrapper(s.api.GetNodes))
+		nodes.POST("/batch", common.Wrapper(s.api.GetNodes))
 		nodes.GET("/:name/apps", common.Wrapper(s.api.GetAppByNode))
 		nodes.GET("/:name/stats", common.Wrapper(s.api.GetNodeStats))
 		nodes.PUT("/:name", common.Wrapper(s.api.UpdateNode))
