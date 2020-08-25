@@ -12,6 +12,7 @@ import (
 )
 
 const offlineDuration = 40 * time.Second
+const maxGetNodesNum = 100
 
 var (
 	CmdExpirationInSeconds = int64(60 * 60)
@@ -53,6 +54,9 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 		}
 		view.Desire = nil
 		nodesView = append(nodesView, view)
+		if len(nodesView) >= maxGetNodesNum {
+			break
+		}
 	}
 	return nodesView, nil
 }
