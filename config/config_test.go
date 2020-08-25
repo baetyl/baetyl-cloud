@@ -1,27 +1,25 @@
 package config
 
 import (
-	"github.com/baetyl/baetyl-go/v2/utils"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/baetyl/baetyl-go/v2/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSetPortFromEnv(t *testing.T) {
 	cfg := &CloudConfig{
 		ActiveServer: Server{Port: ":1"},
 		AdminServer:  Server{Port: ":2"},
-		NodeServer:   NodeServer{},
 		MisServer:    MisServer{},
 	}
-	cfg.NodeServer.Port = ":3"
 	cfg.MisServer.Port = ":4"
 	// no env
 	SetPortFromEnv(cfg)
 	assert.Equal(t, ":1", cfg.ActiveServer.Port)
 	assert.Equal(t, ":2", cfg.AdminServer.Port)
-	assert.Equal(t, ":3", cfg.NodeServer.Port)
 	assert.Equal(t, ":4", cfg.MisServer.Port)
 
 	// env
@@ -29,15 +27,12 @@ func TestSetPortFromEnv(t *testing.T) {
 	assert.NoError(t, err)
 	err = os.Setenv(AdminServerPort, "5")
 	assert.NoError(t, err)
-	err = os.Setenv(NodeServerPort, "6")
-	assert.NoError(t, err)
 	err = os.Setenv(MisServerPort, "7")
 	assert.NoError(t, err)
 
 	SetPortFromEnv(cfg)
 	assert.Equal(t, ":4", cfg.ActiveServer.Port)
 	assert.Equal(t, ":5", cfg.AdminServer.Port)
-	assert.Equal(t, ":6", cfg.NodeServer.Port)
 	assert.Equal(t, ":7", cfg.MisServer.Port)
 }
 
@@ -52,12 +47,6 @@ func TestDefaultValue(t *testing.T) {
 	expect.AdminServer.WriteTimeout = time.Second * 30
 	expect.AdminServer.ReadTimeout = time.Second * 30
 	expect.AdminServer.ShutdownTime = time.Second * 3
-
-	expect.NodeServer.Port = ":9005"
-	expect.NodeServer.WriteTimeout = time.Second * 30
-	expect.NodeServer.ReadTimeout = time.Second * 30
-	expect.NodeServer.ShutdownTime = time.Second * 3
-	expect.NodeServer.CommonName = "common-name"
 
 	expect.MisServer.Port = ":9006"
 	expect.MisServer.WriteTimeout = time.Second * 30
@@ -82,6 +71,8 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Functions = []string{}
 	expect.Plugin.Objects = []string{}
 	expect.Plugin.Property = "database"
+	expect.Plugin.SyncLinks = []string{"httplink"}
+	expect.Plugin.MQ = "defaultmq"
 
 	expect.Cache.ExpirationDuration = time.Minute * 10
 	// case 0
@@ -93,9 +84,6 @@ func TestDefaultValue(t *testing.T) {
 	// case 1
 	cfg = &CloudConfig{}
 	in := `
-nodeServer:
-  port: ":9994"
-
 activeServer:
   port: ":9995"
 
@@ -107,7 +95,6 @@ misServer:
 `
 	expect.AdminServer.Port = ":9993"
 	expect.ActiveServer.Port = ":9995"
-	expect.NodeServer.Port = ":9994"
 	expect.MisServer.Port = ":9996"
 	err = utils.UnmarshalYAML([]byte(in), cfg)
 	assert.NoError(t, err)
