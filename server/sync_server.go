@@ -9,8 +9,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-type HandlerReport func(msg specV1.Message) (*specV1.Message, error)
-type HandlerDesire func(msg specV1.Message) (*specV1.Message, error)
+type HandlerMessage func(msg specV1.Message) (*specV1.Message, error)
 
 type SyncServer struct {
 	links   map[string]plugin.SyncLink
@@ -37,8 +36,8 @@ func (s *SyncServer) SetSyncAPI(a api.SyncAPI) {
 
 func (s *SyncServer) InitMsgRouter() {
 	for _, v := range s.links {
-		v.AddMsgRouter(string(specV1.MessageReport), HandlerReport(s.syncAPI.Report))
-		v.AddMsgRouter(string(specV1.MessageDesire), HandlerDesire(s.syncAPI.Desire))
+		v.AddMsgRouter(string(specV1.MessageReport), HandlerMessage(s.syncAPI.Report))
+		v.AddMsgRouter(string(specV1.MessageDesire), HandlerMessage(s.syncAPI.Desire))
 	}
 }
 

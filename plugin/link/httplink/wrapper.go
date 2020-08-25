@@ -33,7 +33,7 @@ func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 			}
 			msg.Metadata["name"] = n
 			msg.Metadata["namespace"] = ns
-			resp, err := l.msgRouter[string(specV1.MessageReport)].(server.HandlerReport)(msg)
+			resp, err := l.msgRouter[string(specV1.MessageReport)].(server.HandlerMessage)(msg)
 			if err != nil {
 				return nil, err
 			}
@@ -61,7 +61,7 @@ func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 				msg.Metadata[strings.ToLower(k)] = c.GetHeader(k)
 			}
 			msg.Metadata["namespace"] = ns
-			resp, err := l.msgRouter[string(specV1.MessageDesire)].(server.HandlerDesire)(msg)
+			resp, err := l.msgRouter[string(specV1.MessageDesire)].(server.HandlerMessage)(msg)
 			if err != nil {
 				return nil, err
 			}
