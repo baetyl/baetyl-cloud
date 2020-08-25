@@ -1,6 +1,7 @@
 package api
 
 import (
+	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -12,7 +13,6 @@ import (
 )
 
 const offlineDuration = 40 * time.Second
-const maxGetNodesNum = 100
 
 var (
 	CmdExpirationInSeconds = int64(60 * 60)
@@ -40,6 +40,9 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 	nodeNames := &models.NodeNames{}
 	err := c.LoadBody(nodeNames)
 	if err != nil {
+		if strings.Contains(err.Error(), "Error:Field validation"){
+			return nil, common.Error(common.ErrBatchOpNum, common.Field("error", common.ErrBatchOpNum.String()))
+		}
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
 	var nodesView = []*v1.NodeView{}
@@ -54,9 +57,6 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 		}
 		view.Desire = nil
 		nodesView = append(nodesView, view)
-		if len(nodesView) >= maxGetNodesNum {
-			break
-		}
 	}
 	return nodesView, nil
 }

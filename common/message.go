@@ -79,6 +79,8 @@ const (
 	ErrLicenseQuota = "ErrLicenseQuota"
 	// * third server error
 	ErrThirdServer = "ErrThirdServer"
+	// * batch op error
+	ErrBatchOpNum Code = "ErrBatchOpNum"
 )
 
 var templates = map[Code]string{
@@ -142,6 +144,8 @@ var templates = map[Code]string{
 
 	// * third server error
 	ErrThirdServer: "Third server {{if .name}}({{.name}}){{end}} error.{{if .error}} ({{.error}}){{end}}",
+
+	ErrBatchOpNum: "The number of batch operations is too large",
 }
 
 func getHTTPStatus(c Code) int {
