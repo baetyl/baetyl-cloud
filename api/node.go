@@ -35,8 +35,8 @@ func (api *API) GetNode(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) GetNodes(c *common.Context) (interface{}, error) {
-	_, token := c.GetQuery("batch")
-	if !token {
+	_, ok := c.GetQuery("batch")
+	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid)
 	}
 	ns := c.GetNamespace()
@@ -56,9 +56,6 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 		}
 		view, err := node.View(offlineDuration)
 		if err != nil {
-			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
-				continue
-			}
 			return nil, err
 		}
 		view.Desire = nil
