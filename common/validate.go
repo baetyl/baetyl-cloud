@@ -1,9 +1,12 @@
 package common
 
 import (
-	"gopkg.in/go-playground/validator.v9"
 	"regexp"
 	"strings"
+
+	"github.com/go-playground/locales/zh"
+	ut "github.com/go-playground/universal-translator"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 const (
@@ -15,8 +18,10 @@ const (
 	nonBaetyl        = "nonBaetyl"
 	namespace        = "namespace"
 	validLabels      = "validLabels"
+	validBatchOp     = "validBatchOp"
 
 	resourceLength = 63
+	arrayLength    = 3
 )
 
 var regexps = map[string]string{
@@ -30,6 +35,7 @@ var validate *validator.Validate
 var labelRegex *regexp.Regexp
 var resourceRegex *regexp.Regexp
 var fingerprintRegex *regexp.Regexp
+var trans ut.Translator
 
 func init() {
 	labelRegex, _ = regexp.Compile("^([A-Za-z0-9][-A-Za-z0-9_\\.]*)?[A-Za-z0-9]?$")
@@ -43,6 +49,10 @@ func init() {
 	for k, v := range regexps {
 		validate.RegisterValidation(k, genValidFunc(v))
 	}
+	validate.RegisterValidation(validBatchOp, validArrayLengthFunc(arrayLength))
+	uni := ut.New(zh.New())
+	trans, _ = uni.GetTranslator("en")
+	validate.RegisterTranslation(validBatchOp, trans, registerTranslator(validBatchOp, ErrBatchOpNum.String()), translate)
 }
 
 func genValidFunc(str string) validator.Func {
@@ -78,4 +88,31 @@ func validRexAndLengthFunc(length int, reg *regexp.Regexp) validator.Func {
 		}
 		return true
 	}
+}
+
+func validArrayLengthFunc(length int) validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		field := fl.Field().Interface().([]string)
+		if len(field) > length {
+			return false
+		}
+		return true
+	}
+}
+
+func registerTranslator(tag string, msg string) validator.RegisterTranslationsFunc {
+	return func(trans ut.Translator) error {
+		if err := trans.Add(tag, msg, false); err != nil {
+			return err
+		}
+		return nil
+	}
+}
+
+func translate(trans ut.Translator, fe validator.FieldError) string {
+	msg, err := trans.T(fe.Tag(), fe.Field())
+	if err != nil {
+		panic(fe.(error).Error())
+	}
+	return msg
 }

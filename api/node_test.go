@@ -140,10 +140,10 @@ func TestGetNodes(t *testing.T) {
 	mNode2 := getMockNode()
 	mNode2.Name = "abc2"
 	mNode2.Labels[common.LabelNodeName] = "abc2"
-	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
-	mkNodeService.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
 
 	// 200
+	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
+	mkNodeService.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
 	nodeNames := &models.NodeNames{
 		Names: []string{"abc", "abc2"},
 	}
@@ -155,11 +155,10 @@ func TestGetNodes(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, string(w.Body.Bytes()), "[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"ready\":false}]\n")
 
-	//error node name
+	// 200 ResourceNotFound
 	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
 	mkNodeService.EXPECT().Get(mNode.Namespace, "err_abc").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	mkNodeService.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
-	// 200
 	nodeNames = &models.NodeNames{
 		Names: []string{"abc", "err_abc", "abc2"},
 	}
@@ -170,8 +169,10 @@ func TestGetNodes(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, string(w.Body.Bytes()), "[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"ready\":false}]\n")
+
+	nodeNames = &models.NodeNames{}
 	// 400 validate error
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 21; i++ {
 		nodeNames.Names = append(nodeNames.Names, "abc")
 	}
 	body, err = json.Marshal(nodeNames)
@@ -180,6 +181,18 @@ func TestGetNodes(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	//500
+	nodeNames = &models.NodeNames{
+		Names: []string{"abc", "abc2"},
+	}
+	body, err = json.Marshal(nodeNames)
+	assert.NoError(t, err)
+	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, fmt.Errorf("error")).Times(1)
+	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes?batch", bytes.NewReader(body))
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestGetNodeStats(t *testing.T) {
