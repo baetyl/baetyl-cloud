@@ -16,7 +16,7 @@ const (
 	nonBaetyl        = "nonBaetyl"
 	namespace        = "namespace"
 	validLabels      = "validLabels"
-	maxLength 		 = "maxLength"
+	maxLength        = "maxLength"
 
 	resourceLength = 63
 )
