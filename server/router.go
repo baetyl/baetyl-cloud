@@ -3,9 +3,10 @@ package server
 import (
 	"strings"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/gin-gonic/gin"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
 // InitRoute init router
@@ -66,24 +67,6 @@ func (s *AdminServer) InitRoute() {
 		apps.DELETE("/:name", common.Wrapper(s.api.DeleteApplication))
 		apps.POST("", common.Wrapper(s.api.CreateApplication))
 		apps.GET("", common.Wrapper(s.api.ListApplication))
-	}
-	{
-		register := v1.Group("/register")
-		register.GET("", common.Wrapper(s.api.ListBatch))
-		register.POST("", common.Wrapper(s.api.CreateBatch))
-		register.PUT("/:batchName", common.Wrapper(s.api.UpdateBatch))
-		register.DELETE("/:batchName", common.Wrapper(s.api.DeleteBatch))
-		register.GET("/:batchName", common.Wrapper(s.api.GetBatch))
-		register.GET("/:batchName/init", common.Wrapper(s.api.GenInitCmdFromBatch))
-
-		register.GET("/:batchName/download", common.WrapperRaw(s.api.DownloadRecords))
-		register.POST("/:batchName/generate", common.Wrapper(s.api.GenRecordRandom))
-
-		register.POST("/:batchName/record", common.Wrapper(s.api.CreateRecord))
-		register.PUT("/:batchName/record/:recordName", common.Wrapper(s.api.UpdateRecord))
-		register.DELETE("/:batchName/record/:recordName", common.Wrapper(s.api.DeleteRecord))
-		register.GET("/:batchName/record/:recordName", common.Wrapper(s.api.GetRecord))
-		register.GET("/:batchName/record", common.Wrapper(s.api.ListRecord))
 	}
 	{
 		namespace := v1.Group("/namespace")
@@ -149,32 +132,6 @@ func (s *AdminServer) nodeQuotaHandler(c *gin.Context) {
 }
 
 // GetRoute get router
-func (s *NodeServer) GetRoute() *gin.Engine {
-	return s.router
-}
-
-func (s *NodeServer) InitRoute() {
-	s.router.NoRoute(NoRouteHandler)
-	s.router.NoMethod(NoMethodHandler)
-	s.router.GET("/health", Health)
-
-	s.router.Use(RequestIDHandler)
-	s.router.Use(LoggerHandler)
-	if s.server.TLSConfig == nil {
-		HeaderCommonName = s.cfg.NodeServer.CommonName
-		s.router.Use(ExtractNodeCommonNameFromHeader)
-	} else {
-		s.router.Use(ExtractNodeCommonNameFromCert)
-	}
-	v1 := s.router.Group("v1")
-	{
-		node := v1.Group("/sync")
-		node.POST("/report", common.Wrapper(s.syncAPI.Report))
-		node.POST("/desire", common.Wrapper(s.syncAPI.Desire))
-	}
-}
-
-// GetRoute get router
 func (s *ActiveServer) GetRoute() *gin.Engine {
 	return s.router
 }
@@ -189,7 +146,6 @@ func (s *ActiveServer) InitRoute() {
 	v1 := s.router.Group("v1")
 	{
 		active := v1.Group("/active")
-		active.POST("/", common.Wrapper(s.api.Active))
 		active.GET("/:resource", common.WrapperRaw(s.api.GetResource))
 	}
 }
@@ -199,7 +155,6 @@ func (s *MisServer) GetRoute() *gin.Engine {
 }
 
 func (s *MisServer) InitRoute() {
-
 	s.router.NoRoute(NoRouteHandler)
 	s.router.NoMethod(NoMethodHandler)
 	s.router.GET("/health", Health)
@@ -216,7 +171,6 @@ func (s *MisServer) InitRoute() {
 		cache.GET("", common.WrapperMis(s.api.ListProperty))
 		cache.PUT("/:name", common.WrapperMis(s.api.UpdateProperty))
 	}
-
 }
 
 // auth handler

@@ -19,13 +19,13 @@ const (
 type CloudConfig struct {
 	ActiveServer Server     `yaml:"activeServer" json:"activeServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	AdminServer  Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
-	NodeServer   NodeServer `yaml:"nodeServer" json:"nodeServer" default:"{\"port\":\":9005\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"commonName\":\"common-name\"}"`
 	MisServer    MisServer  `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
 	Cache        struct {
 		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
 	} `yaml:"cache" json:"cache"`
 	Plugin struct {
+		MQ        string   `yaml:"mq" json:"mq" default:"defaultmq"`
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
 		Auth      string   `yaml:"auth" json:"auth" default:"defaultauth"`
 		License   string   `yaml:"license" json:"license" default:"defaultlicense"`
@@ -33,16 +33,12 @@ type CloudConfig struct {
 		Objects   []string `yaml:"objects" json:"objects" default:"[]"`
 		Functions []string `yaml:"functions" json:"functions" default:"[]"`
 		Property  string   `yaml:"property" json:"property" default:"database"`
+		SyncLinks []string `yaml:"synclinks" json:"synclinks" default:"[\"httplink\"]"`
 		// TODO: deprecated
 
 		ModelStorage    string `yaml:"modelStorage" json:"modelStorage" default:"kubernetes"`
 		DatabaseStorage string `yaml:"databaseStorage" json:"databaseStorage" default:"database"`
 	} `yaml:"plugin" json:"plugin"`
-}
-
-type NodeServer struct {
-	Server     `yaml:",inline" json:",inline"`
-	CommonName string `yaml:"commonName" json:"commonName" default:"common-name"`
 }
 
 type MisServer struct {
@@ -69,10 +65,6 @@ func SetPortFromEnv(cfg *CloudConfig) {
 	activePort := os.Getenv(ActiveServerPort)
 	if activePort != "" {
 		cfg.ActiveServer.Port = ":" + activePort
-	}
-	nodePort := os.Getenv(NodeServerPort)
-	if nodePort != "" {
-		cfg.NodeServer.Port = ":" + nodePort
 	}
 	misPort := os.Getenv(MisServerPort)
 	if misPort != "" {

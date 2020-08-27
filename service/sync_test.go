@@ -14,16 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func genCallbackTestCase() *models.Callback {
-	return &models.Callback{
-		Name:        "c",
-		Namespace:   "default",
-		Method:      "Post",
-		Description: "123",
-		Params:      map[string]string{"a": "a"},
-		Body:        map[string]string{"b": "b"},
-	}
-}
+
 
 func TestReport(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
