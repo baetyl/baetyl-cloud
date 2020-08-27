@@ -21,6 +21,15 @@ const (
 	FunctionDefaultConfigFile = "conf.yml"
 )
 
+var (
+	SystemApps      = []common.SystemApplication{
+	common.BaetylCore,
+	common.BaetylFunction,
+	common.BaetylBroker,
+	common.BaetylRule,
+	}
+)
+
 // GetApplication get a application
 func (api *API) GetApplication(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()

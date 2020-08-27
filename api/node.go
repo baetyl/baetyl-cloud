@@ -1,11 +1,13 @@
 package api
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/service"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/baetyl/baetyl-go/v2/spec/v1"
@@ -280,7 +282,7 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	cmd, err := api.genCmd(string(common.Node), ns, name)
+	cmd, err := api.GenCmd(string(common.Node), ns, name)
 	if err != nil {
 		return nil, err
 	}
@@ -317,4 +319,23 @@ func (api *API) NodeNumberCollector(namespace string) (map[string]int, error) {
 	return map[string]int{
 		plugin.QuotaNode: len(list.Items),
 	}, nil
+}
+
+func (api *API) GenCmd(kind, ns, name string) (string, error) {
+	info := map[string]interface{}{
+		service.InfoKind:      kind,
+		service.InfoName:      name,
+		service.InfoNamespace: ns,
+		service.InfoExpiry:    CmdExpirationInSeconds,
+		service.InfoTimestamp: time.Now().Unix(),
+	}
+	token, err := api.authService.GenToken(info)
+	if err != nil {
+		return "", err
+	}
+	host, err := api.sysConfigService.GetSysConfig("address", common.AddressActive)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf(`curl -skfL '%s/v1/active/setup.sh?token=%s' -osetup.sh && sh setup.sh`, host.Value, token), nil
 }

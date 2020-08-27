@@ -15,7 +15,7 @@ type ActiveServer struct {
 	cfg    *config.CloudConfig
 	router *gin.Engine
 	server *http.Server
-	api    *api.API
+	api    api.ActiveAPI
 }
 
 // NewActiveServer new active server
@@ -60,7 +60,7 @@ func (s *ActiveServer) Run() {
 	}
 }
 
-func (s *ActiveServer) SetAPI(api *api.API) {
+func (s *ActiveServer) SetAPI(api api.ActiveAPI) {
 	s.api = api
 }
 
