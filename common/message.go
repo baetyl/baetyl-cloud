@@ -2,7 +2,6 @@ package common
 
 import (
 	"net/http"
-	"strconv"
 )
 
 // Code code
@@ -69,7 +68,7 @@ const (
 	ErrInvalidLabels       = "validLabels"
 	ErrInvalidRequired     = "required"
 	// * batchOp
-	ErrInvalidBatchOp = "validBatchOp"
+	ErrInvalidArrayLength = "maxLength"
 	// * fingerprintValue
 	ErrInvalidFingerprintValue = "fingerprintValue"
 	// * memory
@@ -148,7 +147,7 @@ var templates = map[Code]string{
 	// * third server error
 	ErrThirdServer: "Third server {{if .name}}({{.name}}){{end}} error.{{if .error}} ({{.error}}){{end}}",
 
-	ErrInvalidBatchOp: "The number of objects in batch operations must not exceed " + strconv.Itoa(batchOpNum),
+	ErrInvalidArrayLength: "The length of the array exceeds the limit",
 }
 
 func getHTTPStatus(c Code) int {

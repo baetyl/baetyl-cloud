@@ -3,6 +3,7 @@ package common
 import (
 	"gopkg.in/go-playground/validator.v9"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -15,10 +16,9 @@ const (
 	nonBaetyl        = "nonBaetyl"
 	namespace        = "namespace"
 	validLabels      = "validLabels"
-	validBatchOp     = "validBatchOp"
+	maxLength 		 = "maxLength"
 
 	resourceLength = 63
-	batchOpNum     = 20
 )
 
 var regexps = map[string]string{
@@ -42,7 +42,7 @@ func init() {
 	validate.RegisterValidation(validLabels, validLabelsFunc())
 	validate.RegisterValidation(resourceName, validRexAndLengthFunc(resourceLength, resourceRegex))
 	validate.RegisterValidation(fingerprintValue, validRexAndLengthFunc(resourceLength, fingerprintRegex))
-	validate.RegisterValidation(validBatchOp, validBatchOpNumFunc(batchOpNum))
+	validate.RegisterValidation(maxLength, validMaxLengthFunc())
 	for k, v := range regexps {
 		validate.RegisterValidation(k, genValidFunc(v))
 	}
@@ -83,9 +83,13 @@ func validRexAndLengthFunc(length int, reg *regexp.Regexp) validator.Func {
 	}
 }
 
-func validBatchOpNumFunc(length int) validator.Func {
+func validMaxLengthFunc() validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		field := fl.Field().Interface().([]string)
+		length, err := strconv.Atoi(fl.Param())
+		if err != nil {
+			return false
+		}
 		if len(field) > length {
 			return false
 		}
