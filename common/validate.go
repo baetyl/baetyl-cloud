@@ -1,11 +1,9 @@
 package common
 
 import (
+	"gopkg.in/go-playground/validator.v9"
 	"regexp"
 	"strings"
-
-	ut "github.com/go-playground/universal-translator"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 const (
@@ -20,7 +18,7 @@ const (
 	validBatchOp     = "validBatchOp"
 
 	resourceLength = 63
-	batchOpNum     = 20
+	batchOpNum     = 2
 )
 
 var regexps = map[string]string{
@@ -34,7 +32,6 @@ var validate *validator.Validate
 var labelRegex *regexp.Regexp
 var resourceRegex *regexp.Regexp
 var fingerprintRegex *regexp.Regexp
-var trans ut.Translator
 
 func init() {
 	labelRegex, _ = regexp.Compile("^([A-Za-z0-9][-A-Za-z0-9_\\.]*)?[A-Za-z0-9]?$")
