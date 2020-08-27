@@ -35,16 +35,11 @@ func (api *API) GetNode(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) GetNodes(c *common.Context) (interface{}, error) {
-	_, ok := c.GetQuery("batch")
-	if !ok {
-		return nil, common.Error(common.ErrRequestParamInvalid)
+	nodeNames, err := api.parseAndCheckNodeNames(c)
+	if err != nil {
+		return nil, err
 	}
 	ns := c.GetNamespace()
-	nodeNames := &models.NodeNames{}
-	err := c.LoadBody(nodeNames)
-	if err != nil {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
-	}
 	var nodesView = []*v1.NodeView{}
 	for _, name := range nodeNames.Names {
 		node, err := api.nodeService.Get(ns, name)
@@ -337,6 +332,19 @@ func (api *API) parseAndCheckNode(c *common.Context) (*v1.Node, error) {
 	}
 
 	return node, nil
+}
+
+func (api *API) parseAndCheckNodeNames(c *common.Context) (*models.NodeNames, error){
+	_, ok := c.GetQuery("batch")
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid)
+	}
+	nodeNames := &models.NodeNames{}
+	err := c.LoadBody(nodeNames)
+	if err != nil {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+	}
+	return nodeNames, nil
 }
 
 func (api *API) NodeNumberCollector(namespace string) (map[string]int, error) {
