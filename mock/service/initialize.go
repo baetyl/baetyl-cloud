@@ -64,19 +64,19 @@ func (mr *MockInitializeServiceMockRecorder) GetSyncCert(arg0, arg1 interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSyncCert", reflect.TypeOf((*MockInitializeService)(nil).GetSyncCert), arg0, arg1)
 }
 
-// InitWithBitch mocks base method
-func (m *MockInitializeService) InitWithBitch(arg0 *models.Batch, arg1 string) ([]byte, error) {
+// InitWithBatch mocks base method
+func (m *MockInitializeService) InitWithBatch(arg0 *models.Batch, arg1 string) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InitWithBitch", arg0, arg1)
+	ret := m.ctrl.Call(m, "InitWithBatch", arg0, arg1)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// InitWithBitch indicates an expected call of InitWithBitch
-func (mr *MockInitializeServiceMockRecorder) InitWithBitch(arg0, arg1 interface{}) *gomock.Call {
+// InitWithBatch indicates an expected call of InitWithBatch
+func (mr *MockInitializeServiceMockRecorder) InitWithBatch(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitWithBitch", reflect.TypeOf((*MockInitializeService)(nil).InitWithBitch), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitWithBatch", reflect.TypeOf((*MockInitializeService)(nil).InitWithBatch), arg0, arg1)
 }
 
 // InitWithNode mocks base method
