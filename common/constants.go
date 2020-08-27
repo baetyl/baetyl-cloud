@@ -161,28 +161,15 @@ const (
 	BaetylCore            SystemApplication = "baetyl-core"
 	BaetylBroker          SystemApplication = "baetyl-broker"
 	BaetylFunction        SystemApplication = "baetyl-function"
-	BaetylRule            SystemApplication = "baetyl-rule"
-	BaetylState           SystemApplication = "baetyl-state"
-
-	TemplateJsonAppCore        = "app-core.json"
-	TemplateJsonAppFunction    = "app-function.json"
-	TemplateJsonAppBroker      = "app-broker.json"
-	TemplateJsonAppRule        = "app-rule.json"
-	TemplateJsonConfigCore     = "config-core.json"
-	TemplateJsonConfigFunction = "config-function.json"
-	TemplateJsonConfigBroker   = "config-broker.json"
-	TemplateJsonConfigRule     = "config-rule.json"
 
 	Sync     CertType = "sync"
 	Internal CertType = "internal"
-	External CertType = "external"
 
 	ResourceMetrics          = "metrics.yml"
 	ResourceLocalPathStorage = "local-path-storage.yml"
 	ResourceSetup            = "setup.sh"
 	ResourceInitYaml         = "baetyl-init.yml"
 
-	AddressServer = "server-address"
 	AddressNode   = "node-address"
 	AddressActive = "active-address"
 

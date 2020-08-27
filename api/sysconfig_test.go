@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
@@ -70,43 +69,4 @@ func TestListSysConfig(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-}
-
-func TestAPI_ParseTemplate(t *testing.T) {
-	api, _, ctl := initSysConfigAPI(t)
-	defer ctl.Finish()
-
-	// good case
-	scGood := models.SysConfig{
-		Type:  "resource",
-		Key:   "good",
-		Value: "{{.Test}}",
-	}
-	data := map[string]string{
-		"Test": "good",
-	}
-
-	is := ms.NewMockInitializeService(ctl)
-	api.initService = is
-
-	is.EXPECT().GetResource(scGood.Key).Return(scGood.Value, nil).Times(1)
-
-	res, err := api.ParseTemplate(scGood.Key, data)
-	assert.NoError(t, err)
-	assert.Equal(t, data["Test"], string(res))
-
-	// bad case 0: GetResource error
-	is.EXPECT().GetResource(scGood.Key).Return("", fmt.Errorf("GetResource error")).Times(1)
-	_, err = api.ParseTemplate(scGood.Key, data)
-	assert.Error(t, err, "GetResource error")
-
-	// bad case 1: Parse error
-	scBad := models.SysConfig{
-		Type:  "resource",
-		Key:   "good",
-		Value: "{{if .Test}}",
-	}
-	is.EXPECT().GetResource(scGood.Key).Return(scBad.Value, nil).Times(1)
-	_, err = api.ParseTemplate(scGood.Key, data)
-	assert.Error(t, err)
 }

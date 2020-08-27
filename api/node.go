@@ -134,14 +134,16 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	// generate system applications
-	list := []common.SystemApplication{
-		common.BaetylCore,
-		common.BaetylFunction,
-	}
-	_, err = api.GenSysApp(name, ns, list)
+	apps, err := api.templateService.GenSystemApps(ns, name)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, app := range apps {
+		err = api.updateNodeAndAppIndex(ns, app)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
 	}
 
 	view, err := node.View(offlineDuration)
