@@ -96,7 +96,7 @@ func (c *Context) LoadBody(obj interface{}) error {
 	if err != nil {
 		if es, ok := err.(validator.ValidationErrors); ok {
 			for _, v := range es {
-				return Error(Code(v.Tag()), Field(v.Tag(), v.Field()), Field("error", v.Translate(trans)))
+				return Error(Code(v.Tag()), Field(v.Tag(), v.Field()), Field("error", err.Error()))
 			}
 		}
 		return err

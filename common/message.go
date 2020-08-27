@@ -1,6 +1,9 @@
 package common
 
-import "net/http"
+import (
+	"net/http"
+	"strconv"
+)
 
 // Code code
 type Code string
@@ -65,6 +68,8 @@ const (
 	ErrInvalidResourceName = "resourceName"
 	ErrInvalidLabels       = "validLabels"
 	ErrInvalidRequired     = "required"
+	// * batchOp
+	ErrInvalidBatchOp = "validBatchOp"
 	// * fingerprintValue
 	ErrInvalidFingerprintValue = "fingerprintValue"
 	// * memory
@@ -79,8 +84,6 @@ const (
 	ErrLicenseQuota = "ErrLicenseQuota"
 	// * third server error
 	ErrThirdServer = "ErrThirdServer"
-	// * batch op error
-	ErrBatchOpNum Code = "ErrBatchOpNum"
 )
 
 var templates = map[Code]string{
@@ -145,7 +148,7 @@ var templates = map[Code]string{
 	// * third server error
 	ErrThirdServer: "Third server {{if .name}}({{.name}}){{end}} error.{{if .error}} ({{.error}}){{end}}",
 
-	ErrBatchOpNum: "The number of batch operations is too large",
+	ErrInvalidBatchOp: "The number of objects in batch operations must not exceed " + strconv.Itoa(batchOpNum),
 }
 
 func getHTTPStatus(c Code) int {
