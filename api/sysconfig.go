@@ -1,9 +1,6 @@
 package api
 
 import (
-	"bytes"
-	"text/template"
-
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
@@ -24,21 +21,4 @@ func (api *API) ListSysConfig(c *common.Context) (interface{}, error) {
 	return &models.SysConfigView{
 		SysConfigs: res,
 	}, nil
-}
-
-func (api *API) ParseTemplate(key string, data map[string]string) ([]byte, error) {
-	tl, err := api.initService.GetResource(key)
-	if err != nil {
-		return nil, err
-	}
-	t, err := template.New(key).Parse(tl)
-	if err != nil {
-		return nil, err
-	}
-	buf := &bytes.Buffer{}
-	err = t.Execute(buf, data)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
 }

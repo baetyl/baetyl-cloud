@@ -1,0 +1,23 @@
+"name": "{{.AppName}}"
+"namespace": "{{.Namespace}}"
+"selector": "baetyl-node-name={{.NodeName}}"
+"labels":
+  "baetyl-cloud-system":"true"
+"type": "{{.AppType}}"
+"system": true
+"services":
+  - "name": "baetyl-function"
+    "image": "hub.baidubce.com/baetyl/function:v2.0.1"
+    "replica": 1
+    "volumeMounts":
+      - "name": "func-conf"
+        "mountPath": "/etc/baetyl"
+        "readOnly": true
+    "ports":
+      - "containerPort":80
+        "protocol":"TCP"
+"volumes":
+  - "name": "func-conf"
+    "config":
+      "name": "{{.ConfName}}"
+      "version": "{{.ConfVersion}}"

@@ -21,6 +21,7 @@ type API struct {
 	authService        service.AuthService
 	propertyService    service.PropertyService
 	cacheService       service.CacheService
+	templateService    service.TemplateService
 }
 
 // NewAPI NewAPI
@@ -81,6 +82,10 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
+	templateService, err := service.NewTemplateService(config)
+	if err != nil {
+		return nil, err
+	}
 	return &API{
 		applicationService: applicationService,
 		nodeService:        nodeService,
@@ -96,5 +101,6 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		authService:        authService,
 		propertyService:    propertyService,
 		cacheService:       cacheService,
+		templateService:    templateService,
 	}, nil
 }

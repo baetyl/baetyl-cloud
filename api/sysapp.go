@@ -1,11 +1,11 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
-
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/service"
+	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
@@ -20,48 +20,41 @@ var (
 // todo more general, initialize according to list
 func (api *API) GenSysApp(nodeName, ns string, appList []common.SystemApplication) ([]specV1.Application, error) {
 	var apps []specV1.Application
-	isSysApp := true
 	for _, appName := range appList {
 		app := specV1.Application{}
 		switch appName {
 		case common.BaetylCore:
-			res, err := api.GenCoreApp(nodeName, ns, isSysApp)
+			res, err := api.GenCoreApp(ns, nodeName)
 			if err != nil {
 				return nil, err
 			}
 			app = *res
 		case common.BaetylFunction:
-			res, err := api.GenFunctionApp(nodeName, ns, isSysApp)
+			res, err := api.GenFunctionApp(ns, nodeName)
 			if err != nil {
 				return nil, err
 			}
 			app = *res
-		case common.BaetylBroker:
-			res, err := api.GenBrokerApp(nodeName, ns, true)
-			if err != nil {
-				return nil, err
-			}
-			app = *res
-		case common.BaetylRule:
-			res, err := api.GenRuleApp(nodeName, ns, true)
-			if err != nil {
-				return nil, err
-			}
-			app = *res
+			//case common.BaetylBroker:
+			//	res, err := api.GenBrokerApp(nodeName, ns, true)
+			//	if err != nil {
+			//		return nil, err
+			//	}
+			//	app = *res
+			//case common.BaetylRule:
+			//	res, err := api.GenRuleApp(nodeName, ns, true)
+			//	if err != nil {
+			//		return nil, err
+			//	}
+			//	app = *res
 		}
 		apps = append(apps, app)
 	}
 	return apps, nil
 }
 
-func (api *API) GenCoreApp(nodeName, ns string, isSys bool) (*specV1.Application, error) {
-	// get sys config
-	imageConf, err := api.sysConfigService.GetSysConfig(common.BaetylModule, string(common.BaetylCore))
-	if err != nil {
-		log.L().Error("GenCoreApp", log.Any("GetSysConfig", "imageConf get nil"))
-		return nil, err
-	}
-	nodeAddress, err := api.sysConfigService.GetSysConfig("address", common.AddressNode)
+func (api *API) GenCoreApp(ns, nodeName string) (*specV1.Application, error) {
+	syncAddress, err := api.sysConfigService.GetSysConfig("address", common.AddressNode)
 	if err != nil {
 		log.L().Error("GenCoreApp", log.Any("GetSysConfig", "imageConf get nil"))
 		return nil, err
@@ -69,138 +62,129 @@ func (api *API) GenCoreApp(nodeName, ns string, isSys bool) (*specV1.Application
 	appName := fmt.Sprintf("%s-%s", common.BaetylCore, common.RandString(9))
 	// create config
 	confMap := map[string]string{
-		"NodeAddress": nodeAddress.Value,
-		"NodeName":    nodeName,
-		"AppName":     appName,
-		"Namespace":   ns,
-		"ConfigName":  fmt.Sprintf("%s-%s-config-%s", common.BaetylCore, nodeName, common.RandString(9)),
+		"Namespace": ns,
+		"NodeName":  nodeName,
+		"AppName":   appName,
+		"SyncAddr":  syncAddress.Value,
+		"ConfName":  fmt.Sprintf("%s-%s-config-%s", common.BaetylCore, nodeName, common.RandString(9)),
 	}
-	conf, err := api.genConfig(ns, common.TemplateJsonConfigCore, confMap, isSys)
+	conf, err := api.genConfig(ns, service.TemplateCoreConf, confMap)
 	if err != nil {
 		return nil, err
 	}
 
 	// create secret
-	sync, err := api.genCertSync(appName, nodeName, ns, common.BaetylCore, isSys)
+	cert, err := api.genNodeCerts(appName, nodeName, ns, common.BaetylCore, true)
 	if err != nil {
 		return nil, err
 	}
 
 	// create application
 	appMap := map[string]string{
-		"AppName":         appName,
-		"Image":           imageConf.Value,
-		"CertSync":        sync.Name,
-		"CertSyncVersion": sync.Version,
-		"NodeName":        nodeName,
-		"Namespace":       ns,
-		"ConfigName":      conf.Name,
-		"ConfigVersion":   conf.Version,
-		"AppType":         common.ContainerApp,
+		"Namespace":   ns,
+		"AppName":     appName,
+		"NodeName":    nodeName,
+		"CertName":    cert.Name,
+		"CertVersion": cert.Version,
+		"ConfName":    conf.Name,
+		"ConfVersion": conf.Version,
 	}
-	return api.genApp(ns, common.TemplateJsonAppCore, appMap, isSys)
+	return api.genApp(ns, service.TemplateCoreApp, appMap)
 }
 
-func (api *API) GenFunctionApp(nodeName, ns string, isSys bool) (*specV1.Application, error) {
-	// get sys config
-	imageConf, err := api.sysConfigService.GetSysConfig(common.BaetylModule, string(common.BaetylFunction))
-	if err != nil {
-		return nil, err
-	}
-
+func (api *API) GenFunctionApp(ns, nodeName string) (*specV1.Application, error) {
 	appName := fmt.Sprintf("%s-%s", common.BaetylFunction, common.RandString(9))
 	// create config
 	confMap := map[string]string{
-		"AppName":    appName,
-		"NodeName":   nodeName,
-		"Namespace":  ns,
-		"ConfigName": fmt.Sprintf("%s-%s-config-%s", common.BaetylFunction, nodeName, common.RandString(9)),
+		"Namespace": ns,
+		"AppName":   appName,
+		"NodeName":  nodeName,
+		"ConfName":  fmt.Sprintf("%s-%s-config-%s", common.BaetylFunction, nodeName, common.RandString(9)),
 	}
-	conf, err := api.genConfig(ns, common.TemplateJsonConfigFunction, confMap, isSys)
+	conf, err := api.genConfig(ns, service.TemplateFuncConf, confMap)
 	if err != nil {
 		return nil, err
 	}
 
 	// create application
 	appMap := map[string]string{
-		"AppName":       appName,
-		"Image":         imageConf.Value,
-		"NodeName":      nodeName,
-		"Namespace":     ns,
-		"ConfigName":    conf.Name,
-		"ConfigVersion": conf.Version,
-		"AppType":       common.ContainerApp,
+		"Namespace":   ns,
+		"AppName":     appName,
+		"NodeName":    nodeName,
+		"ConfName":    conf.Name,
+		"ConfVersion": conf.Version,
 	}
-	return api.genApp(ns, common.TemplateJsonAppFunction, appMap, isSys)
+	return api.genApp(ns, service.TemplateFuncApp, appMap)
 }
 
-func (api *API) GenBrokerApp(nodeName, ns string, isSys bool) (*specV1.Application, error) {
-	// get sys config
-	imageConf, err := api.sysConfigService.GetSysConfig(common.BaetylModule, string(common.BaetylBroker))
-	if err != nil {
-		return nil, err
-	}
+//
+//func (api *API) GenBrokerApp(nodeName, ns string, isSys bool) (*specV1.Application, error) {
+//	// get sys config
+//	imageConf, err := api.sysConfigService.GetSysConfig(common.BaetylModule, string(common.BaetylBroker))
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	appName := fmt.Sprintf("%s-%s", common.BaetylBroker, common.RandString(9))
+//	// create config
+//	confMap := map[string]string{
+//		"AppName":    appName,
+//		"NodeName":   nodeName,
+//		"Namespace":  ns,
+//		"ConfigName": fmt.Sprintf("%s-%s-config-%s", common.BaetylBroker, nodeName, common.RandString(9)),
+//	}
+//	conf, err := api.genConfig(ns, common.TemplateJsonConfigBroker, confMap, isSys)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	// create application
+//	appMap := map[string]string{
+//		"AppName":       appName,
+//		"Image":         imageConf.Value,
+//		"NodeName":      nodeName,
+//		"Namespace":     ns,
+//		"ConfigName":    conf.Name,
+//		"ConfigVersion": conf.Version,
+//		"AppType":       common.ContainerApp,
+//	}
+//	return api.genApp(ns, common.TemplateJsonAppBroker, appMap, isSys)
+//}
+//
+//func (api *API) GenRuleApp(nodeName, ns string, isSys bool) (*specV1.Application, error) {
+//	// get sys config
+//	imageConf, err := api.sysConfigService.GetSysConfig(common.BaetylModule, string(common.BaetylRule))
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	appName := fmt.Sprintf("%s-%s", common.BaetylRule, common.RandString(9))
+//	// create config
+//	confMap := map[string]string{
+//		"AppName":    appName,
+//		"NodeName":   nodeName,
+//		"Namespace":  ns,
+//		"ConfigName": fmt.Sprintf("%s-%s-config-%s", common.BaetylRule, nodeName, common.RandString(9)),
+//	}
+//	conf, err := api.genConfig(ns, common.TemplateJsonConfigRule, confMap, isSys)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	// create application
+//	appMap := map[string]string{
+//		"AppName":       appName,
+//		"Image":         imageConf.Value,
+//		"NodeName":      nodeName,
+//		"Namespace":     ns,
+//		"ConfigName":    conf.Name,
+//		"ConfigVersion": conf.Version,
+//		"AppType":       common.ContainerApp,
+//	}
+//	return api.genApp(ns, common.TemplateJsonAppRule, appMap, isSys)
+//}
 
-	appName := fmt.Sprintf("%s-%s", common.BaetylBroker, common.RandString(9))
-	// create config
-	confMap := map[string]string{
-		"AppName":    appName,
-		"NodeName":   nodeName,
-		"Namespace":  ns,
-		"ConfigName": fmt.Sprintf("%s-%s-config-%s", common.BaetylBroker, nodeName, common.RandString(9)),
-	}
-	conf, err := api.genConfig(ns, common.TemplateJsonConfigBroker, confMap, isSys)
-	if err != nil {
-		return nil, err
-	}
-
-	// create application
-	appMap := map[string]string{
-		"AppName":       appName,
-		"Image":         imageConf.Value,
-		"NodeName":      nodeName,
-		"Namespace":     ns,
-		"ConfigName":    conf.Name,
-		"ConfigVersion": conf.Version,
-		"AppType":       common.ContainerApp,
-	}
-	return api.genApp(ns, common.TemplateJsonAppBroker, appMap, isSys)
-}
-
-func (api *API) GenRuleApp(nodeName, ns string, isSys bool) (*specV1.Application, error) {
-	// get sys config
-	imageConf, err := api.sysConfigService.GetSysConfig(common.BaetylModule, string(common.BaetylRule))
-	if err != nil {
-		return nil, err
-	}
-
-	appName := fmt.Sprintf("%s-%s", common.BaetylRule, common.RandString(9))
-	// create config
-	confMap := map[string]string{
-		"AppName":    appName,
-		"NodeName":   nodeName,
-		"Namespace":  ns,
-		"ConfigName": fmt.Sprintf("%s-%s-config-%s", common.BaetylRule, nodeName, common.RandString(9)),
-	}
-	conf, err := api.genConfig(ns, common.TemplateJsonConfigRule, confMap, isSys)
-	if err != nil {
-		return nil, err
-	}
-
-	// create application
-	appMap := map[string]string{
-		"AppName":       appName,
-		"Image":         imageConf.Value,
-		"NodeName":      nodeName,
-		"Namespace":     ns,
-		"ConfigName":    conf.Name,
-		"ConfigVersion": conf.Version,
-		"AppType":       common.ContainerApp,
-	}
-	return api.genApp(ns, common.TemplateJsonAppRule, appMap, isSys)
-}
-
-func (api *API) genCertSync(appName, nodeName, ns string, module common.SystemApplication, isSys bool) (*specV1.Secret, error) {
+func (api *API) genNodeCerts(appName, nodeName, ns string, module common.SystemApplication, isSys bool) (*specV1.Secret, error) {
 	name := "sync-" + nodeName + "-" + string(module) + "-" + common.RandString(9)
 	cerName := fmt.Sprintf(`%s.%s`, ns, nodeName)
 	certPEM, err := api.pkiService.SignClientCertificate(cerName, models.AltNames{})
@@ -234,17 +218,12 @@ func (api *API) genCertSync(appName, nodeName, ns string, module common.SystemAp
 	return api.secretService.Create(ns, s)
 }
 
-func (api *API) genConfig(ns, template string, params map[string]string, isSys bool) (*specV1.Configuration, error) {
-	confJson, err := api.ParseTemplate(template, params)
-	if err != nil {
-		return nil, err
-	}
+func (api *API) genConfig(ns, template string, params map[string]string) (*specV1.Configuration, error) {
 	config := &specV1.Configuration{}
-	err = json.Unmarshal(confJson, config)
+	err := api.templateService.ParseSystemTemplate(template, params, config)
 	if err != nil {
 		return nil, err
 	}
-	config.System = isSys
 	conf, err := api.configService.Create(ns, config)
 	if err != nil {
 		log.L().Error("API", log.Any("func", "genApp"), log.Any("err", err.Error()))
@@ -257,17 +236,12 @@ func (api *API) genConfig(ns, template string, params map[string]string, isSys b
 	return conf, nil
 }
 
-func (api *API) genApp(ns, template string, params map[string]string, isSys bool) (*specV1.Application, error) {
-	appJson, err := api.ParseTemplate(template, params)
-	if err != nil {
-		return nil, err
-	}
+func (api *API) genApp(ns, template string, params map[string]string) (*specV1.Application, error) {
 	application := &specV1.Application{}
-	err = json.Unmarshal(appJson, application)
+	err := api.templateService.ParseSystemTemplate(template, params, application)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
-	application.System = isSys
 	app, err := api.applicationService.Create(ns, application)
 	if err != nil {
 		log.L().Error("API", log.Any("func", "genApp"), log.Any("err", err.Error()))
