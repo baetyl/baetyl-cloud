@@ -21,7 +21,7 @@ const (
 	validBatchOp     = "validBatchOp"
 
 	resourceLength = 63
-	arrayLength    = 3
+	arrayLength    = 20
 )
 
 var regexps = map[string]string{
@@ -49,7 +49,7 @@ func init() {
 	for k, v := range regexps {
 		validate.RegisterValidation(k, genValidFunc(v))
 	}
-	validate.RegisterValidation(validBatchOp, validArrayLengthFunc(arrayLength))
+	validate.RegisterValidation(validBatchOp, validStringArrayLengthFunc(arrayLength))
 	uni := ut.New(zh.New())
 	trans, _ = uni.GetTranslator("en")
 	validate.RegisterTranslation(validBatchOp, trans, registerTranslator(validBatchOp, ErrBatchOpNum.String()), translate)
@@ -90,7 +90,7 @@ func validRexAndLengthFunc(length int, reg *regexp.Regexp) validator.Func {
 	}
 }
 
-func validArrayLengthFunc(length int) validator.Func {
+func validStringArrayLengthFunc(length int) validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		field := fl.Field().Interface().([]string)
 		if len(field) > length {
