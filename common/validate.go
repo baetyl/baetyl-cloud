@@ -18,7 +18,7 @@ const (
 	validBatchOp     = "validBatchOp"
 
 	resourceLength = 63
-	batchOpNum     = 2
+	batchOpNum     = 20
 )
 
 var regexps = map[string]string{
