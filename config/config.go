@@ -24,6 +24,9 @@ type CloudConfig struct {
 	Cache        struct {
 		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
 	} `yaml:"cache" json:"cache"`
+	Template struct {
+		Path string `yaml:"path" json:"path" default:"/etc/baetyl/templates"`
+	} `yaml:"template" json:"template"`
 	Plugin struct {
 		MQ        string   `yaml:"mq" json:"mq" default:"defaultmq"`
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`

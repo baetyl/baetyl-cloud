@@ -12,8 +12,8 @@ type CacheService struct {
 	expireDuration time.Duration
 }
 
-func NewCacheService(config *config.CloudConfig) (CacheService, error) {
-	return CacheService{
+func NewCacheService(config *config.CloudConfig) (*CacheService, error) {
+	return &CacheService{
 		cache:          persistence.NewInMemoryStore(config.Cache.ExpirationDuration),
 		expireDuration: config.Cache.ExpirationDuration,
 	}, nil

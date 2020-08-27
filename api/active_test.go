@@ -34,11 +34,14 @@ func TestAPI_GetResource(t *testing.T) {
 	api, router, ctl := initActiveAPI(t)
 	init := service.NewMockInitializeService(ctl)
 	ss := service.NewMockSysConfigService(ctl)
+	tp := service.NewMockTemplateService(ctl)
 	api.sysConfigService = ss
 	api.initService = init
+	api.templateService = tp
 
 	// good case : metrics
 	init.EXPECT().GetResource(common.ResourceMetrics).Return("metrics", nil).Times(1)
+	tp.EXPECT().GenSetupShell(gomock.Any()).Return([]byte("shell"), nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/active/"+common.ResourceMetrics, nil)
 	w := httptest.NewRecorder()
@@ -90,22 +93,6 @@ func TestApi_genInitYaml(t *testing.T) {
 	auth.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(1)
 	res, err := api.getInitYaml(token, kube)
 	assert.Error(t, err, ErrInvalidToken)
-	assert.Nil(t, res)
-}
-
-func TestApi_genSetupScript(t *testing.T) {
-	// bad case : sys config not found
-	token := "ac40cc632e217d7675abfdfbf64e285f7b22657870697279223a333630302c226b696e64223a226e6f6465222c226e616d65223a22303431353031222c226e616d657370616365223a2264656661756c74222c2274696d657374616d70223a313538363935363931367d"
-	api, _, ctl := initActiveAPI(t)
-	ss := service.NewMockSysConfigService(ctl)
-	api.sysConfigService = ss
-
-	ss.EXPECT().GetSysConfig("address", common.AddressActive).Return(nil, fmt.Errorf("not found")).Times(1)
-
-	res, err := api.getSetupScript(token)
-	assert.Error(t, err, common.Error(common.ErrResourceNotFound,
-		common.Field("type", "address"),
-		common.Field("name", common.AddressActive)))
 	assert.Nil(t, res)
 }
 

@@ -19,12 +19,6 @@ const (
 
 var (
 	ErrInvalidToken = fmt.Errorf("invalid token")
-	SystemApps      = []common.SystemApplication{
-		common.BaetylCore,
-		common.BaetylFunction,
-		common.BaetylBroker,
-		common.BaetylRule,
-	}
 )
 
 func (api *API) GetResource(c *common.Context) (interface{}, error) {
@@ -54,7 +48,7 @@ func (api *API) GetResource(c *common.Context) (interface{}, error) {
 		}
 		return []byte(res), nil
 	case common.ResourceSetup:
-		return api.getSetupScript(query.Token)
+		return api.templateService.GenSetupShell(query.Token)
 	case common.ResourceInitYaml:
 		return api.getInitYaml(query.Token, query.Node)
 	default:
@@ -80,18 +74,6 @@ func (api *API) getInitYaml(token, edgeKubeNodeName string) ([]byte, error) {
 			common.ErrRequestParamInvalid,
 			common.Field("error", err))
 	}
-}
-
-func (api *API) getSetupScript(token string) ([]byte, error) {
-	sysConf, err := api.sysConfigService.GetSysConfig("address", common.AddressActive)
-	if err != nil {
-		return nil, err
-	}
-	params := map[string]string{
-		"Token":      token,
-		"BaetylHost": sysConf.Value,
-	}
-	return api.ParseTemplate(common.ResourceSetup, params)
 }
 
 func (api *API) genCmd(kind, ns, name string) (string, error) {

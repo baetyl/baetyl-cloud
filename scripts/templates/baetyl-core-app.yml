@@ -1,0 +1,52 @@
+name: "{{.AppName}}"
+namespace: "{{.Namespace}}"
+selector: "baetyl-node-name={{.NodeName}}"
+labels:
+  baetyl-cloud-system: "true"
+type: "container"
+system: true
+services:
+  - name: "baetyl-core"
+    image: "hub.baidubce.com/baetyl/baetyl:v2.0.1"
+    replica: 1
+    args:
+      - "core"
+    volumeMounts:
+      - name: "core-conf"
+        mountPath: "/etc/baetyl"
+        readOnly: true
+      - name: "node-certs"
+        mountPath: "/var/lib/baetyl/node"
+      - name: "core-store-path"
+        mountPath: "/var/lib/baetyl/store"
+      - name: "object-download-path"
+        mountPath: "/var/lib/baetyl/objects"
+      - name: "host-root-path"
+        mountPath: "/var/lib/baetyl/hostpath"
+      - name: "native-apps-path"
+        mountPath: "/var/lib/baetyl/apps"
+    ports:
+      - containerPort: 80
+        hostPort: 30050
+        protocol: "TCP"
+volumes:
+  - name: "core-conf"
+    config:
+      name: "{{.ConfName}}"
+      version: "{{.ConfVersion}}"
+  - name: "node-certs"
+    secret:
+      name: "{{.CertName}}"
+      version: "{{.CertVersion}}"
+  - name: "core-store-path"
+    hostPath:
+      path: "/var/lib/baetyl/store"
+  - name: "object-download-path"
+    hostPath:
+      path: "/var/lib/baetyl/objects"
+  - name: "host-root-path"
+    hostPath:
+      path: "/var/lib/baetyl/hostpath"
+  - name: "native-apps-path"
+    hostPath:
+      path: "/var/lib/baetyl/apps"

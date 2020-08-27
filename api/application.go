@@ -425,16 +425,14 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 }
 
 func (api *API) isAppCanDelete(namesapce, name string) (bool, error) {
-	for _, sysAppPrefix := range SystemApps {
-		if strings.Contains(name, string(sysAppPrefix)) {
-			nodeNames, err := api.indexService.ListNodesByApp(namesapce, name)
-			if err != nil {
-				return false, err
-			}
+	if strings.HasPrefix(name, "baetyl-") {
+		nodeNames, err := api.indexService.ListNodesByApp(namesapce, name)
+		if err != nil {
+			return false, err
+		}
 
-			if len(nodeNames) > 0 {
-				return false, nil
-			}
+		if len(nodeNames) > 0 {
+			return false, nil
 		}
 	}
 	return true, nil
