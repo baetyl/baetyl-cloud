@@ -26,5 +26,5 @@ type ListOptions struct {
 }
 
 type NodeNames struct {
-	Names []string `json:"names,"validate:"max=20"`
+	Names []string `json:"names,"validate:"validBatchOp"`
 }
