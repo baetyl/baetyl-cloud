@@ -77,6 +77,7 @@ func (a *applicationService) Create(namespace string, app *specV1.Application) (
 		return nil, err
 	}
 
+	// TODO: is it necessary ?
 	// store application history to db
 	if _, err := a.dbStorage.CreateApplication(app); err != nil {
 		log.L().Error("store application to db error",

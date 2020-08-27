@@ -16,6 +16,7 @@ import (
 
 //go:generate mockgen -destination=../mock/service/initialize.go -package=service github.com/baetyl/baetyl-cloud/v2/service InitializeService
 
+// TODO: move init logic into template service
 type InitializeService interface {
 	InitWithNode(ns, nodeName, edgeKubeNodeName string) ([]byte, error)
 	InitWithBitch(batch *models.Batch, edgeKubeNodeName string) ([]byte, error)

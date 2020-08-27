@@ -74,6 +74,8 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.SyncLinks = []string{"httplink"}
 	expect.Plugin.MQ = "defaultmq"
 
+	expect.Template.Path = "/etc/baetyl/templates"
+
 	expect.Cache.ExpirationDuration = time.Minute * 10
 	// case 0
 	cfg := &CloudConfig{}

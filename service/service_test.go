@@ -98,6 +98,7 @@ func mockTestConfig() *config.CloudConfig {
 	conf.Plugin.Shadow = conf.Plugin.DatabaseStorage
 	conf.Plugin.License = common.RandString(9)
 	conf.Plugin.Property = common.RandString(9)
+	conf.Template.Path = "../scripts/templates"
 	return conf
 }
 

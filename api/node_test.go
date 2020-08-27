@@ -314,7 +314,6 @@ func TestCreateNode(t *testing.T) {
 	api.nodeService = mkNodeService
 	mNode := getMockNode()
 
-	// sysapp
 	as := ms.NewMockApplicationService(mockCtl)
 	cs := ms.NewMockConfigService(mockCtl)
 	ss := ms.NewMockSecretService(mockCtl)
@@ -322,6 +321,7 @@ func TestCreateNode(t *testing.T) {
 	pki := ms.NewMockPKIService(mockCtl)
 	is := ms.NewMockIndexService(mockCtl)
 	init := ms.NewMockInitializeService(mockCtl)
+	tp := ms.NewMockTemplateService(mockCtl)
 
 	api.applicationService = as
 	api.configService = cs
@@ -330,47 +330,22 @@ func TestCreateNode(t *testing.T) {
 	api.pkiService = pki
 	api.indexService = is
 	api.initService = init
+	api.templateService = tp
 
-	conf := &specV1.Configuration{
-		Name:      "testConf",
+	app1 := &specV1.Application{
+		Name:      "baetyl-core",
 		Namespace: mNode.Namespace,
-		Data:      nil,
 	}
-	app := &specV1.Application{
-		Name:      "testApp",
+	app2 := &specV1.Application{
+		Name:      "baetyl-function",
 		Namespace: mNode.Namespace,
 	}
 	nodeList := []string{"s0", "s1", "s2"}
-	sysConf := &models.SysConfig{
-		Type:  "baetyl-edge",
-		Key:   "test",
-		Value: "123",
-	}
-	certPEM := &models.PEMCredential{
-		CertPEM: []byte("test"),
-		KeyPEM:  []byte("test"),
-	}
-	certMap := map[string][]byte{
-		"client.pem": certPEM.CertPEM,
-		"client.key": certPEM.KeyPEM,
-		"ca.pem":     []byte("test"),
-	}
-	secret := &specV1.Secret{
-		Name:      "sync-" + mNode.Name + "-core-8d4djspg",
-		Namespace: mNode.Namespace,
-		Data:      certMap,
-		Version:   "123",
-	}
-	cs.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(conf, nil).AnyTimes()
-	as.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(app, nil).AnyTimes()
-	ss.EXPECT().Get(mNode.Namespace, gomock.Any(), "").Return(secret, nil).AnyTimes()
-	scs.EXPECT().GetSysConfig(gomock.Any(), gomock.Any()).Return(sysConf, nil).AnyTimes()
-	pki.EXPECT().SignClientCertificate(gomock.Any(), gomock.Any()).Return(certPEM, nil).AnyTimes()
-	pki.EXPECT().GetCA().Return([]byte("test"), nil).AnyTimes()
-	ss.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(secret, nil).AnyTimes()
+
 	mkNodeService.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	is.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
 	init.EXPECT().GetResource(gomock.Any()).Return("{}", nil).AnyTimes()
+	tp.EXPECT().GenSystemApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(2)
 
 	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
 	mkNodeService.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil)
