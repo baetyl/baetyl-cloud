@@ -2,29 +2,27 @@ package server
 
 import (
 	"bytes"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/v2/api"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/baetyl/baetyl-cloud/v2/api"
+
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 )
 
-func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer,
+func InitMockEnvironment(t *testing.T) (*AdminServer, *ActiveServer,
 	*mockPlugin.MockAuth, *mockPlugin.MockLicense, *gomock.Controller, *config.CloudConfig, *MisServer) {
 	c := &config.CloudConfig{}
 	c.Plugin.Auth = common.RandString(9)
@@ -36,9 +34,6 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 	c.Plugin.Functions = []string{common.RandString(9)}
 	c.Plugin.License = common.RandString(9)
 	c.Plugin.Property = common.RandString(9)
-	c.NodeServer.Certificate.CA = ""
-	c.NodeServer.Certificate.Cert = ""
-	c.NodeServer.Certificate.Key = ""
 	c.ActiveServer.Certificate.CA = "../scripts/demo/native/certs/client_ca.crt"
 	c.ActiveServer.Certificate.Cert = "../scripts/demo/native/certs/server.crt"
 	c.ActiveServer.Certificate.Key = "../scripts/demo/native/certs/server.key"
@@ -88,15 +83,10 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 
 	mockAPI, err := api.NewAPI(c)
 	assert.NoError(t, err)
-	mockSyncAPI, err := api.NewSyncAPI(c)
-	assert.NoError(t, err)
 
 	s, err := NewAdminServer(c)
 	assert.NoError(t, err)
 	s.SetAPI(mockAPI)
-	n, err := NewNodeServer(c)
-	assert.NoError(t, err)
-	n.SetSyncAPI(mockSyncAPI)
 	a, err := NewActiveServer(c)
 	assert.NoError(t, err)
 	a.SetAPI(mockAPI)
@@ -104,11 +94,11 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *NodeServer, *ActiveServer
 	assert.NoError(t, err)
 	m.SetAPI(mockAPI)
 
-	return s, n, a, mockAuth, mLicense, mockCtl, c, m
+	return s, a, mockAuth, mLicense, mockCtl, c, m
 }
 
 func TestHandler(t *testing.T) {
-	s, _, _, mkAuth, mkLicense, mockCtl, _, _ := InitMockEnvironment(t)
+	s, _, mkAuth, mkLicense, mockCtl, _, _ := InitMockEnvironment(t)
 	defer mockCtl.Finish()
 
 	s.InitRoute()
@@ -163,89 +153,9 @@ func TestHandler(t *testing.T) {
 	defer s.Close()
 }
 
-func TestHandler_Node(t *testing.T) {
-	t.Skip()
-	_, n, _, mkAuth, _, mockCtl, c, _ := InitMockEnvironment(t)
-	defer mockCtl.Finish()
-
-	n.InitRoute()
-	r := n.GetRoute()
-	assert.NotNil(t, r)
-
-	n.GetRoute().GET("/device", func(c *gin.Context) {
-		cc := common.NewContext(c)
-		c.JSON(common.PackageResponse(&struct {
-			Namespace string
-			Name      string
-		}{
-			Namespace: cc.GetNamespace(),
-			Name:      cc.GetName(),
-		}))
-	})
-
-	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil).AnyTimes()
-
-	// https 200
-	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
-	w := httptest.NewRecorder()
-	n.GetRoute().ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-	go n.Run()
-	defer n.Close()
-
-	s2 := httptest.NewUnstartedServer(n.GetRoute())
-	pool := x509.NewCertPool()
-	caCrt, _ := ioutil.ReadFile("../test/cloud/ca.pem")
-	pool.AppendCertsFromPEM(caCrt)
-	serverCert, _ := ioutil.ReadFile("../test/cloud/server.pem")
-	serverKey, _ := ioutil.ReadFile("../test/cloud/server.key")
-	cert, _ := tls.X509KeyPair(serverCert, serverKey)
-
-	s2.TLS = &tls.Config{
-		Certificates:       []tls.Certificate{cert},
-		ClientCAs:          pool,
-		InsecureSkipVerify: true,
-		ClientAuth:         tls.VerifyClientCertIfGiven, // IfGiven -> report else -> active
-	}
-	s2.StartTLS()
-
-	poolca := x509.NewCertPool()
-	caCrtca, _ := ioutil.ReadFile("../test/node/ca.pem")
-	poolca.AppendCertsFromPEM(caCrtca)
-
-	clientCertPEM, _ := ioutil.ReadFile("../test/node/client.pem")
-	clientKeyPEM, _ := ioutil.ReadFile("../test/node/client.key")
-	clientTLSCert, _ := tls.X509KeyPair(clientCertPEM, clientKeyPEM)
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs:            poolca,
-				InsecureSkipVerify: true,
-				Certificates:       []tls.Certificate{clientTLSCert}, //提供客户端的证书
-			},
-		},
-	}
-	_, err := client.Get(s2.URL + "/device")
-	assert.NoError(t, err)
-
-	// http 200
-	c.NodeServer.Certificate.Key = ""
-	c.NodeServer.Certificate.Cert = ""
-	nHttp, err := NewNodeServer(c)
-	assert.NoError(t, err)
-	nHttp.InitRoute()
-	req, err = http.NewRequest(http.MethodGet, "/health", nil)
-	assert.NoError(t, err)
-	w = httptest.NewRecorder()
-	nHttp.GetRoute().ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-	go nHttp.Run()
-	defer nHttp.Close()
-}
-
 func TestHandler_Active(t *testing.T) {
 	t.Skip()
-	_, _, a, _, _, mockCtl, c, _ := InitMockEnvironment(t)
+	_, a, _, _, mockCtl, c, _ := InitMockEnvironment(t)
 	defer mockCtl.Finish()
 
 	// https 200
@@ -275,7 +185,7 @@ func TestHandler_Active(t *testing.T) {
 }
 
 func TestHandler_Mis(t *testing.T) {
-	_, _, _, _, _, mockCtl, _, m := InitMockEnvironment(t)
+	_, _, _, _, mockCtl, _, m := InitMockEnvironment(t)
 	defer mockCtl.Finish()
 
 	m.InitRoute()

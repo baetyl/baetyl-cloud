@@ -18,7 +18,7 @@ import (
 
 type InitializeService interface {
 	InitWithNode(ns, nodeName, edgeKubeNodeName string) ([]byte, error)
-	InitWithBitch(batch *models.Batch, edgeKubeNodeName string) ([]byte, error)
+	InitWithBatch(batch *models.Batch, edgeKubeNodeName string) ([]byte, error)
 	GetResource(key string) (string, error)
 	GetSyncCert(ns, nodeName string) (*specV1.Secret, error)
 }
@@ -101,7 +101,7 @@ func (init *initializeService) InitWithNode(ns, nodeName, edgeKubeNodeName strin
 	return init.parseInitApp(common.ResourceInitYaml, params)
 }
 
-func (init *initializeService) InitWithBitch(batch *models.Batch, edgeKubeNodeName string) ([]byte, error) {
+func (init *initializeService) InitWithBatch(batch *models.Batch, edgeKubeNodeName string) ([]byte, error) {
 	ns := batch.Namespace
 	params, err := init.getSysParams(ns, edgeKubeNodeName)
 	if err != nil {

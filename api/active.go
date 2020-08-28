@@ -4,14 +4,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-go/v2/errors"
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-	"github.com/baetyl/baetyl-go/v2/utils"
 )
 
 const (
@@ -70,144 +65,6 @@ func (api *API) GetResource(c *common.Context) (interface{}, error) {
 	}
 }
 
-func (api *API) Active(c *common.Context) (interface{}, error) {
-	info := &specV1.ActiveRequest{}
-	err := c.LoadBody(info)
-	if err != nil {
-		err = common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
-	}
-
-	batch, err := api.checkBatch(info)
-	if err != nil {
-		return nil, err
-	}
-	record, err := api.checkRecord(batch, info.FingerprintValue)
-	if err != nil {
-		return nil, err
-	}
-	_, err = api.genNodeAndSysApp(record.Namespace, record.BatchName, record.NodeName)
-	if err != nil {
-		return nil, err
-	}
-	if err = api.activeAndCallback(record, info.PenetrateData, batch.CallbackName, c.ClientIP()); err != nil {
-		return nil, err
-	}
-	cert, err := api.initService.GetSyncCert(record.Namespace, record.NodeName)
-	if err != nil {
-		return nil, err
-	}
-
-	return specV1.ActiveResponse{
-		NodeName:  record.NodeName,
-		Namespace: record.Namespace,
-		Certificate: utils.Certificate{
-			CA:                 string(cert.Data["ca.pem"]),
-			Key:                string(cert.Data["client.key"]),
-			Cert:               string(cert.Data["client.pem"]),
-			InsecureSkipVerify: false,
-		},
-	}, nil
-}
-
-func (api *API) checkBatch(info *specV1.ActiveRequest) (*models.Batch, error) {
-	batch, err := api.registerService.GetBatch(info.BatchName, info.Namespace)
-	if err != nil {
-		return nil, err
-	}
-	if string(batch.SecurityType) != info.SecurityType {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "SecurityType error"))
-	}
-	if batch.SecurityType == common.Token && batch.SecurityKey != info.SecurityValue {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "SecurityValue error"))
-	}
-	return batch, nil
-}
-
-func (api *API) checkRecord(batch *models.Batch, fingerprintValue string) (*models.Record, error) {
-	record, err := api.registerService.GetRecordByFingerprint(batch.Name, batch.Namespace, fingerprintValue)
-	if err != nil {
-		return nil, common.Error(common.ErrDatabase, common.Field("error", err))
-	}
-	if record != nil {
-		if record.Active == common.Activated {
-			return record, nil
-		}
-	} else {
-		lowFv := strings.ToLower(fingerprintValue)
-		if batch.EnableWhitelist == common.DisableWhitelist {
-			r := &models.Record{
-				Name:             lowFv,
-				Namespace:        batch.Namespace,
-				BatchName:        batch.Name,
-				NodeName:         lowFv,
-				FingerprintValue: fingerprintValue,
-				Active:           common.Inactivated,
-				ActiveTime:       time.Unix(common.DefaultActiveTime, 0),
-			}
-			if _, err = api.registerService.CreateRecord(r); err != nil {
-				return nil, err
-			}
-		}
-		record, err = api.registerService.GetRecordByFingerprint(batch.Name, batch.Namespace, fingerprintValue)
-		if err != nil {
-			return nil, err
-		}
-		if record == nil {
-			return nil, common.Error(
-				common.ErrResourceNotFound,
-				common.Field("type", "record"),
-				common.Field("name", lowFv),
-				common.Field("namespace", batch.Namespace))
-		}
-	}
-	return record, nil
-}
-
-func (api *API) genNodeAndSysApp(ns, batchName, nodeName string) ([]specV1.Application, error) {
-	node, err := api.nodeService.Get(ns, nodeName)
-	if err != nil {
-		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
-			n := &specV1.Node{
-				Name:      nodeName,
-				Namespace: ns,
-				Labels: map[string]string{
-					common.LabelBatch:    batchName,
-					common.LabelNodeName: nodeName,
-				},
-			}
-			node, err = api.nodeService.Create(ns, n)
-			if err != nil {
-				return nil, common.Error(common.ErrK8S, common.Field("error", err))
-			}
-		} else {
-			return nil, err
-		}
-
-	}
-
-	apps, err := api.GenSysApp(node.Name, ns, SystemApps)
-	if err != nil {
-		return nil, err
-	}
-	return apps, nil
-}
-
-func (api *API) activeAndCallback(record *models.Record, data map[string]string, callName, ip string) error {
-	record.Active = common.Activated
-	record.ActiveIP = ip
-	record.ActiveTime = time.Now()
-	_, err := api.registerService.UpdateRecord(record)
-	if err != nil {
-		return err
-	}
-	if callName != "" {
-		if _, err = api.callbackService.Callback(callName, record.Namespace, data); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (api *API) getInitYaml(token, edgeKubeNodeName string) ([]byte, error) {
 	info, err := api.checkAndParseToken(token)
 	if err != nil {
@@ -218,12 +75,6 @@ func (api *API) getInitYaml(token, edgeKubeNodeName string) ([]byte, error) {
 	switch common.Resource(info[InfoKind].(string)) {
 	case common.Node:
 		return api.initService.InitWithNode(info[InfoNamespace].(string), info[InfoName].(string), edgeKubeNodeName)
-	case common.Batch:
-		batch, err := api.registerService.GetBatch(info[InfoName].(string), info[InfoNamespace].(string))
-		if err != nil {
-			return nil, err
-		}
-		return api.initService.InitWithBitch(batch, edgeKubeNodeName)
 	default:
 		return nil, common.Error(
 			common.ErrRequestParamInvalid,

@@ -1,6 +1,8 @@
 package common
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // Code code
 type Code string
@@ -65,6 +67,8 @@ const (
 	ErrInvalidResourceName = "resourceName"
 	ErrInvalidLabels       = "validLabels"
 	ErrInvalidRequired     = "required"
+	// * batchOp
+	ErrInvalidArrayLength = "maxLength"
 	// * fingerprintValue
 	ErrInvalidFingerprintValue = "fingerprintValue"
 	// * memory
@@ -142,6 +146,8 @@ var templates = map[Code]string{
 
 	// * third server error
 	ErrThirdServer: "Third server {{if .name}}({{.name}}){{end}} error.{{if .error}} ({{.error}}){{end}}",
+
+	ErrInvalidArrayLength: "The length of the array exceeds the limit",
 }
 
 func getHTTPStatus(c Code) int {

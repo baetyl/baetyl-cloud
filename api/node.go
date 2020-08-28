@@ -34,6 +34,31 @@ func (api *API) GetNode(c *common.Context) (interface{}, error) {
 	return view, nil
 }
 
+func (api *API) GetNodes(c *common.Context) (interface{}, error) {
+	nodeNames, err := api.parseAndCheckNodeNames(c)
+	if err != nil {
+		return nil, err
+	}
+	ns := c.GetNamespace()
+	var nodesView = []*v1.NodeView{}
+	for _, name := range nodeNames.Names {
+		node, err := api.nodeService.Get(ns, name)
+		if err != nil {
+			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
+				continue
+			}
+			return nil, err
+		}
+		view, err := node.View(offlineDuration)
+		if err != nil {
+			return nil, err
+		}
+		view.Desire = nil
+		nodesView = append(nodesView, view)
+	}
+	return nodesView, nil
+}
+
 // GetNodeStats get a node stats
 func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
@@ -113,8 +138,6 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	list := []common.SystemApplication{
 		common.BaetylCore,
 		common.BaetylFunction,
-		common.BaetylBroker,
-		common.BaetylRule,
 	}
 	_, err = api.GenSysApp(name, ns, list)
 	if err != nil {
@@ -310,6 +333,19 @@ func (api *API) parseAndCheckNode(c *common.Context) (*v1.Node, error) {
 	}
 
 	return node, nil
+}
+
+func (api *API) parseAndCheckNodeNames(c *common.Context) (*models.NodeNames, error){
+	_, ok := c.GetQuery("batch")
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid)
+	}
+	nodeNames := &models.NodeNames{}
+	err := c.LoadBody(nodeNames)
+	if err != nil {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+	}
+	return nodeNames, nil
 }
 
 func (api *API) NodeNumberCollector(namespace string) (map[string]int, error) {
