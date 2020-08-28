@@ -7,7 +7,7 @@ type: "{{.AppType}}"
 system: true
 services:
   - name: "baetyl-function"
-    image: "hub.baidubce.com/baetyl/function:v2.0.1"
+    image: "baetyltechtest/function:git-226e40d"
     replica: 1
     volumeMounts:
       - name: "func-conf"
