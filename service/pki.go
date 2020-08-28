@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
+
 	"github.com/baetyl/baetyl-go/v2/pki"
 
 	"github.com/baetyl/baetyl-cloud/v2/config"

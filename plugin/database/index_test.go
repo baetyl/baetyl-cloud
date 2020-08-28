@@ -2,10 +2,12 @@ package database
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/v2/common"
+	"testing"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
-	"testing"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
 var (

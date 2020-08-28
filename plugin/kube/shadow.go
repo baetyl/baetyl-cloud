@@ -3,15 +3,17 @@ package kube
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
+	"strings"
+	"time"
+
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strings"
-	"time"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
 )
 
 func (c *client) Get(namespace, name string) (*models.Shadow, error) {

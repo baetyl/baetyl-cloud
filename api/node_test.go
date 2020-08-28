@@ -9,16 +9,17 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 )
 
 func getMockNode() *specV1.Node {

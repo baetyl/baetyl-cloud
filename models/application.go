@@ -1,8 +1,9 @@
 package models
 
 import (
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"time"
+
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
 type ApplicationView struct {

@@ -2,9 +2,11 @@ package entities
 
 import (
 	"encoding/json"
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-go/v2/spec/v1"
 	"time"
+
+	"github.com/baetyl/baetyl-go/v2/spec/v1"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 type Shadow struct {

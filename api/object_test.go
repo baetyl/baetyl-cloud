@@ -3,16 +3,18 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func initObjectAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {

@@ -64,8 +64,8 @@ func TestTemplateService_GenApps(t *testing.T) {
 	out, err := ts.GenSystemApps(node.Namespace, node.Name)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(out))
-	assert.Equal(t, "hub.baidubce.com/baetyl/baetyl:v2.0.1", out[0].Services[0].Image)
-	assert.Equal(t, "hub.baidubce.com/baetyl/function:v2.0.1", out[1].Services[0].Image)
+	assert.Equal(t, "baetyltechtest/baetyl:git-122bf10", out[0].Services[0].Image)
+	assert.Equal(t, "baetyltechtest/function:git-226e40d", out[1].Services[0].Image)
 }
 
 func TestTemplateService_GetSetupShell(t *testing.T) {

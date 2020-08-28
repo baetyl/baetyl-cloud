@@ -2,9 +2,11 @@ package database
 
 import (
 	"database/sql"
+
+	"github.com/jmoiron/sqlx"
+
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
-	"github.com/jmoiron/sqlx"
 )
 
 // TODO: 抽象 batch 操作的 interface

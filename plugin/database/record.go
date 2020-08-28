@@ -2,8 +2,10 @@ package database
 
 import (
 	"database/sql"
-	"github.com/baetyl/baetyl-cloud/v2/models"
+
 	"github.com/jmoiron/sqlx"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func (d *dbStorage) CountRecord(batchName, fingerprintValue, ns string) (int, error) {

@@ -1,10 +1,11 @@
 package common
 
 import (
-	"gopkg.in/go-playground/validator.v9"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"gopkg.in/go-playground/validator.v9"
 )
 
 const (

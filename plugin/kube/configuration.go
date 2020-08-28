@@ -2,15 +2,17 @@ package kube
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-go/v2/utils"
 	"time"
+
+	"github.com/baetyl/baetyl-go/v2/utils"
+
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	"github.com/jinzhu/copier"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-	"github.com/jinzhu/copier"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func toConfigurationModel(config *v1alpha1.Configuration) *specV1.Configuration {

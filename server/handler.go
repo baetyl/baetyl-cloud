@@ -2,13 +2,15 @@ package server
 
 import (
 	"bytes"
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-go/v2/log"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/baetyl/baetyl-go/v2/log"
+	"github.com/gin-gonic/gin"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
 var (

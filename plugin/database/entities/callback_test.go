@@ -1,10 +1,12 @@
 package entities
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func genCallback() *models.Callback {

@@ -3,12 +3,13 @@ package api
 import (
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/baetyl/baetyl-go/v2/spec/v1"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 const offlineDuration = 40 * time.Second
@@ -337,7 +338,7 @@ func (api *API) parseAndCheckNode(c *common.Context) (*v1.Node, error) {
 	return node, nil
 }
 
-func (api *API) parseAndCheckNodeNames(c *common.Context) (*models.NodeNames, error){
+func (api *API) parseAndCheckNodeNames(c *common.Context) (*models.NodeNames, error) {
 	_, ok := c.GetQuery("batch")
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid)

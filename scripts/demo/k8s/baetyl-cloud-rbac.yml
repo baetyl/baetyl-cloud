@@ -6,9 +6,9 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: baetyl-cloud-clusterrole
 rules:
-- apiGroups: ["cloud.baetyl.io"]
-  resources: ["secrets","applications","nodes","configurations","nodedesires","nodereports"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [ "cloud.baetyl.io" ]
+    resources: [ "secrets","applications","nodes","configurations","nodedesires","nodereports" ]
+    verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1

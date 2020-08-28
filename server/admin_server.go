@@ -4,11 +4,12 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/baetyl/baetyl-go/v2/log"
+	"github.com/gin-gonic/gin"
+
 	"github.com/baetyl/baetyl-cloud/v2/api"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/service"
-	"github.com/baetyl/baetyl-go/v2/log"
-	"github.com/gin-gonic/gin"
 )
 
 // AdminServer admin server

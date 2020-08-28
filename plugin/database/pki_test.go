@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"github.com/baetyl/baetyl-cloud/v2/plugin/default/pki"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/plugin/default/pki"
 )
 
 var (

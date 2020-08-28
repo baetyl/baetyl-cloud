@@ -2,12 +2,14 @@ package server
 
 import (
 	"context"
-	"github.com/baetyl/baetyl-go/v2/log"
 	"net/http"
+
+	"github.com/baetyl/baetyl-go/v2/log"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/baetyl/baetyl-cloud/v2/api"
 	"github.com/baetyl/baetyl-cloud/v2/config"
-	"github.com/gin-gonic/gin"
 )
 
 // MisServer mis server
