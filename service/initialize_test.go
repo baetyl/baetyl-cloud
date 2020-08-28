@@ -230,7 +230,7 @@ func TestInitializeService_getCoreApp(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestInitializeService_getSyncCert(t *testing.T) {
+func TestInitializeService_getNodeCerts(t *testing.T) {
 	cfg, mockModel, mockDB := genInitStruct(t)
 	init := &initializeService{
 		cfg:          cfg,
@@ -241,14 +241,14 @@ func TestInitializeService_getSyncCert(t *testing.T) {
 		Namespace: "default",
 		Volumes: []specV1.Volume{
 			{
-				Name:         "cert-sync",
-				VolumeSource: specV1.VolumeSource{Secret: &specV1.ObjectReference{Name: "cert-sync"}},
+				Name:         "node-certs",
+				VolumeSource: specV1.VolumeSource{Secret: &specV1.ObjectReference{Name: "node-certs"}},
 			},
 		},
 	}
 
 	// bad case 0
-	mockModel.EXPECT().GetSecret(app.Namespace, "cert-sync", "").Return(nil, nil).Times(1)
+	mockModel.EXPECT().GetSecret(app.Namespace, "node-certs", "").Return(nil, nil).Times(1)
 	_, err := init.getSyncCert(app)
 	assert.Error(t, err)
 }

@@ -426,6 +426,7 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 }
 
 func (api *API) isAppCanDelete(namesapce, name string) (bool, error) {
+	// TODO: improve
 	if strings.HasPrefix(name, "baetyl-") {
 		nodeNames, err := api.indexService.ListNodesByApp(namesapce, name)
 		if err != nil {

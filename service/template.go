@@ -41,7 +41,7 @@ type TemplateService interface {
 type TemplateServiceImpl struct {
 	path  string
 	prop  PropertyService
-	cache *CacheService
+	cache CacheService
 	// TODO: move the following services out of template, template service only generates models without creating
 	pki    PKIService
 	app    ApplicationService

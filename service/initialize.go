@@ -174,7 +174,7 @@ func (init *initializeService) getCoreApp(ns, nodeName string) (*specV1.Applicat
 func (init *initializeService) getSyncCert(app *specV1.Application) (*specV1.Secret, error) {
 	certName := ""
 	for _, vol := range app.Volumes {
-		if vol.Name == "cert-sync" {
+		if vol.Name == "node-certs" {
 			certName = vol.Secret.Name
 			break
 		}

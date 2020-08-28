@@ -7,7 +7,7 @@ type: "container"
 system: true
 services:
   - name: "baetyl-core"
-    image: "hub.baidubce.com/baetyl/baetyl:v2.0.1"
+    image: "baetyltechtest/baetyl:git-122bf10"
     replica: 1
     args:
       - "core"
@@ -23,8 +23,10 @@ services:
         mountPath: "/var/lib/baetyl/objects"
       - name: "host-root-path"
         mountPath: "/var/lib/baetyl/hostpath"
-      - name: "native-apps-path"
-        mountPath: "/var/lib/baetyl/apps"
+      - name: "app-log-path"
+        mountPath: "/var/lib/baetyl/logs"
+      - name: "native-app-run-path"
+        mountPath: "/var/lib/baetyl/run"
     ports:
       - containerPort: 80
         hostPort: 30050
@@ -47,6 +49,9 @@ volumes:
   - name: "host-root-path"
     hostPath:
       path: "/var/lib/baetyl/hostpath"
-  - name: "native-apps-path"
+  - name: "app-log-path"
     hostPath:
-      path: "/var/lib/baetyl/apps"
+      path: "/var/lib/baetyl/logs"
+  - name: "native-app-run-path"
+    hostPath:
+      path: "/var/lib/baetyl/run"
