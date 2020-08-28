@@ -2,9 +2,11 @@ package database
 
 import (
 	"database/sql"
-	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
+
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
 )
 
 func (d *dbStorage) CreateApplication(app *specV1.Application) (sql.Result, error) {

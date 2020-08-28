@@ -2,10 +2,11 @@ package auth
 
 import (
 	"crypto/rsa"
+	"io/ioutil"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/common/util"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"io/ioutil"
 )
 
 type defaultAuth struct {

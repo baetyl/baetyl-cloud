@@ -3,8 +3,9 @@ package service
 import (
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/gin-contrib/cache/persistence"
+
+	"github.com/baetyl/baetyl-cloud/v2/config"
 )
 
 type CacheService struct {

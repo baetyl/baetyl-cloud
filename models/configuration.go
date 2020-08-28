@@ -1,9 +1,10 @@
 package models
 
 import (
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"reflect"
 	"time"
+
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
 // ConfigurationList Configuration List

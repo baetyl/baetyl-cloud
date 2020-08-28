@@ -2,10 +2,12 @@ package plugin
 
 import (
 	"database/sql"
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/models"
+
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 //go:generate mockgen -destination=../mock/plugin/storage_db.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin DBStorage

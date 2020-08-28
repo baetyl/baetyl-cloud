@@ -3,8 +3,10 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/v2/common"
+
 	"github.com/jmoiron/sqlx"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
 var cache = map[string]string{}

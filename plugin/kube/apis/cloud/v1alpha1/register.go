@@ -7,10 +7,11 @@
 package v1alpha1
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud"
 )
 
 // SchemeGroupVersion is group version used to register these objects

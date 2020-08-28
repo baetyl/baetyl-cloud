@@ -10,12 +10,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	mockPKI "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-go/v2/pki"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	mockPKI "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 var (

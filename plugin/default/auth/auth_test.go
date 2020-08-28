@@ -2,14 +2,16 @@ package auth
 
 import (
 	"encoding/base64"
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/config"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/config"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 const (

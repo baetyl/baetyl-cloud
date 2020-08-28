@@ -2,9 +2,10 @@ package entities
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-	"time"
 )
 
 type Application struct {

@@ -1,12 +1,14 @@
 package entities
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/stretchr/testify/assert"
 	"path"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func genBatch() *models.Batch {

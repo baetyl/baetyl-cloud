@@ -2,9 +2,11 @@ package database
 
 import (
 	"database/sql"
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/jmoiron/sqlx"
 	"time"
+
+	"github.com/jmoiron/sqlx"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func (d *dbStorage) CreateTask(task *models.Task) (sql.Result, error) {

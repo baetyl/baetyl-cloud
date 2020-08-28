@@ -13,27 +13,33 @@ spec:
       labels:
         app: baetyl-cloud
     spec:
-      hostNetwork: true
       serviceAccountName: baetyl-cloud
       containers:
-      - image: hub.baidubce.com/baetyl/cloud:v2.0.0
-        imagePullPolicy: IfNotPresent
-        name: baetyl-cloud
-        ports:
-        - containerPort: 9004
-          name: admin-port
-          protocol: TCP
-        - containerPort: 9005
-          name: node-port
-          protocol: TCP
-        - containerPort: 9003
-          name: active-port
-          protocol: TCP
-        volumeMounts:
-        - mountPath: /etc/baetyl
-          name: system-config
+        - image: baetyl-cloud:t2
+          imagePullPolicy: IfNotPresent
+          name: baetyl-cloud
+          ports:
+            - containerPort: 9004
+              name: admin-port
+              protocol: TCP
+            - containerPort: 9005
+              name: sync-port
+              protocol: TCP
+            - containerPort: 9003
+              name: active-port
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/baetyl
+              name: config
+            - mountPath: /etc/baetyl/templates
+              name: templates
       volumes:
-      - configMap:
-          name: baetyl-cloud-config
-          defaultMode: 256
-        name: system-config
+        - name: config
+          configMap:
+            name: baetyl-cloud-config
+            defaultMode: 256
+        - name: templates
+          configMap:
+            name: baetyl-cloud-templates
+            defaultMode: 256
+

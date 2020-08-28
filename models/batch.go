@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"time"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
 type Batch struct {

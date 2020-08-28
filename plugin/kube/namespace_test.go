@@ -1,15 +1,17 @@
 package kube
 
 import (
-	"github.com/baetyl/baetyl-go/v2/log"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-go/v2/log"
+
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func genNamespaceRuntime() []runtime.Object {

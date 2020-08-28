@@ -1,8 +1,9 @@
 package database
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"os"
+
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 func (d dbStorage) CreateCert(cert plugin.Cert) error {

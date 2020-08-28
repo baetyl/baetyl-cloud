@@ -2,9 +2,11 @@ package entities
 
 import (
 	"encoding/json"
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-go/v2/log"
 	"time"
+
+	"github.com/baetyl/baetyl-go/v2/log"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 type Callback struct {

@@ -1,8 +1,9 @@
 package kube
 
 import (
-	"gotest.tools/assert"
 	"testing"
+
+	"gotest.tools/assert"
 )
 
 func TestLabelMatcher_Match(t *testing.T) {

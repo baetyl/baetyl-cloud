@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 var (

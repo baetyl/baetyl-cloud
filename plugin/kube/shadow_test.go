@@ -1,19 +1,21 @@
 package kube
 
 import (
+	"strings"
+	"testing"
+
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	"github.com/baetyl/baetyl-go/v2/spec/v1"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
 	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/client/clientset/versioned/fake"
-	"github.com/baetyl/baetyl-go/v2/spec/v1"
-	"github.com/stretchr/testify/assert"
-	"strings"
-	"testing"
 )
 
 func genShadowRuntime() []runtime.Object {
