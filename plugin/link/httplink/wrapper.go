@@ -14,19 +14,22 @@ func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 	case specV1.MessageReport:
 		return func(c *common.Context) (interface{}, error) {
 			ns, n := c.GetNamespace(), c.GetName()
-			var report specV1.Report
-			err := c.BindJSON(&report)
 			if ns == "" || n == "" {
 				return nil, common.Error(common.ErrRequestParamInvalid)
 			}
+			body, err := c.GetRawData()
 			if err != nil {
 				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 			}
 
 			msg := specV1.Message{
 				Kind:     specV1.MessageReport,
-				Content:  report,
+				Content:  specV1.VariableValue{},
 				Metadata: map[string]string{},
+			}
+			err = msg.Content.UnmarshalJSON(body)
+			if err != nil {
+				return nil, err
 			}
 			for k := range c.Request.Header {
 				msg.Metadata[strings.ToLower(k)] = c.GetHeader(k)
@@ -37,24 +40,28 @@ func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 			if err != nil {
 				return nil, err
 			}
-			return resp.Content, nil
+			return resp.Content.Value, nil
 		}
 	case specV1.MessageDesire:
 		return func(c *common.Context) (interface{}, error) {
 			ns := c.GetNamespace()
-			var request specV1.DesireRequest
-			err := c.BindJSON(&request)
 			if ns == "" {
 				return nil, common.Error(common.ErrRequestParamInvalid)
 			}
+
+			body, err := c.GetRawData()
 			if err != nil {
 				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 			}
 
 			msg := specV1.Message{
 				Kind:     specV1.MessageDesire,
-				Content:  request,
+				Content:  specV1.VariableValue{},
 				Metadata: map[string]string{},
+			}
+			err = msg.Content.UnmarshalJSON(body)
+			if err != nil {
+				return nil, err
 			}
 
 			for k := range c.Request.Header {
@@ -65,7 +72,7 @@ func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 			if err != nil {
 				return nil, err
 			}
-			return resp.Content.(specV1.DesireResponse), nil
+			return resp.Content.Value, nil
 		}
 	}
 	return func(c *common.Context) (interface{}, error) {

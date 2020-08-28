@@ -14,8 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
-
 func TestReport(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()

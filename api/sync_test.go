@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 
@@ -37,21 +38,26 @@ func TestSyncAPIImpl_Report(t *testing.T) {
 	msg := specV1.Message{
 		Kind:     specV1.MessageReport,
 		Metadata: map[string]string{"name": "test", "namespace": "default"},
-		Content:  info,
+		Content:  specV1.VariableValue{},
 	}
+	bt, err := json.Marshal(info)
+	assert.NoError(t, err)
+	err = msg.Content.UnmarshalJSON(bt)
+	assert.NoError(t, err)
 	resp := specV1.Desire{}
 	expMsg := &specV1.Message{
 		Kind:     msg.Kind,
 		Metadata: msg.Metadata,
-		Content:  resp,
+		Content:  specV1.VariableValue{},
 	}
-	mSync.EXPECT().Report("default", "test", info).Return(resp, nil).Times(1)
+	mSync.EXPECT().Report("default", "test", gomock.Any()).Return(resp, nil).Times(1)
 	res, err := sync.Report(msg)
 	assert.NoError(t, err)
-	assert.EqualValues(t, expMsg, res)
+	assert.EqualValues(t, expMsg.Kind, res.Kind)
+	assert.EqualValues(t, expMsg.Metadata, res.Metadata)
 
 	// bad case 0
-	mSync.EXPECT().Report("default", "test", info).Return(nil, os.ErrInvalid).Times(1)
+	mSync.EXPECT().Report("default", "test", gomock.Any()).Return(nil, os.ErrInvalid).Times(1)
 	_, err = sync.Report(msg)
 	assert.Error(t, err)
 }
@@ -68,18 +74,23 @@ func TestSyncAPIImpl_Desire(t *testing.T) {
 	msg := specV1.Message{
 		Kind:     specV1.MessageDesire,
 		Metadata: map[string]string{"namespace": "default"},
-		Content:  infos,
+		Content:  specV1.VariableValue{},
 	}
+	bt, err := json.Marshal(infos)
+	assert.NoError(t, err)
+	err = msg.Content.UnmarshalJSON(bt)
+	assert.NoError(t, err)
 	resp := []specV1.ResourceValue{}
 	expMsg := &specV1.Message{
 		Kind:     msg.Kind,
 		Metadata: msg.Metadata,
-		Content:  specV1.DesireResponse{Values: resp},
+		Content:  specV1.VariableValue{},
 	}
 	mSync.EXPECT().Desire("default", nil, msg.Metadata).Return(resp, nil).Times(1)
 	res, err := sync.Desire(msg)
 	assert.NoError(t, err)
-	assert.EqualValues(t, expMsg, res)
+	assert.EqualValues(t, expMsg.Kind, res.Kind)
+	assert.EqualValues(t, expMsg.Metadata, res.Metadata)
 
 	// bad case 0
 	mSync.EXPECT().Desire("default", nil, msg.Metadata).Return(nil, os.ErrInvalid).Times(1)

@@ -115,6 +115,6 @@ func (l *httpLink) initRouter() {
 func (l *httpLink) setPortFromEnv() {
 	nodePort := os.Getenv(config.NodeServerPort)
 	if nodePort != "" {
-		l.cfg.HTTPLink.Port = ":" + nodePort
+		l.svr.Addr = ":" + nodePort
 	}
 }
