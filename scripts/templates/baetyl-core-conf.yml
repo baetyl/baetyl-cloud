@@ -1,8 +1,8 @@
-name: "{{.ConfName}}"
+name: "{{.CoreConfName}}"
 namespace: "{{.Namespace}}"
 system: true
 labels:
-  baetyl-app-name: "{{.AppName}}"
+  baetyl-app-name: "{{.CoreAppName}}"
   baetyl-node-name: "{{.NodeName}}"
   baetyl-cloud-system: "true"
 data:

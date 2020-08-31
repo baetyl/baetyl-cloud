@@ -49,16 +49,16 @@ func (mr *MockTemplateServiceMockRecorder) GenSetupShell(arg0 interface{}) *gomo
 }
 
 // GenSystemApps mocks base method
-func (m *MockTemplateService) GenSystemApps(arg0, arg1 string) ([]*v1.Application, error) {
+func (m *MockTemplateService) GenSystemApps(arg0, arg1 string, arg2 map[string]string) ([]*v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenSystemApps", arg0, arg1)
+	ret := m.ctrl.Call(m, "GenSystemApps", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]*v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GenSystemApps indicates an expected call of GenSystemApps
-func (mr *MockTemplateServiceMockRecorder) GenSystemApps(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockTemplateServiceMockRecorder) GenSystemApps(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenSystemApps", reflect.TypeOf((*MockTemplateService)(nil).GenSystemApps), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenSystemApps", reflect.TypeOf((*MockTemplateService)(nil).GenSystemApps), arg0, arg1, arg2)
 }

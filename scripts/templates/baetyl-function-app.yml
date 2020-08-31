@@ -1,9 +1,9 @@
-name: "{{.AppName}}"
+name: "{{.FunctionAppName}}"
 namespace: "{{.Namespace}}"
 selector: "baetyl-node-name={{.NodeName}}"
 labels:
   baetyl-cloud-system: "true"
-type: "{{.AppType}}"
+type: "container"
 system: true
 services:
   - name: "baetyl-function"
@@ -19,5 +19,5 @@ services:
 volumes:
   - name: "func-conf"
     config:
-      name: "{{.ConfName}}"
-      version: "{{.ConfVersion}}"
+      name: "{{.FunctionConfName}}"
+      version: "{{.FunctionConfVersion}}"
