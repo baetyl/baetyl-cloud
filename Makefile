@@ -28,9 +28,11 @@ XFLAGS:=--load
 XPLATFORMS:=$(shell echo $(filter-out darwin/amd64,$(PLATFORMS)) | sed 's: :,:g')
 
 .PHONY: all
-all: $(SRC_FILES)
-	@echo "BUILD $(MODULE)"
-	@env GO111MODULE=on GOPROXY=https://goproxy.cn CGO_ENABLED=0 go build -o output/$(MODULE) $(GO_FLAGS) .
+all: build
+
+.PHONY: build
+build: $(SRC_FILES)
+	env GO111MODULE=on GOPROXY=https://goproxy.baidu.com CGO_ENABLED=0 go build -o output/$(MODULE) $(GO_FLAGS) .
 
 .PHONY: image
 image:
@@ -38,7 +40,7 @@ image:
 	@-docker buildx create --name $(MODULE)
 	@docker buildx use $(MODULE)
 	@docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-	@docker buildx build $(XFLAGS) --platform $(XPLATFORMS) -t $(REGISTRY)$(MODULE):$(VERSION) -f Dockerfile .
+	docker buildx build $(XFLAGS) --platform $(XPLATFORMS) -t $(REGISTRY)$(MODULE):$(VERSION) -f Dockerfile .
 
 .PHONY: test
 test: fmt
