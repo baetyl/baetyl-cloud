@@ -7,6 +7,8 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
+//go:generate mockgen -destination=../mock/api/sync.go -package=api github.com/baetyl/baetyl-cloud/v2/api SyncAPI
+
 type SyncAPI interface {
 	Report(msg specV1.Message) (*specV1.Message, error)
 	Desire(msg specV1.Message) (*specV1.Message, error)
