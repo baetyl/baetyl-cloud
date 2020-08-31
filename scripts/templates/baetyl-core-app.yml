@@ -1,4 +1,4 @@
-name: "{{.AppName}}"
+name: "{{.CoreAppName}}"
 namespace: "{{.Namespace}}"
 selector: "baetyl-node-name={{.NodeName}}"
 labels:
@@ -34,12 +34,12 @@ services:
 volumes:
   - name: "core-conf"
     config:
-      name: "{{.ConfName}}"
-      version: "{{.ConfVersion}}"
+      name: "{{.CoreConfName}}"
+      version: "{{.CoreConfVersion}}"
   - name: "node-certs"
     secret:
-      name: "{{.CertName}}"
-      version: "{{.CertVersion}}"
+      name: "{{.CoreCertName}}"
+      version: "{{.CoreCertVersion}}"
   - name: "core-store-path"
     hostPath:
       path: "/var/lib/baetyl/store"

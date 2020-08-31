@@ -61,7 +61,7 @@ func TestTemplateService_GenApps(t *testing.T) {
 	mock.dbStorage.EXPECT().RefreshIndex(node.Namespace, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(4)
 	mock.dbStorage.EXPECT().CreateApplication(gomock.Any()).Return(nil, nil).Times(2)
 
-	out, err := ts.GenSystemApps(node.Namespace, node.Name)
+	out, err := ts.GenSystemApps(node.Namespace, node.Name, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(out))
 	assert.Equal(t, "baetyltechtest/baetyl:git-122bf10", out[0].Services[0].Image)
