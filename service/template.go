@@ -34,7 +34,7 @@ const (
 
 type TemplateService interface {
 	GenSetupShell(token string) ([]byte, error)
-	GenSystemApps(ns, nodeName string) ([]*specV1.Application, error)
+	GenSystemApps(ns, nodeName string, params map[string]string) ([]*specV1.Application, error)
 }
 
 // TemplateServiceImpl is a combined service for generating app, config, secret or cert model from templates.
@@ -142,13 +142,13 @@ func (s *TemplateServiceImpl) GenSetupShell(token string) ([]byte, error) {
 	return data, nil
 }
 
-func (s *TemplateServiceImpl) GenSystemApps(ns, nodeName string) ([]*specV1.Application, error) {
+func (s *TemplateServiceImpl) GenSystemApps(ns, nodeName string, params map[string]string) ([]*specV1.Application, error) {
 	var apps []*specV1.Application
-	ca, err := s.genCoreApp(ns, nodeName)
+	ca, err := s.genCoreApp(ns, nodeName, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	fa, err := s.genFunctionApp(ns, nodeName)
+	fa, err := s.genFunctionApp(ns, nodeName, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -156,7 +156,7 @@ func (s *TemplateServiceImpl) GenSystemApps(ns, nodeName string) ([]*specV1.Appl
 	return apps, nil
 }
 
-func (s *TemplateServiceImpl) genCoreApp(ns, nodeName string) (*specV1.Application, error) {
+func (s *TemplateServiceImpl) genCoreApp(ns, nodeName string, params map[string]string) (*specV1.Application, error) {
 	syncAddr, err := s.getProperty(propertySyncServerAddress)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -165,11 +165,14 @@ func (s *TemplateServiceImpl) genCoreApp(ns, nodeName string) (*specV1.Applicati
 	confName := fmt.Sprintf("%s-conf-%s", templateCoreAppName, common.RandString(9))
 	// create config
 	confMap := map[string]string{
-		"Namespace": ns,
-		"NodeName":  nodeName,
-		"AppName":   appName,
-		"SyncAddr":  syncAddr,
-		"ConfName":  confName,
+		"Namespace":    ns,
+		"NodeName":     nodeName,
+		"SyncAddr":     syncAddr,
+		"CoreAppName":  appName,
+		"CoreConfName": confName,
+	}
+	for k, v := range params {
+		confMap[k] = v
 	}
 	conf, err := s.genConfig(ns, templateCoreConfYaml, confMap)
 	if err != nil {
@@ -184,26 +187,32 @@ func (s *TemplateServiceImpl) genCoreApp(ns, nodeName string) (*specV1.Applicati
 
 	// create application
 	appMap := map[string]string{
-		"Namespace":   ns,
-		"AppName":     appName,
-		"NodeName":    nodeName,
-		"CertName":    cert.Name,
-		"CertVersion": cert.Version,
-		"ConfName":    conf.Name,
-		"ConfVersion": conf.Version,
+		"Namespace":       ns,
+		"NodeName":        nodeName,
+		"CoreAppName":     appName,
+		"CoreCertName":    cert.Name,
+		"CoreCertVersion": cert.Version,
+		"CoreConfName":    conf.Name,
+		"CoreConfVersion": conf.Version,
+	}
+	for k, v := range params {
+		appMap[k] = v
 	}
 	return s.genApp(ns, templateCoreAppYaml, appMap)
 }
 
-func (s *TemplateServiceImpl) genFunctionApp(ns, nodeName string) (*specV1.Application, error) {
+func (s *TemplateServiceImpl) genFunctionApp(ns, nodeName string, params map[string]string) (*specV1.Application, error) {
 	appName := fmt.Sprintf("%s-%s", templateFuncAppName, common.RandString(9))
 	confName := fmt.Sprintf("%s-conf-%s", templateFuncAppName, common.RandString(9))
 	// create config
 	confMap := map[string]string{
-		"Namespace": ns,
-		"AppName":   appName,
-		"NodeName":  nodeName,
-		"ConfName":  confName,
+		"Namespace":        ns,
+		"NodeName":         nodeName,
+		"FunctionAppName":  appName,
+		"FunctionConfName": confName,
+	}
+	for k, v := range params {
+		confMap[k] = v
 	}
 	conf, err := s.genConfig(ns, templateFuncConfYaml, confMap)
 	if err != nil {
@@ -212,11 +221,14 @@ func (s *TemplateServiceImpl) genFunctionApp(ns, nodeName string) (*specV1.Appli
 
 	// create application
 	appMap := map[string]string{
-		"Namespace":   ns,
-		"AppName":     appName,
-		"NodeName":    nodeName,
-		"ConfName":    conf.Name,
-		"ConfVersion": conf.Version,
+		"Namespace":           ns,
+		"NodeName":            nodeName,
+		"FunctionAppName":     appName,
+		"FunctionConfName":    conf.Name,
+		"FunctionConfVersion": conf.Version,
+	}
+	for k, v := range params {
+		appMap[k] = v
 	}
 	return s.genApp(ns, templateFuncAppYaml, appMap)
 }
@@ -286,6 +298,5 @@ func (s *TemplateServiceImpl) genApp(ns, template string, params map[string]stri
 		}
 		app = res
 	}
-
 	return app, nil
 }

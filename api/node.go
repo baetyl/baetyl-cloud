@@ -137,7 +137,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	apps, err := api.templateService.GenSystemApps(ns, name)
+	apps, err := api.templateService.GenSystemApps(ns, name, nil)
 	if err != nil {
 		return nil, err
 	}

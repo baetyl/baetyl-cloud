@@ -67,13 +67,7 @@ data:
     q2MjYpZ2G6tvqQIa9oBI7z/dAiA3z47euYsWN2/rPjRoHTDAa9aZ6bBOXr8t0fKX
     sgQJMw==
     -----END CERTIFICATE-----
-  service.yml: |-
-    nodeServer:
-      port: ":9005"
-      ca: "/etc/baetyl/client_ca.crt"
-      cert: "/etc/baetyl/server.crt"
-      key: "/etc/baetyl/server.key"
-
+  conf.yml: |-
     activeServer:
       port: ":9003"
       ca: "/etc/baetyl/server_ca.crt"
@@ -85,28 +79,27 @@ data:
 
     database:
       type: "mysql"
-      url: "root:12345678@(host.docker.internal:3306)/baetyl_cloud?charset=utf8&parseTime=true"
+      url: "root:secretpassword@(mariadb:3306)/baetyl_cloud?charset=utf8&parseTime=true"
 
     kubernetes:
       inCluster: true
-
-    plugin:
-      modelStorage: "kubernetes"
-      databaseStorage: "database"
 
     defaultpki:
       rootCAFile: "/etc/baetyl/client_ca.crt"
       rootCAKeyFile: "/etc/baetyl/client_ca.key"
       rootCertId: "98ec3bc552f0478298aa1c6702a95427"
-      persistent:
-        kind: "database"
-        database:
-          type: "mysql"
-          url: "root:12345678@(host.docker.internal:3306)/baetyl_cloud?charset=utf8&parseTime=true"
+      persistent: "database"
 
     defaultauth:
       namespace: "default"
       keyFile: "/etc/baetyl/token.key"
+
+    httplink:
+      port: ":9005"
+      ca: "/etc/baetyl/client_ca.crt"
+      cert: "/etc/baetyl/server.crt"
+      key: "/etc/baetyl/server.key"
+
   token.key: |-
     -----BEGIN RSA PRIVATE KEY-----
     MIIEowIBAAKCAQEA41Ux2wPALzq5agrwhNOr0B+BYePAf5CrVPXtfFKmQDdOqBkB

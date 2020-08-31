@@ -15,7 +15,7 @@ spec:
     spec:
       serviceAccountName: baetyl-cloud
       containers:
-        - image: baetyl-cloud:t2
+        - image: baetyl-cloud:t3
           imagePullPolicy: IfNotPresent
           name: baetyl-cloud
           ports:
