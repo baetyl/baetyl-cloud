@@ -47,7 +47,10 @@ func main() {
 		if err != nil {
 			return err
 		}
-
+		aa, err := api.NewActiveAPI(&cfg)
+		if err != nil {
+			return err
+		}
 		s, err := server.NewAdminServer(&cfg)
 		if err != nil {
 			return err
@@ -71,7 +74,7 @@ func main() {
 		if err != nil {
 			return err
 		}
-		as.SetAPI(a)
+		as.SetAPI(aa)
 		as.InitRoute()
 		go as.Run()
 		defer as.Close()
