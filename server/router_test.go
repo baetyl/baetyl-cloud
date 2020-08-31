@@ -84,12 +84,15 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *ActiveServer,
 	mockAPI, err := api.NewAPI(c)
 	assert.NoError(t, err)
 
+	mockActiveAPI, err := api.NewActiveAPI(c)
+	assert.NoError(t, err)
+
 	s, err := NewAdminServer(c)
 	assert.NoError(t, err)
 	s.SetAPI(mockAPI)
 	a, err := NewActiveServer(c)
 	assert.NoError(t, err)
-	a.SetAPI(mockAPI)
+	a.SetAPI(mockActiveAPI)
 	m, err := NewMisServer(c)
 	assert.NoError(t, err)
 	m.SetAPI(mockAPI)

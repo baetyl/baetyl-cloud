@@ -10,6 +10,8 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/config"
 )
 
+//go:generate mockgen -destination=../mock/service/active.go -package=service github.com/baetyl/baetyl-cloud/v2/service ActiveService
+
 const (
 	InfoKind      = "k"
 	InfoName      = "n"
@@ -23,7 +25,7 @@ var (
 )
 // ActiveService
 type ActiveService interface {
-	GetResource(c *common.Context) (interface{}, error)
+	GetResource(resourceName, node, token string) (interface{}, error)
 }
 
 type ActiveServiceImpl struct {
@@ -65,19 +67,7 @@ func NewActiveService(config *config.CloudConfig) (ActiveService, error) {
 	}, nil
 }
 
-func (api *ActiveServiceImpl) GetResource(c *common.Context) (interface{}, error) {
-	resourceName := c.Param("resource")
-	query := &struct {
-		Token string `form:"token,omitempty"`
-		Node  string `form:"node,omitempty"`
-	}{}
-	err := c.Bind(query)
-	if err != nil {
-		return nil, common.Error(
-			common.ErrRequestParamInvalid,
-			common.Field("error", err))
-	}
-
+func (api *ActiveServiceImpl) GetResource(resourceName, node, token string) (interface{}, error) {
 	switch resourceName {
 	case common.ResourceMetrics:
 		res, err := api.InitService.GetResource(common.ResourceMetrics)
@@ -92,9 +82,9 @@ func (api *ActiveServiceImpl) GetResource(c *common.Context) (interface{}, error
 		}
 		return []byte(res), nil
 	case common.ResourceSetup:
-		return api.TemplateService.GenSetupShell(query.Token)
+		return api.TemplateService.GenSetupShell(token)
 	case common.ResourceInitYaml:
-		return api.getInitYaml(query.Token, query.Node)
+		return api.getInitYaml(token, node)
 	default:
 		return nil, common.Error(
 			common.ErrResourceNotFound,
