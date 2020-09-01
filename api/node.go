@@ -143,7 +143,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	}
 
 	for _, app := range apps {
-		err = api.updateNodeAndAppIndex(ns, app)
+		err = api.UpdateNodeAndAppIndex(ns, app)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}

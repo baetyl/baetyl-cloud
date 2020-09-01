@@ -3,6 +3,7 @@ package service
 import (
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/gin-contrib/cache/persistence"
 
 	"github.com/baetyl/baetyl-cloud/v2/config"
@@ -12,28 +13,40 @@ import (
 
 type CacheService interface {
 	Get(key string, load func(string) (string, error)) (string, error)
+	GetProperty(key string) (string, error)
 }
 
 type CacheServiceImpl struct {
-	cache          persistence.CacheStore
 	expireDuration time.Duration
+	cache          persistence.CacheStore
+
+	prop PropertyService // default backend
 }
 
-func NewCacheService(config *config.CloudConfig) (CacheService, error) {
+func NewCacheService(cfg *config.CloudConfig) (CacheService, error) {
+	propertyService, err := NewPropertyService(cfg)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 	return &CacheServiceImpl{
-		cache:          persistence.NewInMemoryStore(config.Cache.ExpirationDuration),
-		expireDuration: config.Cache.ExpirationDuration,
+		expireDuration: cfg.Cache.ExpirationDuration,
+		cache:          persistence.NewInMemoryStore(cfg.Cache.ExpirationDuration),
+		prop:           propertyService,
 	}, nil
 }
 
-func (c *CacheServiceImpl) Get(key string, load func(string) (string, error)) (string, error) {
+func (s *CacheServiceImpl) Get(key string, load func(string) (string, error)) (string, error) {
 	var value string
-	if err := c.cache.Get(key, &value); err == nil {
+	if err := s.cache.Get(key, &value); err == nil {
 		return value, nil
 	}
 	value, err := load(key)
 	if err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 	return value, nil
+}
+
+func (s *CacheServiceImpl) GetProperty(key string) (string, error) {
+	return s.Get(key, s.prop.GetPropertyValue)
 }

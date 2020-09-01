@@ -33,27 +33,25 @@ const (
 //go:generate mockgen -destination=../mock/service/template.go -package=service github.com/baetyl/baetyl-cloud/v2/service TemplateService
 
 type TemplateService interface {
+	GetTemplate(filename string) (string, error)
+	ParseTemplate(filename string, params map[string]string) ([]byte, error)
+	UnmarshalTemplate(filename string, params map[string]string, out interface{}) error
+
+	// the following functions are business logic
 	GenSetupShell(token string) ([]byte, error)
 	GenSystemApps(ns, nodeName string, params map[string]string) ([]*specV1.Application, error)
 }
 
-// TemplateServiceImpl is a combined service for generating app, config, secret or cert model from templates.
+// TemplateServiceImpl is a service to read and parse template files.
 type TemplateServiceImpl struct {
 	path  string
-	prop  PropertyService
 	cache CacheService
 	// TODO: move the following services out of template, template service only generates models without creating
-	pki    PKIService
-	app    ApplicationService
-	conf   ConfigService
-	secret SecretService
+	pki PKIService
+	*AppCombinedService
 }
 
 func NewTemplateService(cfg *config.CloudConfig) (TemplateService, error) {
-	propertyService, err := NewPropertyService(cfg)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
 	cacheService, err := NewCacheService(cfg)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -62,26 +60,15 @@ func NewTemplateService(cfg *config.CloudConfig) (TemplateService, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	configService, err := NewConfigService(cfg)
-	if err != nil {
-		return nil, err
-	}
-	secretService, err := NewSecretService(cfg)
-	if err != nil {
-		return nil, err
-	}
-	appService, err := NewApplicationService(cfg)
+	rs, err := NewAppCombinedService(cfg)
 	if err != nil {
 		return nil, err
 	}
 	return &TemplateServiceImpl{
-		path:   cfg.Template.Path,
-		prop:   propertyService,
-		cache:  cacheService,
-		pki:    pkiService,
-		app:    appService,
-		conf:   configService,
-		secret: secretService,
+		path:               cfg.Template.Path,
+		cache:              cacheService,
+		pki:                pkiService,
+		AppCombinedService: rs,
 	}, nil
 }
 
@@ -89,45 +76,45 @@ func (s *TemplateServiceImpl) GetTemplate(filename string) (string, error) {
 	return s.cache.Get(filename, func(key string) (string, error) {
 		data, err := ioutil.ReadFile(path.Join(s.path, key))
 		if err != nil {
-			return "", errors.Trace(err)
+			return "", common.Error(common.ErrTemplate, common.Field("error", err))
 		}
 		return string(data), nil
 	})
 }
 
-func (s *TemplateServiceImpl) parseTemplate(filename string, params map[string]string) ([]byte, error) {
+func (s *TemplateServiceImpl) ParseTemplate(filename string, params map[string]string) ([]byte, error) {
 	tl, err := s.GetTemplate(filename)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	t, err := template.New(filename).Parse(tl)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, common.Error(common.ErrTemplate, common.Field("error", err))
 	}
 	buf := &bytes.Buffer{}
 	err = t.Execute(buf, params)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, common.Error(common.ErrTemplate, common.Field("error", err))
 	}
 	return buf.Bytes(), nil
 }
 
-func (s *TemplateServiceImpl) unmarshalTemplate(filename string, params map[string]string, out interface{}) error {
-	tp, err := s.parseTemplate(filename, params)
+func (s *TemplateServiceImpl) UnmarshalTemplate(filename string, params map[string]string, out interface{}) error {
+	tp, err := s.ParseTemplate(filename, params)
 	if err != nil {
 		return errors.Trace(err)
 	}
-	return yaml.Unmarshal(tp, out)
-}
-
-func (s *TemplateServiceImpl) getProperty(key string) (string, error) {
-	return s.cache.Get(key, s.prop.GetPropertyValue)
+	err = yaml.Unmarshal(tp, out)
+	if err != nil {
+		return common.Error(common.ErrTemplate, common.Field("error", err))
+	}
+	return nil
 }
 
 // business logic
 
 func (s *TemplateServiceImpl) GenSetupShell(token string) ([]byte, error) {
-	activeAddr, err := s.getProperty(propertyActiveServerAddress)
+	activeAddr, err := s.cache.GetProperty(propertyActiveServerAddress)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -135,7 +122,7 @@ func (s *TemplateServiceImpl) GenSetupShell(token string) ([]byte, error) {
 		"Token":     token,
 		"CloudAddr": activeAddr,
 	}
-	data, err := s.parseTemplate(templateSetupShell, params)
+	data, err := s.ParseTemplate(templateSetupShell, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -157,7 +144,7 @@ func (s *TemplateServiceImpl) GenSystemApps(ns, nodeName string, params map[stri
 }
 
 func (s *TemplateServiceImpl) genCoreApp(ns, nodeName string, params map[string]string) (*specV1.Application, error) {
-	syncAddr, err := s.getProperty(propertySyncServerAddress)
+	syncAddr, err := s.cache.GetProperty(propertySyncServerAddress)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -264,18 +251,18 @@ func (s *TemplateServiceImpl) genNodeCerts(ns, nodeName, appName string) (*specV
 		},
 		System: true,
 	}
-	return s.secret.Create(ns, srt)
+	return s.Secret.Create(ns, srt)
 }
 
 func (s *TemplateServiceImpl) genConfig(ns, template string, params map[string]string) (*specV1.Configuration, error) {
 	config := &specV1.Configuration{}
-	err := s.unmarshalTemplate(template, params, config)
+	err := s.UnmarshalTemplate(template, params, config)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	conf, err := s.conf.Create(ns, config)
+	conf, err := s.Config.Create(ns, config)
 	if err != nil {
-		res, err := s.conf.Get(ns, config.Name, "")
+		res, err := s.Config.Get(ns, config.Name, "")
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
@@ -286,13 +273,13 @@ func (s *TemplateServiceImpl) genConfig(ns, template string, params map[string]s
 
 func (s *TemplateServiceImpl) genApp(ns, template string, params map[string]string) (*specV1.Application, error) {
 	application := &specV1.Application{}
-	err := s.unmarshalTemplate(template, params, application)
+	err := s.UnmarshalTemplate(template, params, application)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	app, err := s.app.Create(ns, application)
+	app, err := s.App.Create(ns, application)
 	if err != nil {
-		res, err := s.app.Get(ns, application.Name, "")
+		res, err := s.App.Get(ns, application.Name, "")
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
