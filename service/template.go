@@ -33,6 +33,11 @@ const (
 //go:generate mockgen -destination=../mock/service/template.go -package=service github.com/baetyl/baetyl-cloud/v2/service TemplateService
 
 type TemplateService interface {
+	GetTemplate(filename string) (string, error)
+	ParseTemplate(filename string, params map[string]string) ([]byte, error)
+	UnmarshalTemplate(filename string, params map[string]string, out interface{}) error
+
+	// the following functions are business logic
 	GenSetupShell(token string) ([]byte, error)
 	GenSystemApps(ns, nodeName string, params map[string]string) ([]*specV1.Application, error)
 }
