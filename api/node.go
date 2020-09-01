@@ -32,7 +32,7 @@ func (api *API) GetNode(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) GetNodes(c *common.Context) (interface{}, error) {
-	nodeNames, err := api.parseAndCheckNodeNames(c)
+	nodeNames, err := api.ParseAndCheckNodeNames(c)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 
 // CreateNode create one node
 func (api *API) CreateNode(c *common.Context) (interface{}, error) {
-	n, err := api.parseAndCheckNode(c)
+	n, err := api.ParseAndCheckNode(c)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 
 // UpdateNode update the node
 func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
-	node, err := api.parseAndCheckNode(c)
+	node, err := api.ParseAndCheckNode(c)
 	if err != nil {
 		return nil, err
 	}
@@ -317,7 +317,7 @@ func (api *API) GetNodeDeployHistory(c *common.Context) (interface{}, error) {
 	return nil, nil
 }
 
-func (api *API) parseAndCheckNode(c *common.Context) (*v1.Node, error) {
+func (api *API) ParseAndCheckNode(c *common.Context) (*v1.Node, error) {
 	node := new(v1.Node)
 	node.Name = c.GetNameFromParam()
 	err := c.LoadBody(node)
@@ -334,7 +334,7 @@ func (api *API) parseAndCheckNode(c *common.Context) (*v1.Node, error) {
 	return node, nil
 }
 
-func (api *API) parseAndCheckNodeNames(c *common.Context) (*models.NodeNames, error) {
+func (api *API) ParseAndCheckNodeNames(c *common.Context) (*models.NodeNames, error) {
 	_, ok := c.GetQuery("batch")
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid)
