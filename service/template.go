@@ -3,16 +3,19 @@ package service
 import (
 	"bytes"
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path"
 	"text/template"
 
-	"github.com/baetyl/baetyl-cloud/v2/config"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	"gopkg.in/yaml.v2"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
+
 	"github.com/baetyl/baetyl-go/v2/errors"
+
+	"github.com/baetyl/baetyl-cloud/v2/config"
 )
 
 const (
@@ -24,18 +27,23 @@ const (
 	templateCoreAppYaml  = "baetyl-core-app.yml"
 	templateFuncConfYaml = "baetyl-function-conf.yml"
 	templateFuncAppYaml  = "baetyl-function-app.yml"
+	templateResourceMetrics = "metrics.yml"
+	templateResourceLocalPathStorage = "local-path-storage.yml"
 	templateSetupShell   = "setup.sh"
 
 	propertySyncServerAddress   = "sync-server-address"
 	propertyActiveServerAddress = "active-server-address"
+)
+var (
+	CmdExpirationInSeconds = int64(60 * 60)
 )
 
 //go:generate mockgen -destination=../mock/service/template.go -package=service github.com/baetyl/baetyl-cloud/v2/service TemplateService
 
 type TemplateService interface {
 	GetTemplate(filename string) (string, error)
-	ParseTemplate(filename string, params map[string]string) ([]byte, error)
-	UnmarshalTemplate(filename string, params map[string]string, out interface{}) error
+	ParseTemplate(filename string, params map[string]interface{}) ([]byte, error)
+	UnmarshalTemplate(filename string, params map[string]interface{}, out interface{}) error
 
 	// the following functions are business logic
 	GenSetupShell(token string) ([]byte, error)
@@ -47,7 +55,8 @@ type TemplateServiceImpl struct {
 	path  string
 	cache CacheService
 	// TODO: move the following services out of template, template service only generates models without creating
-	pki PKIService
+	pki   PKIService
+	auth  AuthService
 	*AppCombinedService
 }
 
@@ -64,10 +73,15 @@ func NewTemplateService(cfg *config.CloudConfig) (TemplateService, error) {
 	if err != nil {
 		return nil, err
 	}
+	authService, err := NewAuthService(cfg)
+	if err != nil {
+		return nil, err
+	}
 	return &TemplateServiceImpl{
 		path:               cfg.Template.Path,
 		cache:              cacheService,
 		pki:                pkiService,
+		auth:               authService,
 		AppCombinedService: rs,
 	}, nil
 }
@@ -82,7 +96,7 @@ func (s *TemplateServiceImpl) GetTemplate(filename string) (string, error) {
 	})
 }
 
-func (s *TemplateServiceImpl) ParseTemplate(filename string, params map[string]string) ([]byte, error) {
+func (s *TemplateServiceImpl) ParseTemplate(filename string, params map[string]interface{}) ([]byte, error) {
 	tl, err := s.GetTemplate(filename)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -99,7 +113,7 @@ func (s *TemplateServiceImpl) ParseTemplate(filename string, params map[string]s
 	return buf.Bytes(), nil
 }
 
-func (s *TemplateServiceImpl) UnmarshalTemplate(filename string, params map[string]string, out interface{}) error {
+func (s *TemplateServiceImpl) UnmarshalTemplate(filename string, params map[string]interface{}, out interface{}) error {
 	tp, err := s.ParseTemplate(filename, params)
 	if err != nil {
 		return errors.Trace(err)
@@ -118,7 +132,7 @@ func (s *TemplateServiceImpl) GenSetupShell(token string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	params := map[string]string{
+	params := map[string]interface{}{
 		"Token":     token,
 		"CloudAddr": activeAddr,
 	}
@@ -151,7 +165,7 @@ func (s *TemplateServiceImpl) genCoreApp(ns, nodeName string, params map[string]
 	appName := fmt.Sprintf("%s-%s", templateCoreAppName, common.RandString(9))
 	confName := fmt.Sprintf("%s-conf-%s", templateCoreAppName, common.RandString(9))
 	// create config
-	confMap := map[string]string{
+	confMap := map[string]interface{}{
 		"Namespace":    ns,
 		"NodeName":     nodeName,
 		"SyncAddr":     syncAddr,
@@ -173,7 +187,7 @@ func (s *TemplateServiceImpl) genCoreApp(ns, nodeName string, params map[string]
 	}
 
 	// create application
-	appMap := map[string]string{
+	appMap := map[string]interface{}{
 		"Namespace":       ns,
 		"NodeName":        nodeName,
 		"CoreAppName":     appName,
@@ -192,7 +206,7 @@ func (s *TemplateServiceImpl) genFunctionApp(ns, nodeName string, params map[str
 	appName := fmt.Sprintf("%s-%s", templateFuncAppName, common.RandString(9))
 	confName := fmt.Sprintf("%s-conf-%s", templateFuncAppName, common.RandString(9))
 	// create config
-	confMap := map[string]string{
+	confMap := map[string]interface{}{
 		"Namespace":        ns,
 		"NodeName":         nodeName,
 		"FunctionAppName":  appName,
@@ -207,7 +221,7 @@ func (s *TemplateServiceImpl) genFunctionApp(ns, nodeName string, params map[str
 	}
 
 	// create application
-	appMap := map[string]string{
+	appMap := map[string]interface{}{
 		"Namespace":           ns,
 		"NodeName":            nodeName,
 		"FunctionAppName":     appName,
@@ -254,7 +268,7 @@ func (s *TemplateServiceImpl) genNodeCerts(ns, nodeName, appName string) (*specV
 	return s.Secret.Create(ns, srt)
 }
 
-func (s *TemplateServiceImpl) genConfig(ns, template string, params map[string]string) (*specV1.Configuration, error) {
+func (s *TemplateServiceImpl) genConfig(ns, template string, params map[string]interface{}) (*specV1.Configuration, error) {
 	config := &specV1.Configuration{}
 	err := s.UnmarshalTemplate(template, params, config)
 	if err != nil {
@@ -271,7 +285,7 @@ func (s *TemplateServiceImpl) genConfig(ns, template string, params map[string]s
 	return conf, nil
 }
 
-func (s *TemplateServiceImpl) genApp(ns, template string, params map[string]string) (*specV1.Application, error) {
+func (s *TemplateServiceImpl) genApp(ns, template string, params map[string]interface{}) (*specV1.Application, error) {
 	application := &specV1.Application{}
 	err := s.UnmarshalTemplate(template, params, application)
 	if err != nil {
