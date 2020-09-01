@@ -93,6 +93,21 @@ func (mr *MockNodeServiceMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockNodeService)(nil).Get), arg0, arg1)
 }
 
+// GetDesire mocks base method
+func (m *MockNodeService) GetDesire(arg0, arg1 string) (*v1.Desire, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDesire", arg0, arg1)
+	ret0, _ := ret[0].(*v1.Desire)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDesire indicates an expected call of GetDesire
+func (mr *MockNodeServiceMockRecorder) GetDesire(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDesire", reflect.TypeOf((*MockNodeService)(nil).GetDesire), arg0, arg1)
+}
+
 // List mocks base method
 func (m *MockNodeService) List(arg0 string, arg1 *models.ListOptions) (*models.NodeList, error) {
 	m.ctrl.T.Helper()

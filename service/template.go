@@ -27,15 +27,10 @@ const (
 	templateCoreAppYaml  = "baetyl-core-app.yml"
 	templateFuncConfYaml = "baetyl-function-conf.yml"
 	templateFuncAppYaml  = "baetyl-function-app.yml"
-	templateResourceMetrics = "metrics.yml"
-	templateResourceLocalPathStorage = "local-path-storage.yml"
 	templateSetupShell   = "setup.sh"
 
 	propertySyncServerAddress   = "sync-server-address"
 	propertyActiveServerAddress = "active-server-address"
-)
-var (
-	CmdExpirationInSeconds = int64(60 * 60)
 )
 
 //go:generate mockgen -destination=../mock/service/template.go -package=service github.com/baetyl/baetyl-cloud/v2/service TemplateService
@@ -56,7 +51,6 @@ type TemplateServiceImpl struct {
 	cache CacheService
 	// TODO: move the following services out of template, template service only generates models without creating
 	pki   PKIService
-	auth  AuthService
 	*AppCombinedService
 }
 
@@ -73,15 +67,10 @@ func NewTemplateService(cfg *config.CloudConfig) (TemplateService, error) {
 	if err != nil {
 		return nil, err
 	}
-	authService, err := NewAuthService(cfg)
-	if err != nil {
-		return nil, err
-	}
 	return &TemplateServiceImpl{
 		path:               cfg.Template.Path,
 		cache:              cacheService,
 		pki:                pkiService,
-		auth:               authService,
 		AppCombinedService: rs,
 	}, nil
 }

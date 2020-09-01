@@ -394,7 +394,7 @@ func TestCreateNode(t *testing.T) {
 	scs := ms.NewMockSysConfigService(mockCtl)
 	pki := ms.NewMockPKIService(mockCtl)
 	is := ms.NewMockIndexService(mockCtl)
-	init := ms.NewMockInitializeService(mockCtl)
+	init := ms.NewMockInitService(mockCtl)
 	tp := ms.NewMockTemplateService(mockCtl)
 
 	api.applicationService = as
@@ -418,7 +418,7 @@ func TestCreateNode(t *testing.T) {
 
 	mkNodeService.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	is.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
-	init.EXPECT().GetResource(gomock.Any()).Return("{}", nil).AnyTimes()
+	tp.EXPECT().GetTemplate(gomock.Any()).Return("{}", nil).AnyTimes()
 	tp.EXPECT().GenSystemApps(mNode.Namespace, gomock.Any(), nil).Return([]*specV1.Application{app1, app2}, nil).Times(2)
 
 	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
@@ -894,18 +894,12 @@ func TestGenInitCmdFromNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	nMock := ms.NewMockNodeService(mockCtl)
-	scs := ms.NewMockSysConfigService(mockCtl)
-	auth := ms.NewMockAuthService(mockCtl)
+	init := ms.NewMockInitService(mockCtl)
 	api.nodeService = nMock
-	api.sysConfigService = scs
-	api.authService = auth
-
+	api.initService = init
 	node := getMockNode()
 
-	sc := &models.SysConfig{Key: common.AddressActive, Type: "address", Value: "baetyl.com"}
-
-	scs.EXPECT().GetSysConfig(sc.Type, sc.Key).Return(sc, nil).Times(1)
-	auth.EXPECT().GenToken(gomock.Any()).Return("token", nil).Times(1)
+	init.EXPECT().GenCmd("node", "default", "abc").Return("setup", nil).Times(1)
 	nMock.EXPECT().Get(node.Namespace, node.Name).Return(node, nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/init", nil)
@@ -1069,30 +1063,3 @@ func TestAPI_NodeNumberCollector(t *testing.T) {
 	assert.Equal(t, 1, res[plugin.QuotaNode])
 }
 
-
-func TestApi_genCmd(t *testing.T) {
-	token := "ac40cc632e217d7675abfdfbf64e285f7b22657870697279223a333630302c226b696e64223a226e6f6465222c226e616d65223a22303431353031222c226e616d657370616365223a2264656661756c74222c2274696d657374616d70223a313538363935363931367d"
-	api, _, mockCtl := initNodeAPI(t)
-	defer mockCtl.Finish()
-	ss := ms.NewMockSysConfigService(mockCtl)
-	auth := ms.NewMockAuthService(mockCtl)
-	api.authService = auth
-	api.sysConfigService = ss
-
-	// bad case 0: gen Token error
-	auth.EXPECT().GenToken(gomock.Any()).Return("", fmt.Errorf("gen token err")).Times(1)
-
-	res, err := api.genCmd("batch", "default", "test")
-	assert.Error(t, err)
-	assert.Equal(t, "", res)
-
-	// bad case 1: get sys config error
-	auth.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(1)
-	ss.EXPECT().GetSysConfig("address", common.AddressActive).Return(nil, fmt.Errorf("not found")).Times(1)
-
-	res, err = api.genCmd("batch", "default", "test")
-	assert.Error(t, err, common.Error(common.ErrResourceNotFound,
-		common.Field("type", "address"),
-		common.Field("name", common.AddressActive)))
-	assert.Equal(t, "", res)
-}
