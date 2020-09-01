@@ -26,6 +26,8 @@ type NodeService interface {
 	UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error)
 	UpdateDesire(namespace, name string, desire specV1.Desire) (*models.Shadow, error)
 
+	GetDesireAppInfo(ns, nodeName string) (*specV1.Application, error)
+
 	UpdateNodeAppVersion(namespace string, app *specV1.Application) ([]string, error)
 	DeleteNodeAppVersion(namespace string, app *specV1.Application) ([]string, error)
 }
@@ -403,4 +405,34 @@ func toShadowMap(shadowList *models.ShadowList) map[string]*models.Shadow {
 	}
 
 	return shadowMap
+}
+
+func (n *nodeService) GetDesireAppInfo(ns, nodeName string) (*specV1.Application, error) {
+	shadow, _ := n.shadow.Get(ns, nodeName)
+	if shadow == nil {
+		return nil, common.Error(
+			common.ErrResourceNotFound,
+			common.Field("type", "node"),
+			common.Field("name", nodeName),
+			common.Field("namespace", ns))
+	}
+	apps := shadow.Desire.AppInfos(true)
+	for _, appInfo := range apps {
+		if strings.Contains(appInfo.Name, string(common.BaetylCore)) {
+			app, _ := n.storage.GetApplication(ns, appInfo.Name, "")
+			if app == nil {
+				return nil, common.Error(
+					common.ErrResourceNotFound,
+					common.Field("type", "application"),
+					common.Field("name", appInfo.Name),
+					common.Field("namespace", ns))
+			}
+			return app, nil
+		}
+	}
+	return nil, common.Error(
+		common.ErrResourceNotFound,
+		common.Field("type", "sysapp"),
+		common.Field("name", nodeName),
+		common.Field("namespace", ns))
 }

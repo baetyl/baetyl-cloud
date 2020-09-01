@@ -13,7 +13,7 @@ type ActiveAPI interface {
 }
 
 type ActiveAPIImpl struct {
-	service.ActiveService
+	activeService service.ActiveService
 }
 
 func NewActiveAPI(cfg *config.CloudConfig) (ActiveAPI, error) {
@@ -22,7 +22,7 @@ func NewActiveAPI(cfg *config.CloudConfig) (ActiveAPI, error) {
 		return nil, err
 	}
 	return &ActiveAPIImpl{
-		activeService,
+		activeService:    activeService,
 	}, nil
 }
 
@@ -38,6 +38,6 @@ func (api *ActiveAPIImpl) GetResource(c *common.Context) (interface{}, error) {
 			common.ErrRequestParamInvalid,
 			common.Field("error", err))
 	}
-	return api.ActiveService.GetResource(resourceName, query.Node, query.Token)
+	return api.activeService.GetResource(resourceName, query.Node, query.Token)
 }
 
