@@ -42,7 +42,7 @@ func (s *CacheServiceImpl) Get(key string, load func(string) (string, error)) (s
 	}
 	value, err := load(key)
 	if err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 	return value, nil
 }
