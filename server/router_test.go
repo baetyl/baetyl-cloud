@@ -22,7 +22,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-func InitMockEnvironment(t *testing.T) (*AdminServer, *ActiveServer,
+func InitMockEnvironment(t *testing.T) (*AdminServer, *InitServer,
 	*mockPlugin.MockAuth, *mockPlugin.MockLicense, *gomock.Controller, *config.CloudConfig, *MisServer) {
 	c := &config.CloudConfig{}
 	c.Plugin.Auth = common.RandString(9)
@@ -84,13 +84,13 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *ActiveServer,
 	mockAPI, err := api.NewAPI(c)
 	assert.NoError(t, err)
 
-	mockActiveAPI, err := api.NewActiveAPI(c)
+	mockActiveAPI, err := api.NewInitAPI(c)
 	assert.NoError(t, err)
 
 	s, err := NewAdminServer(c)
 	assert.NoError(t, err)
 	s.SetAPI(mockAPI)
-	a, err := NewActiveServer(c)
+	a, err := NewInitServer(c)
 	assert.NoError(t, err)
 	a.SetAPI(mockActiveAPI)
 	m, err := NewMisServer(c)
@@ -175,7 +175,7 @@ func TestHandler_Active(t *testing.T) {
 	// http 200
 	c.ActiveServer.Certificate.Key = ""
 	c.ActiveServer.Certificate.Cert = ""
-	aHttp, err := NewActiveServer(c)
+	aHttp, err := NewInitServer(c)
 	assert.NoError(t, err)
 	aHttp.InitRoute()
 	req, err = http.NewRequest(http.MethodGet, "/health", nil)

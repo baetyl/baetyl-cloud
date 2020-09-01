@@ -47,7 +47,7 @@ func main() {
 		if err != nil {
 			return err
 		}
-		aa, err := api.NewActiveAPI(&cfg)
+		ia, err := api.NewInitAPI(&cfg)
 		if err != nil {
 			return err
 		}
@@ -70,11 +70,11 @@ func main() {
 		ss.Run()
 		defer ss.Close()
 
-		as, err := server.NewActiveServer(&cfg)
+		as, err := server.NewInitServer(&cfg)
 		if err != nil {
 			return err
 		}
-		as.SetAPI(aa)
+		as.SetAPI(ia)
 		as.InitRoute()
 		go as.Run()
 		defer as.Close()

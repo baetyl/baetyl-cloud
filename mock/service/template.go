@@ -79,7 +79,7 @@ func (mr *MockTemplateServiceMockRecorder) GetTemplate(arg0 interface{}) *gomock
 }
 
 // ParseTemplate mocks base method
-func (m *MockTemplateService) ParseTemplate(arg0 string, arg1 map[string]string) ([]byte, error) {
+func (m *MockTemplateService) ParseTemplate(arg0 string, arg1 map[string]interface{}) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ParseTemplate", arg0, arg1)
 	ret0, _ := ret[0].([]byte)
@@ -94,7 +94,7 @@ func (mr *MockTemplateServiceMockRecorder) ParseTemplate(arg0, arg1 interface{})
 }
 
 // UnmarshalTemplate mocks base method
-func (m *MockTemplateService) UnmarshalTemplate(arg0 string, arg1 map[string]string, arg2 interface{}) error {
+func (m *MockTemplateService) UnmarshalTemplate(arg0 string, arg1 map[string]interface{}, arg2 interface{}) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UnmarshalTemplate", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)

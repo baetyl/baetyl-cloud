@@ -305,7 +305,7 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	cmd, err := api.activeService.GenCmd(string(common.Node), ns, name)
+	cmd, err := api.initService.GenCmd(string(common.Node), ns, name)
 	if err != nil {
 		return nil, err
 	}

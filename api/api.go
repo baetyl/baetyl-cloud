@@ -20,7 +20,7 @@ type API struct {
 	authService        service.AuthService
 	propertyService    service.PropertyService
 	templateService    service.TemplateService
-	activeService      service.ActiveService
+	initService      service.InitService
 }
 
 // NewAPI NewAPI
@@ -77,7 +77,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
-	activeService, err := service.NewActiveService(config)
+	initService, err := service.NewInitService(config)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +95,6 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		authService:        authService,
 		propertyService:    propertyService,
 		templateService:    templateService,
-		activeService:      activeService,
+		initService:        initService,
 	}, nil
 }

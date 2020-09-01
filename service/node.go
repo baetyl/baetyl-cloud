@@ -26,7 +26,7 @@ type NodeService interface {
 	UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error)
 	UpdateDesire(namespace, name string, desire specV1.Desire) (*models.Shadow, error)
 
-	GetDesireAppInfo(ns, nodeName string) (*specV1.Application, error)
+	GetDesire(ns, nodeName string) (*specV1.Desire, error)
 
 	UpdateNodeAppVersion(namespace string, app *specV1.Application) ([]string, error)
 	DeleteNodeAppVersion(namespace string, app *specV1.Application) ([]string, error)
@@ -224,6 +224,18 @@ func (n *nodeService) UpdateDesire(namespace, name string, desire specV1.Desire)
 	return n.shadow.UpdateDesire(shadow)
 }
 
+func (n *nodeService) GetDesire(ns, nodeName string) (*specV1.Desire, error) {
+	shadow, _ := n.shadow.Get(ns, nodeName)
+	if shadow == nil {
+		return nil, common.Error(
+			common.ErrResourceNotFound,
+			common.Field("type", "node"),
+			common.Field("name", nodeName),
+			common.Field("namespace", ns))
+	}
+	return &shadow.Desire, nil
+}
+
 func (n *nodeService) updateNodeAndAppIndex(namespace string, node *specV1.Node) error {
 	apps, err := n.storage.ListApplication(namespace, &models.ListOptions{})
 	if err != nil {
@@ -407,32 +419,3 @@ func toShadowMap(shadowList *models.ShadowList) map[string]*models.Shadow {
 	return shadowMap
 }
 
-func (n *nodeService) GetDesireAppInfo(ns, nodeName string) (*specV1.Application, error) {
-	shadow, _ := n.shadow.Get(ns, nodeName)
-	if shadow == nil {
-		return nil, common.Error(
-			common.ErrResourceNotFound,
-			common.Field("type", "node"),
-			common.Field("name", nodeName),
-			common.Field("namespace", ns))
-	}
-	apps := shadow.Desire.AppInfos(true)
-	for _, appInfo := range apps {
-		if strings.Contains(appInfo.Name, string(common.BaetylCore)) {
-			app, _ := n.storage.GetApplication(ns, appInfo.Name, "")
-			if app == nil {
-				return nil, common.Error(
-					common.ErrResourceNotFound,
-					common.Field("type", "application"),
-					common.Field("name", appInfo.Name),
-					common.Field("namespace", ns))
-			}
-			return app, nil
-		}
-	}
-	return nil, common.Error(
-		common.ErrResourceNotFound,
-		common.Field("type", "sysapp"),
-		common.Field("name", nodeName),
-		common.Field("namespace", ns))
-}

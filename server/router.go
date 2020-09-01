@@ -132,11 +132,11 @@ func (s *AdminServer) nodeQuotaHandler(c *gin.Context) {
 }
 
 // GetRoute get router
-func (s *ActiveServer) GetRoute() *gin.Engine {
+func (s *InitServer) GetRoute() *gin.Engine {
 	return s.router
 }
 
-func (s *ActiveServer) InitRoute() {
+func (s *InitServer) InitRoute() {
 	s.router.NoRoute(NoRouteHandler)
 	s.router.NoMethod(NoMethodHandler)
 	s.router.GET("/health", Health)
@@ -145,8 +145,13 @@ func (s *ActiveServer) InitRoute() {
 	s.router.Use(LoggerHandler)
 	v1 := s.router.Group("v1")
 	{
+		// TODO: deprecated
 		active := v1.Group("/active")
 		active.GET("/:resource", common.WrapperRaw(s.api.GetResource))
+	}
+	{
+		initz := v1.Group("/init")
+		initz.GET("/:resource", common.WrapperRaw(s.api.GetResource))
 	}
 }
 

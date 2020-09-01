@@ -80,7 +80,7 @@ func TestTemplateService_GetSetupShell(t *testing.T) {
 	// TOKEN="{{.Token}}"
 	// CLOUD_ADDR="{{.CloudAddr}}"
 	actual, err := ts.GenSetupShell("xxx")
-	expected, err := ioutil.ReadFile("../scripts/templates/setup.sh")
+	expected, err := ioutil.ReadFile("../scripts/demo/native/templates/setup.sh")
 	expectedstr := strings.Replace(string(expected), "{{.Token}}", "xxx", 1)
 	expectedstr = strings.Replace(expectedstr, "{{.CloudAddr}}", "https://localhost:50002", 1)
 	assert.NoError(t, err)

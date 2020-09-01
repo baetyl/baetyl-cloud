@@ -1,6 +1,7 @@
 INSERT INTO `baetyl_property` (`name`, `value`) VALUES
 ('sync-server-address', 'https://host.docker.internal:30005'),
-('active-server-address', 'https://0.0.0.0:30003');
+('active-server-address', 'https://0.0.0.0:30003'),
+("baetyl-init", "baetyltechtest/baetyl:git-84127d1");
 
 INSERT INTO `baetyl_system_config` (`id`, `type`, `name`, `create_time`, `update_time`, `value`) VALUES
 (2, 'address', 'node-address',  now(),  now(), 'https://host.docker.internal:30005'),
