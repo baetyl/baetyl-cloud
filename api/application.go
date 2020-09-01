@@ -91,7 +91,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	err = api.updateNodeAndAppIndex(ns, app)
+	err = api.UpdateNodeAndAppIndex(ns, app)
 	if err != nil {
 		return nil, err
 	}
@@ -136,13 +136,13 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 
 	if oldApp != nil && oldApp.Selector != app.Selector {
 		// delete old nodes
-		if err := api.deleteNodeAndAppIndex(ns, oldApp); err != nil {
+		if err := api.DeleteNodeAndAppIndex(ns, oldApp); err != nil {
 			return nil, err
 		}
 	}
 
 	// update nodes
-	if err := api.updateNodeAndAppIndex(ns, app); err != nil {
+	if err := api.UpdateNodeAndAppIndex(ns, app); err != nil {
 		return nil, err
 	}
 
@@ -173,7 +173,7 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 	}
 
 	//delete the app from node
-	if err := api.deleteNodeAndAppIndex(ns, app); err != nil {
+	if err := api.DeleteNodeAndAppIndex(ns, app); err != nil {
 		return nil, err
 	}
 
@@ -254,7 +254,7 @@ func (api *API) parseListOptionsAppendSystemLabel(c *common.Context) *models.Lis
 	return opt
 }
 
-func (api *API) updateNodeAndAppIndex(namespace string, app *specV1.Application) error {
+func (api *API) UpdateNodeAndAppIndex(namespace string, app *specV1.Application) error {
 	nodes, err := api.nodeService.UpdateNodeAppVersion(namespace, app)
 	if err != nil {
 		return err
@@ -262,7 +262,7 @@ func (api *API) updateNodeAndAppIndex(namespace string, app *specV1.Application)
 	return api.indexService.RefreshNodesIndexByApp(namespace, app.Name, nodes)
 }
 
-func (api *API) deleteNodeAndAppIndex(namespace string, app *specV1.Application) error {
+func (api *API) DeleteNodeAndAppIndex(namespace string, app *specV1.Application) error {
 	_, err := api.nodeService.DeleteNodeAppVersion(namespace, app)
 	if err != nil {
 		return err

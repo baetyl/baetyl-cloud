@@ -40,7 +40,6 @@ type TemplateService interface {
 // TemplateServiceImpl is a combined service for generating app, config, secret or cert model from templates.
 type TemplateServiceImpl struct {
 	path  string
-	prop  PropertyService
 	cache CacheService
 	// TODO: move the following services out of template, template service only generates models without creating
 	pki    PKIService
@@ -50,10 +49,6 @@ type TemplateServiceImpl struct {
 }
 
 func NewTemplateService(cfg *config.CloudConfig) (TemplateService, error) {
-	propertyService, err := NewPropertyService(cfg)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
 	cacheService, err := NewCacheService(cfg)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -76,7 +71,6 @@ func NewTemplateService(cfg *config.CloudConfig) (TemplateService, error) {
 	}
 	return &TemplateServiceImpl{
 		path:   cfg.Template.Path,
-		prop:   propertyService,
 		cache:  cacheService,
 		pki:    pkiService,
 		app:    appService,
@@ -95,7 +89,7 @@ func (s *TemplateServiceImpl) GetTemplate(filename string) (string, error) {
 	})
 }
 
-func (s *TemplateServiceImpl) parseTemplate(filename string, params map[string]string) ([]byte, error) {
+func (s *TemplateServiceImpl) ParseTemplate(filename string, params map[string]string) ([]byte, error) {
 	tl, err := s.GetTemplate(filename)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -112,22 +106,18 @@ func (s *TemplateServiceImpl) parseTemplate(filename string, params map[string]s
 	return buf.Bytes(), nil
 }
 
-func (s *TemplateServiceImpl) unmarshalTemplate(filename string, params map[string]string, out interface{}) error {
-	tp, err := s.parseTemplate(filename, params)
+func (s *TemplateServiceImpl) UnmarshalTemplate(filename string, params map[string]string, out interface{}) error {
+	tp, err := s.ParseTemplate(filename, params)
 	if err != nil {
 		return errors.Trace(err)
 	}
 	return yaml.Unmarshal(tp, out)
 }
 
-func (s *TemplateServiceImpl) getProperty(key string) (string, error) {
-	return s.cache.Get(key, s.prop.GetPropertyValue)
-}
-
 // business logic
 
 func (s *TemplateServiceImpl) GenSetupShell(token string) ([]byte, error) {
-	activeAddr, err := s.getProperty(propertyActiveServerAddress)
+	activeAddr, err := s.cache.GetProperty(propertyActiveServerAddress)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -135,7 +125,7 @@ func (s *TemplateServiceImpl) GenSetupShell(token string) ([]byte, error) {
 		"Token":     token,
 		"CloudAddr": activeAddr,
 	}
-	data, err := s.parseTemplate(templateSetupShell, params)
+	data, err := s.ParseTemplate(templateSetupShell, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -157,7 +147,7 @@ func (s *TemplateServiceImpl) GenSystemApps(ns, nodeName string, params map[stri
 }
 
 func (s *TemplateServiceImpl) genCoreApp(ns, nodeName string, params map[string]string) (*specV1.Application, error) {
-	syncAddr, err := s.getProperty(propertySyncServerAddress)
+	syncAddr, err := s.cache.GetProperty(propertySyncServerAddress)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -269,7 +259,7 @@ func (s *TemplateServiceImpl) genNodeCerts(ns, nodeName, appName string) (*specV
 
 func (s *TemplateServiceImpl) genConfig(ns, template string, params map[string]string) (*specV1.Configuration, error) {
 	config := &specV1.Configuration{}
-	err := s.unmarshalTemplate(template, params, config)
+	err := s.UnmarshalTemplate(template, params, config)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -286,7 +276,7 @@ func (s *TemplateServiceImpl) genConfig(ns, template string, params map[string]s
 
 func (s *TemplateServiceImpl) genApp(ns, template string, params map[string]string) (*specV1.Application, error) {
 	application := &specV1.Application{}
-	err := s.unmarshalTemplate(template, params, application)
+	err := s.UnmarshalTemplate(template, params, application)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

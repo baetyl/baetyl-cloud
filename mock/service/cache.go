@@ -46,3 +46,18 @@ func (mr *MockCacheServiceMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockCacheService)(nil).Get), arg0, arg1)
 }
+
+// GetProperty mocks base method
+func (m *MockCacheService) GetProperty(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProperty", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProperty indicates an expected call of GetProperty
+func (mr *MockCacheServiceMockRecorder) GetProperty(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProperty", reflect.TypeOf((*MockCacheService)(nil).GetProperty), arg0)
+}
