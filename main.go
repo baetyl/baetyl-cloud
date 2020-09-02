@@ -78,7 +78,7 @@ func main() {
 		as.InitRoute()
 		go as.Run()
 		defer as.Close()
-		ctx.Log().Info("active server starting")
+		ctx.Log().Info("init  server starting")
 
 		ctx.Wait()
 		return nil

@@ -34,9 +34,9 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *InitServer,
 	c.Plugin.Functions = []string{common.RandString(9)}
 	c.Plugin.License = common.RandString(9)
 	c.Plugin.Property = common.RandString(9)
-	c.ActiveServer.Certificate.CA = "../scripts/demo/native/certs/client_ca.crt"
-	c.ActiveServer.Certificate.Cert = "../scripts/demo/native/certs/server.crt"
-	c.ActiveServer.Certificate.Key = "../scripts/demo/native/certs/server.key"
+	c.InitServer.Certificate.CA = "../scripts/demo/native/certs/client_ca.crt"
+	c.InitServer.Certificate.Cert = "../scripts/demo/native/certs/server.crt"
+	c.InitServer.Certificate.Key = "../scripts/demo/native/certs/server.key"
 	mockCtl := gomock.NewController(t)
 
 	mockModelStorage := mockPlugin.NewMockModelStorage(mockCtl)
@@ -84,7 +84,7 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *InitServer,
 	mockAPI, err := api.NewAPI(c)
 	assert.NoError(t, err)
 
-	mockActiveAPI, err := api.NewInitAPI(c)
+	mockInitAPI, err := api.NewInitAPI(c)
 	assert.NoError(t, err)
 
 	s, err := NewAdminServer(c)
@@ -92,7 +92,7 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *InitServer,
 	s.SetAPI(mockAPI)
 	a, err := NewInitServer(c)
 	assert.NoError(t, err)
-	a.SetAPI(mockActiveAPI)
+	a.SetAPI(mockInitAPI)
 	m, err := NewMisServer(c)
 	assert.NoError(t, err)
 	m.SetAPI(mockAPI)
@@ -156,7 +156,7 @@ func TestHandler(t *testing.T) {
 	defer s.Close()
 }
 
-func TestHandler_Active(t *testing.T) {
+func TestHandler_Init(t *testing.T) {
 	t.Skip()
 	_, a, _, _, mockCtl, c, _ := InitMockEnvironment(t)
 	defer mockCtl.Finish()
@@ -173,8 +173,8 @@ func TestHandler_Active(t *testing.T) {
 	go a.Run()
 	defer a.Close()
 	// http 200
-	c.ActiveServer.Certificate.Key = ""
-	c.ActiveServer.Certificate.Cert = ""
+	c.InitServer.Certificate.Key = ""
+	c.InitServer.Certificate.Cert = ""
 	aHttp, err := NewInitServer(c)
 	assert.NoError(t, err)
 	aHttp.InitRoute()

@@ -11,13 +11,13 @@ import (
 const (
 	AdminServerPort  = "ADMIN_PORT"
 	NodeServerPort   = "NODE_PORT"
-	ActiveServerPort = "ACTIVE_PORT"
+	InitServerPort = "INIT_PORT"
 	MisServerPort    = "MIS_PORT"
 )
 
 // CloudConfig baetyl-cloud config
 type CloudConfig struct {
-	ActiveServer Server     `yaml:"activeServer" json:"activeServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
+	InitServer Server     `yaml:"initServer" json:"initServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	AdminServer  Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	MisServer    MisServer  `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
 	LogInfo      log.Config `yaml:"logger" json:"logger"`
@@ -65,9 +65,9 @@ func SetPortFromEnv(cfg *CloudConfig) {
 	if adminPort != "" {
 		cfg.AdminServer.Port = ":" + adminPort
 	}
-	activePort := os.Getenv(ActiveServerPort)
-	if activePort != "" {
-		cfg.ActiveServer.Port = ":" + activePort
+	initPort := os.Getenv(InitServerPort)
+	if initPort != "" {
+		cfg.InitServer.Port = ":" + initPort
 	}
 	misPort := os.Getenv(MisServerPort)
 	if misPort != "" {

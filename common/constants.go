@@ -169,9 +169,6 @@ const (
 	ResourceSetup            = "setup.sh"
 	ResourceInitYaml         = "baetyl-init.yml"
 
-	AddressNode   = "node-address"
-	AddressActive = "active-address"
-
 	ObjectSource = "object-source"
 )
 
