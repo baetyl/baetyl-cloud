@@ -157,7 +157,6 @@ const (
 
 	BaetylModule                            = "baetyl-module"
 	BaetylFunctionRuntime                   = "baetyl-function-runtime"
-	BaetylInit            SystemApplication = "baetyl-image"
 	BaetylCore            SystemApplication = "baetyl-core"
 	BaetylBroker          SystemApplication = "baetyl-broker"
 	BaetylFunction        SystemApplication = "baetyl-function"
