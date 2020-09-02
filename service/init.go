@@ -2,8 +2,6 @@ package service
 
 import (
 	"encoding/base64"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -28,13 +26,12 @@ const (
 )
 
 var (
-	ErrInvalidToken        = fmt.Errorf("invalid token")
 	CmdExpirationInSeconds = int64(60 * 60)
 )
 
-// ActiveService
+// InitService
 type InitService interface {
-	GetResource(resourceName, node, token string) (interface{}, error)
+	GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error)
 	GenCmd(kind, ns, name string) (string, error)
 }
 
@@ -85,7 +82,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	}, nil
 }
 
-func (a *InitServiceImpl) GetResource(resourceName, node, token string) (interface{}, error) {
+func (a *InitServiceImpl) GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error) {
 	switch resourceName {
 	case common.ResourceMetrics:
 		res, err := a.TemplateService.GetTemplate(ResourceMetrics)
@@ -103,7 +100,7 @@ func (a *InitServiceImpl) GetResource(resourceName, node, token string) (interfa
 		return a.TemplateService.GenSetupShell(token)
 
 	case common.ResourceInitYaml:
-		return a.getInitYaml(token, node)
+		return a.getInitYaml(info, node)
 	default:
 		return nil, common.Error(
 			common.ErrResourceNotFound,
@@ -112,62 +109,15 @@ func (a *InitServiceImpl) GetResource(resourceName, node, token string) (interfa
 	}
 }
 
-func (a *InitServiceImpl) getInitYaml(token, edgeKubeNodeName string) ([]byte, error) {
-	info, err := a.CheckAndParseToken(token)
-	if err != nil {
-		return nil, common.Error(
-			common.ErrRequestParamInvalid,
-			common.Field("error", err))
-	}
+func (a *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeName string) ([]byte, error) {
 	switch common.Resource(info[InfoKind].(string)) {
 	case common.Node:
 		return a.genInitYml(info[InfoNamespace].(string), info[InfoName].(string), edgeKubeNodeName)
 	default:
 		return nil, common.Error(
 			common.ErrRequestParamInvalid,
-			common.Field("error", err))
+			common.Field("error", "InfoKind error"))
 	}
-}
-
-func (a *InitServiceImpl) CheckAndParseToken(token string) (map[string]interface{}, error) {
-	// check len
-	if len(token) < 10 {
-		return nil, ErrInvalidToken
-	}
-
-	// check sign
-	data, err := hex.DecodeString(token[10:])
-	if err != nil {
-		return nil, err
-	}
-	info := map[string]interface{}{}
-	err = json.Unmarshal(data, &info)
-	if err != nil {
-		return nil, err
-	}
-	realToken, err := a.AuthService.GenToken(info)
-	if err != nil {
-		return nil, err
-	}
-	if realToken != token {
-		return nil, ErrInvalidToken
-	}
-
-	expiry, ok := info[InfoExpiry].(float64)
-	if !ok {
-		return nil, ErrInvalidToken
-	}
-
-	ts, ok := info[InfoTimestamp].(float64)
-	if !ok {
-		return nil, ErrInvalidToken
-	}
-	// check expiration
-	timestamp := time.Unix(int64(ts), 0)
-	if timestamp.Add(time.Duration(int64(expiry))*time.Second).Unix() < time.Now().Unix() {
-		return nil, ErrInvalidToken
-	}
-	return info, nil
 }
 
 func (a *InitServiceImpl) genInitYml(ns, nodeName, edgeKubeNodeName string) ([]byte, error) {
@@ -227,7 +177,7 @@ func (a *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	activeAddr, err := a.CacheService.GetProperty(propertyActiveServerAddress)
+	activeAddr, err := a.CacheService.GetProperty(propertyInitServerAddress)
 	if err != nil {
 		return "", err
 	}
@@ -243,7 +193,7 @@ func (a *InitServiceImpl) getSysParams(ns, nodeName string) (map[string]interfac
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	activeAddress, err := a.CacheService.GetProperty(propertyActiveServerAddress)
+	activeAddress, err := a.CacheService.GetProperty(propertyInitServerAddress)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

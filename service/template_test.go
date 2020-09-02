@@ -75,7 +75,7 @@ func TestTemplateService_GetSetupShell(t *testing.T) {
 	ts, err := NewTemplateService(mock.conf)
 	assert.NoError(t, err)
 
-	mock.property.EXPECT().GetPropertyValue("active-server-address").Return("https://localhost:50002", nil)
+	mock.property.EXPECT().GetPropertyValue("init-server-address").Return("https://localhost:50002", nil)
 
 	// TOKEN="{{.Token}}"
 	// CLOUD_ADDR="{{.CloudAddr}}"

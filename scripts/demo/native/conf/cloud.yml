@@ -6,7 +6,7 @@ httplink:
   cert: "./certs/server.crt"
   key: "./certs/server.key"
 
-activeServer:
+initServer:
   port: ":9003"
   ca: "./certs/server_ca.crt"
   cert: "./certs/server.crt"

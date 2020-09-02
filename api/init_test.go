@@ -1,9 +1,12 @@
 package api
 
 import (
+	"encoding/hex"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -12,6 +15,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
+	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 func initInitAPI(t *testing.T) (*InitAPIImpl, *gin.Engine, *gomock.Controller) {
@@ -21,8 +25,8 @@ func initInitAPI(t *testing.T) (*InitAPIImpl, *gin.Engine, *gomock.Controller) {
 	mockIM := func(c *gin.Context) { common.NewContext(c).SetNamespace("default") }
 	v1 := router.Group("v1")
 	{
-		active := v1.Group("/active")
-		active.GET("/:resource", mockIM, common.WrapperRaw(api.GetResource))
+		init := v1.Group("/init")
+		init.GET("/:resource", mockIM, common.WrapperRaw(api.GetResource))
 	}
 	return api, router, mockCtl
 }
@@ -36,14 +40,51 @@ func TestNewInitAPI(t *testing.T) {
 func TestInitAPIImpl_GetResource(t *testing.T) {
 	api, router, mockCtl := initInitAPI(t)
 	defer mockCtl.Finish()
-	mActive := ms.NewMockInitService(mockCtl)
-	api.initService = mActive
+	mInit := ms.NewMockInitService(mockCtl)
+	api.initService = mInit
 
-	mActive.EXPECT().GetResource(common.ResourceSetup, "", "").Return([]byte("setup"), nil)
-
+	// ResourceSetup
+	mInit.EXPECT().GetResource(common.ResourceSetup, "", "", nil).Return([]byte("setup"), nil)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest(http.MethodGet, "/v1/active/" + common.ResourceSetup, nil)
+	req, _ := http.NewRequest(http.MethodGet, "/v1/init/"+common.ResourceSetup, nil)
 
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	// ResourceMetrics
+	mInit.EXPECT().GetResource(common.ResourceMetrics, "", "", nil).Return([]byte("metrics"), nil)
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest(http.MethodGet, "/v1/init/"+common.ResourceMetrics, nil)
+
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// ResourceLocalPathStorage
+	mInit.EXPECT().GetResource(common.ResourceLocalPathStorage, "", "", nil).Return([]byte("metrics"), nil)
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest(http.MethodGet, "/v1/init/"+common.ResourceLocalPathStorage, nil)
+
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestInitAPIImpl_CheckAndParseToken(t *testing.T) {
+	api, _, mockCtl := initInitAPI(t)
+	defer mockCtl.Finish()
+	info := map[string]interface{}{
+		service.InfoKind:      "node",
+		service.InfoName:      "n0",
+		service.InfoNamespace: "default",
+		service.InfoTimestamp: time.Now().Unix(),
+		service.InfoExpiry:    60 * 60 * 24 * 3650,
+	}
+	data, err := json.Marshal(info)
+	assert.NoError(t, err)
+	encode := hex.EncodeToString(data)
+	sign := "0123456789"
+	token := sign + encode
+
+	res, err := api.CheckAndParseToken(token, common.ResourceInitYaml)
+	assert.Equal(t, res, info)
+	assert.NoError(t, err)
 }

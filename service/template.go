@@ -30,7 +30,7 @@ const (
 	templateSetupShell   = "setup.sh"
 
 	propertySyncServerAddress   = "sync-server-address"
-	propertyActiveServerAddress = "active-server-address"
+	propertyInitServerAddress = "init-server-address"
 )
 
 //go:generate mockgen -destination=../mock/service/template.go -package=service github.com/baetyl/baetyl-cloud/v2/service TemplateService
@@ -117,13 +117,13 @@ func (s *TemplateServiceImpl) UnmarshalTemplate(filename string, params map[stri
 // business logic
 
 func (s *TemplateServiceImpl) GenSetupShell(token string) ([]byte, error) {
-	activeAddr, err := s.cache.GetProperty(propertyActiveServerAddress)
+	initAddr, err := s.cache.GetProperty(propertyInitServerAddress)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	params := map[string]interface{}{
 		"Token":     token,
-		"CloudAddr": activeAddr,
+		"CloudAddr": initAddr,
 	}
 	data, err := s.ParseTemplate(templateSetupShell, params)
 	if err != nil {

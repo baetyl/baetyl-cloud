@@ -1,11 +1,11 @@
 INSERT INTO `baetyl_property` (`name`, `value`) VALUES
 ('sync-server-address', 'https://host.docker.internal:30005'),
-('active-server-address', 'https://0.0.0.0:30003'),
+('init-server-address', 'https://0.0.0.0:30003'),
 ("baetyl-image", "baetyltechtest/baetyl:git-84127d1");
 
 INSERT INTO `baetyl_system_config` (`id`, `type`, `name`, `create_time`, `update_time`, `value`) VALUES
 (2, 'address', 'node-address',  now(),  now(), 'https://host.docker.internal:30005'),
-(3, 'address', 'active-address',  now(),  now(), 'https://0.0.0.0:30003');
+(3, 'address', 'init-address',  now(),  now(), 'https://0.0.0.0:30003');
 
 INSERT INTO `baetyl_system_config` (`id`, `type`, `name`, `create_time`, `update_time`, `value`) VALUES
 (14, 'baetyl-module', 'baetyl-init', now(), now(), 'hub.baidubce.com/baetyl/init:v2.0.0'),
