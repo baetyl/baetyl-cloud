@@ -116,7 +116,7 @@ func (a *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeN
 	default:
 		return nil, common.Error(
 			common.ErrRequestParamInvalid,
-			common.Field("error", "InfoKind error"))
+			common.Field("error", "invalid info kind"))
 	}
 }
 
