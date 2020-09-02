@@ -17,17 +17,17 @@ import (
 //go:generate mockgen -destination=../mock/service/init.go -package=service github.com/baetyl/baetyl-cloud/v2/service InitService
 
 const (
-	InfoKind      = "k"
-	InfoName      = "n"
-	InfoNamespace = "ns"
-	InfoTimestamp = "ts"
-	InfoExpiry    = "e"
-	ResourceMetrics = "metrics.yml"
+	InfoKind                 = "k"
+	InfoName                 = "n"
+	InfoNamespace            = "ns"
+	InfoTimestamp            = "ts"
+	InfoExpiry               = "e"
+	ResourceMetrics          = "metrics.yml"
 	ResourceLocalPathStorage = "local-path-storage.yml"
 )
 
 var (
-	ErrInvalidToken = fmt.Errorf("invalid token")
+	ErrInvalidToken        = fmt.Errorf("invalid token")
 	CmdExpirationInSeconds = int64(60 * 60)
 )
 
@@ -38,12 +38,12 @@ type InitService interface {
 }
 
 type InitServiceImpl struct {
-	cfg           *config.CloudConfig
-	AuthService   AuthService
-	NodeService   NodeService
-	SecretService SecretService
-	CacheService  CacheService
-	AppService    ApplicationService
+	cfg             *config.CloudConfig
+	AuthService     AuthService
+	NodeService     NodeService
+	SecretService   SecretService
+	CacheService    CacheService
+	AppService      ApplicationService
 	TemplateService TemplateService
 }
 
@@ -74,13 +74,13 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		return nil, err
 	}
 	return &InitServiceImpl{
-		cfg:			config,
-		AuthService:	authService,
-		NodeService:    nodeService,
-		TemplateService:templateService,
-		SecretService:  secretService,
-		CacheService:   cacheService,
-		AppService:     appService,
+		cfg:             config,
+		AuthService:     authService,
+		NodeService:     nodeService,
+		TemplateService: templateService,
+		SecretService:   secretService,
+		CacheService:    cacheService,
+		AppService:      appService,
 	}, nil
 }
 
