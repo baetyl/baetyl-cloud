@@ -48,16 +48,16 @@ func (mr *MockInitServiceMockRecorder) GenCmd(arg0, arg1, arg2 interface{}) *gom
 }
 
 // GetResource mocks base method
-func (m *MockInitService) GetResource(arg0, arg1, arg2 string) (interface{}, error) {
+func (m *MockInitService) GetResource(arg0, arg1, arg2 string, arg3 map[string]interface{}) (interface{}, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetResource", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetResource", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(interface{})
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetResource indicates an expected call of GetResource
-func (mr *MockInitServiceMockRecorder) GetResource(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockInitServiceMockRecorder) GetResource(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResource", reflect.TypeOf((*MockInitService)(nil).GetResource), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResource", reflect.TypeOf((*MockInitService)(nil).GetResource), arg0, arg1, arg2, arg3)
 }
