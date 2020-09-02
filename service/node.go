@@ -26,7 +26,7 @@ type NodeService interface {
 	UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error)
 	UpdateDesire(namespace, name string, desire specV1.Desire) (*models.Shadow, error)
 
-	GetDesire(ns, nodeName string) (*specV1.Desire, error)
+	GetDesire(namespace, name string) (*specV1.Desire, error)
 
 	UpdateNodeAppVersion(namespace string, app *specV1.Application) ([]string, error)
 	DeleteNodeAppVersion(namespace string, app *specV1.Application) ([]string, error)
@@ -224,14 +224,14 @@ func (n *nodeService) UpdateDesire(namespace, name string, desire specV1.Desire)
 	return n.shadow.UpdateDesire(shadow)
 }
 
-func (n *nodeService) GetDesire(ns, nodeName string) (*specV1.Desire, error) {
-	shadow, _ := n.shadow.Get(ns, nodeName)
+func (n *nodeService) GetDesire(namespace, name string) (*specV1.Desire, error) {
+	shadow, _ := n.shadow.Get(namespace, name)
 	if shadow == nil {
 		return nil, common.Error(
 			common.ErrResourceNotFound,
-			common.Field("type", "node"),
-			common.Field("name", nodeName),
-			common.Field("namespace", ns))
+			common.Field("type", "shadow"),
+			common.Field("name", name),
+			common.Field("namespace", namespace))
 	}
 	return &shadow.Desire, nil
 }

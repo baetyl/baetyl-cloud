@@ -14,7 +14,7 @@ import (
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 )
 
-func initActiveAPI(t *testing.T) (*InitAPIImpl, *gin.Engine, *gomock.Controller) {
+func initInitAPI(t *testing.T) (*InitAPIImpl, *gin.Engine, *gomock.Controller) {
 	api := &InitAPIImpl{}
 	router := gin.Default()
 	mockCtl := gomock.NewController(t)
@@ -27,14 +27,14 @@ func initActiveAPI(t *testing.T) (*InitAPIImpl, *gin.Engine, *gomock.Controller)
 	return api, router, mockCtl
 }
 
-func TestNewActiveAPI(t *testing.T) {
+func TestNewInitAPI(t *testing.T) {
 	// bad case
 	_, err := NewInitAPI(&config.CloudConfig{})
 	assert.Error(t, err)
 }
 
-func TestActiveAPIImpl_GetResource(t *testing.T) {
-	api, router, mockCtl := initActiveAPI(t)
+func TestInitAPIImpl_GetResource(t *testing.T) {
+	api, router, mockCtl := initInitAPI(t)
 	defer mockCtl.Finish()
 	mActive := ms.NewMockInitService(mockCtl)
 	api.initService = mActive

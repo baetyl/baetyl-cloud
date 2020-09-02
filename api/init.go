@@ -6,7 +6,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
-//go:generate mockgen -destination=../mock/api/active.go -package=api github.com/baetyl/baetyl-cloud/v2/api ActiveAPI
+//go:generate mockgen -destination=../mock/api/init.go -package=api github.com/baetyl/baetyl-cloud/v2/api InitAPI
 
 type InitAPI interface {
 	GetResource(c *common.Context) (interface{}, error)
@@ -22,7 +22,7 @@ func NewInitAPI(cfg *config.CloudConfig) (InitAPI, error) {
 		return nil, err
 	}
 	return &InitAPIImpl{
-		initService:    initService,
+		initService: initService,
 	}, nil
 }
 
@@ -40,4 +40,3 @@ func (api *InitAPIImpl) GetResource(c *common.Context) (interface{}, error) {
 	}
 	return api.initService.GetResource(resourceName, query.Node, query.Token)
 }
-
