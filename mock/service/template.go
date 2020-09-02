@@ -5,7 +5,6 @@
 package service
 
 import (
-	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -31,36 +30,6 @@ func NewMockTemplateService(ctrl *gomock.Controller) *MockTemplateService {
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockTemplateService) EXPECT() *MockTemplateServiceMockRecorder {
 	return m.recorder
-}
-
-// GenSetupShell mocks base method
-func (m *MockTemplateService) GenSetupShell(arg0 string) ([]byte, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenSetupShell", arg0)
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GenSetupShell indicates an expected call of GenSetupShell
-func (mr *MockTemplateServiceMockRecorder) GenSetupShell(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenSetupShell", reflect.TypeOf((*MockTemplateService)(nil).GenSetupShell), arg0)
-}
-
-// GenSystemApps mocks base method
-func (m *MockTemplateService) GenSystemApps(arg0, arg1 string, arg2 map[string]string) ([]*v1.Application, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenSystemApps", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]*v1.Application)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GenSystemApps indicates an expected call of GenSystemApps
-func (mr *MockTemplateServiceMockRecorder) GenSystemApps(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenSystemApps", reflect.TypeOf((*MockTemplateService)(nil).GenSystemApps), arg0, arg1, arg2)
 }
 
 // GetTemplate mocks base method

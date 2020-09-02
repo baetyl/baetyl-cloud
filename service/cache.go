@@ -1,6 +1,7 @@
 package service
 
 import (
+	"io/ioutil"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -14,6 +15,7 @@ import (
 type CacheService interface {
 	Get(key string, load func(string) (string, error)) (string, error)
 	GetProperty(key string) (string, error)
+	GetFileData(file string) (string, error)
 }
 
 type CacheServiceImpl struct {
@@ -49,4 +51,14 @@ func (s *CacheServiceImpl) Get(key string, load func(string) (string, error)) (s
 
 func (s *CacheServiceImpl) GetProperty(key string) (string, error) {
 	return s.Get(key, s.prop.GetPropertyValue)
+}
+
+func (s *CacheServiceImpl) GetFileData(file string) (string, error) {
+	return s.Get(file, func(key string) (string, error) {
+		data, err := ioutil.ReadFile(key)
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+		return string(data), nil
+	})
 }

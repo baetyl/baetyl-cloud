@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/baetyl/baetyl-cloud/v2/api"
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 )
 
@@ -69,4 +70,28 @@ func (s *InitServer) SetAPI(api api.InitAPI) {
 func (s *InitServer) Close() {
 	ctx, _ := context.WithTimeout(context.Background(), s.cfg.InitServer.ShutdownTime)
 	s.server.Shutdown(ctx)
+}
+
+// GetRoute get router
+func (s *InitServer) GetRoute() *gin.Engine {
+	return s.router
+}
+
+func (s *InitServer) InitRoute() {
+	s.router.NoRoute(NoRouteHandler)
+	s.router.NoMethod(NoMethodHandler)
+	s.router.GET("/health", Health)
+
+	s.router.Use(RequestIDHandler)
+	s.router.Use(LoggerHandler)
+	v1 := s.router.Group("v1")
+	{
+		// TODO: deprecated
+		active := v1.Group("/active")
+		active.GET("/:resource", common.WrapperRaw(s.api.GetResource))
+	}
+	{
+		initz := v1.Group("/init")
+		initz.GET("/:resource", common.WrapperRaw(s.api.GetResource))
+	}
 }

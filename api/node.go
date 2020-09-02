@@ -131,7 +131,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	apps, err := api.templateService.GenSystemApps(ns, name, nil)
+	apps, err := api.initService.GenApps(ns, name, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -356,4 +356,3 @@ func (api *API) NodeNumberCollector(namespace string) (map[string]int, error) {
 		plugin.QuotaNode: len(list.Items),
 	}, nil
 }
-

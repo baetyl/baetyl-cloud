@@ -9,19 +9,19 @@ import (
 )
 
 const (
-	AdminServerPort  = "ADMIN_PORT"
-	NodeServerPort   = "NODE_PORT"
-	InitServerPort = "INIT_PORT"
-	MisServerPort    = "MIS_PORT"
+	AdminServerPort = "ADMIN_PORT"
+	NodeServerPort  = "NODE_PORT"
+	InitServerPort  = "INIT_PORT"
+	MisServerPort   = "MIS_PORT"
 )
 
 // CloudConfig baetyl-cloud config
 type CloudConfig struct {
-	InitServer Server     `yaml:"initServer" json:"initServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
-	AdminServer  Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
-	MisServer    MisServer  `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
-	LogInfo      log.Config `yaml:"logger" json:"logger"`
-	Cache        struct {
+	InitServer  Server     `yaml:"initServer" json:"initServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
+	AdminServer Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
+	MisServer   MisServer  `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
+	LogInfo     log.Config `yaml:"logger" json:"logger"`
+	Cache       struct {
 		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
 	} `yaml:"cache" json:"cache"`
 	Template struct {

@@ -11,9 +11,9 @@ import (
 
 func TestSetPortFromEnv(t *testing.T) {
 	cfg := &CloudConfig{
-		InitServer: Server{Port: ":1"},
-		AdminServer:  Server{Port: ":2"},
-		MisServer:    MisServer{},
+		InitServer:  Server{Port: ":1"},
+		AdminServer: Server{Port: ":2"},
+		MisServer:   MisServer{},
 	}
 	cfg.MisServer.Port = ":4"
 	// no env
@@ -86,11 +86,11 @@ func TestDefaultValue(t *testing.T) {
 	// case 1
 	cfg = &CloudConfig{}
 	in := `
-initServer:
-  port: ":9995"
-
 adminServer:
   port: ":9993"
+
+initServer:
+  port: ":9995"
 
 misServer:
   port: ":9996"

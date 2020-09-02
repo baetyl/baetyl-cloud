@@ -7,7 +7,7 @@ type: "container"
 system: true
 services:
   - name: "baetyl-core"
-    image: "baetyltechtest/baetyl:git-122bf10"
+    image: "{{GetProperty \"baetyl-image\"}}"
     replica: 1
     args:
       - "core"
@@ -25,8 +25,6 @@ services:
         mountPath: "/var/lib/baetyl/hostpath"
       - name: "app-log-path"
         mountPath: "/var/lib/baetyl/logs"
-      - name: "native-app-run-path"
-        mountPath: "/var/lib/baetyl/run"
     ports:
       - containerPort: 80
         hostPort: 30050
@@ -35,7 +33,7 @@ volumes:
   - name: "core-conf"
     config:
       name: "{{.CoreConfName}}"
-      version: "{{.CoreConfVersion}}"
+      version: ""
   - name: "node-certs"
     secret:
       name: "{{.CoreCertName}}"
@@ -52,6 +50,3 @@ volumes:
   - name: "app-log-path"
     hostPath:
       path: "/var/lib/baetyl/logs"
-  - name: "native-app-run-path"
-    hostPath:
-      path: "/var/lib/baetyl/run"

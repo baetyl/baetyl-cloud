@@ -5,6 +5,7 @@
 package service
 
 import (
+	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -30,6 +31,21 @@ func NewMockInitService(ctrl *gomock.Controller) *MockInitService {
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockInitService) EXPECT() *MockInitServiceMockRecorder {
 	return m.recorder
+}
+
+// GenApps mocks base method
+func (m *MockInitService) GenApps(arg0, arg1 string, arg2 map[string]string) ([]*v1.Application, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenApps", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]*v1.Application)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GenApps indicates an expected call of GenApps
+func (mr *MockInitServiceMockRecorder) GenApps(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenApps", reflect.TypeOf((*MockInitService)(nil).GenApps), arg0, arg1, arg2)
 }
 
 // GenCmd mocks base method

@@ -20,7 +20,7 @@ type API struct {
 	authService        service.AuthService
 	propertyService    service.PropertyService
 	templateService    service.TemplateService
-	initService      service.InitService
+	initService        service.InitService
 }
 
 // NewAPI NewAPI

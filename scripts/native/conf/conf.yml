@@ -1,5 +1,9 @@
 # Change database's url with real account and address.
-# Go into scripts/demo/native fold in this project, then start baetyl-cloud by ../../../output/baetyl-cloud -c ./conf/cloud.yml
+# Go into scripts/demo/native fold in this project, then start baetyl-cloud by ../../../output/baetyl-cloud -c ./conf/conf.yml
+
+adminServer:
+  port: ":9004"
+
 httplink:
   port: ":9005"
   ca: "./certs/client_ca.crt"
@@ -12,15 +16,12 @@ initServer:
   cert: "./certs/server.crt"
   key: "./certs/server.key"
 
-adminServer:
-  port: ":9004"
-
 template:
   path: "./templates"
 
 kubernetes:
-  inCluster: false
-  configPath: "./conf/kubeconfig.yml"
+  outCluster: true
+#  configPath: "~/.kube/config"
 
 database:
   type: "mysql"
@@ -33,7 +34,6 @@ defaultpki:
 
 defaultauth:
   keyFile: "./conf/token.key"
-
 
 logger:
   level: debug

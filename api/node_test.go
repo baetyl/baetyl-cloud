@@ -419,7 +419,7 @@ func TestCreateNode(t *testing.T) {
 	mkNodeService.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	is.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
 	tp.EXPECT().GetTemplate(gomock.Any()).Return("{}", nil).AnyTimes()
-	tp.EXPECT().GenSystemApps(mNode.Namespace, gomock.Any(), nil).Return([]*specV1.Application{app1, app2}, nil).Times(2)
+	init.EXPECT().GenApps(mNode.Namespace, gomock.Any(), nil).Return([]*specV1.Application{app1, app2}, nil).Times(2)
 
 	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
 	mkNodeService.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil)
@@ -1062,4 +1062,3 @@ func TestAPI_NodeNumberCollector(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 1, res[plugin.QuotaNode])
 }
-

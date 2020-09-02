@@ -4,22 +4,23 @@ import (
 	"testing"
 	"time"
 
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/mock/service"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
-func TestAPI_GetResource(t *testing.T) {
-	as := InitServiceImpl{}
+func TestInitService_GetResource(t *testing.T) {
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
 	tp := service.NewMockTemplateService(mockCtl)
 	ns := service.NewMockNodeService(mockCtl)
 	aus := service.NewMockAuthService(mockCtl)
+	as := InitServiceImpl{}
 	as.TemplateService = tp
 	as.NodeService = ns
 	as.AuthService = aus
@@ -44,7 +45,7 @@ func TestAPI_GetResource(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestApi_getInitYaml(t *testing.T) {
+func TestInitService_getInitYaml(t *testing.T) {
 	info := map[string]interface{}{
 		InfoKind:      "123",
 		InfoName:      "n0",
@@ -62,7 +63,7 @@ func TestApi_getInitYaml(t *testing.T) {
 	assert.Nil(t, res)
 }
 
-func TestApi_getSysParams(t *testing.T) {
+func TestInitService_getInitYaml(t *testing.T) {
 	as := InitServiceImpl{}
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
@@ -154,4 +155,87 @@ func TestApi_getDesireAppInfo(t *testing.T) {
 	res, err := as.getDesireAppInfo("default", "node01")
 	assert.NoError(t, err)
 	assert.Equal(t, res, app1)
+}
+
+func TestInitService_GenApps(t *testing.T) {
+	mock := gomock.NewController(t)
+	defer mock.Finish()
+
+	sApp := service.NewMockApplicationService(mock)
+	sConfig := service.NewMockConfigService(mock)
+	sSecret := service.NewMockSecretService(mock)
+	sCache := service.NewMockCacheService(mock)
+	sTemplate := service.NewMockTemplateService(mock)
+	sNode := service.NewMockNodeService(mock)
+	sAuth := service.NewMockAuthService(mock)
+	sPKI := service.NewMockPKIService(mock)
+	is := InitServiceImpl{}
+	is.CacheService = sCache
+	is.TemplateService = sTemplate
+	is.NodeService = sNode
+	is.AuthService = sAuth
+	is.PKI = sPKI
+	is.AppCombinedService = &AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	cert := &models.PEMCredential{
+		CertPEM: []byte("CertPEM"),
+		KeyPEM:  []byte("KeyPEM"),
+		CertId:  "CertId",
+	}
+
+	config := &v1.Configuration{
+		Namespace: "ns",
+		Name:      "config",
+	}
+
+	secret := &v1.Secret{
+		Namespace: "ns",
+		Name:      "secret",
+	}
+
+	app := &v1.Application{
+		Namespace: "ns",
+		Name:      "app",
+	}
+
+	sCache.EXPECT().GetProperty("sync-server-address").Return("https://localhost:50001", nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-core-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-core-app.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-app.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sPKI.EXPECT().SignClientCertificate("ns.abc", gomock.Any()).Return(cert, nil)
+	sPKI.EXPECT().GetCA().Return([]byte("RootCA"), nil)
+	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(2)
+	sSecret.EXPECT().Create("ns", gomock.Any()).Return(secret, nil).Times(1)
+	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(2)
+
+	out, err := is.GenApps("ns", "abc", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(out))
+}
+
+func TestInitService_GetSetupShell(t *testing.T) {
+	mock := gomock.NewController(t)
+	defer mock.Finish()
+
+	sCache := service.NewMockCacheService(mock)
+	sTemplate := service.NewMockTemplateService(mock)
+	ns := service.NewMockNodeService(mock)
+	aus := service.NewMockAuthService(mock)
+	is := InitServiceImpl{}
+	is.CacheService = sCache
+	is.TemplateService = sTemplate
+	is.NodeService = ns
+	is.AuthService = aus
+
+	sCache.EXPECT().GetProperty("init-server-address").Return("https://localhost:50001", nil)
+	sTemplate.EXPECT().ParseTemplate("setup.sh", gomock.Any()).Return([]byte("setup"), nil)
+
+	actual, err := is.genSetupShell("xxx")
+	assert.NoError(t, err)
+	assert.Equal(t, "setup", string(actual))
 }

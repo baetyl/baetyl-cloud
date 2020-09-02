@@ -418,4 +418,3 @@ func toShadowMap(shadowList *models.ShadowList) map[string]*models.Shadow {
 
 	return shadowMap
 }
-
