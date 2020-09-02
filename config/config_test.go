@@ -86,7 +86,7 @@ func TestDefaultValue(t *testing.T) {
 	// case 1
 	cfg = &CloudConfig{}
 	in := `
-activeServer:
+initServer:
   port: ":9995"
 
 adminServer:
