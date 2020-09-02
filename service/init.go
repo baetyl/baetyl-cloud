@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/errors"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -234,30 +235,19 @@ func (a *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
 }
 
 func (a *InitServiceImpl) getSysParams(ns, nodeName string) (map[string]interface{}, error) {
-	imageConf, err := a.CacheService.GetProperty(string(common.BaetylInit))
+	imageConf, err := a.CacheService.GetProperty("baetyl-image")
 	if err != nil {
-		return nil, common.Error(
-			common.ErrResourceNotFound,
-			common.Field("type", "system config baetyl module"),
-			common.Field("name", common.BaetylInit),
-			common.Field("namespace", ns))
+		return nil, errors.Trace(err)
 	}
 	nodeAddress, err := a.CacheService.GetProperty(propertySyncServerAddress)
 	if err != nil {
-		return nil, common.Error(
-			common.ErrResourceNotFound,
-			common.Field("type", "system config address"),
-			common.Field("name", propertySyncServerAddress),
-			common.Field("namespace", ns))
+		return nil, errors.Trace(err)
 	}
 	activeAddress, err := a.CacheService.GetProperty(propertyActiveServerAddress)
 	if err != nil {
-		return nil, common.Error(
-			common.ErrResourceNotFound,
-			common.Field("type", "system config address"),
-			common.Field("name", propertyActiveServerAddress),
-			common.Field("namespace", ns))
+		return nil, errors.Trace(err)
 	}
+
 	return map[string]interface{}{
 		"Namespace":           ns,
 		"EdgeNamespace":       common.DefaultBaetylEdgeNamespace,
