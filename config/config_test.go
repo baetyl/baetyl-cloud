@@ -11,19 +11,19 @@ import (
 
 func TestSetPortFromEnv(t *testing.T) {
 	cfg := &CloudConfig{
-		ActiveServer: Server{Port: ":1"},
+		InitServer: Server{Port: ":1"},
 		AdminServer:  Server{Port: ":2"},
 		MisServer:    MisServer{},
 	}
 	cfg.MisServer.Port = ":4"
 	// no env
 	SetPortFromEnv(cfg)
-	assert.Equal(t, ":1", cfg.ActiveServer.Port)
+	assert.Equal(t, ":1", cfg.InitServer.Port)
 	assert.Equal(t, ":2", cfg.AdminServer.Port)
 	assert.Equal(t, ":4", cfg.MisServer.Port)
 
 	// env
-	err := os.Setenv(ActiveServerPort, "4")
+	err := os.Setenv(InitServerPort, "4")
 	assert.NoError(t, err)
 	err = os.Setenv(AdminServerPort, "5")
 	assert.NoError(t, err)
@@ -31,17 +31,17 @@ func TestSetPortFromEnv(t *testing.T) {
 	assert.NoError(t, err)
 
 	SetPortFromEnv(cfg)
-	assert.Equal(t, ":4", cfg.ActiveServer.Port)
+	assert.Equal(t, ":4", cfg.InitServer.Port)
 	assert.Equal(t, ":5", cfg.AdminServer.Port)
 	assert.Equal(t, ":7", cfg.MisServer.Port)
 }
 
 func TestDefaultValue(t *testing.T) {
 	expect := &CloudConfig{}
-	expect.ActiveServer.Port = ":9003"
-	expect.ActiveServer.WriteTimeout = time.Second * 30
-	expect.ActiveServer.ReadTimeout = time.Second * 30
-	expect.ActiveServer.ShutdownTime = time.Second * 3
+	expect.InitServer.Port = ":9003"
+	expect.InitServer.WriteTimeout = time.Second * 30
+	expect.InitServer.ReadTimeout = time.Second * 30
+	expect.InitServer.ShutdownTime = time.Second * 3
 
 	expect.AdminServer.Port = ":9004"
 	expect.AdminServer.WriteTimeout = time.Second * 30
@@ -86,7 +86,7 @@ func TestDefaultValue(t *testing.T) {
 	// case 1
 	cfg = &CloudConfig{}
 	in := `
-activeServer:
+initServer:
   port: ":9995"
 
 adminServer:
@@ -96,7 +96,7 @@ misServer:
   port: ":9996"
 `
 	expect.AdminServer.Port = ":9993"
-	expect.ActiveServer.Port = ":9995"
+	expect.InitServer.Port = ":9995"
 	expect.MisServer.Port = ":9996"
 	err = utils.UnmarshalYAML([]byte(in), cfg)
 	assert.NoError(t, err)

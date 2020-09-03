@@ -30,6 +30,7 @@ const (
 	ErrResourceConflict        = "ErrResourceConflict"
 	ErrResourceHasBeenUsed     = "ErrResourceHasBeenUsed"
 	ErrNodeNotReady            = "ErrNodeNotReady"
+	ErrInvalidToken            = "ErrInvalidToken"
 
 	// * volumes
 	ErrVolumeType = "ErrVolumeType"
