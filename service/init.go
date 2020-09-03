@@ -276,10 +276,10 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]inte
 		"Namespace":       ns,
 		"NodeName":        nodeName,
 		"CoreAppName":     appName,
-		"CoreCertName":    cert.Name,
-		"CoreCertVersion": cert.Version,
 		"CoreConfName":    conf.Name,
 		"CoreConfVersion": conf.Version,
+		"NodeCertName":    cert.Name,
+		"NodeCertVersion": cert.Version,
 	}
 	for k, v := range params {
 		appMap[k] = v

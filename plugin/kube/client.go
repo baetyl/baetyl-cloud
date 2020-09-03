@@ -26,6 +26,7 @@ func (c *client) Close() error {
 }
 
 func init() {
+	plugin.RegisterFactory("kube", New)
 	plugin.RegisterFactory("kubernetes", New)
 }
 
