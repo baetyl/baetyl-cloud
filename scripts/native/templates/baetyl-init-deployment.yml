@@ -41,6 +41,7 @@ provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
 
 {{- if .NodeCertPem}}
+
 ---
 apiVersion: v1
 kind: Secret
@@ -68,10 +69,9 @@ data:
       key: var/lib/baetyl/node/client.key
       cert: var/lib/baetyl/node/client.pem
     httplink:
-      address: {{GetProperty \"sync-server-address\"}}
+      address: {{GetProperty "sync-server-address"}}
       insecureSkipVerify: true
     logger:
-      filename: var/log/baetyl/init/service.log
       level: debug
 
 ---
@@ -88,7 +88,7 @@ spec:
   publishNotReadyAddresses: true
   selector:
     baetyl-service-name: baetyl-init
-    
+
 ---
 # baetyl-init deployment
 apiVersion: apps/v1
@@ -124,33 +124,36 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
           volumeMounts:
-            - name: object-download-path
-              mountPath: /var/lib/baetyl/objects
-            - name: core-store-path
-              mountPath: /var/lib/baetyl/store
-            - name: app-log-path
-              mountPath: var/log/baetyl
-            {{- if .NodeCertPem}}
-            - name: node-certs
-              mountPath: var/lib/baetyl/node
-            {{- end}}
             - name: init-conf
               mountPath: /etc/baetyl
+            - name: core-store-path
+              mountPath: /var/lib/baetyl/store
+            - name: object-download-path
+              mountPath: /var/lib/baetyl/object
+            - name: host-root-path
+              mountPath: /var/lib/baetyl/host
+            {{- if .NodeCertPem}}
+            - name: node-cert
+              mountPath: var/lib/baetyl/node
+            {{- end}}
       volumes:
-        - name: object-download-path
-          hostPath:
-            path: /var/lib/baetyl/hostpath
-        - name: core-store-path
-          hostPath:
-            path: /var/lib/baetyl/objects
-        - name: app-log-path
-          hostPath:
-            path: /var/lib/baetyl/logs
-        {{- if .NodeCertPem}}
-        - name: node-certs
-          secret:
-            secretName: {{.NodeCertName}}
-        {{- end}}
         - name: init-conf
           configMap:
             name: baetyl-init-config
+        - name: core-store-path
+          hostPath:
+            path: /var/lib/baetyl/store
+        - name: object-download-path
+          hostPath:
+            path: /var/lib/baetyl/object
+        - name: core-store-path
+          hostPath:
+            path: /var/lib/baetyl/store
+        - name: host-root-path
+          hostPath:
+            path: /var/lib/baetyl/host
+        {{- if .NodeCertPem}}
+        - name: node-cert
+          secret:
+            secretName: {{.NodeCertName}}
+        {{- end}}

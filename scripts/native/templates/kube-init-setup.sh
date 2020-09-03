@@ -4,7 +4,7 @@ set -e
 
 OS=$(uname)
 TOKEN="{{.Token}}"
-ADDR="{{GetProperty \"init-server-address\"}}"
+ADDR="{{GetProperty "init-server-address"}}"
 SUDO=sudo
 
 exec_cmd_nobail() {

@@ -2,8 +2,6 @@ package service
 
 import (
 	"encoding/base64"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -83,7 +81,9 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	if err != nil {
 		return nil, err
 	}
-	templateService, err := NewTemplateService(config, nil)
+	templateService, err := NewTemplateService(config, map[string]interface{}{
+		"GetProperty": cacheService.GetProperty,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func (s *InitServiceImpl) genInitYml(ns, nodeName, edgeKubeNodeName string) ([]b
 func (s *InitServiceImpl) getSyncCert(app *specV1.Application) (*specV1.Secret, error) {
 	certName := ""
 	for _, vol := range app.Volumes {
-		if vol.Name == "node-certs" {
+		if vol.Name == "node-cert" {
 			certName = vol.Secret.Name
 			break
 		}

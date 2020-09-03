@@ -18,7 +18,7 @@ data:
           - name: "core-conf"
             mountPath: "/etc/baetyl"
             readOnly: true
-          - name: "node-certs"
+          - name: "node-cert"
             mountPath: "/var/lib/baetyl/node"
           - name: "core-store-path"
             mountPath: "/var/lib/baetyl/store"
@@ -39,7 +39,7 @@ data:
         config:
           name: "{{.CoreConfName}}"
           version: "{{.CoreConfVersion}}"
-      - name: "node-certs"
+      - name: "node-cert"
         secret:
           name: "{{.CoreCertName}}"
           version: "{{.CoreCertVersion}}"

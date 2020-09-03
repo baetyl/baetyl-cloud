@@ -32,9 +32,6 @@ func NewTemplateService(cfg *config.CloudConfig, funcs map[string]interface{}) (
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	//if funcs == nil {
-	//	funcs = map[string]interface{}{}
-	//}
 	return &TemplateServiceImpl{
 		path:  cfg.Template.Path,
 		cache: sCache,
@@ -55,7 +52,7 @@ func (s *TemplateServiceImpl) ParseTemplate(filename string, params map[string]i
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	t, err := template.New(filename).Funcs(s.funcs).Parse(tl)
+	t, err := template.New(filename).Option("missingkey=error").Funcs(s.funcs).Parse(tl)
 	if err != nil {
 		return nil, common.Error(common.ErrTemplate, common.Field("error", err))
 	}

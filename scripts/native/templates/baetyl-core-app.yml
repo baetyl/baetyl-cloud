@@ -7,7 +7,7 @@ type: "container"
 system: true
 services:
   - name: "baetyl-core"
-    image: "{{GetProperty \"baetyl-image\"}}"
+    image: "{{GetProperty "baetyl-image"}}"
     replica: 1
     args:
       - "core"
@@ -15,16 +15,14 @@ services:
       - name: "core-conf"
         mountPath: "/etc/baetyl"
         readOnly: true
-      - name: "node-certs"
+      - name: "node-cert"
         mountPath: "/var/lib/baetyl/node"
       - name: "core-store-path"
         mountPath: "/var/lib/baetyl/store"
       - name: "object-download-path"
-        mountPath: "/var/lib/baetyl/objects"
+        mountPath: "/var/lib/baetyl/object"
       - name: "host-root-path"
-        mountPath: "/var/lib/baetyl/hostpath"
-      - name: "app-log-path"
-        mountPath: "/var/lib/baetyl/logs"
+        mountPath: "/var/lib/baetyl/host"
     ports:
       - containerPort: 80
         hostPort: 30050
@@ -33,20 +31,17 @@ volumes:
   - name: "core-conf"
     config:
       name: "{{.CoreConfName}}"
-      version: ""
-  - name: "node-certs"
+      version: "{{.CoreConfVersion}}"
+  - name: "node-cert"
     secret:
-      name: "{{.CoreCertName}}"
-      version: "{{.CoreCertVersion}}"
+      name: "{{.NodeCertName}}"
+      version: "{{.NodeCertVersion}}"
   - name: "core-store-path"
     hostPath:
       path: "/var/lib/baetyl/store"
   - name: "object-download-path"
     hostPath:
-      path: "/var/lib/baetyl/objects"
+      path: "/var/lib/baetyl/object"
   - name: "host-root-path"
     hostPath:
-      path: "/var/lib/baetyl/hostpath"
-  - name: "app-log-path"
-    hostPath:
-      path: "/var/lib/baetyl/logs"
+      path: "/var/lib/baetyl/host"

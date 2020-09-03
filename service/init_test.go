@@ -36,7 +36,7 @@ func TestInitService_GetResource(t *testing.T) {
 	assert.Equal(t, res, []byte("local-path-storage"))
 
 	// good case : setup
-	tp.EXPECT().GenSetupShell(gomock.Any()).Return([]byte("shell"), nil).Times(1)
+	tp.EXPECT().GetTemplate(templateSetupShell).Return("setup", nil).Times(1)
 	res, _ = as.GetResource(common.ResourceSetup, "", "", nil)
 	assert.Equal(t, res, []byte("shell"))
 
@@ -63,7 +63,7 @@ func TestInitService_getInitYaml(t *testing.T) {
 	assert.Nil(t, res)
 }
 
-func TestInitService_getInitYaml(t *testing.T) {
+func TestInitService_getSysParams(t *testing.T) {
 	as := InitServiceImpl{}
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
@@ -87,7 +87,7 @@ func TestInitService_getInitYaml(t *testing.T) {
 	assert.Equal(t, res, expect)
 }
 
-func TestApi_getSyncCert(t *testing.T) {
+func TestInitService_getSyncCert(t *testing.T) {
 	as := InitServiceImpl{}
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
@@ -105,7 +105,7 @@ func TestApi_getSyncCert(t *testing.T) {
 	assert.Nil(t, res)
 }
 
-func TestApi_GenCmd(t *testing.T) {
+func TestInitService_GenCmd(t *testing.T) {
 	as := InitServiceImpl{}
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
@@ -130,14 +130,16 @@ func TestApi_GenCmd(t *testing.T) {
 	assert.Equal(t, res, expect)
 }
 
-func TestApi_getDesireAppInfo(t *testing.T) {
+func TestInitService_getDesireAppInfo(t *testing.T) {
 	as := InitServiceImpl{}
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
 	node := service.NewMockNodeService(mockCtl)
 	app := service.NewMockApplicationService(mockCtl)
 	as.NodeService = node
-	as.AppService = app
+	as.AppCombinedService = &AppCombinedService{
+		App: app,
+	}
 
 	Desire := &specV1.Desire{
 		"sysapps": []specV1.AppInfo{{

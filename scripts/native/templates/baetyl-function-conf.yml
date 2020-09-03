@@ -1,4 +1,4 @@
-name: "{{.FunctionConfName}}}"
+name: "{{.FunctionConfName}}"
 namespace: "{{.Namespace}}"
 system: true
 labels:
