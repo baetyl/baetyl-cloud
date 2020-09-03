@@ -16,7 +16,7 @@ import (
 // GetRegistry get a Registry
 func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapRegistry(api.secretService.Get(ns, n, ""))
+	res, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 // ListRegistry list Registry
 func (api *API) ListRegistry(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	res, err := wrapRegistryList(api.secretService.List(ns, wrapRegistryListOption(api.parseListOptions(c))))
+	res, err := wrapRegistryList(api.Secret.List(ns, wrapRegistryListOption(api.parseListOptions(c))))
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
@@ -43,7 +43,7 @@ func (api *API) CreateRegistry(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, name := c.GetNamespace(), cfg.Name
-	sd, err := api.secretService.Get(ns, name, "")
+	sd, err := api.Secret.Get(ns, name, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
 			return nil, err
@@ -56,7 +56,7 @@ func (api *API) CreateRegistry(c *common.Context) (interface{}, error) {
 	if err = api.validateRegistryModel(cfg); err != nil {
 		return nil, err
 	}
-	res, err := wrapRegistry(api.secretService.Create(ns, cfg.ToSecret()))
+	res, err := wrapRegistry(api.Secret.Create(ns, cfg.ToSecret()))
 	return hidePwd(res), err
 }
 
@@ -67,7 +67,7 @@ func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	sd, err := wrapRegistry(api.secretService.Get(ns, n, ""))
+	sd, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
 	if err = api.validateRegistryModel(sd); err != nil {
 		return nil, err
 	}
-	res, err := wrapRegistry(api.secretService.Update(ns, sd.ToSecret()))
+	res, err := wrapRegistry(api.Secret.Update(ns, sd.ToSecret()))
 	if err != nil {
 		return nil, err
 	}
@@ -93,13 +93,13 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	sd, err := wrapRegistry(api.secretService.Get(ns, n, ""))
+	sd, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}
 	sd.UpdateTimestamp = time.Now()
 	sd.Password = cfg.Password
-	res, err := wrapRegistry(api.secretService.Update(ns, sd.ToSecret()))
+	res, err := wrapRegistry(api.Secret.Update(ns, sd.ToSecret()))
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 // DeleteRegistry delete the Registry
 func (api *API) DeleteRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	_, err := wrapRegistry(api.secretService.Get(ns, n, ""))
+	_, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (api *API) DeleteRegistry(c *common.Context) (interface{}, error) {
 // GetAppByRegistry list app
 func (api *API) GetAppByRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapRegistry(api.secretService.Get(ns, n, ""))
+	res, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}

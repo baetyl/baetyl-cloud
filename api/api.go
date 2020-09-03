@@ -7,23 +7,21 @@ import (
 
 // API baetyl api server
 type API struct {
-	namespaceService   service.NamespaceService
-	applicationService service.ApplicationService
-	nodeService        service.NodeService
-	configService      service.ConfigService
-	secretService      service.SecretService
-	indexService       service.IndexService
-	functionService    service.FunctionService
-	objectService      service.ObjectService
-	pkiService         service.PKIService
-	authService        service.AuthService
-	propertyService    service.PropertyService
-	initService        service.InitService
+	namespaceService service.NamespaceService
+	nodeService      service.NodeService
+	indexService     service.IndexService
+	functionService  service.FunctionService
+	objectService    service.ObjectService
+	pkiService       service.PKIService
+	authService      service.AuthService
+	propertyService  service.PropertyService
+	initService      service.InitService
+	*service.AppCombinedService
 }
 
 // NewAPI NewAPI
 func NewAPI(config *config.CloudConfig) (*API, error) {
-	applicationService, err := service.NewApplicationService(config)
+	acs, err := service.NewAppCombinedService(config)
 	if err != nil {
 		return nil, err
 	}
@@ -31,15 +29,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
-	configService, err := service.NewConfigService(config)
-	if err != nil {
-		return nil, err
-	}
 	namespaceService, err := service.NewNamespaceService(config)
-	if err != nil {
-		return nil, err
-	}
-	secretService, err := service.NewSecretService(config)
 	if err != nil {
 		return nil, err
 	}
@@ -72,11 +62,8 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		return nil, err
 	}
 	return &API{
-		applicationService: applicationService,
 		nodeService:        nodeService,
-		configService:      configService,
 		namespaceService:   namespaceService,
-		secretService:      secretService,
 		indexService:       indexService,
 		functionService:    functionService,
 		objectService:      objectService,
@@ -84,5 +71,6 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		authService:        authService,
 		propertyService:    propertyService,
 		initService:        initService,
+		AppCombinedService: acs,
 	}, nil
 }

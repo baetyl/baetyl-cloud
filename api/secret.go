@@ -16,7 +16,7 @@ import (
 // GetSecret get a secret
 func (api *API) GetSecret(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapSecret(api.secretService.Get(ns, n, ""))
+	res, err := wrapSecret(api.Secret.Get(ns, n, ""))
 	if res == nil {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "secret"), common.Field("name", n))
 	}
@@ -26,7 +26,7 @@ func (api *API) GetSecret(c *common.Context) (interface{}, error) {
 // ListSecret list secret
 func (api *API) ListSecret(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	res, err := wrapSecretList(api.secretService.List(ns, api.parseListOptionsAppendSystemLabel(c)))
+	res, err := wrapSecretList(api.Secret.List(ns, api.parseListOptionsAppendSystemLabel(c)))
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
@@ -40,7 +40,7 @@ func (api *API) CreateSecret(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, name := c.GetNamespace(), cfg.Name
-	sd, err := api.secretService.Get(ns, name, "")
+	sd, err := api.Secret.Get(ns, name, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
 			return nil, err
@@ -49,7 +49,7 @@ func (api *API) CreateSecret(c *common.Context) (interface{}, error) {
 	if sd != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
-	return wrapSecret(api.secretService.Create(ns, cfg.ToSecret()))
+	return wrapSecret(api.Secret.Create(ns, cfg.ToSecret()))
 }
 
 // UpdateSecret update the secret
@@ -59,7 +59,7 @@ func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	sd, err := wrapSecret(api.secretService.Get(ns, n, ""))
+	sd, err := wrapSecret(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
 	}
 	cfg.Version = sd.Version
 	cfg.UpdateTimestamp = time.Now()
-	res, err := wrapSecret(api.secretService.Update(ns, cfg.ToSecret()))
+	res, err := wrapSecret(api.Secret.Update(ns, cfg.ToSecret()))
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (api *API) DeleteSecret(c *common.Context) (interface{}, error) {
 // GetAppBySecret list app
 func (api *API) GetAppBySecret(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapSecret(api.secretService.Get(ns, n, ""))
+	res, err := wrapSecret(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (api *API) deleteSecret(namespace, secret, secretType string) (interface{},
 	if len(appNames) > 0 {
 		return nil, common.Error(common.ErrResourceHasBeenUsed, common.Field("type", secretType), common.Field("name", secret))
 	}
-	return nil, api.secretService.Delete(namespace, secret)
+	return nil, api.Secret.Delete(namespace, secret)
 }
 
 func (api *API) updateAppSecret(namespace string, secret *specV1.Secret) error {
@@ -149,7 +149,7 @@ func (api *API) updateAppSecret(namespace string, secret *specV1.Secret) error {
 		return err
 	}
 	for _, appName := range appNames {
-		app, err := api.applicationService.Get(namespace, appName, "")
+		app, err := api.App.Get(namespace, appName, "")
 		if err != nil {
 			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 				continue
@@ -159,7 +159,7 @@ func (api *API) updateAppSecret(namespace string, secret *specV1.Secret) error {
 		if !needUpdateAppSecret(secret, app) {
 			continue
 		}
-		app, err = api.applicationService.Update(namespace, app)
+		app, err = api.App.Update(namespace, app)
 		if err != nil {
 			return err
 		}
@@ -207,7 +207,7 @@ func (api *API) listAppByNames(namespace string, appNames []string) (*models.App
 		Items: []models.AppItem{},
 	}
 	for _, appName := range appNames {
-		app, err := api.applicationService.Get(namespace, appName, "")
+		app, err := api.App.Get(namespace, appName, "")
 		if err != nil {
 			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 				continue

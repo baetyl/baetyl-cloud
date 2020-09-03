@@ -114,7 +114,7 @@ func (s *AdminServer) InitRoute() {
 		nodes.GET("/:name/stats", common.Wrapper(s.api.GetNodeStats))
 		nodes.PUT("/:name", common.Wrapper(s.api.UpdateNode))
 		nodes.DELETE("/:name", common.Wrapper(s.api.DeleteNode))
-		nodes.POST("", s.nodeQuotaHandler, common.Wrapper(s.api.CreateNode))
+		nodes.POST("", s.NodeQuotaHandler, common.Wrapper(s.api.CreateNode))
 		nodes.GET("", common.Wrapper(s.api.ListNode))
 		nodes.GET("/:name/deploys", common.Wrapper(s.api.GetNodeDeployHistory))
 		nodes.GET("/:name/init", common.Wrapper(s.api.GenInitCmdFromNode))
@@ -171,12 +171,11 @@ func (s *AdminServer) authHandler(c *gin.Context) {
 	}
 }
 
-// access manager handler
-func (s *AdminServer) nodeQuotaHandler(c *gin.Context) {
+func (s *AdminServer) NodeQuotaHandler(c *gin.Context) {
 	cc := common.NewContext(c)
 	namespace := cc.GetNamespace()
 	if err := s.license.CheckQuota(namespace, s.api.NodeNumberCollector); err != nil {
-		log.L().Error("iotcore checkquota failed",
+		log.L().Error("quota out of limit",
 			log.Any(cc.GetTrace()),
 			log.Any("namespace", cc.GetNamespace()),
 			log.Error(err))

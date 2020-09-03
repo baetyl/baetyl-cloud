@@ -207,7 +207,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	sysAppInfos := node.Desire.AppInfos(true)
 	for _, ai := range sysAppInfos {
 		// Clean APP
-		app, err := api.applicationService.Get(ns, ai.Name, "")
+		app, err := api.App.Get(ns, ai.Name, "")
 		if err != nil {
 			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 				continue
@@ -221,7 +221,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 			for _, v := range app.Volumes {
 				// Clean Config
 				if v.Config != nil {
-					if err := api.configService.Delete(ns, v.Config.Name); err != nil {
+					if err := api.Config.Delete(ns, v.Config.Name); err != nil {
 						common.LogDirtyData(err,
 							log.Any("type", common.Config),
 							log.Any("namespace", ns),
@@ -230,7 +230,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 				}
 				// Clean Secret
 				if v.Secret != nil {
-					secret, err := api.secretService.Get(ns, v.Secret.Name, "")
+					secret, err := api.Secret.Get(ns, v.Secret.Name, "")
 					if err != nil {
 						common.LogDirtyData(err,
 							log.Any("type", common.Secret),
@@ -251,7 +251,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 							log.L().Warn("failed to get "+common.AnnotationPkiCertID+" of certificate secret", log.Any(common.KeyContextNamespace, ns), log.Any("name", v.Secret.Name))
 						}
 					}
-					if err := api.secretService.Delete(ns, v.Secret.Name); err != nil {
+					if err := api.Secret.Delete(ns, v.Secret.Name); err != nil {
 						common.LogDirtyData(err,
 							log.Any("type", common.Secret),
 							log.Any(common.KeyContextNamespace, ns),
@@ -260,7 +260,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 				}
 			}
 		}
-		if err := api.applicationService.Delete(ns, ai.Name, ai.Version); err != nil {
+		if err := api.App.Delete(ns, ai.Name, ai.Version); err != nil {
 			common.LogDirtyData(err,
 				log.Any("type", common.Application),
 				log.Any(common.KeyContextNamespace, ns),

@@ -25,7 +25,7 @@ const (
 // GetApplication get a application
 func (api *API) GetApplication(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	app, err := api.applicationService.Get(ns, n, "")
+	app, err := api.App.Get(ns, n, "")
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (api *API) GetApplication(c *common.Context) (interface{}, error) {
 // ListApplication list application
 func (api *API) ListApplication(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	apps, err := api.applicationService.List(ns, api.parseListOptionsAppendSystemLabel(c))
+	apps, err := api.App.List(ns, api.parseListOptionsAppendSystemLabel(c))
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
@@ -57,7 +57,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 	}
 
 	// TODO: remove get method, return error inside service instead
-	oldApp, err := api.applicationService.Get(ns, name, "")
+	oldApp, err := api.App.Get(ns, name, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
 			return nil, err
@@ -86,7 +86,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	app, err = api.applicationService.CreateWithBase(ns, app, baseApp)
+	app, err = api.App.CreateWithBase(ns, app, baseApp)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	oldApp, err := api.applicationService.Get(ns, name, "")
+	oldApp, err := api.App.Get(ns, name, "")
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	app, err = api.applicationService.Update(ns, app)
+	app, err = api.App.Update(ns, app)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 // DeleteApplication delete the application
 func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 	ns, name := c.GetNamespace(), c.GetNameFromParam()
-	app, err := api.applicationService.Get(ns, name, "")
+	app, err := api.App.Get(ns, name, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 			return nil, nil
@@ -168,7 +168,7 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrAppReferencedByNode, common.Field("name", name))
 	}
 
-	if err := api.applicationService.Delete(ns, c.GetNameFromParam(), ""); err != nil {
+	if err := api.App.Delete(ns, c.GetNameFromParam(), ""); err != nil {
 		return nil, err
 	}
 
@@ -219,7 +219,7 @@ func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, er
 func (api *API) getBaseAppIfSet(c *common.Context) (*specV1.Application, error) {
 	if base, ok := c.GetQuery("base"); ok {
 		namespace := c.GetNamespace()
-		baseApp, err := api.applicationService.Get(namespace, base, "")
+		baseApp, err := api.App.Get(namespace, base, "")
 		if err != nil {
 			return nil, err
 		}
@@ -290,7 +290,7 @@ func (api *API) toApplicationView(app *specV1.Application) (*models.ApplicationV
 			return nil, err
 		}
 
-		config, err := api.configService.Get(appView.Namespace, generatedConfigName, "")
+		config, err := api.Config.Get(appView.Namespace, generatedConfigName, "")
 		if err != nil {
 			return nil, err
 		}
@@ -378,7 +378,7 @@ func (api *API) translateSecretsToRegistries(appView *models.ApplicationView) er
 	volumes := make([]specV1.Volume, 0)
 	for _, volume := range appView.Volumes {
 		if volume.Secret != nil {
-			secret, err := api.secretService.Get(appView.Namespace, volume.Secret.Name, "")
+			secret, err := api.Secret.Get(appView.Namespace, volume.Secret.Name, "")
 			if err != nil {
 				if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 					continue
@@ -407,13 +407,13 @@ func (api *API) translateSecretsToRegistries(appView *models.ApplicationView) er
 func (api *API) validApplication(namesapce string, app *models.ApplicationView) error {
 	for _, v := range app.Volumes {
 		if v.VolumeSource.Config != nil {
-			_, err := api.configService.Get(namesapce, v.VolumeSource.Config.Name, "")
+			_, err := api.Config.Get(namesapce, v.VolumeSource.Config.Name, "")
 			if err != nil {
 				return err
 			}
 		}
 		if v.VolumeSource.Secret != nil {
-			_, err := api.secretService.Get(namesapce, v.VolumeSource.Secret.Name, "")
+			_, err := api.Secret.Get(namesapce, v.VolumeSource.Secret.Name, "")
 			if err != nil {
 				return err
 			}
@@ -421,7 +421,7 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 	}
 
 	for _, r := range app.Registries {
-		_, err := api.secretService.Get(namesapce, r.Name, "")
+		_, err := api.Secret.Get(namesapce, r.Name, "")
 		if err != nil {
 			return err
 		}
@@ -446,7 +446,7 @@ func (api *API) isAppCanDelete(namesapce, name string) (bool, error) {
 
 func (api *API) updateGeneratedConfigsOfFunctionApp(namespace string, configs []specV1.Configuration) error {
 	for _, config := range configs {
-		_, err := api.configService.Upsert(namespace, &config)
+		_, err := api.Config.Upsert(namespace, &config)
 		if err != nil {
 			return err
 		}
@@ -464,7 +464,7 @@ func (api *API) cleanGeneratedConfigsOfFunctionApp(configs []specV1.Configuratio
 		if v.VolumeSource.Config != nil {
 			if _, ok := m[v.VolumeSource.Config.Name]; !ok &&
 				strings.HasPrefix(v.VolumeSource.Config.Name, FunctionConfigPrefix) {
-				err := api.configService.Delete(oldApp.Namespace, v.VolumeSource.Config.Name)
+				err := api.Config.Delete(oldApp.Namespace, v.VolumeSource.Config.Name)
 				if err != nil {
 					common.LogDirtyData(err,
 						log.Any("type", common.Config),

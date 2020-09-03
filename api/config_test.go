@@ -18,6 +18,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 // TODO: optimize this layer, general abstraction
@@ -48,16 +49,23 @@ func initConfigAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 func TestGetConfig(t *testing.T) {
 	api, router, mockCtl := initConfigAPI(t)
 	defer mockCtl.Finish()
-	mkConfigService := ms.NewMockConfigService(mockCtl)
-	api.configService = mkConfigService
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
 
 	mConf := &specV1.Configuration{
 		Namespace: "default",
 		Name:      "abc",
 	}
 
-	mkConfigService.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(mConf, nil)
-	mkConfigService.EXPECT().Get(mConf.Namespace, "cba", "").Return(nil, fmt.Errorf("error"))
+	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(mConf, nil)
+	sConfig.EXPECT().Get(mConf.Namespace, "cba", "").Return(nil, fmt.Errorf("error"))
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/configs/abc", nil)
@@ -75,12 +83,19 @@ func TestGetConfig(t *testing.T) {
 func TestListConfig(t *testing.T) {
 	api, router, mockCtl := initConfigAPI(t)
 	defer mockCtl.Finish()
-	mkConfigService := ms.NewMockConfigService(mockCtl)
-	api.configService = mkConfigService
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
 
 	mClist := &models.ConfigurationList{}
 
-	mkConfigService.EXPECT().List("default", &models.ListOptions{
+	sConfig.EXPECT().List("default", &models.ListOptions{
 		LabelSelector: "!" + common.LabelSystem,
 	}).Return(mClist, nil)
 
@@ -90,7 +105,7 @@ func TestListConfig(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mkConfigService.EXPECT().List("default", &models.ListOptions{
+	sConfig.EXPECT().List("default", &models.ListOptions{
 		LabelSelector: "!" + common.LabelSystem,
 	}).Return(nil, fmt.Errorf("error"))
 
@@ -104,8 +119,15 @@ func TestListConfig(t *testing.T) {
 func TestCreateConfig(t *testing.T) {
 	api, router, mockCtl := initConfigAPI(t)
 	defer mockCtl.Finish()
-	mkConfigService := ms.NewMockConfigService(mockCtl)
-	api.configService = mkConfigService
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
 
 	mConf := &models.ConfigurationView{
 		Name:      "abc",
@@ -176,7 +198,7 @@ func TestCreateConfig(t *testing.T) {
 	}
 
 	res := &specV1.Configuration{}
-	mkConfigService.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(res, nil).Times(1)
 
 	// 400: configuration already exist
 	w = httptest.NewRecorder()
@@ -222,8 +244,8 @@ func TestCreateConfig(t *testing.T) {
 		Version:           "12",
 		System:            false,
 	}
-	mkConfigService.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
-	mkConfigService.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
+	sConfig.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf)
@@ -280,8 +302,8 @@ func TestCreateConfig(t *testing.T) {
 		Version:           "12",
 		System:            false,
 	}
-	mkConfigService.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
-	mkConfigService.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
+	sConfig.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf)
@@ -318,8 +340,8 @@ func TestCreateConfig(t *testing.T) {
 		},
 	}
 
-	mkConfigService.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
-	mkConfigService.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
+	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
+	sConfig.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf)
@@ -331,11 +353,18 @@ func TestCreateConfig(t *testing.T) {
 func TestUpdateConfig(t *testing.T) {
 	api, router, mockCtl := initConfigAPI(t)
 	defer mockCtl.Finish()
-	mkConfigService, mkAppService := ms.NewMockConfigService(mockCtl), ms.NewMockApplicationService(mockCtl)
-	mkNodeService, mkIndexService := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
 
-	api.configService, api.nodeService = mkConfigService, mkNodeService
-	api.applicationService, api.indexService = mkAppService, mkIndexService
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.nodeService, api.indexService = sNode, sIndex
 
 	namespace, name := "default", "abc"
 	mConf := &models.ConfigurationView{
@@ -372,7 +401,7 @@ func TestUpdateConfig(t *testing.T) {
 		},
 	}
 
-	mkConfigService.EXPECT().Get(namespace, name, gomock.Any()).Return(nil, errors.New("err")).Times(1)
+	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(nil, errors.New("err")).Times(1)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(mConf)
 	req, _ := http.NewRequest(http.MethodPut, "/v1/configs/"+name, bytes.NewReader(body))
@@ -390,7 +419,7 @@ func TestUpdateConfig(t *testing.T) {
 		},
 	}
 	// 200: config is unchanged
-	mkConfigService.EXPECT().Get(namespace, name, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res, nil).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/configs/"+name, bytes.NewReader(body))
@@ -417,8 +446,8 @@ func TestUpdateConfig(t *testing.T) {
 	}
 
 	res2 := &specV1.Configuration{}
-	mkConfigService.EXPECT().Get(namespace, name, gomock.Any()).Return(res2, nil).Times(1)
-	mkConfigService.EXPECT().Update(namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
+	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res2, nil).Times(1)
+	sConfig.EXPECT().Update(namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf2)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/configs/abc", bytes.NewReader(body))
@@ -436,9 +465,9 @@ func TestUpdateConfig(t *testing.T) {
 		},
 		Description: "diff",
 	}
-	mkConfigService.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
-	mkConfigService.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
-	mkIndexService.EXPECT().ListAppIndexByConfig(mConf2.Namespace, "abc").Return(nil, errors.New("err")).Times(1)
+	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
+	sConfig.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
+	sIndex.EXPECT().ListAppIndexByConfig(mConf2.Namespace, "abc").Return(nil, errors.New("err")).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf2)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/configs/"+name, bytes.NewReader(body))
@@ -446,9 +475,9 @@ func TestUpdateConfig(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	appNames := make([]string, 0)
-	mkConfigService.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
-	mkConfigService.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
-	mkIndexService.EXPECT().ListAppIndexByConfig(namespace, name).Return(appNames, nil).Times(1)
+	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
+	sConfig.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
+	sIndex.EXPECT().ListAppIndexByConfig(namespace, name).Return(appNames, nil).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf2)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/configs/"+name, bytes.NewReader(body))
@@ -456,10 +485,10 @@ func TestUpdateConfig(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	appNames = []string{"app01", "app02", "app03"}
-	mkConfigService.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
-	mkConfigService.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
-	mkIndexService.EXPECT().ListAppIndexByConfig(namespace, name).Return(appNames, nil).Times(1)
-	mkAppService.EXPECT().Get(namespace, "app01", "").Return(nil, errors.New("err")).Times(1)
+	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
+	sConfig.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
+	sIndex.EXPECT().ListAppIndexByConfig(namespace, name).Return(appNames, nil).Times(1)
+	sApp.EXPECT().Get(namespace, "app01", "").Return(nil, errors.New("err")).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf2)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/configs/"+name, bytes.NewReader(body))
@@ -507,12 +536,12 @@ func TestUpdateConfig(t *testing.T) {
 		},
 	}
 
-	mkConfigService.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
-	mkConfigService.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
-	mkIndexService.EXPECT().ListAppIndexByConfig(namespace, name).Return(appNames, nil).Times(1)
-	mkAppService.EXPECT().Get(namespace, appNames[0], "").Return(apps[0], nil).Times(1)
-	mkAppService.EXPECT().Get(namespace, appNames[1], "").Return(apps[1], nil).Times(1)
-	mkAppService.EXPECT().Get(namespace, appNames[2], "").Return(apps[2], nil).Times(1)
+	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
+	sConfig.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
+	sIndex.EXPECT().ListAppIndexByConfig(namespace, name).Return(appNames, nil).Times(1)
+	sApp.EXPECT().Get(namespace, appNames[0], "").Return(apps[0], nil).Times(1)
+	sApp.EXPECT().Get(namespace, appNames[1], "").Return(apps[1], nil).Times(1)
+	sApp.EXPECT().Get(namespace, appNames[2], "").Return(apps[2], nil).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf2)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/configs/"+name, bytes.NewReader(body))
@@ -523,9 +552,18 @@ func TestUpdateConfig(t *testing.T) {
 func TestDeleteConfig(t *testing.T) {
 	api, router, mockCtl := initConfigAPI(t)
 	defer mockCtl.Finish()
-	mkConfigService, mkIndexService := ms.NewMockConfigService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.configService = mkConfigService
-	api.indexService = mkIndexService
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sIndex := ms.NewMockIndexService(mockCtl)
+	api.indexService = sIndex
 
 	mConf := &specV1.Configuration{
 		Namespace: "default",
@@ -533,22 +571,22 @@ func TestDeleteConfig(t *testing.T) {
 	}
 
 	// 404
-	mkConfigService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
+	sConfig.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/configs/abc", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	// 500
-	mkConfigService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	sConfig.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/configs/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	// 500
-	mkConfigService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConf, nil)
-	mkIndexService.EXPECT().ListAppIndexByConfig(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	sConfig.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConf, nil)
+	sIndex.EXPECT().ListAppIndexByConfig(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/configs/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -557,24 +595,24 @@ func TestDeleteConfig(t *testing.T) {
 	appNames := []string{"app01"}
 
 	// 403
-	mkConfigService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConf, nil)
-	mkIndexService.EXPECT().ListAppIndexByConfig(gomock.Any(), gomock.Any()).Return(appNames, nil)
+	sConfig.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConf, nil)
+	sIndex.EXPECT().ListAppIndexByConfig(gomock.Any(), gomock.Any()).Return(appNames, nil)
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/configs/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusForbidden, w.Code)
 
 	// 200
-	mkConfigService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConf, nil)
-	mkIndexService.EXPECT().ListAppIndexByConfig(gomock.Any(), gomock.Any()).Return(nil, nil)
-	mkConfigService.EXPECT().Delete(mConf.Namespace, mConf.Name).Return(nil)
+	sConfig.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConf, nil)
+	sIndex.EXPECT().ListAppIndexByConfig(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sConfig.EXPECT().Delete(mConf.Namespace, mConf.Name).Return(nil)
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/configs/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// 200 non-existent config
-	mkConfigService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, common.Error(common.ErrResourceNotFound))
+	sConfig.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, common.Error(common.ErrResourceNotFound))
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/configs/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -585,18 +623,25 @@ func TestDeleteConfig(t *testing.T) {
 func TestGetAppByConfig(t *testing.T) {
 	api, router, mockCtl := initConfigAPI(t)
 	defer mockCtl.Finish()
-	mkConfigService, mkAppService := ms.NewMockConfigService(mockCtl), ms.NewMockApplicationService(mockCtl)
-	mkNodeService, mkIndexService := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
 
-	api.configService, api.nodeService = mkConfigService, mkNodeService
-	api.applicationService, api.indexService = mkAppService, mkIndexService
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.nodeService, api.indexService = sNode, sIndex
 
 	mConf := &specV1.Configuration{
 		Namespace: "default",
 		Name:      "abc",
 	}
 	appNames := []string{"app01", "app02", "app03"}
-	mkConfigService.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(mConf, nil)
+	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(mConf, nil)
 	apps := []*specV1.Application{
 		{
 			Namespace: "default",
@@ -612,10 +657,10 @@ func TestGetAppByConfig(t *testing.T) {
 		},
 	}
 
-	mkIndexService.EXPECT().ListAppIndexByConfig(mConf.Namespace, mConf.Name).Return(appNames, nil).Times(1)
-	mkAppService.EXPECT().Get(mConf.Namespace, appNames[0], "").Return(apps[0], nil)
-	mkAppService.EXPECT().Get(mConf.Namespace, appNames[1], "").Return(apps[1], nil)
-	mkAppService.EXPECT().Get(mConf.Namespace, appNames[2], "").Return(apps[2], nil)
+	sIndex.EXPECT().ListAppIndexByConfig(mConf.Namespace, mConf.Name).Return(appNames, nil).Times(1)
+	sApp.EXPECT().Get(mConf.Namespace, appNames[0], "").Return(apps[0], nil)
+	sApp.EXPECT().Get(mConf.Namespace, appNames[1], "").Return(apps[1], nil)
+	sApp.EXPECT().Get(mConf.Namespace, appNames[2], "").Return(apps[2], nil)
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/configs/abc/apps", nil)
@@ -624,14 +669,14 @@ func TestGetAppByConfig(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// 404
-	mkConfigService.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(nil, nil)
+	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(nil, nil)
 	req, _ = http.NewRequest(http.MethodGet, "/v1/configs/abc/apps", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	// 500
-	mkConfigService.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(nil, fmt.Errorf("error"))
+	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(nil, fmt.Errorf("error"))
 	req, _ = http.NewRequest(http.MethodGet, "/v1/configs/abc/apps", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)

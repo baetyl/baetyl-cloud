@@ -3,12 +3,13 @@ package service
 import (
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 )
 
 type MockServices struct {
