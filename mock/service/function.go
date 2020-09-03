@@ -78,6 +78,21 @@ func (mr *MockFunctionServiceMockRecorder) ListFunctionVersions(arg0, arg1, arg2
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListFunctionVersions", reflect.TypeOf((*MockFunctionService)(nil).ListFunctionVersions), arg0, arg1, arg2)
 }
 
+// ListRuntimes mocks base method
+func (m *MockFunctionService) ListRuntimes() (map[string]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListRuntimes")
+	ret0, _ := ret[0].(map[string]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListRuntimes indicates an expected call of ListRuntimes
+func (mr *MockFunctionServiceMockRecorder) ListRuntimes() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRuntimes", reflect.TypeOf((*MockFunctionService)(nil).ListRuntimes))
+}
+
 // ListSources mocks base method
 func (m *MockFunctionService) ListSources() []models.FunctionSource {
 	m.ctrl.T.Helper()

@@ -155,11 +155,11 @@ const (
 	DefaultBaetylEdgeNamespace       = "baetyl-edge"
 	DefaultBaetylEdgeSystemNamespace = "baetyl-edge-system"
 
-	BaetylModule                            = "baetyl-module"
-	BaetylFunctionRuntime                   = "baetyl-function-runtime"
-	BaetylCore            SystemApplication = "baetyl-core"
-	BaetylBroker          SystemApplication = "baetyl-broker"
-	BaetylFunction        SystemApplication = "baetyl-function"
+	//BaetylModule                            = "baetyl-module"
+	//BaetylFunctionRuntime                   = "baetyl-function-runtime"
+	//BaetylCore            SystemApplication = "baetyl-core"
+	//BaetylBroker          SystemApplication = "baetyl-broker"
+	//BaetylFunction        SystemApplication = "baetyl-function"
 
 	Sync     CertType = "sync"
 	Internal CertType = "internal"

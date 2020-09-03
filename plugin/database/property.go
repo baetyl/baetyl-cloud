@@ -53,7 +53,7 @@ func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error)
 		WHERE name LIKE ? 
 		LIMIT ?,?
 	`
-	cs := []models.Property{}
+	var cs []models.Property
 	if err := d.query(nil, selectSQL, &cs, page.Name, (page.PageNo-1)*page.PageSize, page.PageSize); err != nil {
 		return nil, err
 	}

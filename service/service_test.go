@@ -161,12 +161,14 @@ func InitEmptyMockEnvironment(t *testing.T) *MockServices {
 	for _, v := range conf.Plugin.Functions {
 		plugin.RegisterFactory(v, mockFunction(mockFunctionPlugin))
 	}
-
+	mProperty := mockPlugin.NewMockProperty(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Property, mockProperty(mProperty))
 	return &MockServices{
 		conf:           conf,
 		ctl:            mockCtl,
 		objectStorage:  mockObjectStorage,
 		functionPlugin: mockFunctionPlugin,
+		property:       mProperty,
 	}
 }
 

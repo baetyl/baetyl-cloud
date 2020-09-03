@@ -391,7 +391,7 @@ func TestCreateNode(t *testing.T) {
 	as := ms.NewMockApplicationService(mockCtl)
 	cs := ms.NewMockConfigService(mockCtl)
 	ss := ms.NewMockSecretService(mockCtl)
-	scs := ms.NewMockSysConfigService(mockCtl)
+	sProp := ms.NewMockPropertyService(mockCtl)
 	pki := ms.NewMockPKIService(mockCtl)
 	is := ms.NewMockIndexService(mockCtl)
 	init := ms.NewMockInitService(mockCtl)
@@ -399,7 +399,7 @@ func TestCreateNode(t *testing.T) {
 	api.applicationService = as
 	api.configService = cs
 	api.secretService = ss
-	api.sysConfigService = scs
+	api.propertyService = sProp
 	api.pkiService = pki
 	api.indexService = is
 	api.initService = init

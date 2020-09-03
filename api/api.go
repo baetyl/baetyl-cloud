@@ -15,7 +15,6 @@ type API struct {
 	indexService       service.IndexService
 	functionService    service.FunctionService
 	objectService      service.ObjectService
-	sysConfigService   service.SysConfigService
 	pkiService         service.PKIService
 	authService        service.AuthService
 	propertyService    service.PropertyService
@@ -56,10 +55,6 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
-	sysConfigService, err := service.NewSysConfigService(config)
-	if err != nil {
-		return nil, err
-	}
 	pkiService, err := service.NewPKIService(config)
 	if err != nil {
 		return nil, err
@@ -85,7 +80,6 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		indexService:       indexService,
 		functionService:    functionService,
 		objectService:      objectService,
-		sysConfigService:   sysConfigService,
 		pkiService:         pkiService,
 		authService:        authService,
 		propertyService:    propertyService,

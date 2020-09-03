@@ -76,7 +76,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the type of baseApp is conflicted"))
 	}
 
-	app, configs, err := api.toAppliation(appView, nil)
+	app, configs, err := api.toApplication(appView, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	}
 
 	appView.Version = oldApp.Version
-	app, configs, err := api.toAppliation(appView, oldApp)
+	app, configs, err := api.toApplication(appView, oldApp)
 	if err != nil {
 		return nil, err
 	}
@@ -308,7 +308,7 @@ func (api *API) toApplicationView(app *specV1.Application) (*models.ApplicationV
 	return appView, nil
 }
 
-func (api *API) toAppliation(appView *models.ApplicationView, oldApp *specV1.Application) (*specV1.Application, []specV1.Configuration, error) {
+func (api *API) toApplication(appView *models.ApplicationView, oldApp *specV1.Application) (*specV1.Application, []specV1.Configuration, error) {
 	app := new(specV1.Application)
 	copier.Copy(app, appView)
 
@@ -339,9 +339,13 @@ func (api *API) toAppliation(appView *models.ApplicationView, oldApp *specV1.App
 			app.Volumes = append(app.Volumes, volume)
 		}
 
-		image, err := api.getFunctionImageByRuntime(service.FunctionConfig.Runtime)
+		runtimes, err := api.functionService.ListRuntimes()
 		if err != nil {
 			return nil, nil, err
+		}
+		image, ok := runtimes[service.FunctionConfig.Runtime]
+		if !ok {
+			return nil, nil, common.Error(common.ErrResourceNotFound, common.Field("error", "runtime not found"))
 		}
 		service.Image = image
 

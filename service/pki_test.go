@@ -10,8 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_NewPKIService(t *testing.T) {
+func TestPkiService_NewPKIService(t *testing.T) {
 	conf := &config.CloudConfig{}
+	conf.Plugin.PKI = "dummy-" + t.Name()
 	_, err := NewPKIService(conf)
 	assert.Error(t, err)
 }
