@@ -395,7 +395,6 @@ func TestCreateNode(t *testing.T) {
 	pki := ms.NewMockPKIService(mockCtl)
 	is := ms.NewMockIndexService(mockCtl)
 	init := ms.NewMockInitService(mockCtl)
-	tp := ms.NewMockTemplateService(mockCtl)
 
 	api.applicationService = as
 	api.configService = cs
@@ -404,7 +403,6 @@ func TestCreateNode(t *testing.T) {
 	api.pkiService = pki
 	api.indexService = is
 	api.initService = init
-	api.templateService = tp
 
 	app1 := &specV1.Application{
 		Name:      "baetyl-core",
@@ -418,7 +416,6 @@ func TestCreateNode(t *testing.T) {
 
 	mkNodeService.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	is.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
-	tp.EXPECT().GetTemplate(gomock.Any()).Return("{}", nil).AnyTimes()
 	init.EXPECT().GenApps(mNode.Namespace, gomock.Any(), nil).Return([]*specV1.Application{app1, app2}, nil).Times(2)
 
 	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)

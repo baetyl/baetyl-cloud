@@ -164,11 +164,6 @@ const (
 	Sync     CertType = "sync"
 	Internal CertType = "internal"
 
-	ResourceMetrics          = "metrics.yml"
-	ResourceLocalPathStorage = "local-path-storage.yml"
-	ResourceSetup            = "setup.sh"
-	ResourceInitYaml         = "baetyl-init.yml"
-
 	ObjectSource = "object-source"
 )
 

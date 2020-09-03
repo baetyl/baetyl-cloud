@@ -32,6 +32,21 @@ func (m *MockTemplateService) EXPECT() *MockTemplateServiceMockRecorder {
 	return m.recorder
 }
 
+// Execute mocks base method
+func (m *MockTemplateService) Execute(arg0, arg1 string, arg2 map[string]interface{}) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockTemplateServiceMockRecorder) Execute(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockTemplateService)(nil).Execute), arg0, arg1, arg2)
+}
+
 // GetTemplate mocks base method
 func (m *MockTemplateService) GetTemplate(arg0 string) (string, error) {
 	m.ctrl.T.Helper()

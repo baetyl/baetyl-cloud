@@ -294,7 +294,7 @@ data:
     check_and_get_metrics() {
       METRICS=$(check_kube_res metrics-server)
       if [ -z "$METRICS" ]; then
-        kube_apply "$CLOUD_ADDR/v1/active/metrics.yml"
+        kube_apply "$CLOUD_ADDR/v1/active/kube-api-metrics.yml"
       fi
     }
 
