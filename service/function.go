@@ -2,6 +2,9 @@ package service
 
 import (
 	"fmt"
+
+	"github.com/baetyl/baetyl-go/v2/errors"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/models"
@@ -10,21 +13,29 @@ import (
 
 //go:generate mockgen -destination=../mock/service/function.go -package=service github.com/baetyl/baetyl-cloud/v2/service FunctionService
 
+const functionRuntimePrefix = "baetyl-function-runtime-"
+
 type FunctionService interface {
 	List(userID, source string) ([]models.Function, error)
 	ListFunctionVersions(userID, name, source string) ([]models.Function, error)
 	ListSources() []models.FunctionSource
+	ListRuntimes() (map[string]string, error)
 	GetFunction(userID, name, version, source string) (*models.Function, error)
 }
 
 type functionService struct {
+	prop      PropertyService
 	functions map[string]plugin.Function
 }
 
 // NewFunctionService NewFunctionService
-func NewFunctionService(config *config.CloudConfig) (FunctionService, error) {
+func NewFunctionService(cfg *config.CloudConfig) (FunctionService, error) {
+	sProp, err := NewPropertyService(cfg)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 	functions := make(map[string]plugin.Function)
-	for _, v := range config.Plugin.Functions {
+	for _, v := range cfg.Plugin.Functions {
 		cs, err := plugin.GetPlugin(v)
 		if err != nil {
 			return nil, err
@@ -32,6 +43,7 @@ func NewFunctionService(config *config.CloudConfig) (FunctionService, error) {
 		functions[v] = cs.(plugin.Function)
 	}
 	return &functionService{
+		prop:      sProp,
 		functions: functions,
 	}, nil
 }
@@ -63,6 +75,18 @@ func (c *functionService) ListSources() []models.FunctionSource {
 		sources = append(sources, source)
 	}
 	return sources
+}
+
+func (c *functionService) ListRuntimes() (map[string]string, error) {
+	res, err := c.prop.ListProperty(&models.Filter{Name: functionRuntimePrefix})
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	var runtimes map[string]string
+	for _, item := range res {
+		runtimes[item.Name[len(functionRuntimePrefix):]] = item.Value
+	}
+	return runtimes, nil
 }
 
 func (c *functionService) GetFunction(userID, name, version, source string) (*models.Function, error) {

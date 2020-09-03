@@ -66,7 +66,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Auth = "defaultauth"
 	expect.Plugin.License = "defaultlicense"
 	expect.Plugin.DatabaseStorage = "database"
-	expect.Plugin.ModelStorage = "kubernetes"
+	expect.Plugin.ModelStorage = "kube"
 	expect.Plugin.Shadow = "database"
 	expect.Plugin.Functions = []string{}
 	expect.Plugin.Objects = []string{}

@@ -336,21 +336,6 @@ func (mr *MockDBStorageMockRecorder) CreateRecordTx(arg0, arg1 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRecordTx", reflect.TypeOf((*MockDBStorage)(nil).CreateRecordTx), arg0, arg1)
 }
 
-// CreateSysConfig mocks base method
-func (m *MockDBStorage) CreateSysConfig(arg0 *models.SysConfig) (sql.Result, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSysConfig", arg0)
-	ret0, _ := ret[0].(sql.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateSysConfig indicates an expected call of CreateSysConfig
-func (mr *MockDBStorageMockRecorder) CreateSysConfig(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSysConfig", reflect.TypeOf((*MockDBStorage)(nil).CreateSysConfig), arg0)
-}
-
 // CreateTask mocks base method
 func (m *MockDBStorage) CreateTask(arg0 *models.Task) (sql.Result, error) {
 	m.ctrl.T.Helper()
@@ -545,21 +530,6 @@ func (mr *MockDBStorageMockRecorder) DeleteRecordTx(arg0, arg1, arg2, arg3 inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRecordTx", reflect.TypeOf((*MockDBStorage)(nil).DeleteRecordTx), arg0, arg1, arg2, arg3)
 }
 
-// DeleteSysConfig mocks base method
-func (m *MockDBStorage) DeleteSysConfig(arg0, arg1 string) (sql.Result, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSysConfig", arg0, arg1)
-	ret0, _ := ret[0].(sql.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// DeleteSysConfig indicates an expected call of DeleteSysConfig
-func (mr *MockDBStorageMockRecorder) DeleteSysConfig(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSysConfig", reflect.TypeOf((*MockDBStorage)(nil).DeleteSysConfig), arg0, arg1)
-}
-
 // DeleteTask mocks base method
 func (m *MockDBStorage) DeleteTask(arg0 string) (sql.Result, error) {
 	m.ctrl.T.Helper()
@@ -740,21 +710,6 @@ func (mr *MockDBStorageMockRecorder) GetRecordTx(arg0, arg1, arg2, arg3 interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRecordTx", reflect.TypeOf((*MockDBStorage)(nil).GetRecordTx), arg0, arg1, arg2, arg3)
 }
 
-// GetSysConfig mocks base method
-func (m *MockDBStorage) GetSysConfig(arg0, arg1 string) (*models.SysConfig, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSysConfig", arg0, arg1)
-	ret0, _ := ret[0].(*models.SysConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSysConfig indicates an expected call of GetSysConfig
-func (mr *MockDBStorageMockRecorder) GetSysConfig(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSysConfig", reflect.TypeOf((*MockDBStorage)(nil).GetSysConfig), arg0, arg1)
-}
-
 // GetTask mocks base method
 func (m *MockDBStorage) GetTask(arg0 string) (*models.Task, error) {
 	m.ctrl.T.Helper()
@@ -903,36 +858,6 @@ func (m *MockDBStorage) ListRecordTx(arg0 *sqlx.Tx, arg1, arg2, arg3 string, arg
 func (mr *MockDBStorageMockRecorder) ListRecordTx(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRecordTx", reflect.TypeOf((*MockDBStorage)(nil).ListRecordTx), arg0, arg1, arg2, arg3, arg4, arg5)
-}
-
-// ListSysConfig mocks base method
-func (m *MockDBStorage) ListSysConfig(arg0 string, arg1, arg2 int) ([]models.SysConfig, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListSysConfig", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]models.SysConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListSysConfig indicates an expected call of ListSysConfig
-func (mr *MockDBStorageMockRecorder) ListSysConfig(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSysConfig", reflect.TypeOf((*MockDBStorage)(nil).ListSysConfig), arg0, arg1, arg2)
-}
-
-// ListSysConfigAll mocks base method
-func (m *MockDBStorage) ListSysConfigAll(arg0 string) ([]models.SysConfig, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListSysConfigAll", arg0)
-	ret0, _ := ret[0].([]models.SysConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListSysConfigAll indicates an expected call of ListSysConfigAll
-func (mr *MockDBStorageMockRecorder) ListSysConfigAll(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSysConfigAll", reflect.TypeOf((*MockDBStorage)(nil).ListSysConfigAll), arg0)
 }
 
 // RefreshIndex mocks base method
@@ -1111,21 +1036,6 @@ func (m *MockDBStorage) UpdateReport(arg0 *models.Shadow) (*models.Shadow, error
 func (mr *MockDBStorageMockRecorder) UpdateReport(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateReport", reflect.TypeOf((*MockDBStorage)(nil).UpdateReport), arg0)
-}
-
-// UpdateSysConfig mocks base method
-func (m *MockDBStorage) UpdateSysConfig(arg0 *models.SysConfig) (sql.Result, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateSysConfig", arg0)
-	ret0, _ := ret[0].(sql.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateSysConfig indicates an expected call of UpdateSysConfig
-func (mr *MockDBStorageMockRecorder) UpdateSysConfig(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSysConfig", reflect.TypeOf((*MockDBStorage)(nil).UpdateSysConfig), arg0)
 }
 
 // UpdateTask mocks base method

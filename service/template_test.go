@@ -276,21 +276,6 @@ data:
       level: debug
 
 ---
-# baetyl-init headless service
-apiVersion: v1
-kind: Service
-metadata:
-  name: baetyl-init
-  namespace: baetyl-edge-system
-  labels:
-    baetyl-service-name: baetyl-init
-    baetyl-app-name: baetyl-init
-spec:
-  publishNotReadyAddresses: true
-  selector:
-    baetyl-service-name: baetyl-init
-
----
 # baetyl-init deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -345,9 +330,6 @@ spec:
         - name: object-download-path
           hostPath:
             path: /var/lib/baetyl/object
-        - name: core-store-path
-          hostPath:
-            path: /var/lib/baetyl/store
         - name: host-root-path
           hostPath:
             path: /var/lib/baetyl/host

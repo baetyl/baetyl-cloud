@@ -101,7 +101,7 @@ func TestInitService_GenCmd(t *testing.T) {
 	expect := "curl -skfL 'https://1.2.3.4:9003/v1/active/setup.sh?token=tokenexpect' -osetup.sh && sh setup.sh"
 
 	sAuth.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)
-	sTemplate.EXPECT().Execute("setup-command", templateCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
+	sTemplate.EXPECT().Execute("setup-command", templateKubeInitCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
 
 	res, err := as.GenCmd("kind", "ns", "name")
 	assert.NoError(t, err)

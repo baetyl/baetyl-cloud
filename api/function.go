@@ -6,14 +6,20 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/baetyl/baetyl-go/v2/errors"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 // ListFunctionSources ListFunctionSources
 func (api *API) ListFunctionSources(c *common.Context) (interface{}, error) {
+	runtimes, err := api.functionService.ListRuntimes()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 	res := api.functionService.ListSources()
-	return &models.FunctionSourceView{Sources: res}, nil
+	return &models.FunctionSourceView{Sources: res, Runtimes: runtimes}, nil
 }
 
 // ListFunctions list functions
@@ -22,13 +28,13 @@ func (api *API) ListFunctions(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	runtimes, err := api.getFunctionRuntimes()
+	runtimes, err := api.functionService.ListRuntimes()
 	if err != nil {
 		return nil, err
 	}
-	filter := []models.Function{}
+	var filter []models.Function
 	for _, v := range res {
-		for _, runtime := range runtimes {
+		for runtime, _ := range runtimes {
 			if strings.ToLower(v.Runtime) == runtime {
 				filter = append(filter, v)
 				break
@@ -91,28 +97,6 @@ func (api *API) ImportFunction(c *common.Context) (interface{}, error) {
 			Unpack: common.UnpackTypeZip,
 		},
 	}, nil
-}
-
-func (api *API) getFunctionRuntimes() ([]string, error) {
-	_type := common.BaetylFunctionRuntime
-	res, err := api.sysConfigService.ListSysConfigAll(_type)
-	if err != nil {
-		return nil, err
-	}
-	var runtimes []string
-	for _, v := range res {
-		runtimes = append(runtimes, strings.ToLower(v.Key))
-	}
-	return runtimes, nil
-}
-
-func (api *API) getFunctionImageByRuntime(runtime string) (string, error) {
-	_type := common.BaetylFunctionRuntime
-	res, err := api.sysConfigService.GetSysConfig(_type, runtime)
-	if err != nil {
-		return "", err
-	}
-	return res.Value, nil
 }
 
 func base64ToHex(s string) (string, error) {

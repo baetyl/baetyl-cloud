@@ -19,13 +19,14 @@ initServer:
 template:
   path: "./templates"
 
-kubernetes:
+kube:
   outCluster: true
-#  configPath: "~/.kube/config"
+  configPath: ./conf/kubeconfig.yml
 
 database:
   type: "mysql"
-  url: "root:secretpassword@(kubernetes.docker.internal:3306)/baetyl_cloud?charset=utf8&parseTime=true" 
+  # kubectl port-forward --namespace default svc/mariadb 3306:3306
+  url: "root:secretpassword@(localhost:3306)/baetyl_cloud?charset=utf8&parseTime=true"
   
 defaultpki:
   rootCAFile: "./certs/client_ca.crt"

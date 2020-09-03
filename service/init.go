@@ -33,7 +33,7 @@ const (
 	templateKubeAPIMetricsYaml       = "kube-api-metrics.yml"
 	templateKubeLocalPathStorageYaml = "kube-local-path-storage.yml"
 	templateInitSetupShell           = "kube-init-setup.sh"
-	templateCommand                  = `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/setup.sh?token={{.Token}}' -osetup.sh && sh setup.sh`
+	templateKubeInitCommand          = `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/kube-init-setup.sh?token={{.Token}}' -osetup.sh && sh setup.sh`
 )
 
 var (
@@ -43,7 +43,7 @@ var (
 // InitService
 type InitService interface {
 	GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error)
-	GenApps(ns, nodeName string, params map[string]string) ([]*specV1.Application, error)
+	GenApps(ns, nodeName string, params map[string]interface{}) ([]*specV1.Application, error)
 	GenCmd(kind, ns, name string) (string, error)
 }
 
@@ -71,12 +71,12 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	cacheService, err := NewCacheService(config)
+	propertyService, err := NewPropertyService(config)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	templateService, err := NewTemplateService(config, map[string]interface{}{
-		"GetProperty": cacheService.GetProperty,
+		"GetProperty": propertyService.GetPropertyValue,
 	})
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -200,7 +200,7 @@ func (s *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
 	params := map[string]interface{}{
 		"Token": token,
 	}
-	data, err := s.TemplateService.Execute("setup-command", templateCommand, params)
+	data, err := s.TemplateService.Execute("setup-command", templateKubeInitCommand, params)
 	if err != nil {
 		return "", err
 	}
@@ -214,7 +214,7 @@ func (s *InitServiceImpl) getCoreAppFromDesire(ns, nodeName string) (*specV1.App
 	}
 	apps := shadowDesire.AppInfos(true)
 	for _, appInfo := range apps {
-		if strings.Contains(appInfo.Name, string(common.BaetylCore)) {
+		if strings.Contains(appInfo.Name, "baetyl-core") {
 			app, _ := s.App.Get(ns, appInfo.Name, "")
 			if app == nil {
 				return nil, common.Error(
@@ -233,7 +233,7 @@ func (s *InitServiceImpl) getCoreAppFromDesire(ns, nodeName string) (*specV1.App
 		common.Field("namespace", ns))
 }
 
-func (s *InitServiceImpl) GenApps(ns, nodeName string, params map[string]string) ([]*specV1.Application, error) {
+func (s *InitServiceImpl) GenApps(ns, nodeName string, params map[string]interface{}) ([]*specV1.Application, error) {
 	var apps []*specV1.Application
 	ca, err := s.genCoreApp(ns, nodeName, params)
 	if err != nil {
@@ -247,7 +247,7 @@ func (s *InitServiceImpl) GenApps(ns, nodeName string, params map[string]string)
 	return apps, nil
 }
 
-func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]string) (*specV1.Application, error) {
+func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
 	appName := fmt.Sprintf("baetyl-core-%s", common.RandString(9))
 	confName := fmt.Sprintf("baetyl-core-conf-%s", common.RandString(9))
 	// create config
@@ -276,10 +276,10 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]stri
 		"Namespace":       ns,
 		"NodeName":        nodeName,
 		"CoreAppName":     appName,
-		"CoreCertName":    cert.Name,
-		"CoreCertVersion": cert.Version,
 		"CoreConfName":    conf.Name,
 		"CoreConfVersion": conf.Version,
+		"NodeCertName":    cert.Name,
+		"NodeCertVersion": cert.Version,
 	}
 	for k, v := range params {
 		appMap[k] = v
@@ -287,7 +287,7 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]stri
 	return s.genApp(ns, templateCoreAppYaml, appMap)
 }
 
-func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]string) (*specV1.Application, error) {
+func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
 	appName := fmt.Sprintf("baetyl-function-%s", common.RandString(9))
 	confName := fmt.Sprintf("baetyl-function-conf-%s", common.RandString(9))
 	// create config

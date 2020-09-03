@@ -34,7 +34,7 @@ func (m *MockInitService) EXPECT() *MockInitServiceMockRecorder {
 }
 
 // GenApps mocks base method
-func (m *MockInitService) GenApps(arg0, arg1 string, arg2 map[string]string) ([]*v1.Application, error) {
+func (m *MockInitService) GenApps(arg0, arg1 string, arg2 map[string]interface{}) ([]*v1.Application, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenApps", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]*v1.Application)

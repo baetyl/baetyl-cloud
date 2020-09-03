@@ -27,7 +27,7 @@ func (api *API) ListBucketObjects(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	objects := []models.ObjectView{}
+	var objects []models.ObjectView
 	for _, v := range res.Contents {
 		view := models.ObjectView{Name: v.Key}
 		objects = append(objects, view)
@@ -36,9 +36,9 @@ func (api *API) ListBucketObjects(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) getDefaultObjectSource() (string, error) {
-	sysConf, err := api.sysConfigService.GetSysConfig("object", common.ObjectSource)
+	os, err := api.propertyService.GetPropertyValue("object-source")
 	if err != nil {
 		return "", err
 	}
-	return sysConf.Value, nil
+	return os, nil
 }

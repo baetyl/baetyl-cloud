@@ -13,7 +13,8 @@ type FunctionView struct {
 }
 
 type FunctionSourceView struct {
-	Sources []FunctionSource `json:"sources"`
+	Sources  []FunctionSource  `json:"sources"`
+	Runtimes map[string]string `json:"runtimes"`
 }
 
 type FunctionSource struct {

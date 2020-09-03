@@ -157,11 +157,10 @@ check_and_install_baetyl() {
 
   KUBE_MASTER_NODE_NAME=$(get_kube_master)
   if [ ! -z "$KUBE_MASTER_NODE_NAME" ]; then
-    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/core-data" $SUDO
-    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/app-data" $SUDO
-    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/core-store" $SUDO
-    exec_cmd_nobail "mkdir -p -m 666 /var/log/baetyl/core-log" $SUDO
-    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/core-page" $SUDO
+    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/host" $SUDO
+    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/object" $SUDO
+    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/store" $SUDO
+    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/log" $SUDO
     kube_apply "$ADDR/v1/init/baetyl-init-deployment.yml?token=$TOKEN&node=$KUBE_MASTER_NODE_NAME"
   else
     print_status "Can not get kubernetes master or controlplane node, this script will exit now..."

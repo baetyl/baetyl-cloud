@@ -89,13 +89,6 @@ type DBStorage interface {
 	UpdateApplicationWithTx(tx *sqlx.Tx, app *specV1.Application, oldVersion string) (sql.Result, error)
 	DeleteApplicationWithTx(tx *sqlx.Tx, name, namespace, version string) (sql.Result, error)
 	CountApplication(tx *sqlx.Tx, name, namespace string) (int, error)
-	// system config
-	GetSysConfig(tp, key string) (*models.SysConfig, error)
-	ListSysConfig(tp string, page, size int) ([]models.SysConfig, error)
-	ListSysConfigAll(tp string) ([]models.SysConfig, error)
-	CreateSysConfig(sysConfig *models.SysConfig) (sql.Result, error)
-	UpdateSysConfig(sysConfig *models.SysConfig) (sql.Result, error)
-	DeleteSysConfig(tp, key string) (sql.Result, error)
 
 	Shadow
 }

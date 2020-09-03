@@ -134,12 +134,6 @@ func (s *AdminServer) InitRoute() {
 		namespace.DELETE("", common.Wrapper(s.api.DeleteNamespace))
 	}
 	{
-		sysconfig := v1.Group("/sysconfig")
-		sysconfig.GET("/:type/:key", common.Wrapper(s.api.GetSysConfig))
-		sysconfig.GET("/:type", common.Wrapper(s.api.ListSysConfig))
-
-	}
-	{
 		function := v1.Group("/functions")
 		function.GET("", common.Wrapper(s.api.ListFunctionSources))
 		if len(s.cfg.Plugin.Functions) != 0 {

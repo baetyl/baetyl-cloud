@@ -109,13 +109,17 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	ns, name := c.GetNamespace(), n.Name
+	ns := c.GetNamespace()
+	n.Namespace = ns
+	return api.CreateNodeView(n, nil)
+}
 
+func (api *API) CreateNodeView(n *v1.Node, params map[string]interface{}) (interface{}, error) {
 	n.Labels = common.AddSystemLabel(n.Labels, map[string]string{
-		common.LabelNodeName: name,
+		common.LabelNodeName: n.Name,
 	})
 
-	oldNode, err := api.nodeService.Get(ns, name)
+	oldNode, err := api.nodeService.Get(n.Namespace, n.Name)
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
 			return nil, err
@@ -126,18 +130,18 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
 
-	node, err := api.nodeService.Create(ns, n)
+	node, err := api.nodeService.Create(n.Namespace, n)
 	if err != nil {
 		return nil, err
 	}
 
-	apps, err := api.initService.GenApps(ns, name, nil)
+	apps, err := api.initService.GenApps(n.Namespace, n.Name, params)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, app := range apps {
-		err = api.UpdateNodeAndAppIndex(ns, app)
+		err = api.UpdateNodeAndAppIndex(n.Namespace, app)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}

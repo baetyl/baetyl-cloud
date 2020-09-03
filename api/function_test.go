@@ -50,8 +50,14 @@ func TestListFunctionSources(t *testing.T) {
 			Name: "test2",
 		},
 	}
+	runtimes := map[string]string{
+		"python36": "python36-image",
+		"node10":   "node10-image",
+	}
+
 	// 200
 	mkFunctionService.EXPECT().ListSources().Return(sources).Times(1)
+	mkFunctionService.EXPECT().ListRuntimes().Return(runtimes, nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/functions", nil)
 	w := httptest.NewRecorder()
@@ -62,15 +68,14 @@ func TestListFunctionSources(t *testing.T) {
 	err := json.Unmarshal(bytes, &resSource)
 	assert.NoError(t, err)
 	assert.Len(t, resSource.Sources, 2)
+	assert.Len(t, resSource.Runtimes, 2)
 }
 
 func TestListFunctions(t *testing.T) {
 	api, router, mockCtl := initFunctionAPI(t)
 	defer mockCtl.Finish()
-	mkFunctionService := ms.NewMockFunctionService(mockCtl)
-	mkSysConfigService := ms.NewMockSysConfigService(mockCtl)
-	api.functionService = mkFunctionService
-	api.sysConfigService = mkSysConfigService
+	sFunc := ms.NewMockFunctionService(mockCtl)
+	api.functionService = sFunc
 
 	functions := []models.Function{
 		{
@@ -93,18 +98,14 @@ func TestListFunctions(t *testing.T) {
 		},
 	}
 
-	runtimes := []models.SysConfig{
-		{
-			Key: "python36",
-		},
-		{
-			Key: "node10",
-		},
+	runtimes := map[string]string{
+		"python36": "python36-image",
+		"node10":   "node10-image",
 	}
 
 	// 200
-	mkFunctionService.EXPECT().List("default", "baiducfc").Return(functions, nil).Times(1)
-	mkSysConfigService.EXPECT().ListSysConfigAll(common.BaetylFunctionRuntime).Return(runtimes, nil).Times(1)
+	sFunc.EXPECT().List("default", "baiducfc").Return(functions, nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(runtimes, nil).Times(1)
 	req1, _ := http.NewRequest(http.MethodGet, "/v1/functions/baiducfc/functions", nil)
 	w1 := httptest.NewRecorder()
 	router.ServeHTTP(w1, req1)
@@ -117,7 +118,7 @@ func TestListFunctions(t *testing.T) {
 	assert.Equal(t, res.Functions[1].Name, functions[1].Name)
 
 	// 500
-	mkFunctionService.EXPECT().List("default", "unknown").Return(nil, errors.New("err")).Times(1)
+	sFunc.EXPECT().List("default", "unknown").Return(nil, errors.New("err")).Times(1)
 	req2, _ := http.NewRequest(http.MethodGet, "/v1/functions/unknown/functions", nil)
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req2)
@@ -159,12 +160,12 @@ func TestListFunctionVersions(t *testing.T) {
 func TestImportFunction(t *testing.T) {
 	api, router, mockCtl := initFunctionAPI(t)
 	defer mockCtl.Finish()
-	mkFunctionService := ms.NewMockFunctionService(mockCtl)
-	mkObjectService := ms.NewMockObjectService(mockCtl)
-	mkSysConfigService := ms.NewMockSysConfigService(mockCtl)
-	api.functionService = mkFunctionService
-	api.objectService = mkObjectService
-	api.sysConfigService = mkSysConfigService
+	sFunc := ms.NewMockFunctionService(mockCtl)
+	sObj := ms.NewMockObjectService(mockCtl)
+	sProp := ms.NewMockPropertyService(mockCtl)
+	api.functionService = sFunc
+	api.objectService = sObj
+	api.propertyService = sProp
 
 	function := &models.Function{
 		Name:    "name1",
@@ -178,21 +179,16 @@ func TestImportFunction(t *testing.T) {
 		},
 	}
 	namespace := "default"
-	mkFunctionService.EXPECT().GetFunction(namespace, function.Name,
+	sFunc.EXPECT().GetFunction(namespace, function.Name,
 		function.Version, "baiducfc").Return(function, nil).Times(1)
 
-	sysConfig := &models.SysConfig{
-		Type:  "object",
-		Key:   common.ObjectSource,
-		Value: "awss3",
-	}
-	mkSysConfigService.EXPECT().GetSysConfig(sysConfig.Type, sysConfig.Key).Return(sysConfig, nil).Times(1)
+	sProp.EXPECT().GetPropertyValue(common.ObjectSource).Return("awss3", nil).Times(1)
 
 	bucket := &models.Bucket{
 		Name: fmt.Sprintf("%s-%s", common.BaetylCloud, namespace),
 	}
-	mkObjectService.EXPECT().CreateBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, sysConfig.Value).Return(bucket, nil).Times(1)
-	mkObjectService.EXPECT().PutObjectFromURLIfNotExist(namespace, bucket.Name, gomock.Any(), function.Code.Location, sysConfig.Value).Return(nil).Times(1)
+	sObj.EXPECT().CreateBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, "awss3").Return(bucket, nil).Times(1)
+	sObj.EXPECT().PutObjectFromURLIfNotExist(namespace, bucket.Name, gomock.Any(), function.Code.Location, "awss3").Return(nil).Times(1)
 
 	// 200
 	url := fmt.Sprintf("/v1/functions/baiducfc/functions/%s/versions/%s", function.Name, function.Version)
@@ -210,7 +206,7 @@ func TestImportFunction(t *testing.T) {
 	assert.Equal(t, "baetyl-cloud-default", res.Bucket)
 	assert.Equal(t, "9f02518384acce28a79f34df94df17062960533786214652fe6c63c27424cccf/name1.zip", res.Object)
 
-	mkFunctionService.EXPECT().GetFunction(namespace, function.Name,
+	sFunc.EXPECT().GetFunction(namespace, function.Name,
 		function.Version, "baiducfc").Return(nil, errors.New("err")).Times(1)
 
 	// 500
@@ -220,9 +216,9 @@ func TestImportFunction(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	mkFunctionService.EXPECT().GetFunction(namespace, function.Name,
+	sFunc.EXPECT().GetFunction(namespace, function.Name,
 		function.Version, "baiducfc").Return(function, nil).Times(1)
-	mkSysConfigService.EXPECT().GetSysConfig(sysConfig.Type, sysConfig.Key).Return(nil, errors.New("err")).Times(1)
+	sProp.EXPECT().GetPropertyValue(common.ObjectSource).Return("", errors.New("err")).Times(1)
 
 	// 500
 	url = fmt.Sprintf("/v1/functions/baiducfc/functions/%s/versions/%s", function.Name, function.Version)
@@ -231,10 +227,10 @@ func TestImportFunction(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	mkFunctionService.EXPECT().GetFunction(namespace, function.Name,
+	sFunc.EXPECT().GetFunction(namespace, function.Name,
 		function.Version, "baiducfc").Return(function, nil).Times(1)
-	mkSysConfigService.EXPECT().GetSysConfig(sysConfig.Type, sysConfig.Key).Return(sysConfig, nil).Times(1)
-	mkObjectService.EXPECT().CreateBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, sysConfig.Value).Return(nil, errors.New("err")).Times(1)
+	sProp.EXPECT().GetPropertyValue(common.ObjectSource).Return("awss3", nil).Times(1)
+	sObj.EXPECT().CreateBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, "awss3").Return(nil, errors.New("err")).Times(1)
 
 	// 500
 	url = fmt.Sprintf("/v1/functions/baiducfc/functions/%s/versions/%s", function.Name, function.Version)
@@ -243,11 +239,11 @@ func TestImportFunction(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	mkFunctionService.EXPECT().GetFunction(namespace, function.Name,
+	sFunc.EXPECT().GetFunction(namespace, function.Name,
 		function.Version, "baiducfc").Return(function, nil).Times(1)
-	mkSysConfigService.EXPECT().GetSysConfig(sysConfig.Type, sysConfig.Key).Return(sysConfig, nil).Times(1)
-	mkObjectService.EXPECT().CreateBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, sysConfig.Value).Return(bucket, nil).Times(1)
-	mkObjectService.EXPECT().PutObjectFromURLIfNotExist(namespace, bucket.Name, gomock.Any(), function.Code.Location, sysConfig.Value).Return(errors.New("err")).Times(1)
+	sProp.EXPECT().GetPropertyValue(common.ObjectSource).Return("awss3", nil).Times(1)
+	sObj.EXPECT().CreateBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, "awss3").Return(bucket, nil).Times(1)
+	sObj.EXPECT().PutObjectFromURLIfNotExist(namespace, bucket.Name, gomock.Any(), function.Code.Location, "awss3").Return(errors.New("err")).Times(1)
 
 	// 500
 	url = fmt.Sprintf("/v1/functions/baiducfc/functions/%s/versions/%s", function.Name, function.Version)
