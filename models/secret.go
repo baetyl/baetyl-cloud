@@ -54,7 +54,7 @@ func FromSecretListToRegistryList(s *SecretList) *RegistryList {
 }
 
 func FromSecretToCertificate(s *specV1.Secret) *Certificate {
-	if v, ok := s.Labels[specV1.SecretLabel]; !ok || v != SecretCertificate {
+	if v, ok := s.Labels[specV1.SecretLabel]; !ok || v != specV1.SecretCustomCertificate {
 		return nil
 	}
 	res := &Certificate{}

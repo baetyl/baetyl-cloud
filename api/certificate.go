@@ -96,7 +96,7 @@ func (api *API) DeleteCertificate(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return api.deleteSecret(ns, n, "registry")
+	return api.deleteSecret(ns, n, "certificate")
 }
 
 // GetAppByCertificate list app
@@ -149,6 +149,6 @@ func wrapCertificateList(s *models.SecretList, e error) (*models.CertificateList
 
 func wrapCertificateListOption(lo *models.ListOptions) *models.ListOptions {
 	// TODO 增加type字段代替label标签
-	lo.LabelSelector = fmt.Sprintf("%s=%s", specV1.SecretLabel, models.SecretCertificate)
+	lo.LabelSelector = fmt.Sprintf("%s=%s", specV1.SecretLabel, specV1.SecretCustomCertificate)
 	return lo
 }

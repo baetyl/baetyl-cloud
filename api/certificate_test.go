@@ -108,7 +108,7 @@ tu5nww5RdjCz4Uks08P2GNmZjLO81MgYkhR7B9wi3KDNxg==
 		Name:      cert1.Name,
 		Namespace: ns,
 		Labels: map[string]string{
-			specV1.SecretLabel: models.SecretCertificate,
+			specV1.SecretLabel: specV1.SecretCustomCertificate,
 		},
 		Data: map[string][]byte{
 			"key":                []byte(keyData1),
@@ -174,7 +174,7 @@ RcKyjhh1
 		Name:      cert2.Name,
 		Namespace: ns,
 		Labels: map[string]string{
-			specV1.SecretLabel: models.SecretCertificate,
+			specV1.SecretLabel: specV1.SecretCustomCertificate,
 		},
 		Data: map[string][]byte{
 			"key":                []byte(keyData2),
@@ -428,7 +428,7 @@ tu5nww5RdjCz4Uks08P2GNmZjLO81MgYkhR7B9wi3KDNxg==
 		Name:      cert1.Name,
 		Namespace: ns,
 		Labels: map[string]string{
-			specV1.SecretLabel: models.SecretCertificate,
+			specV1.SecretLabel: specV1.SecretCustomCertificate,
 		},
 		Data: map[string][]byte{
 			"key":                []byte(keyData1),
@@ -471,7 +471,7 @@ RcKyjhh1
 		Name:      name,
 		Namespace: ns,
 		Labels: map[string]string{
-			specV1.SecretLabel: models.SecretCertificate,
+			specV1.SecretLabel: specV1.SecretCustomCertificate,
 		},
 		Data: map[string][]byte{
 			"key":                []byte(keyData2),
@@ -549,7 +549,7 @@ RcKyjhh1
 		Name:      name,
 		Namespace: ns,
 		Labels: map[string]string{
-			specV1.SecretLabel: models.SecretCertificate,
+			specV1.SecretLabel: specV1.SecretCustomCertificate,
 		},
 		Data: map[string][]byte{
 			"key":                []byte(keyData2),
@@ -616,7 +616,7 @@ RcKyjhh1
 		Name:      name,
 		Namespace: ns,
 		Labels: map[string]string{
-			specV1.SecretLabel: models.SecretCertificate,
+			specV1.SecretLabel: specV1.SecretCustomCertificate,
 		},
 		Data: map[string][]byte{
 			"key":                []byte(keyData),
@@ -694,7 +694,7 @@ func TestGetAppByCertificate(t *testing.T) {
 		Description: "desp",
 		Version:     "5",
 		Labels: map[string]string{
-			specV1.SecretLabel: models.SecretCertificate,
+			specV1.SecretLabel: specV1.SecretCustomCertificate,
 		},
 	}
 

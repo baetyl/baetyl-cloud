@@ -43,9 +43,6 @@ type CertStorage struct {
 	KeyName  string
 }
 
-//TODO: move to baetyl-go
-const SecretCertificate = "custom-certificate"
-
 // Certificate Certificate
 type Certificate struct {
 	Name               string              `json:"name,omitempty" validate:"omitempty,resourceName,nonBaetyl"`
@@ -83,7 +80,7 @@ func (r *Certificate) Equal(target *Certificate) bool {
 func (r *Certificate) ToSecret() *specV1.Secret {
 	res := &specV1.Secret{
 		Labels: map[string]string{
-			specV1.SecretLabel: SecretCertificate,
+			specV1.SecretLabel: specV1.SecretCustomCertificate,
 		},
 	}
 	err := copier.Copy(res, r)
