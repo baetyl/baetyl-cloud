@@ -97,6 +97,10 @@ data:
       namespace: "default"
       keyFile: "/etc/baetyl/token.key"
 
+    logger:
+      level: debug
+      encoding: console
+
   token.key: |-
     -----BEGIN RSA PRIVATE KEY-----
     MIIEowIBAAKCAQEA41Ux2wPALzq5agrwhNOr0B+BYePAf5CrVPXtfFKmQDdOqBkB

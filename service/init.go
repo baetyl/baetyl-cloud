@@ -41,7 +41,7 @@ var (
 	HookNamePopulateParams = "populateParams"
 )
 
-type HandlerPopulateParams func(params map[string]interface{}) error
+type HandlerPopulateParams func(ns string, params map[string]interface{}) error
 
 // InitService
 type InitService interface {
@@ -81,6 +81,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	}
 	templateService, err := NewTemplateService(config, map[string]interface{}{
 		"GetProperty": propertyService.GetPropertyValue,
+		"RandString":  common.RandString,
 	})
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -244,7 +245,7 @@ func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, e
 		"NodeName":  nodeName,
 	}
 	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
-		err := handler.(HandlerPopulateParams)(params)
+		err := handler.(HandlerPopulateParams)(ns, params)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
