@@ -35,7 +35,6 @@ func initCertificateAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		certificate.GET("", mockIM, common.Wrapper(api.ListCertificate))
 		certificate.GET("/:name/apps", mockIM, common.Wrapper(api.GetAppByCertificate))
 	}
-
 	return api, router, mockCtl
 }
 
@@ -595,6 +594,7 @@ func TestDeleteCertificate(t *testing.T) {
 	api.AppCombinedService = &service.AppCombinedService{
 		Secret: mkSecretService,
 	}
+
 	mkIndexService := ms.NewMockIndexService(mockCtl)
 	api.indexService = mkIndexService
 
