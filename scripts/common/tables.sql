@@ -104,17 +104,6 @@ CREATE TABLE IF NOT EXISTS `baetyl_index_application_secret` (
   KEY `idx_secret` (`namespace`,`secret`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='应用与secret索引表';
 
-CREATE TABLE IF NOT EXISTS `baetyl_system_config` (
-  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID,主键',
-  `type` varchar(128) NOT NULL DEFAULT '' COMMENT '配置类别',
-  `name` varchar(128) NOT NULL DEFAULT '' COMMENT '配置的键',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
-  `value` text NOT NULL COMMENT '配置的值',
-  PRIMARY KEY (`id`),
-  KEY `idx_type_key` (`type`,`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统配置表';
-
 CREATE TABLE IF NOT EXISTS `baetyl_node_shadow` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID,主键',
   `name` varchar(128) NOT NULL DEFAULT '' COMMENT 'node影子名称',

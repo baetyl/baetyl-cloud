@@ -12,7 +12,7 @@ data:
       key: /var/lib/baetyl/node/client.key
       cert: /var/lib/baetyl/node/client.pem
     httplink:
-      address: "{{.SyncAddr}}"
+      address: "{{GetProperty "sync-server-address"}}"
       insecureSkipVerify: true
     logger:
       level: debug

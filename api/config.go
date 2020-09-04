@@ -25,7 +25,7 @@ const (
 // GetConfig get a config
 func (api *API) GetConfig(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	config, err := api.configService.Get(ns, n, "")
+	config, err := api.Config.Get(ns, n, "")
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (api *API) GetConfig(c *common.Context) (interface{}, error) {
 // ListConfig list config
 func (api *API) ListConfig(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	list, err := api.configService.List(ns, api.parseListOptionsAppendSystemLabel(c))
+	list, err := api.Config.List(ns, api.parseListOptionsAppendSystemLabel(c))
 	if err != nil {
 		log.L().Error("list config error", log.Error(err))
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
@@ -56,7 +56,7 @@ func (api *API) CreateConfig(c *common.Context) (interface{}, error) {
 
 	ns, name := c.GetNamespace(), config.Name
 	// TODO: remove get method, return error inside service instead
-	oldConfig, err := api.configService.Get(ns, name, "")
+	oldConfig, err := api.Config.Get(ns, name, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
 			return nil, err
@@ -68,7 +68,7 @@ func (api *API) CreateConfig(c *common.Context) (interface{}, error) {
 			common.Field("error", "this name is already in use"))
 	}
 
-	config, err = api.configService.Create(ns, config)
+	config, err = api.Config.Create(ns, config)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := api.configService.Get(ns, n, "")
+	res, err := api.Config.Get(ns, n, "")
 
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 
 	config.Version = res.Version
 	config.UpdateTimestamp = time.Now()
-	res, err = api.configService.Update(ns, config)
+	res, err = api.Config.Update(ns, config)
 	if err != nil {
 		log.L().Error("Update config failed", log.Error(err))
 		return nil, err
@@ -118,7 +118,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 // DeleteConfig delete the config
 func (api *API) DeleteConfig(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := api.configService.Get(ns, n, "")
+	res, err := api.Config.Get(ns, n, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 			return nil, nil
@@ -140,12 +140,12 @@ func (api *API) DeleteConfig(c *common.Context) (interface{}, error) {
 	}
 
 	//TODO: should remove file(bos/aws) of a function Config
-	return nil, api.configService.Delete(c.GetNamespace(), c.GetNameFromParam())
+	return nil, api.Config.Delete(c.GetNamespace(), c.GetNameFromParam())
 }
 
 func (api *API) GetAppByConfig(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := api.configService.Get(ns, n, "")
+	res, err := api.Config.Get(ns, n, "")
 	if err != nil {
 		log.L().Error("get config failed", log.Error(err))
 		return nil, err
@@ -204,7 +204,7 @@ func (api *API) parseAndCheckConfigView(c *common.Context) (*specV1.Configuratio
 
 func (api *API) updateNodeAndApp(namespace string, config *specV1.Configuration, appNames []string) error {
 	for _, appName := range appNames {
-		app, err := api.applicationService.Get(namespace, appName, "")
+		app, err := api.App.Get(namespace, appName, "")
 		if err != nil {
 			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 				continue
@@ -216,7 +216,7 @@ func (api *API) updateNodeAndApp(namespace string, config *specV1.Configuration,
 			continue
 		}
 		// Todo remove by list watch
-		app, err = api.applicationService.Update(namespace, app)
+		app, err = api.App.Update(namespace, app)
 		if err != nil {
 			return err
 		}

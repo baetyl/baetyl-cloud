@@ -1,0 +1,141 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{.EdgeSystemNamespace}}
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{.EdgeNamespace}}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: baetyl-edge-system-service-account
+  namespace: {{.EdgeSystemNamespace}}
+
+---
+# elevation of authority
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: baetyl-edge-system-rbac
+subjects:
+  - kind: ServiceAccount
+    name: baetyl-edge-system-service-account
+    namespace: {{.EdgeSystemNamespace}}
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+{{- if .NodeCertPem}}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{.NodeCertName}}
+  namespace: {{.EdgeSystemNamespace}}
+type: Opaque
+data:
+  client.pem: '{{.NodeCertPem}}'
+  client.key: '{{.NodeCertKey}}'
+  ca.pem: '{{.NodeCertCa}}'
+{{- end}}
+
+---
+# baetyl-init configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: baetyl-init-config
+  namespace: {{.EdgeSystemNamespace}}
+data:
+  conf.yml: |-
+    node:
+      ca: var/lib/baetyl/node/ca.pem
+      key: var/lib/baetyl/node/client.key
+      cert: var/lib/baetyl/node/client.pem
+    httplink:
+      address: {{GetProperty "sync-server-address"}}
+      insecureSkipVerify: true
+    logger:
+      level: debug
+
+---
+# baetyl-init deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baetyl-init
+  namespace: {{.EdgeSystemNamespace}}
+  labels:
+    baetyl-app-name: baetyl-init
+    baetyl-service-name: baetyl-init
+spec:
+  selector:
+    matchLabels:
+      baetyl-service-name: baetyl-init
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        baetyl-app-name: baetyl-init
+        baetyl-service-name: baetyl-init
+    spec:
+      nodeName: {{.KubeNodeName}}
+      serviceAccountName: baetyl-edge-system-service-account
+      containers:
+        - name: baetyl-init
+          image: {{GetProperty "baetyl-image"}}
+          imagePullPolicy: IfNotPresent
+          args:
+            - init
+          env:
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: init-conf
+              mountPath: /etc/baetyl
+            - name: core-store-path
+              mountPath: /var/lib/baetyl/store
+            - name: object-download-path
+              mountPath: /var/lib/baetyl/object
+            - name: host-root-path
+              mountPath: /var/lib/baetyl/host
+            {{- if .NodeCertPem}}
+            - name: node-cert
+              mountPath: var/lib/baetyl/node
+            {{- end}}
+      volumes:
+        - name: init-conf
+          configMap:
+            name: baetyl-init-config
+        - name: core-store-path
+          hostPath:
+            path: /var/lib/baetyl/store
+        - name: object-download-path
+          hostPath:
+            path: /var/lib/baetyl/object
+        - name: host-root-path
+          hostPath:
+            path: /var/lib/baetyl/host
+        {{- if .NodeCertPem}}
+        - name: node-cert
+          secret:
+            secretName: {{.NodeCertName}}
+        {{- end}}

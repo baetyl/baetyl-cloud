@@ -47,6 +47,21 @@ func (mr *MockCacheServiceMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockCacheService)(nil).Get), arg0, arg1)
 }
 
+// GetFileData mocks base method
+func (m *MockCacheService) GetFileData(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFileData", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFileData indicates an expected call of GetFileData
+func (mr *MockCacheServiceMockRecorder) GetFileData(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFileData", reflect.TypeOf((*MockCacheService)(nil).GetFileData), arg0)
+}
+
 // GetProperty mocks base method
 func (m *MockCacheService) GetProperty(arg0 string) (string, error) {
 	m.ctrl.T.Helper()

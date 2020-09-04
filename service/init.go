@@ -11,18 +11,29 @@ import (
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 //go:generate mockgen -destination=../mock/service/init.go -package=service github.com/baetyl/baetyl-cloud/v2/service InitService
 
 const (
-	InfoKind                 = "k"
-	InfoName                 = "n"
-	InfoNamespace            = "ns"
-	InfoTimestamp            = "ts"
-	InfoExpiry               = "e"
-	ResourceMetrics          = "metrics.yml"
-	ResourceLocalPathStorage = "local-path-storage.yml"
+	InfoKind      = "k"
+	InfoName      = "n"
+	InfoNamespace = "ns"
+	InfoTimestamp = "ts"
+	InfoExpiry    = "e"
+)
+
+const (
+	templateCoreConfYaml             = "baetyl-core-conf.yml"
+	templateCoreAppYaml              = "baetyl-core-app.yml"
+	templateFuncConfYaml             = "baetyl-function-conf.yml"
+	templateFuncAppYaml              = "baetyl-function-app.yml"
+	templateInitDeploymentYaml       = "baetyl-init-deployment.yml"
+	templateKubeAPIMetricsYaml       = "kube-api-metrics.yml"
+	templateKubeLocalPathStorageYaml = "kube-local-path-storage.yml"
+	templateInitSetupShell           = "kube-init-setup.sh"
+	templateKubeInitCommand          = `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/kube-init-setup.sh?token={{.Token}}' -osetup.sh && sh setup.sh`
 )
 
 var (
@@ -32,6 +43,7 @@ var (
 // InitService
 type InitService interface {
 	GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error)
+	GenApps(ns, nodeName string, params map[string]interface{}) ([]*specV1.Application, error)
 	GenCmd(kind, ns, name string) (string, error)
 }
 
@@ -40,67 +52,76 @@ type InitServiceImpl struct {
 	AuthService     AuthService
 	NodeService     NodeService
 	SecretService   SecretService
-	CacheService    CacheService
-	AppService      ApplicationService
 	TemplateService TemplateService
+	*AppCombinedService
+	PKI PKIService
 }
 
 // NewSyncService new SyncService
 func NewInitService(config *config.CloudConfig) (InitService, error) {
 	authService, err := NewAuthService(config)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 	nodeService, err := NewNodeService(config)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 	secretService, err := NewSecretService(config)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
-	cacheService, err := NewCacheService(config)
+	propertyService, err := NewPropertyService(config)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
-	appService, err := NewApplicationService(config)
+	templateService, err := NewTemplateService(config, map[string]interface{}{
+		"GetProperty": propertyService.GetPropertyValue,
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
-	templateService, err := NewTemplateService(config)
+	acs, err := NewAppCombinedService(config)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
+	}
+	pki, err := NewPKIService(config)
+	if err != nil {
+		return nil, errors.Trace(err)
 	}
 	return &InitServiceImpl{
-		cfg:             config,
-		AuthService:     authService,
-		NodeService:     nodeService,
-		TemplateService: templateService,
-		SecretService:   secretService,
-		CacheService:    cacheService,
-		AppService:      appService,
+		cfg:                config,
+		AuthService:        authService,
+		NodeService:        nodeService,
+		TemplateService:    templateService,
+		SecretService:      secretService,
+		AppCombinedService: acs,
+		PKI:                pki,
 	}, nil
 }
 
-func (a *InitServiceImpl) GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error) {
+func (s *InitServiceImpl) GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error) {
 	switch resourceName {
-	case common.ResourceMetrics:
-		res, err := a.TemplateService.GetTemplate(ResourceMetrics)
+	case templateKubeAPIMetricsYaml:
+		res, err := s.TemplateService.GetTemplate(resourceName)
 		if err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 		return []byte(res), nil
-	case common.ResourceLocalPathStorage:
-		res, err := a.TemplateService.GetTemplate(ResourceLocalPathStorage)
+	case templateKubeLocalPathStorageYaml:
+		res, err := s.TemplateService.GetTemplate(resourceName)
 		if err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 		return []byte(res), nil
-	case common.ResourceSetup:
-		return a.TemplateService.GenSetupShell(token)
-
-	case common.ResourceInitYaml:
-		return a.getInitYaml(info, node)
+	case templateInitSetupShell:
+		data, err := s.TemplateService.ParseTemplate(resourceName, map[string]interface{}{"Token": token})
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		return data, nil
+	case templateInitDeploymentYaml:
+		return s.getInitYaml(info, node)
 	default:
 		return nil, common.Error(
 			common.ErrResourceNotFound,
@@ -109,10 +130,10 @@ func (a *InitServiceImpl) GetResource(resourceName, node, token string, info map
 	}
 }
 
-func (a *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeName string) ([]byte, error) {
+func (s *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeName string) ([]byte, error) {
 	switch common.Resource(info[InfoKind].(string)) {
 	case common.Node:
-		return a.genInitYml(info[InfoNamespace].(string), info[InfoName].(string), edgeKubeNodeName)
+		return s.genInitYml(info[InfoNamespace].(string), info[InfoName].(string), edgeKubeNodeName)
 	default:
 		return nil, common.Error(
 			common.ErrRequestParamInvalid,
@@ -120,41 +141,40 @@ func (a *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeN
 	}
 }
 
-func (a *InitServiceImpl) genInitYml(ns, nodeName, edgeKubeNodeName string) ([]byte, error) {
-	params, err := a.getSysParams(ns, edgeKubeNodeName)
+func (s *InitServiceImpl) genInitYml(ns, nodeName, edgeKubeNodeName string) ([]byte, error) {
+	app, err := s.getCoreAppFromDesire(ns, nodeName)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
-	params["NodeName"] = nodeName
-
-	app, err := a.getDesireAppInfo(ns, nodeName)
+	cert, err := s.getNodeCert(app)
 	if err != nil {
-		return nil, err
-	}
-	params["CoreVersion"] = app.Version
-
-	sync, err := a.getSyncCert(app)
-	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
-	params["CertSync"] = sync.Name
-	params["CertSyncPem"] = base64.StdEncoding.EncodeToString(sync.Data["client.pem"])
-	params["CertSyncKey"] = base64.StdEncoding.EncodeToString(sync.Data["client.key"])
-	params["CertSyncCa"] = base64.StdEncoding.EncodeToString(sync.Data["ca.pem"])
-
-	return a.TemplateService.ParseTemplate(common.ResourceInitYaml, params)
+	params := map[string]interface{}{
+		"Namespace":           ns,
+		"NodeName":            nodeName,
+		"NodeCertName":        cert.Name,
+		"NodeCertVersion":     cert.Version,
+		"NodeCertPem":         base64.StdEncoding.EncodeToString(cert.Data["client.pem"]),
+		"NodeCertKey":         base64.StdEncoding.EncodeToString(cert.Data["client.key"]),
+		"NodeCertCa":          base64.StdEncoding.EncodeToString(cert.Data["ca.pem"]),
+		"KubeNodeName":        edgeKubeNodeName,
+		"EdgeNamespace":       common.DefaultBaetylEdgeNamespace,
+		"EdgeSystemNamespace": common.DefaultBaetylEdgeSystemNamespace,
+	}
+	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
 }
 
-func (a *InitServiceImpl) getSyncCert(app *specV1.Application) (*specV1.Secret, error) {
+func (s *InitServiceImpl) getNodeCert(app *specV1.Application) (*specV1.Secret, error) {
 	certName := ""
 	for _, vol := range app.Volumes {
-		if vol.Name == "node-certs" {
+		if vol.Name == "node-cert" || vol.Name == "sync-cert" {
 			certName = vol.Secret.Name
 			break
 		}
 	}
-	cert, _ := a.SecretService.Get(app.Namespace, certName, "")
+	cert, _ := s.SecretService.Get(app.Namespace, certName, "")
 	if cert == nil {
 		return nil, common.Error(
 			common.ErrResourceNotFound,
@@ -165,7 +185,7 @@ func (a *InitServiceImpl) getSyncCert(app *specV1.Application) (*specV1.Secret, 
 	return cert, nil
 }
 
-func (a *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
+func (s *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
 	info := map[string]interface{}{
 		InfoKind:      kind,
 		InfoName:      name,
@@ -173,51 +193,29 @@ func (a *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
 		InfoExpiry:    CmdExpirationInSeconds,
 		InfoTimestamp: time.Now().Unix(),
 	}
-	token, err := a.AuthService.GenToken(info)
+	token, err := s.AuthService.GenToken(info)
 	if err != nil {
 		return "", err
 	}
-	activeAddr, err := a.CacheService.GetProperty(propertyInitServerAddress)
+	params := map[string]interface{}{
+		"Token": token,
+	}
+	data, err := s.TemplateService.Execute("setup-command", templateKubeInitCommand, params)
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf(`curl -skfL '%s/v1/active/setup.sh?token=%s' -osetup.sh && sh setup.sh`, activeAddr, token), nil
+	return string(data), nil
 }
 
-func (a *InitServiceImpl) getSysParams(ns, nodeName string) (map[string]interface{}, error) {
-	imageConf, err := a.CacheService.GetProperty("baetyl-image")
+func (s *InitServiceImpl) getCoreAppFromDesire(ns, nodeName string) (*specV1.Application, error) {
+	shadowDesire, err := s.NodeService.GetDesire(ns, nodeName)
 	if err != nil {
 		return nil, errors.Trace(err)
-	}
-	nodeAddress, err := a.CacheService.GetProperty(propertySyncServerAddress)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	activeAddress, err := a.CacheService.GetProperty(propertyInitServerAddress)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	return map[string]interface{}{
-		"Namespace":           ns,
-		"EdgeNamespace":       common.DefaultBaetylEdgeNamespace,
-		"EdgeSystemNamespace": common.DefaultBaetylEdgeSystemNamespace,
-		"NodeAddress":         nodeAddress,
-		"ActiveAddress":       activeAddress,
-		"Image":               imageConf,
-		"KubeNodeName":        nodeName,
-	}, nil
-}
-
-func (a *InitServiceImpl) getDesireAppInfo(ns, nodeName string) (*specV1.Application, error) {
-	shadowDesire, err := a.NodeService.GetDesire(ns, nodeName)
-	if err != nil {
-		return nil, err
 	}
 	apps := shadowDesire.AppInfos(true)
 	for _, appInfo := range apps {
-		if strings.Contains(appInfo.Name, string(common.BaetylCore)) {
-			app, _ := a.AppService.Get(ns, appInfo.Name, "")
+		if strings.Contains(appInfo.Name, "baetyl-core") {
+			app, _ := s.App.Get(ns, appInfo.Name, "")
 			if app == nil {
 				return nil, common.Error(
 					common.ErrResourceNotFound,
@@ -233,4 +231,158 @@ func (a *InitServiceImpl) getDesireAppInfo(ns, nodeName string) (*specV1.Applica
 		common.Field("type", "sysapp"),
 		common.Field("name", nodeName),
 		common.Field("namespace", ns))
+}
+
+func (s *InitServiceImpl) GenApps(ns, nodeName string, params map[string]interface{}) ([]*specV1.Application, error) {
+	var apps []*specV1.Application
+	ca, err := s.genCoreApp(ns, nodeName, params)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	fa, err := s.genFunctionApp(ns, nodeName, params)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	apps = append(apps, ca, fa)
+	return apps, nil
+}
+
+func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
+	appName := fmt.Sprintf("baetyl-core-%s", common.RandString(9))
+	confName := fmt.Sprintf("baetyl-core-conf-%s", common.RandString(9))
+	// create config
+	confMap := map[string]interface{}{
+		"Namespace":    ns,
+		"NodeName":     nodeName,
+		"CoreAppName":  appName,
+		"CoreConfName": confName,
+	}
+	for k, v := range params {
+		confMap[k] = v
+	}
+	conf, err := s.genConfig(ns, templateCoreConfYaml, confMap)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	// create secret
+	cert, err := s.genNodeCerts(ns, nodeName, appName)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	// create application
+	appMap := map[string]interface{}{
+		"Namespace":       ns,
+		"NodeName":        nodeName,
+		"CoreAppName":     appName,
+		"CoreConfName":    conf.Name,
+		"CoreConfVersion": conf.Version,
+		"NodeCertName":    cert.Name,
+		"NodeCertVersion": cert.Version,
+	}
+	for k, v := range params {
+		appMap[k] = v
+	}
+	return s.genApp(ns, templateCoreAppYaml, appMap)
+}
+
+func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
+	appName := fmt.Sprintf("baetyl-function-%s", common.RandString(9))
+	confName := fmt.Sprintf("baetyl-function-conf-%s", common.RandString(9))
+	// create config
+	confMap := map[string]interface{}{
+		"Namespace":        ns,
+		"NodeName":         nodeName,
+		"FunctionAppName":  appName,
+		"FunctionConfName": confName,
+	}
+	for k, v := range params {
+		confMap[k] = v
+	}
+	conf, err := s.genConfig(ns, templateFuncConfYaml, confMap)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	// create application
+	appMap := map[string]interface{}{
+		"Namespace":           ns,
+		"NodeName":            nodeName,
+		"FunctionAppName":     appName,
+		"FunctionConfName":    conf.Name,
+		"FunctionConfVersion": conf.Version,
+	}
+	for k, v := range params {
+		appMap[k] = v
+	}
+	return s.genApp(ns, templateFuncAppYaml, appMap)
+}
+
+func (s *InitServiceImpl) genNodeCerts(ns, nodeName, appName string) (*specV1.Secret, error) {
+	confName := fmt.Sprintf("crt-%s-%s", nodeName, common.RandString(9))
+	certName := fmt.Sprintf(`%s.%s`, ns, nodeName)
+	certPEM, err := s.PKI.SignClientCertificate(certName, models.AltNames{})
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	ca, err := s.PKI.GetCA()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	srt := &specV1.Secret{
+		Name:      confName,
+		Namespace: ns,
+		Labels: map[string]string{
+			common.LabelAppName:  appName,
+			common.LabelNodeName: nodeName,
+			specV1.SecretLabel:   specV1.SecretCertificate,
+			common.LabelSystem:   "true",
+		},
+		Data: map[string][]byte{
+			"client.pem": certPEM.CertPEM,
+			"client.key": certPEM.KeyPEM,
+			"ca.pem":     ca,
+		},
+		Annotations: map[string]string{
+			common.AnnotationPkiCertID: certPEM.CertId,
+		},
+		System: true,
+	}
+	return s.Secret.Create(ns, srt)
+}
+
+func (s *InitServiceImpl) genConfig(ns, template string, params map[string]interface{}) (*specV1.Configuration, error) {
+	config := &specV1.Configuration{}
+	err := s.TemplateService.UnmarshalTemplate(template, params, config)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	conf, err := s.Config.Create(ns, config)
+	if err != nil {
+		res, err := s.Config.Get(ns, config.Name, "")
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		conf = res
+	}
+	return conf, nil
+}
+
+func (s *InitServiceImpl) genApp(ns, template string, params map[string]interface{}) (*specV1.Application, error) {
+	application := &specV1.Application{}
+	err := s.TemplateService.UnmarshalTemplate(template, params, application)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	app, err := s.App.Create(ns, application)
+	if err != nil {
+		res, err := s.App.Get(ns, application.Name, "")
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		app = res
+	}
+	return app, nil
 }

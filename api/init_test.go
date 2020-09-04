@@ -44,25 +44,25 @@ func TestInitAPIImpl_GetResource(t *testing.T) {
 	api.initService = mInit
 
 	// ResourceSetup
-	mInit.EXPECT().GetResource(common.ResourceSetup, "", "", nil).Return([]byte("setup"), nil)
+	mInit.EXPECT().GetResource("kube-init-setup.sh", "", "", nil).Return([]byte("setup"), nil)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest(http.MethodGet, "/v1/init/"+common.ResourceSetup, nil)
+	req, _ := http.NewRequest(http.MethodGet, "/v1/init/kube-init-setup.sh", nil)
 
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// ResourceMetrics
-	mInit.EXPECT().GetResource(common.ResourceMetrics, "", "", nil).Return([]byte("metrics"), nil)
+	mInit.EXPECT().GetResource("kube-api-metrics.yml", "", "", nil).Return([]byte("metrics"), nil)
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest(http.MethodGet, "/v1/init/"+common.ResourceMetrics, nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v1/init/"+"kube-api-metrics.yml", nil)
 
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// ResourceLocalPathStorage
-	mInit.EXPECT().GetResource(common.ResourceLocalPathStorage, "", "", nil).Return([]byte("metrics"), nil)
+	mInit.EXPECT().GetResource("kube-local-path-storage.yml", "", "", nil).Return([]byte("metrics"), nil)
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest(http.MethodGet, "/v1/init/"+common.ResourceLocalPathStorage, nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v1/init/"+"kube-local-path-storage.yml", nil)
 
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -89,7 +89,7 @@ func TestInitAPIImpl_CheckAndParseToken(t *testing.T) {
 
 	auth.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(1)
 
-	res, err := as.CheckAndParseToken(token, common.ResourceInitYaml)
+	res, err := as.CheckAndParseToken(token, "baetyl-init-deployment.yml")
 
 	assert.Equal(t, res[service.InfoKind], info[service.InfoKind])
 	assert.Equal(t, res[service.InfoName], info[service.InfoName])

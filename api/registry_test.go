@@ -16,6 +16,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 // TODO: optimize this layer, general abstraction
@@ -43,8 +44,11 @@ func initRegistryAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 func TestGetRegistry(t *testing.T) {
 	api, router, mockCtl := initRegistryAPI(t)
 	defer mockCtl.Finish()
-	mkSecretService := ms.NewMockSecretService(mockCtl)
-	api.secretService = mkSecretService
+
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		Secret: sSecret,
+	}
 
 	mConf := &models.Registry{
 		Namespace: "default",
@@ -59,8 +63,8 @@ func TestGetRegistry(t *testing.T) {
 		},
 	}
 
-	mkSecretService.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(mConf2, nil)
-	mkSecretService.EXPECT().Get(mConf.Namespace, "cba", "").Return(nil, fmt.Errorf("error"))
+	sSecret.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(mConf2, nil)
+	sSecret.EXPECT().Get(mConf.Namespace, "cba", "").Return(nil, fmt.Errorf("error"))
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/registries/abc", nil)
@@ -78,14 +82,17 @@ func TestGetRegistry(t *testing.T) {
 func TestListRegistry(t *testing.T) {
 	api, router, mockCtl := initRegistryAPI(t)
 	defer mockCtl.Finish()
-	mkSecretService := ms.NewMockSecretService(mockCtl)
-	api.secretService = mkSecretService
+
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		Secret: sSecret,
+	}
 
 	mClist := &models.SecretList{
 		Total: 0,
 	}
 
-	mkSecretService.EXPECT().List("default", gomock.Any()).Return(mClist, nil)
+	sSecret.EXPECT().List("default", gomock.Any()).Return(mClist, nil)
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/registries", nil)
@@ -97,8 +104,11 @@ func TestListRegistry(t *testing.T) {
 func TestCreateRegistry(t *testing.T) {
 	api, router, mockCtl := initRegistryAPI(t)
 	defer mockCtl.Finish()
-	mkSecretService := ms.NewMockSecretService(mockCtl)
-	api.secretService = mkSecretService
+
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		Secret: sSecret,
+	}
 
 	mConf := &models.Registry{
 		Namespace: "default",
@@ -119,15 +129,15 @@ func TestCreateRegistry(t *testing.T) {
 			"username": []byte("username"),
 		},
 	}
-	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
-	mkSecretService.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(mConf2, nil)
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
+	sSecret.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(mConf2, nil)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(mConf)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/registries", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConf2, nil)
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConf2, nil)
 	w2 := httptest.NewRecorder()
 	body2, _ := json.Marshal(mConf)
 	req2, _ := http.NewRequest(http.MethodPost, "/v1/registries", bytes.NewReader(body2))
@@ -138,8 +148,11 @@ func TestCreateRegistry(t *testing.T) {
 func TestUpdateRegistry(t *testing.T) {
 	api, router, mockCtl := initRegistryAPI(t)
 	defer mockCtl.Finish()
-	mkSecretService := ms.NewMockSecretService(mockCtl)
-	api.secretService = mkSecretService
+
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		Secret: sSecret,
+	}
 
 	mConf := &models.Registry{
 		Namespace:   "default",
@@ -159,14 +172,14 @@ func TestUpdateRegistry(t *testing.T) {
 			"username": []byte("username"),
 		},
 	}
-	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil)
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(mConf)
 	req, _ := http.NewRequest(http.MethodPut, "/v1/registries/abc", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
 	w2 := httptest.NewRecorder()
 	body2, _ := json.Marshal(mConf)
 	req2, _ := http.NewRequest(http.MethodPut, "/v1/registries/abc", bytes.NewReader(body2))
@@ -178,8 +191,8 @@ func TestUpdateRegistry(t *testing.T) {
 		Name:        "cba",
 		Description: "haha modify",
 	}
-	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil)
-	mkSecretService.EXPECT().Update(mConfSecret2.Namespace, gomock.Any()).Return(nil, common.Error(common.ErrRequestParamInvalid))
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil)
+	sSecret.EXPECT().Update(mConfSecret2.Namespace, gomock.Any()).Return(nil, common.Error(common.ErrRequestParamInvalid))
 	w3 := httptest.NewRecorder()
 	body3, _ := json.Marshal(mConfSecret2)
 	req3, _ := http.NewRequest(http.MethodPut, "/v1/registries/cba", bytes.NewReader(body3))
@@ -190,11 +203,18 @@ func TestUpdateRegistry(t *testing.T) {
 func TestRefreshRegistryPassword(t *testing.T) {
 	api, router, mockCtl := initRegistryAPI(t)
 	defer mockCtl.Finish()
-	mkSecretService, mkAppService := ms.NewMockSecretService(mockCtl), ms.NewMockApplicationService(mockCtl)
-	mkNodeService, mkIndexService := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
 
-	api.secretService, api.nodeService = mkSecretService, mkNodeService
-	api.applicationService, api.indexService = mkAppService, mkIndexService
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.nodeService, api.indexService = sNode, sIndex
 
 	mConf := &models.Registry{
 		Namespace: "default",
@@ -202,7 +222,7 @@ func TestRefreshRegistryPassword(t *testing.T) {
 		Password:  "haha",
 	}
 
-	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
 	w2 := httptest.NewRecorder()
 	body2, _ := json.Marshal(mConf)
 	req2, _ := http.NewRequest(http.MethodPut, "/v1/registries/abc", bytes.NewReader(body2))
@@ -248,14 +268,14 @@ func TestRefreshRegistryPassword(t *testing.T) {
 		Name:      "abc",
 		Password:  "haha",
 	}
-	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil)
-	mkSecretService.EXPECT().Update(mConf2.Namespace, gomock.Any()).Return(mConfSecret, nil)
-	mkIndexService.EXPECT().ListAppIndexBySecret(mConf2.Namespace, mConf2.Name).Return(appNames, nil).Times(1)
-	mkAppService.EXPECT().Get(mConf2.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
-	mkAppService.EXPECT().Get(mConf2.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
-	mkAppService.EXPECT().Get(mConf2.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()
-	mkAppService.EXPECT().Update(mConf2.Namespace, gomock.Any()).Return(apps[0], nil).AnyTimes()
-	mkNodeService.EXPECT().UpdateNodeAppVersion(mConf2.Namespace, gomock.Any()).Return(nil, nil).AnyTimes()
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil)
+	sSecret.EXPECT().Update(mConf2.Namespace, gomock.Any()).Return(mConfSecret, nil)
+	sIndex.EXPECT().ListAppIndexBySecret(mConf2.Namespace, mConf2.Name).Return(appNames, nil).Times(1)
+	sApp.EXPECT().Get(mConf2.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
+	sApp.EXPECT().Get(mConf2.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
+	sApp.EXPECT().Get(mConf2.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()
+	sApp.EXPECT().Update(mConf2.Namespace, gomock.Any()).Return(apps[0], nil).AnyTimes()
+	sNode.EXPECT().UpdateNodeAppVersion(mConf2.Namespace, gomock.Any()).Return(nil, nil).AnyTimes()
 	w3 := httptest.NewRecorder()
 	body3, _ := json.Marshal(mConf2)
 	req3, _ := http.NewRequest(http.MethodPost, "/v1/registries/cba/refresh", bytes.NewReader(body3))
@@ -266,10 +286,19 @@ func TestRefreshRegistryPassword(t *testing.T) {
 func TestDeleteRegistry(t *testing.T) {
 	api, router, mockCtl := initRegistryAPI(t)
 	defer mockCtl.Finish()
-	mkSecretService := ms.NewMockSecretService(mockCtl)
-	mkIndexService := ms.NewMockIndexService(mockCtl)
-	api.secretService = mkSecretService
-	api.indexService = mkIndexService
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.nodeService, api.indexService = sNode, sIndex
+
 	mConfSecret := &specV1.Secret{
 		Namespace:   "default",
 		Name:        "abc",
@@ -278,9 +307,9 @@ func TestDeleteRegistry(t *testing.T) {
 			specV1.SecretLabel: specV1.SecretRegistry,
 		},
 	}
-	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil)
-	mkSecretService.EXPECT().Delete(mConfSecret.Namespace, mConfSecret.Name).Return(nil)
-	mkIndexService.EXPECT().ListAppIndexBySecret(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil)
+	sSecret.EXPECT().Delete(mConfSecret.Namespace, mConfSecret.Name).Return(nil)
+	sIndex.EXPECT().ListAppIndexBySecret(gomock.Any(), gomock.Any()).Return(nil, nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/registries/abc", nil)
 	w := httptest.NewRecorder()
@@ -291,11 +320,18 @@ func TestDeleteRegistry(t *testing.T) {
 func TestGetAppByRegistry(t *testing.T) {
 	api, router, mockCtl := initRegistryAPI(t)
 	defer mockCtl.Finish()
-	mkSecretService, mkAppService := ms.NewMockSecretService(mockCtl), ms.NewMockApplicationService(mockCtl)
-	mkNodeService, mkIndexService := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
 
-	api.secretService, api.nodeService = mkSecretService, mkNodeService
-	api.applicationService, api.indexService = mkAppService, mkIndexService
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.nodeService, api.indexService = sNode, sIndex
 
 	appNames := []string{"app1", "app2", "app3"}
 	apps := []*specV1.Application{
@@ -323,12 +359,12 @@ func TestGetAppByRegistry(t *testing.T) {
 		},
 	}
 
-	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret3, nil)
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret3, nil)
 
-	mkIndexService.EXPECT().ListAppIndexBySecret(mConfSecret3.Namespace, mConfSecret3.Name).Return(appNames, nil).Times(1)
-	mkAppService.EXPECT().Get(mConfSecret3.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
-	mkAppService.EXPECT().Get(mConfSecret3.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
-	mkAppService.EXPECT().Get(mConfSecret3.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()
+	sIndex.EXPECT().ListAppIndexBySecret(mConfSecret3.Namespace, mConfSecret3.Name).Return(appNames, nil).Times(1)
+	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
+	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
+	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()
 
 	w4 := httptest.NewRecorder()
 	req4, _ := http.NewRequest(http.MethodGet, "/v1/registries/abc/apps", nil)

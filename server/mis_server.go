@@ -3,12 +3,14 @@ package server
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/baetyl/baetyl-go/v2/log"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/baetyl/baetyl-cloud/v2/api"
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 )
 
@@ -17,7 +19,7 @@ type MisServer struct {
 	cfg    *config.CloudConfig
 	router *gin.Engine
 	server *http.Server
-	api    *api.API
+	api    *api.API // TODO: define independent api
 }
 
 // NewMisServer create Mis server
@@ -52,4 +54,51 @@ func (s *MisServer) SetAPI(api *api.API) {
 func (s *MisServer) Close() {
 	ctx, _ := context.WithTimeout(context.Background(), s.cfg.MisServer.ShutdownTime)
 	s.server.Shutdown(ctx)
+}
+
+func (s *MisServer) GetRoute() *gin.Engine {
+	return s.router
+}
+
+func (s *MisServer) InitRoute() {
+	s.router.NoRoute(NoRouteHandler)
+	s.router.NoMethod(NoMethodHandler)
+	s.router.GET("/health", Health)
+
+	s.router.Use(RequestIDHandler)
+	s.router.Use(LoggerHandler)
+	s.router.Use(s.authHandler)
+	v1 := s.router.Group("v1")
+	{
+		cache := v1.Group("/properties")
+
+		cache.POST("", common.WrapperMis(s.api.CreateProperty))
+		cache.DELETE("/:name", common.WrapperMis(s.api.DeleteProperty))
+		cache.GET("", common.WrapperMis(s.api.ListProperty))
+		cache.PUT("/:name", common.WrapperMis(s.api.UpdateProperty))
+	}
+}
+
+// auth handler
+func (s *MisServer) authHandler(c *gin.Context) {
+	cc := common.NewContext(c)
+
+	token := c.Request.Header.Get(s.cfg.MisServer.TokenHeader)
+	if strings.Compare(token, s.cfg.MisServer.AuthToken) == 0 {
+		user := c.Request.Header.Get(s.cfg.MisServer.UserHeader)
+		if len(user) != 0 {
+			log.L().Info("mis server accessed",
+				log.Any("user", user),
+				log.Any(cc.GetTrace()),
+			)
+			return
+		}
+	}
+	err := common.Error(common.ErrRequestAccessDenied, common.Field("error", common.Code(common.ErrRequestAccessDenied)))
+	log.L().Error(common.Code(common.ErrRequestAccessDenied).String(),
+		log.Any(cc.GetTrace()),
+		log.Code(err),
+		log.Error(err),
+	)
+	common.PopulateFailedResponse(cc, err, true)
 }

@@ -26,6 +26,7 @@ func (c *client) Close() error {
 }
 
 func init() {
+	plugin.RegisterFactory("kube", New)
 	plugin.RegisterFactory("kubernetes", New)
 }
 
@@ -37,11 +38,11 @@ func New() (plugin.Plugin, error) {
 	}
 
 	kubeConfig, err := func() (*rest.Config, error) {
-		if cfg.Kubernetes.InCluster {
+		if !cfg.Kube.OutCluster {
 			return rest.InClusterConfig()
 		}
 		return clientcmd.BuildConfigFromFlags(
-			"", cfg.Kubernetes.ConfigPath)
+			"", cfg.Kube.ConfigPath)
 	}()
 
 	if err != nil {
@@ -60,7 +61,7 @@ func New() (plugin.Plugin, error) {
 		coreV1:       kubeClient.CoreV1(),
 		customClient: customClient,
 		cfg:          cfg,
-		aesKey:       []byte(cfg.Kubernetes.AES.Key),
+		aesKey:       []byte(cfg.Kube.AES.Key),
 		log:          log.With(log.Any("plugin", "kube")),
 	}, nil
 }

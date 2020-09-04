@@ -20,6 +20,7 @@ import (
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 func getMockNode() *specV1.Node {
@@ -101,12 +102,12 @@ func TestNewAPI(t *testing.T) {
 func TestGetNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	api.nodeService = mkNodeService
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.nodeService = sNode
 
 	mNode := getMockNode()
 
-	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil)
+	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil)
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc", nil)
@@ -116,14 +117,14 @@ func TestGetNode(t *testing.T) {
 	bytes := w.Body.Bytes()
 	assert.Equal(t, string(bytes), "{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false}\n")
 
-	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, common.Error(common.ErrResourceNotFound))
+	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, common.Error(common.ErrResourceNotFound))
 	// 404
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc", nil)
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req)
 	assert.Equal(t, http.StatusNotFound, w2.Code)
 
-	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, fmt.Errorf("error"))
+	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, fmt.Errorf("error"))
 	// 500
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc", nil)
 	w2 = httptest.NewRecorder()
@@ -134,8 +135,8 @@ func TestGetNode(t *testing.T) {
 func TestGetNodes(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	api.nodeService = mkNodeService
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.nodeService = sNode
 
 	mNode := getMockNode()
 	mNode2 := getMockNode()
@@ -143,8 +144,8 @@ func TestGetNodes(t *testing.T) {
 	mNode2.Labels[common.LabelNodeName] = "abc2"
 
 	// 200
-	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
-	mkNodeService.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
+	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
 	nodeNames := &models.NodeNames{
 		Names: []string{"abc", "abc2"},
 	}
@@ -157,9 +158,9 @@ func TestGetNodes(t *testing.T) {
 	assert.Equal(t, string(w.Body.Bytes()), "[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"ready\":false}]\n")
 
 	// 200 ResourceNotFound
-	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
-	mkNodeService.EXPECT().Get(mNode.Namespace, "err_abc").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	mkNodeService.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
+	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Get(mNode.Namespace, "err_abc").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sNode.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
 	nodeNames = &models.NodeNames{
 		Names: []string{"abc", "err_abc", "abc2"},
 	}
@@ -196,7 +197,7 @@ func TestGetNodes(t *testing.T) {
 	}
 	body, err = json.Marshal(nodeNames)
 	assert.NoError(t, err)
-	mkNodeService.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, fmt.Errorf("error")).Times(1)
+	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, fmt.Errorf("error")).Times(1)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes?batch", bytes.NewReader(body))
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -206,26 +207,26 @@ func TestGetNodes(t *testing.T) {
 func TestGetNodeStats(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	api.nodeService = mkNodeService
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.nodeService = sNode
 
 	mNode := getMockNode()
 
-	mkNodeService.EXPECT().Get(mNode.Namespace, gomock.Any()).Return(mNode, nil)
+	sNode.EXPECT().Get(mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mkNodeService.EXPECT().Get(mNode.Namespace, "cba").Return(nil, common.Error(common.ErrResourceNotFound))
+	sNode.EXPECT().Get(mNode.Namespace, "cba").Return(nil, common.Error(common.ErrResourceNotFound))
 	// 404
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/cba/stats", nil)
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req)
 	assert.Equal(t, http.StatusNotFound, w2.Code)
 
-	mkNodeService.EXPECT().Get(mNode.Namespace, "cba").Return(nil, fmt.Errorf("error"))
+	sNode.EXPECT().Get(mNode.Namespace, "cba").Return(nil, fmt.Errorf("error"))
 	// 500
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/cba/stats", nil)
 	w2 = httptest.NewRecorder()
@@ -245,7 +246,7 @@ func TestGetNodeStats(t *testing.T) {
 		},
 		"time": "2020-04-13T10:07:12.267728Z",
 	}
-	mkNodeService.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
 	// 200
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
@@ -264,7 +265,7 @@ func TestGetNodeStats(t *testing.T) {
 			},
 		},
 	}
-	mkNodeService.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
 	// 200
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
@@ -283,7 +284,7 @@ func TestGetNodeStats(t *testing.T) {
 			},
 		},
 	}
-	mkNodeService.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -302,7 +303,7 @@ func TestGetNodeStats(t *testing.T) {
 			},
 		},
 	}
-	mkNodeService.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -321,7 +322,7 @@ func TestGetNodeStats(t *testing.T) {
 			},
 		},
 	}
-	mkNodeService.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -341,7 +342,7 @@ func TestGetNodeStats(t *testing.T) {
 		"appstats":  nil,
 	}
 
-	mkNodeService.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -351,8 +352,8 @@ func TestGetNodeStats(t *testing.T) {
 func TestListNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	api.nodeService = mkNodeService
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.nodeService = sNode
 
 	mClist := &models.NodeList{
 		Items: []specV1.Node{
@@ -362,7 +363,7 @@ func TestListNode(t *testing.T) {
 		},
 	}
 
-	mkNodeService.EXPECT().List("default", &models.ListOptions{}).Return(mClist, nil)
+	sNode.EXPECT().List("default", &models.ListOptions{}).Return(mClist, nil)
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes", nil)
@@ -384,27 +385,27 @@ func TestListNode(t *testing.T) {
 func TestCreateNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	api.nodeService = mkNodeService
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.nodeService, api.indexService = sNode, sIndex
+
+	sProp := ms.NewMockPropertyService(mockCtl)
+	sPKI := ms.NewMockPKIService(mockCtl)
+	sInit := ms.NewMockInitService(mockCtl)
+	api.propertyService = sProp
+	api.pkiService = sPKI
+	api.initService = sInit
+
 	mNode := getMockNode()
-
-	as := ms.NewMockApplicationService(mockCtl)
-	cs := ms.NewMockConfigService(mockCtl)
-	ss := ms.NewMockSecretService(mockCtl)
-	scs := ms.NewMockSysConfigService(mockCtl)
-	pki := ms.NewMockPKIService(mockCtl)
-	is := ms.NewMockIndexService(mockCtl)
-	init := ms.NewMockInitService(mockCtl)
-	tp := ms.NewMockTemplateService(mockCtl)
-
-	api.applicationService = as
-	api.configService = cs
-	api.secretService = ss
-	api.sysConfigService = scs
-	api.pkiService = pki
-	api.indexService = is
-	api.initService = init
-	api.templateService = tp
 
 	app1 := &specV1.Application{
 		Name:      "baetyl-core",
@@ -416,13 +417,12 @@ func TestCreateNode(t *testing.T) {
 	}
 	nodeList := []string{"s0", "s1", "s2"}
 
-	mkNodeService.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
-	is.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
-	tp.EXPECT().GetTemplate(gomock.Any()).Return("{}", nil).AnyTimes()
-	tp.EXPECT().GenSystemApps(mNode.Namespace, gomock.Any(), nil).Return([]*specV1.Application{app1, app2}, nil).Times(2)
+	sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
+	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any(), nil).Return([]*specV1.Application{app1, app2}, nil).Times(2)
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
-	mkNodeService.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(mNode)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
@@ -432,8 +432,8 @@ func TestCreateNode(t *testing.T) {
 	mNode.Name = "node-test"
 	mNode.Labels[common.LabelNodeName] = mNode.Name
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
-	mkNodeService.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode)
@@ -441,7 +441,7 @@ func TestCreateNode(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	mNode.Name = "node-baetyl-test"
 	mNode.Labels[common.LabelNodeName] = mNode.Name
 	w = httptest.NewRecorder()
@@ -450,7 +450,7 @@ func TestCreateNode(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil)
 	mNode.Name = "node-baetyl-test"
 	mNode.Labels[common.LabelNodeName] = mNode.Name
 	w = httptest.NewRecorder()
@@ -472,8 +472,8 @@ func TestCreateNode(t *testing.T) {
 func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	api.nodeService = mkNodeService
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.nodeService = sNode
 	mNode1 := &specV1.Node{
 		Namespace: "default",
 		Name:      "abc",
@@ -553,12 +553,12 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 func TestUpdateNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	api.nodeService = mkNodeService
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.nodeService = sNode
 
 	mApp := getMockNode()
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil).Times(1)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil).Times(1)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(mApp)
 	req, _ := http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
@@ -567,16 +567,16 @@ func TestUpdateNode(t *testing.T) {
 
 	mApp2 := getMockNode()
 	mApp2.Labels["test"] = "test"
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mApp2, nil).AnyTimes()
-	mkNodeService.EXPECT().Update(mApp.Namespace, mApp).Return(nil, fmt.Errorf("error"))
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mApp2, nil).AnyTimes()
+	sNode.EXPECT().Update(mApp.Namespace, mApp).Return(nil, fmt.Errorf("error"))
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mApp)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mApp, nil).AnyTimes()
-	mkNodeService.EXPECT().Update(mApp.Namespace, mApp).Return(mApp2, nil)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mApp, nil).AnyTimes()
+	sNode.EXPECT().Update(mApp.Namespace, mApp).Return(mApp2, nil)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mApp)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
@@ -587,19 +587,21 @@ func TestUpdateNode(t *testing.T) {
 func TestDeleteNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	mkApplicationService := ms.NewMockApplicationService(mockCtl)
-	mkIndexService := ms.NewMockIndexService(mockCtl)
-	mkConfigService := ms.NewMockConfigService(mockCtl)
-	mkSecretService := ms.NewMockSecretService(mockCtl)
-	mkPkiService := ms.NewMockPKIService(mockCtl)
 
-	api.nodeService = mkNodeService
-	api.applicationService = mkApplicationService
-	api.indexService = mkIndexService
-	api.configService = mkConfigService
-	api.secretService = mkSecretService
-	api.pkiService = mkPkiService
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.nodeService, api.indexService = sNode, sIndex
+
+	sPKI := ms.NewMockPKIService(mockCtl)
+	api.pkiService = sPKI
 
 	mNode := &specV1.Node{
 		Namespace: "default",
@@ -679,23 +681,23 @@ func TestDeleteNode(t *testing.T) {
 		},
 	}
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
-	mkNodeService.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
-	mkApplicationService.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
-	mkApplicationService.EXPECT().Delete(mNode.Namespace, appCore.Name, appCore.Version).Return(nil).Times(1)
-	mkIndexService.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appCore.Name, gomock.Any()).Return(nil).Times(1)
-	mkConfigService.EXPECT().Delete(mNode.Namespace, appCore.Volumes[0].Config.Name).Times(1)
-	mkSecretService.EXPECT().Get(mNode.Namespace, appCore.Volumes[1].Secret.Name, "").Return(secret1, nil).Times(1)
-	mkPkiService.EXPECT().DeleteClientCertificate("certId1").Return(nil).Times(1)
-	mkSecretService.EXPECT().Delete(mNode.Namespace, appCore.Volumes[1].Secret.Name).Times(1)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
+	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, appCore.Version).Return(nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appCore.Name, gomock.Any()).Return(nil).Times(1)
+	sConfig.EXPECT().Delete(mNode.Namespace, appCore.Volumes[0].Config.Name).Times(1)
+	sSecret.EXPECT().Get(mNode.Namespace, appCore.Volumes[1].Secret.Name, "").Return(secret1, nil).Times(1)
+	sPKI.EXPECT().DeleteClientCertificate("certId1").Return(nil).Times(1)
+	sSecret.EXPECT().Delete(mNode.Namespace, appCore.Volumes[1].Secret.Name).Times(1)
 
-	mkApplicationService.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
-	mkApplicationService.EXPECT().Delete(mNode.Namespace, appFunction.Name, appFunction.Version).Return(nil).Times(1)
-	mkIndexService.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(nil).Times(1)
-	mkConfigService.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Times(1)
-	mkSecretService.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(secret1f, nil).Times(1)
-	mkPkiService.EXPECT().DeleteClientCertificate("certId1f").Return(nil).Times(1)
-	mkSecretService.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[1].Secret.Name).Times(1)
+	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, appFunction.Version).Return(nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(nil).Times(1)
+	sConfig.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Times(1)
+	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(secret1f, nil).Times(1)
+	sPKI.EXPECT().DeleteClientCertificate("certId1f").Return(nil).Times(1)
+	sSecret.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[1].Secret.Name).Times(1)
 
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
@@ -703,20 +705,20 @@ func TestDeleteNode(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, errors.New("error")).Times(1)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, errors.New("error")).Times(1)
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
-	mkNodeService.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(errors.New("error"))
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(errors.New("error"))
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -726,19 +728,21 @@ func TestDeleteNode(t *testing.T) {
 func TestDeleteNodeError(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	mkApplicationService := ms.NewMockApplicationService(mockCtl)
-	mkIndexService := ms.NewMockIndexService(mockCtl)
-	mkConfigService := ms.NewMockConfigService(mockCtl)
-	mkSecretService := ms.NewMockSecretService(mockCtl)
-	mkPkiService := ms.NewMockPKIService(mockCtl)
 
-	api.nodeService = mkNodeService
-	api.applicationService = mkApplicationService
-	api.indexService = mkIndexService
-	api.configService = mkConfigService
-	api.secretService = mkSecretService
-	api.pkiService = mkPkiService
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.nodeService, api.indexService = sNode, sIndex
+
+	sPKI := ms.NewMockPKIService(mockCtl)
+	api.pkiService = sPKI
 
 	mNode := &specV1.Node{
 		Namespace: "default",
@@ -808,10 +812,10 @@ func TestDeleteNodeError(t *testing.T) {
 		},
 	}
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
-	mkNodeService.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
-	mkApplicationService.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	mkApplicationService.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
+	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
@@ -819,21 +823,21 @@ func TestDeleteNodeError(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
-	mkNodeService.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
-	mkApplicationService.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
-	mkApplicationService.EXPECT().Delete(mNode.Namespace, appCore.Name, appCore.Version).Return(errors.New("error")).Times(1)
-	mkIndexService.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
-	mkConfigService.EXPECT().Delete(mNode.Namespace, appCore.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
-	mkSecretService.EXPECT().Get(mNode.Namespace, appCore.Volumes[1].Secret.Name, "").Return(secret1, nil).Times(1)
-	mkPkiService.EXPECT().DeleteClientCertificate("certId1").Return(errors.New("error")).Times(1)
-	mkSecretService.EXPECT().Delete(mNode.Namespace, appCore.Volumes[1].Secret.Name).Times(1)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
+	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, appCore.Version).Return(errors.New("error")).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
+	sConfig.EXPECT().Delete(mNode.Namespace, appCore.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
+	sSecret.EXPECT().Get(mNode.Namespace, appCore.Volumes[1].Secret.Name, "").Return(secret1, nil).Times(1)
+	sPKI.EXPECT().DeleteClientCertificate("certId1").Return(errors.New("error")).Times(1)
+	sSecret.EXPECT().Delete(mNode.Namespace, appCore.Volumes[1].Secret.Name).Times(1)
 
-	mkApplicationService.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
-	mkApplicationService.EXPECT().Delete(mNode.Namespace, appFunction.Name, appFunction.Version).Return(errors.New("error")).Times(1)
-	mkIndexService.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(errors.New("error")).Times(1)
-	mkConfigService.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
-	mkSecretService.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(nil, errors.New("error")).Times(1)
+	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, appFunction.Version).Return(errors.New("error")).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(errors.New("error")).Times(1)
+	sConfig.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
+	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(nil, errors.New("error")).Times(1)
 
 	// 200
 	req2, _ := http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
@@ -841,17 +845,17 @@ func TestDeleteNodeError(t *testing.T) {
 	router.ServeHTTP(w2, req2)
 	assert.Equal(t, http.StatusOK, w2.Code)
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
-	mkNodeService.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
-	mkApplicationService.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, errors.New("error")).Times(1)
-	mkApplicationService.EXPECT().Delete(mNode.Namespace, appCore.Name, appCore.Version).Return(errors.New("error")).Times(1)
-	mkIndexService.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
+	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, errors.New("error")).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, appCore.Version).Return(errors.New("error")).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 
-	mkApplicationService.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
-	mkApplicationService.EXPECT().Delete(mNode.Namespace, appFunction.Name, appFunction.Version).Return(errors.New("error")).Times(1)
-	mkIndexService.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(errors.New("error")).Times(1)
-	mkConfigService.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
-	mkSecretService.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(nil, errors.New("error")).Times(1)
+	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, appFunction.Version).Return(errors.New("error")).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(errors.New("error")).Times(1)
+	sConfig.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
+	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(nil, errors.New("error")).Times(1)
 
 	// 200
 	req3, _ := http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
@@ -881,8 +885,8 @@ func genDesireOfSysApps() specV1.Desire {
 func TestAPI_GetNodeDeployHistory(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	api.nodeService = mkNodeService
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.nodeService = sNode
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/deploys", nil)
 	w2 := httptest.NewRecorder()
@@ -893,14 +897,26 @@ func TestAPI_GetNodeDeployHistory(t *testing.T) {
 func TestGenInitCmdFromNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	nMock := ms.NewMockNodeService(mockCtl)
-	init := ms.NewMockInitService(mockCtl)
-	api.nodeService = nMock
-	api.initService = init
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.nodeService = sNode
+
+	sInit := ms.NewMockInitService(mockCtl)
+	api.initService = sInit
+
 	node := getMockNode()
 
-	init.EXPECT().GenCmd("node", "default", "abc").Return("setup", nil).Times(1)
-	nMock.EXPECT().Get(node.Namespace, node.Name).Return(node, nil).Times(1)
+	sInit.EXPECT().GenCmd("node", "default", "abc").Return("setup", nil).Times(1)
+	sNode.EXPECT().Get(node.Namespace, node.Name).Return(node, nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/init", nil)
 	w := httptest.NewRecorder()
@@ -930,10 +946,21 @@ func TestGenInitCmdFromNode_ErrNode(t *testing.T) {
 func TestGetAppByNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService, mkIndexService := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	mkAppService := ms.NewMockApplicationService(mockCtl)
-	api.applicationService = mkAppService
-	api.nodeService, api.indexService = mkNodeService, mkIndexService
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.nodeService, api.indexService = sNode, sIndex
+
+	sInit := ms.NewMockInitService(mockCtl)
+	api.initService = sInit
 
 	appNames := []string{"app1", "app2", "app3"}
 	sysAppNames := []string{"sysapp1", "sysapp2", "sysapp3"}
@@ -1003,7 +1030,7 @@ func TestGetAppByNode(t *testing.T) {
 		Desire:      specV1.Desire{},
 	}
 
-	mkNodeService.EXPECT().Get(gomock.Any(), gomock.Any()).Return(node, nil).AnyTimes()
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(node, nil).AnyTimes()
 
 	w4 := httptest.NewRecorder()
 	req4, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/apps", nil)
@@ -1016,12 +1043,12 @@ func TestGetAppByNode(t *testing.T) {
 	node.Desire.SetAppInfos(true, sysappinfos)
 	node.Desire.SetAppInfos(false, appinfos)
 
-	mkAppService.EXPECT().Get(node.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
-	mkAppService.EXPECT().Get(node.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
-	mkAppService.EXPECT().Get(node.Namespace, appNames[2], "").Return(nil, common.Error(common.ErrResourceNotFound)).AnyTimes()
-	mkAppService.EXPECT().Get(node.Namespace, sysAppNames[0], "").Return(sysapps[0], nil).AnyTimes()
-	mkAppService.EXPECT().Get(node.Namespace, sysAppNames[1], "").Return(sysapps[1], nil).AnyTimes()
-	mkAppService.EXPECT().Get(node.Namespace, sysAppNames[2], "").Return(nil, common.Error(common.ErrResourceNotFound)).AnyTimes()
+	sApp.EXPECT().Get(node.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
+	sApp.EXPECT().Get(node.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
+	sApp.EXPECT().Get(node.Namespace, appNames[2], "").Return(nil, common.Error(common.ErrResourceNotFound)).AnyTimes()
+	sApp.EXPECT().Get(node.Namespace, sysAppNames[0], "").Return(sysapps[0], nil).AnyTimes()
+	sApp.EXPECT().Get(node.Namespace, sysAppNames[1], "").Return(sysapps[1], nil).AnyTimes()
+	sApp.EXPECT().Get(node.Namespace, sysAppNames[2], "").Return(nil, common.Error(common.ErrResourceNotFound)).AnyTimes()
 
 	w4 = httptest.NewRecorder()
 	req4, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/apps", nil)
@@ -1041,11 +1068,11 @@ func TestGetAppByNode(t *testing.T) {
 func TestAPI_NodeNumberCollector(t *testing.T) {
 	api, _, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
-	mkNodeService := ms.NewMockNodeService(mockCtl)
-	api.nodeService = mkNodeService
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.nodeService = sNode
 	namespace := "iotCoreId"
 
-	mkNodeService.EXPECT().List(namespace, gomock.Any()).Return(nil, errors.New("error"))
+	sNode.EXPECT().List(namespace, gomock.Any()).Return(nil, errors.New("error"))
 	_, err := api.NodeNumberCollector(namespace)
 	assert.Error(t, err)
 
@@ -1057,9 +1084,8 @@ func TestAPI_NodeNumberCollector(t *testing.T) {
 			},
 		},
 	}
-	mkNodeService.EXPECT().List(namespace, gomock.Any()).Return(list, nil)
+	sNode.EXPECT().List(namespace, gomock.Any()).Return(list, nil)
 	res, err := api.NodeNumberCollector(namespace)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, res[plugin.QuotaNode])
 }
-

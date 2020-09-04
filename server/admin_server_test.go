@@ -22,8 +22,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-func InitMockEnvironment(t *testing.T) (*AdminServer, *InitServer,
-	*mockPlugin.MockAuth, *mockPlugin.MockLicense, *gomock.Controller, *config.CloudConfig, *MisServer) {
+func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *mockPlugin.MockLicense, *gomock.Controller) {
 	c := &config.CloudConfig{}
 	c.Plugin.Auth = common.RandString(9)
 	c.Plugin.ModelStorage = common.RandString(9)
@@ -34,9 +33,6 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *InitServer,
 	c.Plugin.Functions = []string{common.RandString(9)}
 	c.Plugin.License = common.RandString(9)
 	c.Plugin.Property = common.RandString(9)
-	c.InitServer.Certificate.CA = "../scripts/demo/native/certs/client_ca.crt"
-	c.InitServer.Certificate.Cert = "../scripts/demo/native/certs/server.crt"
-	c.InitServer.Certificate.Key = "../scripts/demo/native/certs/server.key"
 	mockCtl := gomock.NewController(t)
 
 	mockModelStorage := mockPlugin.NewMockModelStorage(mockCtl)
@@ -84,24 +80,15 @@ func InitMockEnvironment(t *testing.T) (*AdminServer, *InitServer,
 	mockAPI, err := api.NewAPI(c)
 	assert.NoError(t, err)
 
-	mockInitAPI, err := api.NewInitAPI(c)
-	assert.NoError(t, err)
-
 	s, err := NewAdminServer(c)
 	assert.NoError(t, err)
 	s.SetAPI(mockAPI)
-	a, err := NewInitServer(c)
-	assert.NoError(t, err)
-	a.SetAPI(mockInitAPI)
-	m, err := NewMisServer(c)
-	assert.NoError(t, err)
-	m.SetAPI(mockAPI)
 
-	return s, a, mockAuth, mLicense, mockCtl, c, m
+	return s, mockAuth, mLicense, mockCtl
 }
 
-func TestHandler(t *testing.T) {
-	s, _, mkAuth, mkLicense, mockCtl, _, _ := InitMockEnvironment(t)
+func TestAdminServer_Handler(t *testing.T) {
+	s, mkAuth, mkLicense, mockCtl := initAdminServerMock(t)
 	defer mockCtl.Finish()
 
 	s.InitRoute()
@@ -154,70 +141,4 @@ func TestHandler(t *testing.T) {
 
 	go s.Run()
 	defer s.Close()
-}
-
-func TestHandler_Init(t *testing.T) {
-	t.Skip()
-	_, a, _, _, mockCtl, c, _ := InitMockEnvironment(t)
-	defer mockCtl.Finish()
-
-	// https 200
-	a.InitRoute()
-	r := a.GetRoute()
-	assert.NotNil(t, r)
-
-	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
-	w := httptest.NewRecorder()
-	a.GetRoute().ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-	go a.Run()
-	defer a.Close()
-	// http 200
-	c.InitServer.Certificate.Key = ""
-	c.InitServer.Certificate.Cert = ""
-	aHttp, err := NewInitServer(c)
-	assert.NoError(t, err)
-	aHttp.InitRoute()
-	req, err = http.NewRequest(http.MethodGet, "/health", nil)
-	assert.NoError(t, err)
-	w = httptest.NewRecorder()
-	aHttp.GetRoute().ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-	go aHttp.Run()
-	defer aHttp.Close()
-}
-
-func TestHandler_Mis(t *testing.T) {
-	_, _, _, _, mockCtl, _, m := InitMockEnvironment(t)
-	defer mockCtl.Finish()
-
-	m.InitRoute()
-	m.router.Use(m.authHandler)
-	r := m.GetRoute()
-	assert.NotNil(t, r)
-	// https 200
-	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
-	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
-	req.Header.Set("baetyl-cloud-user", "1")
-	w := httptest.NewRecorder()
-	m.GetRoute().ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-	go m.Run()
-	defer m.Close()
-	// http 200
-	req, _ = http.NewRequest(http.MethodGet, "/health", nil)
-	req.Header.Set("baetyl-cloud-token", "baetyl-cloud-token")
-	req.Header.Set("baetyl-cloud-user", "")
-	w = httptest.NewRecorder()
-	m.GetRoute().ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-	go m.Run()
-	defer m.Close()
-	// http 200
-	req, _ = http.NewRequest(http.MethodGet, "/health", nil)
-	w = httptest.NewRecorder()
-	m.GetRoute().ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-	go m.Run()
-	defer m.Close()
 }

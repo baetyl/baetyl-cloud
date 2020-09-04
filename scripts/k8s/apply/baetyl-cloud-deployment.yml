@@ -15,7 +15,8 @@ spec:
     spec:
       serviceAccountName: baetyl-cloud
       containers:
-        - image: baetyl-cloud:t4
+        # docker build -t baetyl-cloud:local-build -f Dockerfile-local .
+        - image: baetyl-cloud:local-build
           imagePullPolicy: IfNotPresent
           name: baetyl-cloud
           ports:
@@ -26,7 +27,7 @@ spec:
               name: sync-port
               protocol: TCP
             - containerPort: 9003
-              name: active-port
+              name: init-port
               protocol: TCP
           volumeMounts:
             - mountPath: /etc/baetyl

@@ -4,7 +4,7 @@ set -e
 
 OS=$(uname)
 TOKEN="{{.Token}}"
-CLOUD_ADDR="{{.CloudAddr}}"
+ADDR="{{GetProperty "init-server-address"}}"
 SUDO=sudo
 
 exec_cmd_nobail() {
@@ -157,12 +157,11 @@ check_and_install_baetyl() {
 
   KUBE_MASTER_NODE_NAME=$(get_kube_master)
   if [ ! -z "$KUBE_MASTER_NODE_NAME" ]; then
-    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/core-data" $SUDO
-    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/app-data" $SUDO
-    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/core-store" $SUDO
-    exec_cmd_nobail "mkdir -p -m 666 /var/log/baetyl/core-log" $SUDO
-    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/core-page" $SUDO
-    kube_apply "$CLOUD_ADDR/v1/active/baetyl-init.yml?token=$TOKEN&node=$KUBE_MASTER_NODE_NAME"
+    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/host" $SUDO
+    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/object" $SUDO
+    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/store" $SUDO
+    exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/log" $SUDO
+    kube_apply "$ADDR/v1/init/baetyl-init-deployment.yml?token=$TOKEN&node=$KUBE_MASTER_NODE_NAME"
   else
     print_status "Can not get kubernetes master or controlplane node, this script will exit now..."
   fi
@@ -178,7 +177,7 @@ kube_apply() {
 check_and_get_metrics() {
   METRICS=$(check_kube_res metrics-server)
   if [ -z "$METRICS" ]; then
-    kube_apply "$CLOUD_ADDR/v1/active/metrics.yml"
+    kube_apply "$ADDR/v1/init/kube-api-metrics.yml"
   fi
 }
 
@@ -189,7 +188,7 @@ check_kube_res() {
 check_and_get_storage() {
   PROVISIONER=$(check_kube_res local-path-provisioner)
   if [ -z "$PROVISIONER" ]; then
-    kube_apply "$$CLOUD_ADDR/v1/active/local-path-storage.yml"
+    kube_apply "$ADDR/v1/init/kube-local-path-storage.yml"
   fi
 }
 

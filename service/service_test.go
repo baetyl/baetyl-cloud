@@ -3,12 +3,13 @@ package service
 import (
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 )
 
 type MockServices struct {
@@ -98,7 +99,7 @@ func mockTestConfig() *config.CloudConfig {
 	conf.Plugin.Shadow = conf.Plugin.DatabaseStorage
 	conf.Plugin.License = common.RandString(9)
 	conf.Plugin.Property = common.RandString(9)
-	conf.Template.Path = "../scripts/demo/native/templates"
+	conf.Template.Path = "../scripts/native/templates"
 	return conf
 }
 
@@ -161,12 +162,14 @@ func InitEmptyMockEnvironment(t *testing.T) *MockServices {
 	for _, v := range conf.Plugin.Functions {
 		plugin.RegisterFactory(v, mockFunction(mockFunctionPlugin))
 	}
-
+	mProperty := mockPlugin.NewMockProperty(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Property, mockProperty(mProperty))
 	return &MockServices{
 		conf:           conf,
 		ctl:            mockCtl,
 		objectStorage:  mockObjectStorage,
 		functionPlugin: mockFunctionPlugin,
+		property:       mProperty,
 	}
 }
 

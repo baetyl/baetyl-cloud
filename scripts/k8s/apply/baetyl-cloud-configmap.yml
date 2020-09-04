@@ -68,21 +68,24 @@ data:
     sgQJMw==
     -----END CERTIFICATE-----
   conf.yml: |-
-    activeServer:
+    adminServer:
+      port: ":9004"
+
+    initServer:
       port: ":9003"
       ca: "/etc/baetyl/server_ca.crt"
       cert: "/etc/baetyl/server.crt"
       key: "/etc/baetyl/server.key"
 
-    adminServer:
-      port: ":9004"
+    httplink:
+      port: ":9005"
+      ca: "/etc/baetyl/client_ca.crt"
+      cert: "/etc/baetyl/server.crt"
+      key: "/etc/baetyl/server.key"
 
     database:
       type: "mysql"
       url: "root:secretpassword@(mariadb:3306)/baetyl_cloud?charset=utf8&parseTime=true"
-
-    kubernetes:
-      inCluster: true
 
     defaultpki:
       rootCAFile: "/etc/baetyl/client_ca.crt"
@@ -93,12 +96,6 @@ data:
     defaultauth:
       namespace: "default"
       keyFile: "/etc/baetyl/token.key"
-
-    httplink:
-      port: ":9005"
-      ca: "/etc/baetyl/client_ca.crt"
-      cert: "/etc/baetyl/server.crt"
-      key: "/etc/baetyl/server.key"
 
   token.key: |-
     -----BEGIN RSA PRIVATE KEY-----
