@@ -14,7 +14,7 @@ import (
 // GetCertificate get a Certificate
 func (api *API) GetCertificate(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapCertificate(api.secretService.Get(ns, n, ""))
+	res, err := wrapCertificate(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func (api *API) GetCertificate(c *common.Context) (interface{}, error) {
 // ListCertificate list Certificate
 func (api *API) ListCertificate(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	res, err := wrapCertificateList(api.secretService.List(ns, wrapCertificateListOption(api.parseListOptions(c))))
+	res, err := wrapCertificateList(api.Secret.List(ns, wrapCertificateListOption(api.parseListOptions(c))))
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
@@ -41,7 +41,7 @@ func (api *API) CreateCertificate(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, name := c.GetNamespace(), cfg.Name
-	sd, err := api.secretService.Get(ns, name, "")
+	sd, err := api.Secret.Get(ns, name, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
 			return nil, err
@@ -54,7 +54,7 @@ func (api *API) CreateCertificate(c *common.Context) (interface{}, error) {
 	if err = cfg.ParseCertInfo(); err != nil {
 		return nil, err
 	}
-	res, err := wrapCertificate(api.secretService.Create(ns, cfg.ToSecret()))
+	res, err := wrapCertificate(api.Secret.Create(ns, cfg.ToSecret()))
 	return hideCertKey(res), err
 }
 
@@ -65,7 +65,7 @@ func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	sd, err := wrapCertificate(api.secretService.Get(ns, n, ""))
+	sd, err := wrapCertificate(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
 	if err = sd.ParseCertInfo(); err != nil {
 		return nil, err
 	}
-	res, err := wrapCertificate(api.secretService.Update(ns, sd.ToSecret()))
+	res, err := wrapCertificate(api.Secret.Update(ns, sd.ToSecret()))
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
 // DeleteCertificate delete the Certificate
 func (api *API) DeleteCertificate(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	_, err := wrapCertificate(api.secretService.Get(ns, n, ""))
+	_, err := wrapCertificate(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (api *API) DeleteCertificate(c *common.Context) (interface{}, error) {
 // GetAppByCertificate list app
 func (api *API) GetAppByCertificate(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapCertificate(api.secretService.Get(ns, n, ""))
+	res, err := wrapCertificate(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}

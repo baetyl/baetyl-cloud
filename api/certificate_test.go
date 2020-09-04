@@ -17,6 +17,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 func initCertificateAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
@@ -42,7 +43,9 @@ func TestCreateCertificate(t *testing.T) {
 	api, router, mockCtl := initCertificateAPI(t)
 	defer mockCtl.Finish()
 	mkSecretService := ms.NewMockSecretService(mockCtl)
-	api.secretService = mkSecretService
+	api.AppCombinedService = &service.AppCombinedService{
+		Secret: mkSecretService,
+	}
 
 	ns := "ns"
 	keyData1 := `-----BEGIN RSA PRIVATE KEY-----
@@ -361,7 +364,9 @@ func TestUpdateCertificate(t *testing.T) {
 	api, router, mockCtl := initCertificateAPI(t)
 	defer mockCtl.Finish()
 	mkSecretService := ms.NewMockSecretService(mockCtl)
-	api.secretService = mkSecretService
+	api.AppCombinedService = &service.AppCombinedService{
+		Secret: mkSecretService,
+	}
 
 	ns := "ns"
 	name := "cert"
@@ -519,7 +524,9 @@ func TestGetCertificate(t *testing.T) {
 	api, router, mockCtl := initCertificateAPI(t)
 	defer mockCtl.Finish()
 	mkSecretService := ms.NewMockSecretService(mockCtl)
-	api.secretService = mkSecretService
+	api.AppCombinedService = &service.AppCombinedService{
+		Secret: mkSecretService,
+	}
 
 	ns := "default"
 	name := "cert"
@@ -583,9 +590,13 @@ RcKyjhh1
 func TestDeleteCertificate(t *testing.T) {
 	api, router, mockCtl := initCertificateAPI(t)
 	defer mockCtl.Finish()
+
 	mkSecretService := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		Secret: mkSecretService,
+	}
+
 	mkIndexService := ms.NewMockIndexService(mockCtl)
-	api.secretService = mkSecretService
 	api.indexService = mkIndexService
 
 	ns := "default"
@@ -647,8 +658,11 @@ RcKyjhh1
 func TestListCertificate(t *testing.T) {
 	api, router, mockCtl := initCertificateAPI(t)
 	defer mockCtl.Finish()
+
 	mkSecretService := ms.NewMockSecretService(mockCtl)
-	api.secretService = mkSecretService
+	api.AppCombinedService = &service.AppCombinedService{
+		Secret: mkSecretService,
+	}
 
 	mClist := &models.SecretList{
 		Total: 0,
@@ -666,11 +680,18 @@ func TestListCertificate(t *testing.T) {
 func TestGetAppByCertificate(t *testing.T) {
 	api, router, mockCtl := initCertificateAPI(t)
 	defer mockCtl.Finish()
-	mkSecretService, mkAppService := ms.NewMockSecretService(mockCtl), ms.NewMockApplicationService(mockCtl)
-	mkNodeService, mkIndexService := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
 
-	api.secretService, api.nodeService = mkSecretService, mkNodeService
-	api.applicationService, api.indexService = mkAppService, mkIndexService
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.nodeService, api.indexService = sNode, sIndex
 
 	appNames := []string{"app1", "app2", "app3"}
 	apps := []*specV1.Application{
@@ -691,19 +712,19 @@ func TestGetAppByCertificate(t *testing.T) {
 	mConfSecret3 := &specV1.Secret{
 		Namespace:   "default",
 		Name:        "abc",
-		Description: "desp",
+		Description: "haha",
 		Version:     "5",
 		Labels: map[string]string{
 			specV1.SecretLabel: specV1.SecretCustomCertificate,
 		},
 	}
 
-	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret3, nil)
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret3, nil)
 
-	mkIndexService.EXPECT().ListAppIndexBySecret(mConfSecret3.Namespace, mConfSecret3.Name).Return(appNames, nil).Times(1)
-	mkAppService.EXPECT().Get(mConfSecret3.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
-	mkAppService.EXPECT().Get(mConfSecret3.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
-	mkAppService.EXPECT().Get(mConfSecret3.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()
+	sIndex.EXPECT().ListAppIndexBySecret(mConfSecret3.Namespace, mConfSecret3.Name).Return(appNames, nil).Times(1)
+	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
+	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
+	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()
 
 	w4 := httptest.NewRecorder()
 	req4, _ := http.NewRequest(http.MethodGet, "/v1/certificates/abc/apps", nil)
