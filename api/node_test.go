@@ -419,7 +419,7 @@ func TestCreateNode(t *testing.T) {
 
 	sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
-	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any(), nil).Return([]*specV1.Application{app1, app2}, nil).Times(2)
+	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(2)
 
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil)

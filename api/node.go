@@ -111,10 +111,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	}
 	ns := c.GetNamespace()
 	n.Namespace = ns
-	return api.CreateNodeView(n, nil)
-}
 
-func (api *API) CreateNodeView(n *v1.Node, params map[string]interface{}) (interface{}, error) {
 	n.Labels = common.AddSystemLabel(n.Labels, map[string]string{
 		common.LabelNodeName: n.Name,
 	})
@@ -135,7 +132,7 @@ func (api *API) CreateNodeView(n *v1.Node, params map[string]interface{}) (inter
 		return nil, err
 	}
 
-	apps, err := api.initService.GenApps(n.Namespace, n.Name, params)
+	apps, err := api.initService.GenApps(n.Namespace, n.Name)
 	if err != nil {
 		return nil, err
 	}

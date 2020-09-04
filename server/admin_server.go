@@ -76,7 +76,7 @@ func (s *AdminServer) InitRoute() {
 
 	s.router.Use(RequestIDHandler)
 	s.router.Use(LoggerHandler)
-	s.router.Use(s.authHandler)
+	s.router.Use(s.AuthHandler)
 	v1 := s.router.Group("v1")
 	{
 		configs := v1.Group("/configs")
@@ -158,7 +158,7 @@ func (s *AdminServer) GetRoute() *gin.Engine {
 }
 
 // auth handler
-func (s *AdminServer) authHandler(c *gin.Context) {
+func (s *AdminServer) AuthHandler(c *gin.Context) {
 	cc := common.NewContext(c)
 	err := s.auth.Authenticate(cc)
 	if err != nil {

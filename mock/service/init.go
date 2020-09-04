@@ -34,18 +34,18 @@ func (m *MockInitService) EXPECT() *MockInitServiceMockRecorder {
 }
 
 // GenApps mocks base method
-func (m *MockInitService) GenApps(arg0, arg1 string, arg2 map[string]interface{}) ([]*v1.Application, error) {
+func (m *MockInitService) GenApps(arg0, arg1 string) ([]*v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenApps", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GenApps", arg0, arg1)
 	ret0, _ := ret[0].([]*v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GenApps indicates an expected call of GenApps
-func (mr *MockInitServiceMockRecorder) GenApps(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockInitServiceMockRecorder) GenApps(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenApps", reflect.TypeOf((*MockInitService)(nil).GenApps), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenApps", reflect.TypeOf((*MockInitService)(nil).GenApps), arg0, arg1)
 }
 
 // GenCmd mocks base method
