@@ -283,7 +283,7 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]inte
 
 	params["CoreConfVersion"] = conf.Version
 	params["NodeCertName"] = cert.Name
-	params["NodeCertName"] = cert.Version
+	params["NodeCertVersion"] = cert.Version
 
 	// create application
 	return s.genApp(ns, templateCoreAppYaml, params)
