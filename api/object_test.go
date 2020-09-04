@@ -40,7 +40,7 @@ func TestListObjectSources(t *testing.T) {
 	api, router, mockCtl := initObjectAPI(t)
 	defer mockCtl.Finish()
 	mkObjectService := ms.NewMockObjectService(mockCtl)
-	api.objectService = mkObjectService
+	api.Obj = mkObjectService
 
 	sources := []models.ObjectStorageSource{
 		{
@@ -67,7 +67,7 @@ func TestListBuckets(t *testing.T) {
 	api, router, mockCtl := initObjectAPI(t)
 	defer mockCtl.Finish()
 	mkObjectService := ms.NewMockObjectService(mockCtl)
-	api.objectService = mkObjectService
+	api.Obj = mkObjectService
 
 	buckets := []models.Bucket{
 		{
@@ -94,7 +94,7 @@ func TestListBucketObjects(t *testing.T) {
 	api, router, mockCtl := initObjectAPI(t)
 	defer mockCtl.Finish()
 	mkObjectService := ms.NewMockObjectService(mockCtl)
-	api.objectService = mkObjectService
+	api.Obj = mkObjectService
 
 	objectsResult := &models.ListObjectsResult{
 		Name:        "o1",

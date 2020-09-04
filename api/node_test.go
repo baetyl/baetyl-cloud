@@ -103,7 +103,7 @@ func TestGetNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.nodeService = sNode
+	api.Node = sNode
 
 	mNode := getMockNode()
 
@@ -136,7 +136,7 @@ func TestGetNodes(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.nodeService = sNode
+	api.Node = sNode
 
 	mNode := getMockNode()
 	mNode2 := getMockNode()
@@ -208,7 +208,7 @@ func TestGetNodeStats(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.nodeService = sNode
+	api.Node = sNode
 
 	mNode := getMockNode()
 
@@ -353,7 +353,7 @@ func TestListNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.nodeService = sNode
+	api.Node = sNode
 
 	mClist := &models.NodeList{
 		Items: []specV1.Node{
@@ -396,14 +396,14 @@ func TestCreateNode(t *testing.T) {
 	}
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.nodeService, api.indexService = sNode, sIndex
+	api.Node, api.Index = sNode, sIndex
 
 	sProp := ms.NewMockPropertyService(mockCtl)
 	sPKI := ms.NewMockPKIService(mockCtl)
 	sInit := ms.NewMockInitService(mockCtl)
-	api.propertyService = sProp
-	api.pkiService = sPKI
-	api.initService = sInit
+	api.Prop = sProp
+	api.PKI = sPKI
+	api.Init = sInit
 
 	mNode := getMockNode()
 
@@ -473,7 +473,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.nodeService = sNode
+	api.Node = sNode
 	mNode1 := &specV1.Node{
 		Namespace: "default",
 		Name:      "abc",
@@ -554,7 +554,7 @@ func TestUpdateNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.nodeService = sNode
+	api.Node = sNode
 
 	mApp := getMockNode()
 
@@ -598,10 +598,10 @@ func TestDeleteNode(t *testing.T) {
 	}
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.nodeService, api.indexService = sNode, sIndex
+	api.Node, api.Index = sNode, sIndex
 
 	sPKI := ms.NewMockPKIService(mockCtl)
-	api.pkiService = sPKI
+	api.PKI = sPKI
 
 	mNode := &specV1.Node{
 		Namespace: "default",
@@ -739,10 +739,10 @@ func TestDeleteNodeError(t *testing.T) {
 	}
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.nodeService, api.indexService = sNode, sIndex
+	api.Node, api.Index = sNode, sIndex
 
 	sPKI := ms.NewMockPKIService(mockCtl)
-	api.pkiService = sPKI
+	api.PKI = sPKI
 
 	mNode := &specV1.Node{
 		Namespace: "default",
@@ -886,7 +886,7 @@ func TestAPI_GetNodeDeployHistory(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.nodeService = sNode
+	api.Node = sNode
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/deploys", nil)
 	w2 := httptest.NewRecorder()
@@ -908,10 +908,10 @@ func TestGenInitCmdFromNode(t *testing.T) {
 	}
 
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.nodeService = sNode
+	api.Node = sNode
 
 	sInit := ms.NewMockInitService(mockCtl)
-	api.initService = sInit
+	api.Init = sInit
 
 	node := getMockNode()
 
@@ -928,7 +928,7 @@ func TestGenInitCmdFromNode_ErrNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	nMock := ms.NewMockNodeService(mockCtl)
-	api.nodeService = nMock
+	api.Node = nMock
 
 	node := getMockNode()
 
@@ -957,10 +957,10 @@ func TestGetAppByNode(t *testing.T) {
 	}
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.nodeService, api.indexService = sNode, sIndex
+	api.Node, api.Index = sNode, sIndex
 
 	sInit := ms.NewMockInitService(mockCtl)
-	api.initService = sInit
+	api.Init = sInit
 
 	appNames := []string{"app1", "app2", "app3"}
 	sysAppNames := []string{"sysapp1", "sysapp2", "sysapp3"}
@@ -1069,7 +1069,7 @@ func TestAPI_NodeNumberCollector(t *testing.T) {
 	api, _, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.nodeService = sNode
+	api.Node = sNode
 	namespace := "iotCoreId"
 
 	sNode.EXPECT().List(namespace, gomock.Any()).Return(nil, errors.New("error"))

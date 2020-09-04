@@ -364,7 +364,7 @@ func TestUpdateConfig(t *testing.T) {
 	}
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.nodeService, api.indexService = sNode, sIndex
+	api.Node, api.Index = sNode, sIndex
 
 	namespace, name := "default", "abc"
 	mConf := &models.ConfigurationView{
@@ -563,7 +563,7 @@ func TestDeleteConfig(t *testing.T) {
 	}
 
 	sIndex := ms.NewMockIndexService(mockCtl)
-	api.indexService = sIndex
+	api.Index = sIndex
 
 	mConf := &specV1.Configuration{
 		Namespace: "default",
@@ -634,7 +634,7 @@ func TestGetAppByConfig(t *testing.T) {
 	}
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.nodeService, api.indexService = sNode, sIndex
+	api.Node, api.Index = sNode, sIndex
 
 	mConf := &specV1.Configuration{
 		Namespace: "default",

@@ -255,20 +255,20 @@ func (api *API) parseListOptionsAppendSystemLabel(c *common.Context) *models.Lis
 }
 
 func (api *API) UpdateNodeAndAppIndex(namespace string, app *specV1.Application) error {
-	nodes, err := api.nodeService.UpdateNodeAppVersion(namespace, app)
+	nodes, err := api.Node.UpdateNodeAppVersion(namespace, app)
 	if err != nil {
 		return err
 	}
-	return api.indexService.RefreshNodesIndexByApp(namespace, app.Name, nodes)
+	return api.Index.RefreshNodesIndexByApp(namespace, app.Name, nodes)
 }
 
 func (api *API) DeleteNodeAndAppIndex(namespace string, app *specV1.Application) error {
-	_, err := api.nodeService.DeleteNodeAppVersion(namespace, app)
+	_, err := api.Node.DeleteNodeAppVersion(namespace, app)
 	if err != nil {
 		return err
 	}
 
-	return api.indexService.RefreshNodesIndexByApp(namespace, app.Name, make([]string, 0))
+	return api.Index.RefreshNodesIndexByApp(namespace, app.Name, make([]string, 0))
 }
 
 func (api *API) toApplicationView(app *specV1.Application) (*models.ApplicationView, error) {
@@ -339,7 +339,7 @@ func (api *API) toApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 			app.Volumes = append(app.Volumes, volume)
 		}
 
-		runtimes, err := api.functionService.ListRuntimes()
+		runtimes, err := api.Func.ListRuntimes()
 		if err != nil {
 			return nil, nil, err
 		}
@@ -432,7 +432,7 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 func (api *API) isAppCanDelete(namesapce, name string) (bool, error) {
 	// TODO: improve
 	if strings.HasPrefix(name, "baetyl-") {
-		nodeNames, err := api.indexService.ListNodesByApp(namesapce, name)
+		nodeNames, err := api.Index.ListNodesByApp(namesapce, name)
 		if err != nil {
 			return false, err
 		}

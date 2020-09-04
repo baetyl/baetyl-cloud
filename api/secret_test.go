@@ -153,7 +153,7 @@ func TestUpdateSecret(t *testing.T) {
 	}
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.nodeService, api.indexService = sNode, sIndex
+	api.Node, api.Index = sNode, sIndex
 
 	mConf := &models.SecretView{
 		Namespace:   "default",
@@ -294,7 +294,7 @@ func TestDeleteSecret(t *testing.T) {
 	}
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.nodeService, api.indexService = sNode, sIndex
+	api.Node, api.Index = sNode, sIndex
 
 	mConfSecret := &specV1.Secret{
 		Namespace:   "default",
@@ -335,7 +335,7 @@ func TestGetAppBySecret(t *testing.T) {
 	}
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.nodeService, api.indexService = sNode, sIndex
+	api.Node, api.Index = sNode, sIndex
 
 	appNames := []string{"app1", "app2", "app3"}
 	apps := []*specV1.Application{

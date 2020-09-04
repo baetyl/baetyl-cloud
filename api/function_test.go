@@ -40,7 +40,7 @@ func TestListFunctionSources(t *testing.T) {
 	api, router, mockCtl := initFunctionAPI(t)
 	defer mockCtl.Finish()
 	mkFunctionService := ms.NewMockFunctionService(mockCtl)
-	api.functionService = mkFunctionService
+	api.Func = mkFunctionService
 
 	sources := []models.FunctionSource{
 		{
@@ -75,7 +75,7 @@ func TestListFunctions(t *testing.T) {
 	api, router, mockCtl := initFunctionAPI(t)
 	defer mockCtl.Finish()
 	sFunc := ms.NewMockFunctionService(mockCtl)
-	api.functionService = sFunc
+	api.Func = sFunc
 
 	functions := []models.Function{
 		{
@@ -129,7 +129,7 @@ func TestListFunctionVersions(t *testing.T) {
 	api, router, mockCtl := initFunctionAPI(t)
 	defer mockCtl.Finish()
 	mkPluginService := ms.NewMockFunctionService(mockCtl)
-	api.functionService = mkPluginService
+	api.Func = mkPluginService
 
 	functions := []models.Function{
 		{
@@ -163,9 +163,9 @@ func TestImportFunction(t *testing.T) {
 	sFunc := ms.NewMockFunctionService(mockCtl)
 	sObj := ms.NewMockObjectService(mockCtl)
 	sProp := ms.NewMockPropertyService(mockCtl)
-	api.functionService = sFunc
-	api.objectService = sObj
-	api.propertyService = sProp
+	api.Func = sFunc
+	api.Obj = sObj
+	api.Prop = sProp
 
 	function := &models.Function{
 		Name:    "name1",
