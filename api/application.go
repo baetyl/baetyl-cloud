@@ -387,7 +387,7 @@ func (api *API) translateSecretsToRegistries(appView *models.ApplicationView) er
 			}
 
 			if label, ok := secret.Labels[specV1.SecretLabel]; ok && label == specV1.SecretRegistry {
-				registry := models.FromSecret(secret)
+				registry := models.FromSecretToRegistry(secret)
 				appView.Registries = append(appView.Registries, models.RegistryView{
 					Name:     registry.Name,
 					Address:  registry.Address,

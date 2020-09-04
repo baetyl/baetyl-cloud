@@ -98,6 +98,15 @@ func (s *AdminServer) InitRoute() {
 		registry.GET("/:name/apps", common.Wrapper(s.api.GetAppByRegistry))
 	}
 	{
+		certificate := v1.Group("/certificates")
+		certificate.GET("/:name", common.Wrapper(s.api.GetCertificate))
+		certificate.PUT("/:name", common.Wrapper(s.api.UpdateCertificate))
+		certificate.DELETE("/:name", common.Wrapper(s.api.DeleteCertificate))
+		certificate.POST("", common.Wrapper(s.api.CreateCertificate))
+		certificate.GET("", common.Wrapper(s.api.ListCertificate))
+		certificate.GET("/:name/apps", common.Wrapper(s.api.GetAppByCertificate))
+	}
+	{
 		configs := v1.Group("/secrets")
 		configs.GET("/:name", common.Wrapper(s.api.GetSecret))
 		configs.PUT("/:name", common.Wrapper(s.api.UpdateSecret))
