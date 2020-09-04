@@ -595,7 +595,6 @@ func TestDeleteCertificate(t *testing.T) {
 	api.AppCombinedService = &service.AppCombinedService{
 		Secret: mkSecretService,
 	}
-
 	mkIndexService := ms.NewMockIndexService(mockCtl)
 	api.indexService = mkIndexService
 
