@@ -15,7 +15,7 @@ type SecretList struct {
 	Items       []specV1.Secret `json:"items"`
 }
 
-func FromSecret(s *specV1.Secret) *Registry {
+func FromSecretToRegistry(s *specV1.Secret) *Registry {
 	if v, ok := s.Labels[specV1.SecretLabel]; !ok || v != specV1.SecretRegistry {
 		return nil
 	}
@@ -36,21 +36,73 @@ func FromSecret(s *specV1.Secret) *Registry {
 	return res
 }
 
-func FromSecretList(s *SecretList) *RegistryList {
+func FromSecretListToRegistryList(s *SecretList) *RegistryList {
 	res := &RegistryList{
 		Total:       s.Total,
 		ListOptions: s.ListOptions,
 		Items:       []Registry{},
 	}
 	for _, sd := range s.Items {
-		r := FromSecret(&sd)
+		r := FromSecretToRegistry(&sd)
 		if r == nil {
 			res.Total--
 		} else {
 			res.Items = append(res.Items, *r)
 		}
 	}
+	return res
+}
 
+func FromSecretToCertificate(s *specV1.Secret) *Certificate {
+	if v, ok := s.Labels[specV1.SecretLabel]; !ok || v != specV1.SecretCustomCertificate {
+		return nil
+	}
+	res := &Certificate{}
+	err := copier.Copy(res, s)
+	if err != nil {
+		panic(fmt.Sprintf("copier exception: %s", err.Error()))
+	}
+	if v, ok := s.Data["key"]; ok {
+		res.Data.Key = string(v)
+	}
+	if v, ok := s.Data["cert"]; ok {
+		res.Data.Cert = string(v)
+	}
+	if v, ok := s.Data["signatureAlgorithm"]; ok {
+		res.SignatureAlgorithm = string(v)
+	}
+	if v, ok := s.Data["effectiveTime"]; ok {
+		res.EffectiveTime = string(v)
+	}
+	if v, ok := s.Data["expiredTime"]; ok {
+		res.ExpiredTime = string(v)
+	}
+	if v, ok := s.Data["serialNumber"]; ok {
+		res.SerialNumber = string(v)
+	}
+	if v, ok := s.Data["issuer"]; ok {
+		res.Issuer = string(v)
+	}
+	if v, ok := s.Data["fingerPrint"]; ok {
+		res.FingerPrint = string(v)
+	}
+	return res
+}
+
+func FromSecretListToCertificateList(s *SecretList) *CertificateList {
+	res := &CertificateList{
+		Total:       s.Total,
+		ListOptions: s.ListOptions,
+		Items:       []Certificate{},
+	}
+	for _, sd := range s.Items {
+		r := FromSecretToCertificate(&sd)
+		if r == nil {
+			res.Total--
+		} else {
+			res.Items = append(res.Items, *r)
+		}
+	}
 	return res
 }
 
