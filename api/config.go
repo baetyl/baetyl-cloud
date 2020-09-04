@@ -101,7 +101,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	appNames, err := api.indexService.ListAppIndexByConfig(ns, res.Name)
+	appNames, err := api.Index.ListAppIndexByConfig(ns, res.Name)
 	if err != nil {
 		log.L().Error("list app index by config failed", log.Error(err))
 		return nil, err
@@ -127,7 +127,7 @@ func (api *API) DeleteConfig(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	appNames, err := api.indexService.ListAppIndexByConfig(ns, res.Name)
+	appNames, err := api.Index.ListAppIndexByConfig(ns, res.Name)
 	if err != nil {
 		log.L().Error("list app index by config failed", log.Error(err))
 		return nil, err
@@ -220,7 +220,7 @@ func (api *API) updateNodeAndApp(namespace string, config *specV1.Configuration,
 		if err != nil {
 			return err
 		}
-		_, err = api.nodeService.UpdateNodeAppVersion(namespace, app)
+		_, err = api.Node.UpdateNodeAppVersion(namespace, app)
 		if err != nil {
 			return err
 		}

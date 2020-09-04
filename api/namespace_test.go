@@ -48,7 +48,7 @@ func TestGetNamespace(t *testing.T) {
 	api, router, mockCtl := initNamespaceAPI(t)
 	defer mockCtl.Finish()
 	mkNamespaceService := ms.NewMockNamespaceService(mockCtl)
-	api.namespaceService = mkNamespaceService
+	api.NS = mkNamespaceService
 
 	ns := getMockNS("testA")
 
@@ -72,7 +72,7 @@ func TestCreateNamespace(t *testing.T) {
 	api, router, mockCtl := initNamespaceAPI(t)
 	defer mockCtl.Finish()
 	mkNamespaceService := ms.NewMockNamespaceService(mockCtl)
-	api.namespaceService = mkNamespaceService
+	api.NS = mkNamespaceService
 
 	nsa := getMockNS("testA")
 
@@ -90,7 +90,7 @@ func TestAPI_DeleteNamespace(t *testing.T) {
 	api, router, mockCtl := initNamespaceAPI(t)
 	defer mockCtl.Finish()
 	mkNamespaceService := ms.NewMockNamespaceService(mockCtl)
-	api.namespaceService = mkNamespaceService
+	api.NS = mkNamespaceService
 
 	nsa := getMockNS("testA")
 

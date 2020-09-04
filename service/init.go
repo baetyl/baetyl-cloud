@@ -38,12 +38,15 @@ const (
 
 var (
 	CmdExpirationInSeconds = int64(60 * 60)
+	HookNamePopulateParams = "populateParams"
 )
+
+type HandlerPopulateParams func(params map[string]interface{}) error
 
 // InitService
 type InitService interface {
 	GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error)
-	GenApps(ns, nodeName string, params map[string]interface{}) ([]*specV1.Application, error)
+	GenApps(ns, nodeName string) ([]*specV1.Application, error)
 	GenCmd(kind, ns, name string) (string, error)
 }
 
@@ -54,7 +57,8 @@ type InitServiceImpl struct {
 	SecretService   SecretService
 	TemplateService TemplateService
 	*AppCombinedService
-	PKI PKIService
+	PKI   PKIService
+	Hooks map[string]interface{}
 }
 
 // NewSyncService new SyncService
@@ -97,6 +101,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		SecretService:      secretService,
 		AppCombinedService: acs,
 		PKI:                pki,
+		Hooks:              map[string]interface{}{},
 	}, nil
 }
 
@@ -233,7 +238,18 @@ func (s *InitServiceImpl) getCoreAppFromDesire(ns, nodeName string) (*specV1.App
 		common.Field("namespace", ns))
 }
 
-func (s *InitServiceImpl) GenApps(ns, nodeName string, params map[string]interface{}) ([]*specV1.Application, error) {
+func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, error) {
+	params := map[string]interface{}{
+		"Namespace": ns,
+		"NodeName":  nodeName,
+	}
+	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
+		err := handler.(HandlerPopulateParams)(params)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+	}
+
 	var apps []*specV1.Application
 	ca, err := s.genCoreApp(ns, nodeName, params)
 	if err != nil {
@@ -250,17 +266,11 @@ func (s *InitServiceImpl) GenApps(ns, nodeName string, params map[string]interfa
 func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
 	appName := fmt.Sprintf("baetyl-core-%s", common.RandString(9))
 	confName := fmt.Sprintf("baetyl-core-conf-%s", common.RandString(9))
+	params["CoreAppName"] = appName
+	params["CoreConfName"] = confName
+
 	// create config
-	confMap := map[string]interface{}{
-		"Namespace":    ns,
-		"NodeName":     nodeName,
-		"CoreAppName":  appName,
-		"CoreConfName": confName,
-	}
-	for k, v := range params {
-		confMap[k] = v
-	}
-	conf, err := s.genConfig(ns, templateCoreConfYaml, confMap)
+	conf, err := s.genConfig(ns, templateCoreConfYaml, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -271,20 +281,12 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]inte
 		return nil, errors.Trace(err)
 	}
 
+	params["CoreConfVersion"] = conf.Version
+	params["NodeCertName"] = cert.Name
+	params["NodeCertName"] = cert.Version
+
 	// create application
-	appMap := map[string]interface{}{
-		"Namespace":       ns,
-		"NodeName":        nodeName,
-		"CoreAppName":     appName,
-		"CoreConfName":    conf.Name,
-		"CoreConfVersion": conf.Version,
-		"NodeCertName":    cert.Name,
-		"NodeCertVersion": cert.Version,
-	}
-	for k, v := range params {
-		appMap[k] = v
-	}
-	return s.genApp(ns, templateCoreAppYaml, appMap)
+	return s.genApp(ns, templateCoreAppYaml, params)
 }
 
 func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {

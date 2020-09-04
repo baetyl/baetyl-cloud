@@ -311,8 +311,8 @@ func TestCreateContainerApplication(t *testing.T) {
 
 	sNode := ms.NewMockNodeService(mockCtl)
 	sIndex := ms.NewMockIndexService(mockCtl)
-	api.indexService = sIndex
-	api.nodeService = sNode
+	api.Index = sIndex
+	api.Node = sNode
 
 	appView := &models.ApplicationView{
 		Application: specV1.Application{
@@ -539,8 +539,8 @@ func TestUpdateContainerApplication(t *testing.T) {
 
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.indexService = sIndex
-	api.nodeService = sNode
+	api.Index = sIndex
+	api.Node = sNode
 
 	mApp := getMockContainerApp()
 	mApp.Selector = "label = test"
@@ -619,11 +619,11 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sProp := ms.NewMockPropertyService(mockCtl)
 
 	api.App = sApp
-	api.indexService = sIndex
+	api.Index = sIndex
 	api.Secret = sSecret
 	api.Config = sConfig
-	api.nodeService = sNode
-	api.propertyService = sProp
+	api.Node = sNode
+	api.Prop = sProp
 
 	appView := &models.ApplicationView{
 		Application: specV1.Application{
@@ -915,9 +915,9 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sNode := ms.NewMockNodeService(mockCtl)
 	sProp := ms.NewMockPropertyService(mockCtl)
-	api.indexService = sIndex
-	api.nodeService = sNode
-	api.propertyService = sProp
+	api.Index = sIndex
+	api.Node = sNode
+	api.Prop = sProp
 
 	namespace := "baetyl-cloud"
 	oldApp := &specV1.Application{
@@ -1323,8 +1323,8 @@ func TestDeleteApplication(t *testing.T) {
 
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.indexService = sIndex
-	api.nodeService = sNode
+	api.Index = sIndex
+	api.Node = sNode
 
 	app := &specV1.Application{
 		Namespace: "baetyl-cloud",

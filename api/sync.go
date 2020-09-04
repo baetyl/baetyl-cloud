@@ -15,7 +15,7 @@ type SyncAPI interface {
 }
 
 type SyncAPIImpl struct {
-	service.SyncService
+	Sync service.SyncService
 }
 
 func NewSyncAPI(cfg *config.CloudConfig) (SyncAPI, error) {
@@ -24,7 +24,7 @@ func NewSyncAPI(cfg *config.CloudConfig) (SyncAPI, error) {
 		return nil, err
 	}
 	return &SyncAPIImpl{
-		syncService,
+		Sync: syncService,
 	}, nil
 }
 
@@ -37,7 +37,7 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 		}
 	}
 
-	desire, err := s.SyncService.Report(msg.Metadata["namespace"], msg.Metadata["name"], *msg.Content.Value.(*specV1.Report))
+	desire, err := s.Sync.Report(msg.Metadata["namespace"], msg.Metadata["name"], *msg.Content.Value.(*specV1.Report))
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (s *SyncAPIImpl) Desire(msg specV1.Message) (*specV1.Message, error) {
 		}
 	}
 
-	res, err := s.SyncService.Desire(msg.Metadata["namespace"], msg.Content.Value.(*specV1.DesireRequest).Infos, msg.Metadata)
+	res, err := s.Sync.Desire(msg.Metadata["namespace"], msg.Content.Value.(*specV1.DesireRequest).Infos, msg.Metadata)
 	if err != nil {
 		return nil, err
 	}
