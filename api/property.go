@@ -5,6 +5,10 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
+func (api *API) GetProperty(c *common.Context) (interface{}, error) {
+	return api.Prop.GetProperty(c.Param("name"))
+}
+
 func (api *API) CreateProperty(c *common.Context) (interface{}, error) {
 	property := &models.Property{}
 	err := c.LoadBody(property)

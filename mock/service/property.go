@@ -76,6 +76,21 @@ func (mr *MockPropertyServiceMockRecorder) DeleteProperty(arg0 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProperty", reflect.TypeOf((*MockPropertyService)(nil).DeleteProperty), arg0)
 }
 
+// GetProperty mocks base method
+func (m *MockPropertyService) GetProperty(arg0 string) (*models.Property, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProperty", arg0)
+	ret0, _ := ret[0].(*models.Property)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProperty indicates an expected call of GetProperty
+func (mr *MockPropertyServiceMockRecorder) GetProperty(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProperty", reflect.TypeOf((*MockPropertyService)(nil).GetProperty), arg0)
+}
+
 // GetPropertyValue mocks base method
 func (m *MockPropertyService) GetPropertyValue(arg0 string) (string, error) {
 	m.ctrl.T.Helper()

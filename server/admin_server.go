@@ -159,6 +159,25 @@ func (s *AdminServer) InitRoute() {
 			objects.GET("/:source/buckets/:bucket/objects", common.Wrapper(s.api.ListBucketObjects))
 		}
 	}
+
+	{
+		properties := v1.Group("properties")
+		properties.GET("/:name", common.Wrapper(s.api.GetProperty))
+
+		// TODO: deprecated, to use property api
+		sysconfig := v1.Group("sysconfig")
+		sysconfig.GET("/baetyl_version/latest", common.Wrapper(func(c *common.Context) (interface{}, error) {
+			v, err := s.api.Prop.GetPropertyValue("baetyl-version-latest")
+			if err != nil {
+				return nil, err
+			}
+			return map[string]string{
+				"type":  "baetyl_version",
+				"key":   "latest",
+				"value": v,
+			}, nil
+		}))
+	}
 }
 
 // GetRoute get router
