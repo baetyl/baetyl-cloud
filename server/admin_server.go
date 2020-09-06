@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/gin-gonic/gin"
 
@@ -175,6 +176,24 @@ func (s *AdminServer) InitRoute() {
 				"type":  "baetyl_version",
 				"key":   "latest",
 				"value": v,
+			}, nil
+		}))
+		sysconfig.GET("/baetyl-function-runtime", common.Wrapper(func(c *common.Context) (interface{}, error) {
+			runtimes, err := s.api.Func.ListRuntimes()
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+			var runtimesView []map[string]string
+			for k, v := range runtimes {
+				runtimesView = append(runtimesView, map[string]string{
+					"type":  "baetyl-function-runtime",
+					"key":   k,
+					"value": v,
+				})
+			}
+			// {"sysconfigs":[{"type":"baetyl-function-runtime","key":"nodejs10","value":"hub.baidubce.com/baetyl/function-node:10.19-v2.0.0","createTime":"2020-08-20T05:16:27Z","updateTime":"2020-08-20T05:16:27Z"},{"type":"baetyl-function-runtime","key":"python3","value":"hub.baidubce.com/baetyl/function-python:3.6-v2.0.0","createTime":"2020-08-20T05:16:27Z","updateTime":"2020-08-20T05:16:27Z"},{"type":"baetyl-function-runtime","key":"python3-opencv","value":"hub.baidubce.com/baetyl/function-python-opencv:3.6","createTime":"2020-04-26T06:39:32Z","updateTime":"2020-04-26T06:39:32Z"},{"type":"baetyl-function-runtime","key":"sql","value":"hub.baidubce.com/baetyl-sandbox/function-sql:git-4a62dfc","createTime":"2020-08-20T05:16:27Z","updateTime":"2020-08-25T03:16:39Z"}]}
+			return map[string]interface{}{
+				"sysconfigs": runtimesView,
 			}, nil
 		}))
 	}
