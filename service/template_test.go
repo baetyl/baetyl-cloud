@@ -114,9 +114,9 @@ labels:
 data:
   conf.yml: |-
     node:
-      ca: /var/lib/baetyl/node/ca.pem
-      key: /var/lib/baetyl/node/client.key
-      cert: /var/lib/baetyl/node/client.pem
+      ca: var/lib/baetyl/node/ca.pem
+      key: var/lib/baetyl/node/client.key
+      cert: var/lib/baetyl/node/client.pem
     httplink:
       address: "out-sync-server-address"
       insecureSkipVerify: true
