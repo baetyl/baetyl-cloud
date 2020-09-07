@@ -14,21 +14,21 @@ import (
 
 // ListFunctionSources ListFunctionSources
 func (api *API) ListFunctionSources(c *common.Context) (interface{}, error) {
-	runtimes, err := api.functionService.ListRuntimes()
+	runtimes, err := api.Func.ListRuntimes()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	res := api.functionService.ListSources()
+	res := api.Func.ListSources()
 	return &models.FunctionSourceView{Sources: res, Runtimes: runtimes}, nil
 }
 
 // ListFunctions list functions
 func (api *API) ListFunctions(c *common.Context) (interface{}, error) {
-	res, err := api.functionService.List(c.GetUser().ID, c.Param("source"))
+	res, err := api.Func.List(c.GetUser().ID, c.Param("source"))
 	if err != nil {
 		return nil, err
 	}
-	runtimes, err := api.functionService.ListRuntimes()
+	runtimes, err := api.Func.ListRuntimes()
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (api *API) ListFunctions(c *common.Context) (interface{}, error) {
 // ListFunctionVersions list versions of a function
 func (api *API) ListFunctionVersions(c *common.Context) (interface{}, error) {
 	id, n, source := c.GetUser().ID, c.Param("name"), c.Param("source")
-	res, err := api.functionService.ListFunctionVersions(id, n, source)
+	res, err := api.Func.ListFunctionVersions(id, n, source)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (api *API) ListFunctionVersions(c *common.Context) (interface{}, error) {
 func (api *API) ImportFunction(c *common.Context) (interface{}, error) {
 	id, name, version, source := c.GetUser().ID, c.Param("name"), c.Param("version"), c.Param("source")
 
-	functionObj, err := api.functionService.GetFunction(id, name, version, source)
+	functionObj, err := api.Func.GetFunction(id, name, version, source)
 	if err != nil {
 		return nil, err
 	}
@@ -75,12 +75,12 @@ func (api *API) ImportFunction(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	_, err = api.objectService.CreateBucketIfNotExist(id, bucketName, common.AWSS3PrivatePermission, objectSource)
+	_, err = api.Obj.CreateBucketIfNotExist(id, bucketName, common.AWSS3PrivatePermission, objectSource)
 	if err != nil {
 		return nil, err
 	}
 
-	err = api.objectService.PutObjectFromURLIfNotExist(id, bucketName, objectName, functionObj.Code.Location, objectSource)
+	err = api.Obj.PutObjectFromURLIfNotExist(id, bucketName, objectName, functionObj.Code.Location, objectSource)
 	if err != nil {
 		return nil, err
 	}

@@ -41,7 +41,7 @@ func TestInitAPIImpl_GetResource(t *testing.T) {
 	api, router, mockCtl := initInitAPI(t)
 	defer mockCtl.Finish()
 	mInit := ms.NewMockInitService(mockCtl)
-	api.initService = mInit
+	api.Init = mInit
 
 	// ResourceSetup
 	mInit.EXPECT().GetResource("kube-init-setup.sh", "", "", nil).Return([]byte("setup"), nil)
@@ -73,7 +73,7 @@ func TestInitAPIImpl_CheckAndParseToken(t *testing.T) {
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
 	auth := ms.NewMockAuthService(mockCtl)
-	as.auth = auth
+	as.Auth = auth
 	info := map[string]interface{}{
 		service.InfoKind:      "node",
 		service.InfoName:      "n0",

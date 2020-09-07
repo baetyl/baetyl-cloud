@@ -17,7 +17,7 @@ const offlineDuration = 40 * time.Second
 // GetNode get a node
 func (api *API) GetNode(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	node, err := api.nodeService.Get(ns, n)
+	node, err := api.Node.Get(ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
 	var nodesView = []*v1.NodeView{}
 	for _, name := range nodeNames.Names {
-		node, err := api.nodeService.Get(ns, name)
+		node, err := api.Node.Get(ns, name)
 		if err != nil {
 			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 				continue
@@ -60,7 +60,7 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 
-	node, err := api.nodeService.Get(ns, n)
+	node, err := api.Node.Get(ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 // ListNode list node
 func (api *API) ListNode(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	nodeList, err := api.nodeService.List(ns, api.parseListOptions(c))
+	nodeList, err := api.Node.List(ns, api.parseListOptions(c))
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
@@ -111,15 +111,12 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	}
 	ns := c.GetNamespace()
 	n.Namespace = ns
-	return api.CreateNodeView(n, nil)
-}
 
-func (api *API) CreateNodeView(n *v1.Node, params map[string]interface{}) (interface{}, error) {
 	n.Labels = common.AddSystemLabel(n.Labels, map[string]string{
 		common.LabelNodeName: n.Name,
 	})
 
-	oldNode, err := api.nodeService.Get(n.Namespace, n.Name)
+	oldNode, err := api.Node.Get(n.Namespace, n.Name)
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
 			return nil, err
@@ -130,12 +127,12 @@ func (api *API) CreateNodeView(n *v1.Node, params map[string]interface{}) (inter
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
 
-	node, err := api.nodeService.Create(n.Namespace, n)
+	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
 		return nil, err
 	}
 
-	apps, err := api.initService.GenApps(n.Namespace, n.Name, params)
+	apps, err := api.Init.GenApps(n.Namespace, n.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +161,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	oldNode, err := api.nodeService.Get(ns, n)
+	oldNode, err := api.Node.Get(ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +170,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		common.LabelNodeName: node.Name,
 	})
 	node.Version = oldNode.Version
-	node, err = api.nodeService.Update(c.GetNamespace(), node)
+	node, err = api.Node.Update(c.GetNamespace(), node)
 
 	if err != nil {
 		return nil, err
@@ -191,7 +188,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 // DeleteNode delete the node
 func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	node, err := api.nodeService.Get(ns, n)
+	node, err := api.Node.Get(ns, n)
 	if err != nil {
 		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 			return nil, nil
@@ -200,7 +197,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	}
 
 	// Delete Node
-	if err := api.nodeService.Delete(c.GetNamespace(), c.GetNameFromParam()); err != nil {
+	if err := api.Node.Delete(c.GetNamespace(), c.GetNameFromParam()); err != nil {
 		return nil, err
 	}
 
@@ -241,7 +238,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 
 					if vv, ok := secret.Labels[v1.SecretLabel]; ok && vv == v1.SecretCertificate {
 						if certID, _ok := secret.Annotations[common.AnnotationPkiCertID]; _ok {
-							if err := api.pkiService.DeleteClientCertificate(certID); err != nil {
+							if err := api.PKI.DeleteClientCertificate(certID); err != nil {
 								common.LogDirtyData(err,
 									log.Any("type", "pki"),
 									log.Any(common.KeyContextNamespace, ns),
@@ -266,7 +263,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 				log.Any(common.KeyContextNamespace, ns),
 				log.Any("name", ai.Name))
 		}
-		if err := api.indexService.RefreshNodesIndexByApp(ns, ai.Name, make([]string, 0)); err != nil {
+		if err := api.Index.RefreshNodesIndexByApp(ns, ai.Name, make([]string, 0)); err != nil {
 			common.LogDirtyData(err,
 				log.Any("type", common.Index),
 				log.Any(common.KeyContextNamespace, ns),
@@ -280,7 +277,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 func (api *API) GetAppByNode(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 
-	node, err := api.nodeService.Get(ns, n)
+	node, err := api.Node.Get(ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -305,11 +302,11 @@ func (api *API) GetAppByNode(c *common.Context) (interface{}, error) {
 // GenInitCmdFromNode generate install command
 func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	ns, name := c.GetNamespace(), c.Param("name")
-	_, err := api.nodeService.Get(ns, name)
+	_, err := api.Node.Get(ns, name)
 	if err != nil {
 		return nil, err
 	}
-	cmd, err := api.initService.GenCmd(string(common.Node), ns, name)
+	cmd, err := api.Init.GenCmd(string(common.Node), ns, name)
 	if err != nil {
 		return nil, err
 	}
@@ -352,7 +349,7 @@ func (api *API) ParseAndCheckNodeNames(c *common.Context) (*models.NodeNames, er
 }
 
 func (api *API) NodeNumberCollector(namespace string) (map[string]int, error) {
-	list, err := api.nodeService.List(namespace, &models.ListOptions{})
+	list, err := api.Node.List(namespace, &models.ListOptions{})
 	if err != nil {
 		return nil, err
 	}

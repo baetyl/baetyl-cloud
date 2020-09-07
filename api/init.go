@@ -17,8 +17,8 @@ type InitAPI interface {
 }
 
 type InitAPIImpl struct {
-	initService service.InitService
-	auth        service.AuthService
+	Init service.InitService
+	Auth service.AuthService
 }
 
 func NewInitAPI(cfg *config.CloudConfig) (InitAPI, error) {
@@ -31,8 +31,8 @@ func NewInitAPI(cfg *config.CloudConfig) (InitAPI, error) {
 		return nil, err
 	}
 	return &InitAPIImpl{
-		initService: initService,
-		auth:        authService,
+		Init: initService,
+		Auth: authService,
 	}, nil
 }
 
@@ -54,7 +54,7 @@ func (api *InitAPIImpl) GetResource(c *common.Context) (interface{}, error) {
 			common.ErrRequestParamInvalid,
 			common.Field("error", err))
 	}
-	return api.initService.GetResource(resourceName, query.Node, query.Token, info)
+	return api.Init.GetResource(resourceName, query.Node, query.Token, info)
 }
 
 func (a *InitAPIImpl) CheckAndParseToken(token, resourceName string) (map[string]interface{}, error) {
@@ -78,7 +78,7 @@ func (a *InitAPIImpl) CheckAndParseToken(token, resourceName string) (map[string
 	if err != nil {
 		return nil, err
 	}
-	realToken, err := a.auth.GenToken(info)
+	realToken, err := a.Auth.GenToken(info)
 	if err != nil {
 		return nil, err
 	}

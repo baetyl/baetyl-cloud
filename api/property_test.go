@@ -45,7 +45,7 @@ func genProperty() *models.Property {
 func TestCreateProperty(t *testing.T) {
 	api, router, ctl := initPropertyAPI(t)
 	rs := plugin.NewMockPropertyService(ctl)
-	api.propertyService = rs
+	api.Prop = rs
 
 	property := genProperty()
 
@@ -67,7 +67,7 @@ func TestCreateProperty(t *testing.T) {
 func TestDeleteProperty(t *testing.T) {
 	api, router, ctl := initPropertyAPI(t)
 	rs := plugin.NewMockPropertyService(ctl)
-	api.propertyService = rs
+	api.Prop = rs
 
 	property := genProperty()
 
@@ -82,7 +82,7 @@ func TestDeleteProperty(t *testing.T) {
 func TestListProperty(t *testing.T) {
 	api, router, ctl := initPropertyAPI(t)
 	rs := plugin.NewMockPropertyService(ctl)
-	api.propertyService = rs
+	api.Prop = rs
 
 	mConf := genProperty()
 	page := &models.Filter{
@@ -122,7 +122,7 @@ func TestListProperty(t *testing.T) {
 func TestUpdateProperty(t *testing.T) {
 	api, router, ctl := initPropertyAPI(t)
 	rs := plugin.NewMockPropertyService(ctl)
-	api.propertyService = rs
+	api.Prop = rs
 
 	property := genProperty()
 	rs.EXPECT().UpdateProperty(property).Return(nil).Times(1)

@@ -133,7 +133,7 @@ func wrapSecretListOption(lo *models.ListOptions) *models.ListOptions {
 }
 
 func (api *API) deleteSecret(namespace, secret, secretType string) (interface{}, error) {
-	appNames, err := api.indexService.ListAppIndexBySecret(namespace, secret)
+	appNames, err := api.Index.ListAppIndexBySecret(namespace, secret)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (api *API) deleteSecret(namespace, secret, secretType string) (interface{},
 }
 
 func (api *API) updateAppSecret(namespace string, secret *specV1.Secret) error {
-	appNames, err := api.indexService.ListAppIndexBySecret(namespace, secret.Name)
+	appNames, err := api.Index.ListAppIndexBySecret(namespace, secret.Name)
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (api *API) updateAppSecret(namespace string, secret *specV1.Secret) error {
 		if err != nil {
 			return err
 		}
-		_, err = api.nodeService.UpdateNodeAppVersion(namespace, app)
+		_, err = api.Node.UpdateNodeAppVersion(namespace, app)
 		if err != nil {
 			return err
 		}
@@ -186,7 +186,7 @@ func needUpdateAppSecret(secret *specV1.Secret, app *specV1.Application) bool {
 }
 
 func (api *API) listAppBySecret(namespace, secret string) (*models.ApplicationList, error) {
-	appNames, err := api.indexService.ListAppIndexBySecret(namespace, secret)
+	appNames, err := api.Index.ListAppIndexBySecret(namespace, secret)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (api *API) listAppBySecret(namespace, secret string) (*models.ApplicationLi
 }
 
 func (api *API) listAppByConfig(namespace, config string) (*models.ApplicationList, error) {
-	appNames, err := api.indexService.ListAppIndexByConfig(namespace, config)
+	appNames, err := api.Index.ListAppIndexByConfig(namespace, config)
 	if err != nil {
 		return nil, err
 	}

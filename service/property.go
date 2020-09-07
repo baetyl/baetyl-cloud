@@ -9,6 +9,7 @@ import (
 //go:generate mockgen -destination=../mock/service/property.go -package=service github.com/baetyl/baetyl-cloud/v2/service PropertyService
 
 type PropertyService interface {
+	GetProperty(name string) (*models.Property, error)
 	CreateProperty(property *models.Property) error
 	DeleteProperty(name string) error
 	ListProperty(page *models.Filter) ([]models.Property, error) //Pagination

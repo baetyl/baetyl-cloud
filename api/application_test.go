@@ -311,8 +311,8 @@ func TestCreateContainerApplication(t *testing.T) {
 
 	sNode := ms.NewMockNodeService(mockCtl)
 	sIndex := ms.NewMockIndexService(mockCtl)
-	api.indexService = sIndex
-	api.nodeService = sNode
+	api.Index = sIndex
+	api.Node = sNode
 
 	appView := &models.ApplicationView{
 		Application: specV1.Application{
@@ -539,8 +539,8 @@ func TestUpdateContainerApplication(t *testing.T) {
 
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.indexService = sIndex
-	api.nodeService = sNode
+	api.Index = sIndex
+	api.Node = sNode
 
 	mApp := getMockContainerApp()
 	mApp.Selector = "label = test"
@@ -601,7 +601,6 @@ func TestUpdateContainerApplication(t *testing.T) {
 }
 
 func TestCreateFunctionApplication(t *testing.T) {
-	t.Skip("TODO: @chensheng")
 	api, router, mockCtl := initApplicationAPI(t)
 	defer mockCtl.Finish()
 
@@ -616,14 +615,14 @@ func TestCreateFunctionApplication(t *testing.T) {
 
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sNode := ms.NewMockNodeService(mockCtl)
-	sProp := ms.NewMockPropertyService(mockCtl)
+	sFunc := ms.NewMockFunctionService(mockCtl)
 
 	api.App = sApp
-	api.indexService = sIndex
+	api.Index = sIndex
 	api.Secret = sSecret
 	api.Config = sConfig
-	api.nodeService = sNode
-	api.propertyService = sProp
+	api.Node = sNode
+	api.Func = sFunc
 
 	appView := &models.ApplicationView{
 		Application: specV1.Application{
@@ -756,7 +755,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sProp.EXPECT().GetPropertyValue(gomock.Any()).Return(nil, errors.New("err")).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -787,7 +786,10 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sProp.EXPECT().GetPropertyValue(gomock.Any()).Return("image", nil).Times(1)
+	funcs := map[string]string{
+		"python36": "image",
+	}
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
@@ -799,7 +801,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sProp.EXPECT().GetPropertyValue(gomock.Any()).Return("image", nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(config, nil).Times(1)
 	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
 
@@ -812,7 +814,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sProp.EXPECT().GetPropertyValue(gomock.Any()).Return("image", nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(config, nil).Times(1)
 
 	mApp := &specV1.Application{
@@ -884,7 +886,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sProp.EXPECT().GetPropertyValue(gomock.Any()).Return("image", nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(config, nil).Times(1)
 	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), gomock.Any()).Return(mApp, nil).Times(1)
 	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return([]string{}, nil).Times(1)
@@ -899,7 +901,6 @@ func TestCreateFunctionApplication(t *testing.T) {
 }
 
 func TestUpdateFunctionApplication(t *testing.T) {
-	t.Skip("TODO: @chensheng")
 	api, router, mockCtl := initApplicationAPI(t)
 	defer mockCtl.Finish()
 
@@ -914,10 +915,10 @@ func TestUpdateFunctionApplication(t *testing.T) {
 
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sNode := ms.NewMockNodeService(mockCtl)
-	sProp := ms.NewMockPropertyService(mockCtl)
-	api.indexService = sIndex
-	api.nodeService = sNode
-	api.propertyService = sProp
+	sFunc := ms.NewMockFunctionService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+	api.Func = sFunc
 
 	namespace := "baetyl-cloud"
 	oldApp := &specV1.Application{
@@ -1291,7 +1292,10 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(namespace, "func2", "").Return(configCode, nil).Times(1)
 	sConfig.EXPECT().Get(namespace, "func3", "").Return(configCode, nil).Times(1)
 	sConfig.EXPECT().Get(namespace, "baetyl-function-config-app-service-2", "").Return(config2, nil).Times(1)
-	sProp.EXPECT().GetPropertyValue(gomock.Any()).Return("image", nil).Times(2)
+	funcs := map[string]string{
+		"python36": "image",
+	}
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(2)
 	sConfig.EXPECT().Upsert(namespace, gomock.Any()).Return(config2extra, nil).Times(1)
 	sConfig.EXPECT().Upsert(namespace, gomock.Any()).Return(config3, nil).Times(1)
 	sApp.EXPECT().Update(namespace, gomock.Any()).Return(newApp, nil).Times(1)
@@ -1323,8 +1327,8 @@ func TestDeleteApplication(t *testing.T) {
 
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sNode := ms.NewMockNodeService(mockCtl)
-	api.indexService = sIndex
-	api.nodeService = sNode
+	api.Index = sIndex
+	api.Node = sNode
 
 	app := &specV1.Application{
 		Namespace: "baetyl-cloud",

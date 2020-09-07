@@ -159,14 +159,14 @@ func hidePwd(r *models.Registry) *models.Registry {
 
 func wrapRegistry(s *specV1.Secret, e error) (*models.Registry, error) {
 	if s != nil {
-		return models.FromSecret(s), e
+		return models.FromSecretToRegistry(s), e
 	}
 	return nil, e
 }
 
 func wrapRegistryList(s *models.SecretList, e error) (*models.RegistryList, error) {
 	if s != nil {
-		return models.FromSecretList(s), e
+		return models.FromSecretListToRegistryList(s), e
 	}
 	return nil, e
 }

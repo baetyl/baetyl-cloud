@@ -26,7 +26,7 @@ func (d *dbStorage) DeleteProperty(name string) error {
 	return err
 }
 
-func (d *dbStorage) GetPropertyValue(name string) (string, error) {
+func (d *dbStorage) GetProperty(name string) (*models.Property, error) {
 	selectSQL := `
 		SELECT 
 		name, value, create_time, update_time 
@@ -35,14 +35,22 @@ func (d *dbStorage) GetPropertyValue(name string) (string, error) {
 	`
 	var cs []models.Property
 	if err := d.query(nil, selectSQL, &cs, name); err != nil {
+		return nil, err
+	}
+	if len(cs) == 0 {
+		return nil, common.Error(
+			common.ErrResourceNotFound,
+			common.Field("name", name))
+	}
+	return &cs[0], nil
+}
+
+func (d *dbStorage) GetPropertyValue(name string) (string, error) {
+	p, err := d.GetProperty(name)
+	if err != nil {
 		return "", err
 	}
-	if len(cs) == 1 {
-		return (&cs[0]).Value, nil
-	}
-	return "", common.Error(
-		common.ErrResourceNotFound,
-		common.Field("name", name))
+	return p.Value, nil
 }
 
 func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error) {

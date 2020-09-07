@@ -6,13 +6,13 @@ import (
 )
 
 func (api *API) ListObjectSources(c *common.Context) (interface{}, error) {
-	res := api.objectService.ListSources()
+	res := api.Obj.ListSources()
 	return &models.ObjectStorageSourceView{Sources: res}, nil
 }
 
 // ListBuckets ListBuckets
 func (api *API) ListBuckets(c *common.Context) (interface{}, error) {
-	res, err := api.objectService.ListBuckets(c.GetUser().ID, c.Param("source"))
+	res, err := api.Obj.ListBuckets(c.GetUser().ID, c.Param("source"))
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (api *API) ListBuckets(c *common.Context) (interface{}, error) {
 // ListBucketObjects ListBucketObjects
 func (api *API) ListBucketObjects(c *common.Context) (interface{}, error) {
 	id, bucket, source := c.GetUser().ID, c.Param("bucket"), c.Param("source")
-	res, err := api.objectService.ListBucketObjects(id, bucket, source)
+	res, err := api.Obj.ListBucketObjects(id, bucket, source)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (api *API) ListBucketObjects(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) getDefaultObjectSource() (string, error) {
-	os, err := api.propertyService.GetPropertyValue("object-source")
+	os, err := api.Prop.GetPropertyValue("object-source")
 	if err != nil {
 		return "", err
 	}

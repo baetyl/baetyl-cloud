@@ -24,7 +24,7 @@ func TestSyncAPIImpl_Report(t *testing.T) {
 	defer mockCtl.Finish()
 	sync := &SyncAPIImpl{}
 	mSync := ms.NewMockSyncService(mockCtl)
-	sync.SyncService = mSync
+	sync.Sync = mSync
 
 	// good case 0
 	info := specV1.Report{
@@ -67,7 +67,7 @@ func TestSyncAPIImpl_Desire(t *testing.T) {
 	defer mockCtl.Finish()
 	sync := &SyncAPIImpl{}
 	mSync := ms.NewMockSyncService(mockCtl)
-	sync.SyncService = mSync
+	sync.Sync = mSync
 
 	// good case 0
 	infos := specV1.DesireRequest{}
