@@ -58,10 +58,6 @@ func (api *InitAPIImpl) GetResource(c *common.Context) (interface{}, error) {
 }
 
 func (a *InitAPIImpl) CheckAndParseToken(token, resourceName string) (map[string]interface{}, error) {
-	// TODO: all requests need token auth @jiangxin
-	if resourceName != "baetyl-init-deployment.yml" && resourceName != "baetyl-init-batch-deployment.yml" {
-		return nil, nil
-	}
 	// check len
 	if len(token) < 10 {
 		return nil, common.Error(

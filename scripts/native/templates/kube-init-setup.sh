@@ -177,7 +177,7 @@ kube_apply() {
 check_and_get_metrics() {
   METRICS=$(check_kube_res metrics-server)
   if [ -z "$METRICS" ]; then
-    kube_apply "$ADDR/v1/init/kube-api-metrics.yml"
+    kube_apply "$ADDR/v1/init/kube-api-metrics.yml?token=$TOKEN"
   fi
 }
 
@@ -188,7 +188,7 @@ check_kube_res() {
 check_and_get_storage() {
   PROVISIONER=$(check_kube_res local-path-provisioner)
   if [ -z "$PROVISIONER" ]; then
-    kube_apply "$ADDR/v1/init/kube-local-path-storage.yml"
+    kube_apply "$ADDR/v1/init/kube-local-path-storage.yml?token=$TOKEN"
   fi
 }
 

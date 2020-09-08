@@ -42,6 +42,7 @@ var (
 )
 
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
+type GetInitResource func(resourceName, node, token string, info map[string]interface{}) ([]byte, error)
 
 // InitService
 type InitService interface {
@@ -59,6 +60,7 @@ type InitServiceImpl struct {
 	*AppCombinedService
 	PKI   PKIService
 	Hooks map[string]interface{}
+	ResourceMapFunc map[string]GetInitResource
 }
 
 // NewSyncService new SyncService
@@ -94,7 +96,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	return &InitServiceImpl{
+	initService := &InitServiceImpl{
 		cfg:                config,
 		AuthService:        authService,
 		NodeService:        nodeService,
@@ -103,37 +105,52 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		AppCombinedService: acs,
 		PKI:                pki,
 		Hooks:              map[string]interface{}{},
-	}, nil
+		ResourceMapFunc:    map[string]GetInitResource{},
+	}
+	initService.ResourceMapFunc[TemplateKubeAPIMetricsYaml] = initService.getMetricsYaml
+	initService.ResourceMapFunc[TemplateKubeLocalPathStorageYaml] = initService.getLocalPathStorageYaml
+	initService.ResourceMapFunc[TemplateInitSetupShell] = initService.getInitSetupShell
+	initService.ResourceMapFunc[TemplateInitDeploymentYaml] = initService.getInitDeploymentYaml
+
+	return initService, nil
 }
 
 func (s *InitServiceImpl) GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error) {
-	switch resourceName {
-	case TemplateKubeAPIMetricsYaml:
-		res, err := s.TemplateService.GetTemplate(resourceName)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		return []byte(res), nil
-	case TemplateKubeLocalPathStorageYaml:
-		res, err := s.TemplateService.GetTemplate(resourceName)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		return []byte(res), nil
-	case TemplateInitSetupShell:
-		data, err := s.TemplateService.ParseTemplate(resourceName, map[string]interface{}{"Token": token})
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		return data, nil
-	case TemplateInitDeploymentYaml:
-		return s.getInitYaml(info, node)
-	default:
-		return nil, common.Error(
-			common.ErrResourceNotFound,
-			common.Field("type", "resource"),
-			common.Field("name", resourceName))
+	if handler, ok := s.ResourceMapFunc[resourceName]; ok {
+		return handler(resourceName, node, token, info)
 	}
+	return nil, common.Error(
+		common.ErrResourceNotFound,
+		common.Field("type", "resource"),
+		common.Field("name", resourceName))
+}
+
+func (s *InitServiceImpl) getMetricsYaml(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
+	res, err := s.TemplateService.GetTemplate(resourceName)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return []byte(res), nil
+}
+
+func (s *InitServiceImpl) getLocalPathStorageYaml(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
+	res, err := s.TemplateService.GetTemplate(resourceName)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return []byte(res), nil
+}
+
+func (s *InitServiceImpl) getInitSetupShell(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
+	data, err := s.TemplateService.ParseTemplate(resourceName, map[string]interface{}{"Token": token})
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return data, nil
+}
+
+func (s *InitServiceImpl) getInitDeploymentYaml(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
+	return s.getInitYaml(info, node)
 }
 
 func (s *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeName string) ([]byte, error) {

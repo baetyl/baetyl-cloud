@@ -21,10 +21,14 @@ func TestInitService_GetResource(t *testing.T) {
 	ns := service.NewMockNodeService(mockCtl)
 	aus := service.NewMockAuthService(mockCtl)
 	as := InitServiceImpl{}
+	as.ResourceMapFunc = map[string]GetInitResource{}
 	as.TemplateService = tp
 	as.NodeService = ns
 	as.AuthService = aus
-
+	as.ResourceMapFunc[TemplateKubeAPIMetricsYaml] = as.getMetricsYaml
+	as.ResourceMapFunc[TemplateKubeLocalPathStorageYaml] = as.getLocalPathStorageYaml
+	as.ResourceMapFunc[TemplateInitSetupShell] = as.getInitSetupShell
+	as.ResourceMapFunc[TemplateInitDeploymentYaml] = as.getInitDeploymentYaml
 	// good case : metrics
 	tp.EXPECT().GetTemplate(TemplateKubeAPIMetricsYaml).Return("metrics", nil).Times(1)
 	res, _ := as.GetResource(TemplateKubeAPIMetricsYaml, "", "", nil)
