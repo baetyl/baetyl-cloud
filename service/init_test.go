@@ -25,23 +25,23 @@ func TestInitService_GetResource(t *testing.T) {
 	as.TemplateService = tp
 	as.NodeService = ns
 	as.AuthService = aus
-	as.ResourceMapFunc[TemplateKubeAPIMetricsYaml] = as.getMetricsYaml
-	as.ResourceMapFunc[TemplateKubeLocalPathStorageYaml] = as.getLocalPathStorageYaml
-	as.ResourceMapFunc[TemplateInitSetupShell] = as.getInitSetupShell
-	as.ResourceMapFunc[TemplateInitDeploymentYaml] = as.getInitDeploymentYaml
+	as.ResourceMapFunc[templateKubeAPIMetricsYaml] = as.getMetricsYaml
+	as.ResourceMapFunc[templateKubeLocalPathStorageYaml] = as.getLocalPathStorageYaml
+	as.ResourceMapFunc[templateInitSetupShell] = as.getInitSetupShell
+	as.ResourceMapFunc[templateInitDeploymentYaml] = as.getInitDeploymentYaml
 	// good case : metrics
-	tp.EXPECT().GetTemplate(TemplateKubeAPIMetricsYaml).Return("metrics", nil).Times(1)
-	res, _ := as.GetResource(TemplateKubeAPIMetricsYaml, "", "", nil)
+	tp.EXPECT().GetTemplate(templateKubeAPIMetricsYaml).Return("metrics", nil).Times(1)
+	res, _ := as.GetResource(templateKubeAPIMetricsYaml, "", "", nil)
 	assert.Equal(t, res, []byte("metrics"))
 
 	// good case : local_path_storage
-	tp.EXPECT().GetTemplate(TemplateKubeLocalPathStorageYaml).Return("local-path-storage", nil).Times(1)
-	res, _ = as.GetResource(TemplateKubeLocalPathStorageYaml, "", "", nil)
+	tp.EXPECT().GetTemplate(templateKubeLocalPathStorageYaml).Return("local-path-storage", nil).Times(1)
+	res, _ = as.GetResource(templateKubeLocalPathStorageYaml, "", "", nil)
 	assert.Equal(t, res, []byte("local-path-storage"))
 
 	// good case : setup
-	tp.EXPECT().ParseTemplate(TemplateInitSetupShell, gomock.Any()).Return([]byte("shell"), nil).Times(1)
-	res, _ = as.GetResource(TemplateInitSetupShell, "", "", nil)
+	tp.EXPECT().ParseTemplate(templateInitSetupShell, gomock.Any()).Return([]byte("shell"), nil).Times(1)
+	res, _ = as.GetResource(templateInitSetupShell, "", "", nil)
 	assert.Equal(t, res, []byte("shell"))
 
 	// bad case : not found

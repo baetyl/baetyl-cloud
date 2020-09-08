@@ -29,10 +29,10 @@ const (
 	templateCoreAppYaml              = "baetyl-core-app.yml"
 	templateFuncConfYaml             = "baetyl-function-conf.yml"
 	templateFuncAppYaml              = "baetyl-function-app.yml"
-	TemplateInitDeploymentYaml       = "baetyl-init-deployment.yml"
-	TemplateKubeAPIMetricsYaml       = "kube-api-metrics.yml"
-	TemplateKubeLocalPathStorageYaml = "kube-local-path-storage.yml"
-	TemplateInitSetupShell           = "kube-init-setup.sh"
+	templateInitDeploymentYaml       = "baetyl-init-deployment.yml"
+	templateKubeAPIMetricsYaml       = "kube-api-metrics.yml"
+	templateKubeLocalPathStorageYaml = "kube-local-path-storage.yml"
+	templateInitSetupShell           = "kube-init-setup.sh"
 )
 
 var (
@@ -110,10 +110,10 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		Hooks:              map[string]interface{}{},
 		ResourceMapFunc:    map[string]GetInitResource{},
 	}
-	initService.ResourceMapFunc[TemplateKubeAPIMetricsYaml] = initService.getMetricsYaml
-	initService.ResourceMapFunc[TemplateKubeLocalPathStorageYaml] = initService.getLocalPathStorageYaml
-	initService.ResourceMapFunc[TemplateInitSetupShell] = initService.getInitSetupShell
-	initService.ResourceMapFunc[TemplateInitDeploymentYaml] = initService.getInitDeploymentYaml
+	initService.ResourceMapFunc[templateKubeAPIMetricsYaml] = initService.getMetricsYaml
+	initService.ResourceMapFunc[templateKubeLocalPathStorageYaml] = initService.getLocalPathStorageYaml
+	initService.ResourceMapFunc[templateInitSetupShell] = initService.getInitSetupShell
+	initService.ResourceMapFunc[templateInitDeploymentYaml] = initService.getInitDeploymentYaml
 
 	return initService, nil
 }
@@ -189,7 +189,7 @@ func (s *InitServiceImpl) GenInitYml(ns, nodeName, edgeKubeNodeName string) ([]b
 		"EdgeNamespace":       common.DefaultBaetylEdgeNamespace,
 		"EdgeSystemNamespace": common.DefaultBaetylEdgeSystemNamespace,
 	}
-	return s.TemplateService.ParseTemplate(TemplateInitDeploymentYaml, params)
+	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
 }
 
 func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, error) {
