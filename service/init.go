@@ -33,7 +33,6 @@ const (
 	TemplateKubeAPIMetricsYaml       = "kube-api-metrics.yml"
 	TemplateKubeLocalPathStorageYaml = "kube-local-path-storage.yml"
 	TemplateInitSetupShell           = "kube-init-setup.sh"
-	templateKubeInitCommand          = `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/kube-init-setup.sh?token={{.Token}}' -osetup.sh && sh setup.sh`
 )
 
 var (
