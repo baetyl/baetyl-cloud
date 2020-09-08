@@ -203,7 +203,7 @@ func (api *API) parseAndCheckConfigView(c *common.Context) (*specV1.Configuratio
 						common.Field("error", "failed to validate function data of config"))
 				}
 			case ConfigTypeKV:
-				if strings.HasPrefix(item.Key, common.ObjectSource) {
+				if strings.HasPrefix(item.Key, common.ConfigObjectPrefix) {
 					return nil, common.Error(common.ErrRequestParamInvalid,
 						common.Field("error", "key of kv data can't start with "+common.ConfigObjectPrefix))
 				}
