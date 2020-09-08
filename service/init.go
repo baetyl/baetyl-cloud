@@ -41,6 +41,10 @@ var (
 	HookNamePopulateParams = "populateParams"
 )
 
+var initCmdMap = map[string]string{
+	"node": `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/kube-init-setup.sh?token={{.Token}}' -osetup.sh && sh setup.sh`,
+}
+
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
 type GetInitResource func(resourceName, node, token string, info map[string]interface{}) ([]byte, error)
 
@@ -58,8 +62,8 @@ type InitServiceImpl struct {
 	SecretService   SecretService
 	TemplateService TemplateService
 	*AppCombinedService
-	PKI   PKIService
-	Hooks map[string]interface{}
+	PKI             PKIService
+	Hooks           map[string]interface{}
 	ResourceMapFunc map[string]GetInitResource
 }
 
@@ -223,11 +227,14 @@ func (s *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
 	params := map[string]interface{}{
 		"Token": token,
 	}
-	data, err := s.TemplateService.Execute("setup-command", templateKubeInitCommand, params)
-	if err != nil {
-		return "", err
+	if templateCmd, ok := initCmdMap[kind]; ok {
+		data, err := s.TemplateService.Execute("setup-command", templateCmd, params)
+		if err != nil {
+			return "", err
+		}
+		return string(data), nil
 	}
-	return string(data), nil
+	return "", nil
 }
 
 func (s *InitServiceImpl) GetCoreAppFromDesire(ns, nodeName string) (*specV1.Application, error) {

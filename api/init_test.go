@@ -19,8 +19,8 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
-func initInitAPI(t *testing.T) (*InitAPIImpl, *gin.Engine, *gomock.Controller) {
-	api := &InitAPIImpl{}
+func initInitAPI(t *testing.T) (*InitAPI, *gin.Engine, *gomock.Controller) {
+	api := &InitAPI{}
 	router := gin.Default()
 	mockCtl := gomock.NewController(t)
 	mockIM := func(c *gin.Context) { common.NewContext(c).SetNamespace("default") }
@@ -101,7 +101,7 @@ func TestInitAPIImpl_GetResource(t *testing.T) {
 }
 
 func TestInitAPIImpl_CheckAndParseToken(t *testing.T) {
-	as := InitAPIImpl{}
+	as := InitAPI{}
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
 	auth := ms.NewMockAuthService(mockCtl)

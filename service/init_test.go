@@ -96,7 +96,7 @@ func TestInitService_GenCmd(t *testing.T) {
 	as.TemplateService = sTemplate
 
 	info := map[string]interface{}{
-		InfoKind:      "kind",
+		InfoKind:      "node",
 		InfoName:      "name",
 		InfoNamespace: "ns",
 		InfoExpiry:    CmdExpirationInSeconds,
@@ -105,9 +105,9 @@ func TestInitService_GenCmd(t *testing.T) {
 	expect := "curl -skfL 'https://1.2.3.4:9003/v1/active/setup.sh?token=tokenexpect' -osetup.sh && sh setup.sh"
 
 	sAuth.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)
-	sTemplate.EXPECT().Execute("setup-command", templateKubeInitCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
+	sTemplate.EXPECT().Execute("setup-command", initCmdMap["node"], gomock.Any()).Return([]byte(expect), nil).Times(1)
 
-	res, err := as.GenCmd("kind", "ns", "name")
+	res, err := as.GenCmd("node", "ns", "name")
 	assert.NoError(t, err)
 	assert.Equal(t, res, expect)
 }
