@@ -15,13 +15,10 @@ import (
 )
 
 const (
-	ConfigTypeKV          = "kv"
-	ConfigTypeObject      = "object"
-	ConfigTypeFunction    = "function"
-	ConfigObjectTypeBos   = "baidubos"
-	ConfigObjectTypeMinio = "minio"
-	ConfigObjectTypeAwss3 = "awss3"
-	ConfigObjectTypeHttp  = "http"
+	ConfigTypeKV         = "kv"
+	ConfigTypeObject     = "object"
+	ConfigTypeFunction   = "function"
+	ConfigObjectTypeHttp = "http"
 )
 
 // TODO: optimize this layer, general abstraction
@@ -177,28 +174,22 @@ func (api *API) parseAndCheckConfigView(c *common.Context) (*specV1.Configuratio
 		if _type, ok := item.Value["type"]; ok {
 			switch _type {
 			case ConfigTypeObject:
-				res := checkElementsExist(item.Value, "source")
-				if !res {
+				ok = checkElementsExist(item.Value, "source")
+				if !ok {
 					return nil, common.Error(common.ErrRequestParamInvalid,
 						common.Field("error", "failed to validate object data of config"))
 				}
-				switch item.Value["source"] {
-				case ConfigObjectTypeBos, ConfigObjectTypeMinio:
-					res = checkElementsExist(item.Value, "bucket", "object")
-				case ConfigObjectTypeAwss3:
-					res = checkElementsExist(item.Value, "endpoint", "bucket", "object",
-						"ak", "sk", "md5")
-				case ConfigObjectTypeHttp:
-					res = checkElementsExist(item.Value, "url")
+				if item.Value["source"] == ConfigObjectTypeHttp {
+					ok = checkElementsExist(item.Value, "url")
 				}
-				if !res {
+				if !ok {
 					return nil, common.Error(common.ErrRequestParamInvalid,
 						common.Field("error", "failed to validate object data of config"))
 				}
 			case ConfigTypeFunction:
-				res := checkElementsExist(item.Value, "function", "version", "runtime",
+				ok = checkElementsExist(item.Value, "function", "version", "runtime",
 					"handler", "bucket", "object")
-				if !res {
+				if !ok {
 					return nil, common.Error(common.ErrRequestParamInvalid,
 						common.Field("error", "failed to validate function data of config"))
 				}

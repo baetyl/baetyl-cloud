@@ -162,7 +162,7 @@ func TestCreateConfig(t *testing.T) {
 			{
 				Key: "_object_key",
 				Value: map[string]string{
-					"type": ConfigTypeKV,
+					"type":  ConfigTypeKV,
 					"value": "{\n    \"md5\":\"sdfsdfsd\",\n    \"url\": \"http://download.com/url\"\n}",
 				},
 			},
@@ -187,82 +187,6 @@ func TestCreateConfig(t *testing.T) {
 				Value: map[string]string{
 					"type":    ConfigTypeObject,
 					"unknown": "unknown",
-				},
-			},
-		},
-	}
-
-	w = httptest.NewRecorder()
-	body, _ = json.Marshal(mConf)
-	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	mConf = &models.ConfigurationView{
-		Name:      "abc",
-		Namespace: "default",
-		Labels: map[string]string{
-			"test": "test",
-		},
-		Data: []models.ConfigDataItem{
-			{
-				Key: "object",
-				Value: map[string]string{
-					"type":   ConfigTypeObject,
-					"source": ConfigObjectTypeBos,
-					"bucket": "baetyl",
-				},
-			},
-		},
-	}
-
-	w = httptest.NewRecorder()
-	body, _ = json.Marshal(mConf)
-	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	mConf = &models.ConfigurationView{
-		Name:      "abc",
-		Namespace: "default",
-		Labels: map[string]string{
-			"test": "test",
-		},
-		Data: []models.ConfigDataItem{
-			{
-				Key: "object",
-				Value: map[string]string{
-					"type":   ConfigTypeObject,
-					"source": ConfigObjectTypeMinio,
-					"object": "a.zip",
-				},
-			},
-		},
-	}
-
-	w = httptest.NewRecorder()
-	body, _ = json.Marshal(mConf)
-	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	mConf = &models.ConfigurationView{
-		Name:      "abc",
-		Namespace: "default",
-		Labels: map[string]string{
-			"test": "test",
-		},
-		Data: []models.ConfigDataItem{
-			{
-				Key: "object",
-				Value: map[string]string{
-					"type":     ConfigTypeObject,
-					"source":   ConfigObjectTypeAwss3,
-					"endpoint": "http://xx.xx.com",
-					"bucket":   "baetyl",
-					"object":   "func.zip",
-					"ak":       "xx",
-					"sk":       "xx",
 				},
 			},
 		},
@@ -401,7 +325,7 @@ func TestCreateConfig(t *testing.T) {
 				Key: "object",
 				Value: map[string]string{
 					"type":   ConfigTypeObject,
-					"source": "baidubos",
+					"source": "minio",
 					"bucket": "baetyl",
 					"object": "a.zip",
 				},
@@ -416,7 +340,7 @@ func TestCreateConfig(t *testing.T) {
 			"test": "test",
 		},
 		Data: map[string]string{
-			common.ConfigObjectPrefix + "object": `{"metadata":{"bucket":"baetyl","object":"a.zip","source":"baidubos","type":"object"}}`,
+			common.ConfigObjectPrefix + "object": `{"metadata":{"bucket":"baetyl","object":"a.zip","source":"minio","type":"object"}}`,
 		},
 		CreationTimestamp: time.Now(),
 		UpdateTimestamp:   time.Now(),
@@ -441,7 +365,7 @@ func TestCreateConfig(t *testing.T) {
 	assert.Equal(t, view.Data[0].Value["type"], "object")
 	assert.Equal(t, view.Data[0].Value["bucket"], "baetyl")
 	assert.Equal(t, view.Data[0].Value["object"], "a.zip")
-	assert.Equal(t, view.Data[0].Value["source"], "baidubos")
+	assert.Equal(t, view.Data[0].Value["source"], "minio")
 
 	mConf = &models.ConfigurationView{
 		Name:      "abc",
@@ -505,7 +429,7 @@ func TestCreateConfig(t *testing.T) {
 				Key: "object",
 				Value: map[string]string{
 					"type":   ConfigTypeObject,
-					"source": "baidubos",
+					"source": "minio",
 					"bucket": "baetyl",
 					"object": "a.zip",
 				},
