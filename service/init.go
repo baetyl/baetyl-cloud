@@ -29,10 +29,10 @@ const (
 	templateCoreAppYaml              = "baetyl-core-app.yml"
 	templateFuncConfYaml             = "baetyl-function-conf.yml"
 	templateFuncAppYaml              = "baetyl-function-app.yml"
-	templateInitDeploymentYaml       = "baetyl-init-deployment.yml"
-	templateKubeAPIMetricsYaml       = "kube-api-metrics.yml"
-	templateKubeLocalPathStorageYaml = "kube-local-path-storage.yml"
-	templateInitSetupShell           = "kube-init-setup.sh"
+	TemplateInitDeploymentYaml       = "baetyl-init-deployment.yml"
+	TemplateKubeAPIMetricsYaml       = "kube-api-metrics.yml"
+	TemplateKubeLocalPathStorageYaml = "kube-local-path-storage.yml"
+	TemplateInitSetupShell           = "kube-init-setup.sh"
 	templateKubeInitCommand          = `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/kube-init-setup.sh?token={{.Token}}' -osetup.sh && sh setup.sh`
 )
 
@@ -108,25 +108,25 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 
 func (s *InitServiceImpl) GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error) {
 	switch resourceName {
-	case templateKubeAPIMetricsYaml:
+	case TemplateKubeAPIMetricsYaml:
 		res, err := s.TemplateService.GetTemplate(resourceName)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
 		return []byte(res), nil
-	case templateKubeLocalPathStorageYaml:
+	case TemplateKubeLocalPathStorageYaml:
 		res, err := s.TemplateService.GetTemplate(resourceName)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
 		return []byte(res), nil
-	case templateInitSetupShell:
+	case TemplateInitSetupShell:
 		data, err := s.TemplateService.ParseTemplate(resourceName, map[string]interface{}{"Token": token})
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
 		return data, nil
-	case templateInitDeploymentYaml:
+	case TemplateInitDeploymentYaml:
 		return s.getInitYaml(info, node)
 	default:
 		return nil, common.Error(
@@ -139,7 +139,7 @@ func (s *InitServiceImpl) GetResource(resourceName, node, token string, info map
 func (s *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeName string) ([]byte, error) {
 	switch common.Resource(info[InfoKind].(string)) {
 	case common.Node:
-		return s.genInitYml(info[InfoNamespace].(string), info[InfoName].(string), edgeKubeNodeName)
+		return s.GenInitYml(info[InfoNamespace].(string), info[InfoName].(string), edgeKubeNodeName)
 	default:
 		return nil, common.Error(
 			common.ErrRequestParamInvalid,
@@ -147,12 +147,12 @@ func (s *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeN
 	}
 }
 
-func (s *InitServiceImpl) genInitYml(ns, nodeName, edgeKubeNodeName string) ([]byte, error) {
-	app, err := s.getCoreAppFromDesire(ns, nodeName)
+func (s *InitServiceImpl) GenInitYml(ns, nodeName, edgeKubeNodeName string) ([]byte, error) {
+	app, err := s.GetCoreAppFromDesire(ns, nodeName)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	cert, err := s.getNodeCert(app)
+	cert, err := s.GetNodeCert(app)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -169,10 +169,10 @@ func (s *InitServiceImpl) genInitYml(ns, nodeName, edgeKubeNodeName string) ([]b
 		"EdgeNamespace":       common.DefaultBaetylEdgeNamespace,
 		"EdgeSystemNamespace": common.DefaultBaetylEdgeSystemNamespace,
 	}
-	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
+	return s.TemplateService.ParseTemplate(TemplateInitDeploymentYaml, params)
 }
 
-func (s *InitServiceImpl) getNodeCert(app *specV1.Application) (*specV1.Secret, error) {
+func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, error) {
 	certName := ""
 	for _, vol := range app.Volumes {
 		if vol.Name == "node-cert" || vol.Name == "sync-cert" {
@@ -213,7 +213,7 @@ func (s *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
 	return string(data), nil
 }
 
-func (s *InitServiceImpl) getCoreAppFromDesire(ns, nodeName string) (*specV1.Application, error) {
+func (s *InitServiceImpl) GetCoreAppFromDesire(ns, nodeName string) (*specV1.Application, error) {
 	shadowDesire, err := s.NodeService.GetDesire(ns, nodeName)
 	if err != nil {
 		return nil, errors.Trace(err)

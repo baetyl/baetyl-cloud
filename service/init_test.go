@@ -26,18 +26,18 @@ func TestInitService_GetResource(t *testing.T) {
 	as.AuthService = aus
 
 	// good case : metrics
-	tp.EXPECT().GetTemplate(templateKubeAPIMetricsYaml).Return("metrics", nil).Times(1)
-	res, _ := as.GetResource(templateKubeAPIMetricsYaml, "", "", nil)
+	tp.EXPECT().GetTemplate(TemplateKubeAPIMetricsYaml).Return("metrics", nil).Times(1)
+	res, _ := as.GetResource(TemplateKubeAPIMetricsYaml, "", "", nil)
 	assert.Equal(t, res, []byte("metrics"))
 
 	// good case : local_path_storage
-	tp.EXPECT().GetTemplate(templateKubeLocalPathStorageYaml).Return("local-path-storage", nil).Times(1)
-	res, _ = as.GetResource(templateKubeLocalPathStorageYaml, "", "", nil)
+	tp.EXPECT().GetTemplate(TemplateKubeLocalPathStorageYaml).Return("local-path-storage", nil).Times(1)
+	res, _ = as.GetResource(TemplateKubeLocalPathStorageYaml, "", "", nil)
 	assert.Equal(t, res, []byte("local-path-storage"))
 
 	// good case : setup
-	tp.EXPECT().ParseTemplate(templateInitSetupShell, gomock.Any()).Return([]byte("shell"), nil).Times(1)
-	res, _ = as.GetResource(templateInitSetupShell, "", "", nil)
+	tp.EXPECT().ParseTemplate(TemplateInitSetupShell, gomock.Any()).Return([]byte("shell"), nil).Times(1)
+	res, _ = as.GetResource(TemplateInitSetupShell, "", "", nil)
 	assert.Equal(t, res, []byte("shell"))
 
 	// bad case : not found
@@ -76,7 +76,7 @@ func TestInitService_getSyncCert(t *testing.T) {
 	}
 
 	secret.EXPECT().Get("default", "", "").Return(nil, nil).Times(1)
-	res, err := as.getNodeCert(app1)
+	res, err := as.GetNodeCert(app1)
 	assert.Error(t, err, common.ErrResourceNotFound)
 	assert.Nil(t, res)
 }
@@ -132,7 +132,7 @@ func TestInitService_getDesireAppInfo(t *testing.T) {
 	node.EXPECT().GetDesire("default", "node01").Return(Desire, nil).Times(1)
 	app.EXPECT().Get("default", "baetyl-core-node01", "").Return(app1, nil).Times(1)
 
-	res, err := as.getCoreAppFromDesire("default", "node01")
+	res, err := as.GetCoreAppFromDesire("default", "node01")
 	assert.NoError(t, err)
 	assert.Equal(t, res, app1)
 }
