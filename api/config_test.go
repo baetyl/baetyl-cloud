@@ -160,6 +160,29 @@ func TestCreateConfig(t *testing.T) {
 		},
 		Data: []models.ConfigDataItem{
 			{
+				Key: "_object_key",
+				Value: map[string]string{
+					"type": ConfigTypeKV,
+					"value": "{\n    \"md5\":\"sdfsdfsd\",\n    \"url\": \"http://download.com/url\"\n}",
+				},
+			},
+		},
+	}
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mConf)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mConf = &models.ConfigurationView{
+		Name:      "abc",
+		Namespace: "default",
+		Labels: map[string]string{
+			"test": "test",
+		},
+		Data: []models.ConfigDataItem{
+			{
 				Key: "object",
 				Value: map[string]string{
 					"type":    ConfigTypeObject,
