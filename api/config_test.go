@@ -139,7 +139,7 @@ func TestCreateConfig(t *testing.T) {
 			{
 				Key: "function",
 				Value: map[string]string{
-					"type":    "function",
+					"type":    ConfigTypeFunction,
 					"unknown": "unknown",
 				},
 			},
@@ -162,7 +162,7 @@ func TestCreateConfig(t *testing.T) {
 			{
 				Key: "object",
 				Value: map[string]string{
-					"type":    "object",
+					"type":    ConfigTypeObject,
 					"unknown": "unknown",
 				},
 			},
@@ -183,7 +183,106 @@ func TestCreateConfig(t *testing.T) {
 		},
 		Data: []models.ConfigDataItem{
 			{
-				Key: "function",
+				Key: "object",
+				Value: map[string]string{
+					"type":   ConfigTypeObject,
+					"source": ConfigObjectTypeBos,
+					"bucket": "baetyl",
+				},
+			},
+		},
+	}
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mConf)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mConf = &models.ConfigurationView{
+		Name:      "abc",
+		Namespace: "default",
+		Labels: map[string]string{
+			"test": "test",
+		},
+		Data: []models.ConfigDataItem{
+			{
+				Key: "object",
+				Value: map[string]string{
+					"type":   ConfigTypeObject,
+					"source": ConfigObjectTypeMinio,
+					"object": "a.zip",
+				},
+			},
+		},
+	}
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mConf)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mConf = &models.ConfigurationView{
+		Name:      "abc",
+		Namespace: "default",
+		Labels: map[string]string{
+			"test": "test",
+		},
+		Data: []models.ConfigDataItem{
+			{
+				Key: "object",
+				Value: map[string]string{
+					"type":     ConfigTypeObject,
+					"source":   ConfigObjectTypeAwss3,
+					"endpoint": "http://xx.xx.com",
+					"bucket":   "baetyl",
+					"object":   "func.zip",
+					"ak":       "xx",
+					"sk":       "xx",
+				},
+			},
+		},
+	}
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mConf)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mConf = &models.ConfigurationView{
+		Name:      "abc",
+		Namespace: "default",
+		Labels: map[string]string{
+			"test": "test",
+		},
+		Data: []models.ConfigDataItem{
+			{
+				Key: ConfigTypeObject,
+				Value: map[string]string{
+					"type":   "object",
+					"source": ConfigObjectTypeHttp,
+				},
+			},
+		},
+	}
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mConf)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mConf = &models.ConfigurationView{
+		Name:      "abc",
+		Namespace: "default",
+		Labels: map[string]string{
+			"test": "test",
+		},
+		Data: []models.ConfigDataItem{
+			{
+				Key: ConfigTypeFunction,
 				Value: map[string]string{
 					"type":     "function",
 					"function": "process",
@@ -215,7 +314,7 @@ func TestCreateConfig(t *testing.T) {
 		},
 		Data: []models.ConfigDataItem{
 			{
-				Key: "function",
+				Key: ConfigTypeFunction,
 				Value: map[string]string{
 					"type":     "function",
 					"function": "process",
@@ -260,7 +359,7 @@ func TestCreateConfig(t *testing.T) {
 	assert.Equal(t, view.Namespace, res.Namespace)
 	assert.Equal(t, view.Labels, res.Labels)
 	assert.Equal(t, view.Data[0].Key, "function")
-	assert.Equal(t, view.Data[0].Value["type"], "function")
+	assert.Equal(t, view.Data[0].Value["type"], ConfigTypeFunction)
 	assert.Equal(t, view.Data[0].Value["bucket"], "baetyl")
 	assert.Equal(t, view.Data[0].Value["object"], "a.zip")
 	assert.Equal(t, view.Data[0].Value["function"], "process")
@@ -278,7 +377,7 @@ func TestCreateConfig(t *testing.T) {
 			{
 				Key: "object",
 				Value: map[string]string{
-					"type":   "object",
+					"type":   ConfigTypeObject,
 					"source": "baidubos",
 					"bucket": "baetyl",
 					"object": "a.zip",
@@ -331,7 +430,58 @@ func TestCreateConfig(t *testing.T) {
 			{
 				Key: "object",
 				Value: map[string]string{
-					"type":   "object",
+					"type":   ConfigTypeObject,
+					"source": ConfigObjectTypeHttp,
+					"url":    "http://download.com/url",
+				},
+			},
+		},
+	}
+
+	res = &specV1.Configuration{
+		Name:      "abc",
+		Namespace: "default",
+		Labels: map[string]string{
+			"test": "test",
+		},
+		Data: map[string]string{
+			common.ConfigObjectPrefix + "object": `{"url":"http://download.com/url","metadata":{"url":"http://download.com/url","source":"http","type":"object"}}`,
+		},
+		CreationTimestamp: time.Now(),
+		UpdateTimestamp:   time.Now(),
+		Description:       "des",
+		Version:           "12",
+		System:            false,
+	}
+	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
+	sConfig.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mConf)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	err = json.Unmarshal(w.Body.Bytes(), &view)
+	assert.NoError(t, err)
+	assert.Equal(t, view.Name, res.Name)
+	assert.Equal(t, view.Namespace, res.Namespace)
+	assert.Equal(t, view.Labels, res.Labels)
+	assert.Equal(t, view.Data[0].Key, "object")
+	assert.Equal(t, view.Data[0].Value["type"], "object")
+	assert.Equal(t, view.Data[0].Value["url"], "http://download.com/url")
+	assert.Equal(t, view.Data[0].Value["source"], ConfigObjectTypeHttp)
+
+	mConf = &models.ConfigurationView{
+		Name:      "abc",
+		Namespace: "default",
+		Labels: map[string]string{
+			"test": "test",
+		},
+		Data: []models.ConfigDataItem{
+			{
+				Key: "object",
+				Value: map[string]string{
+					"type":   ConfigTypeObject,
 					"source": "baidubos",
 					"bucket": "baetyl",
 					"object": "a.zip",
@@ -377,7 +527,7 @@ func TestUpdateConfig(t *testing.T) {
 			{
 				Key: "function",
 				Value: map[string]string{
-					"type":     "function",
+					"type":     ConfigTypeFunction,
 					"function": "process",
 					"version":  "1",
 					"runtime":  "python36",
@@ -389,7 +539,7 @@ func TestUpdateConfig(t *testing.T) {
 			{
 				Key: "function",
 				Value: map[string]string{
-					"type":     "function",
+					"type":     ConfigTypeFunction,
 					"function": "process",
 					"version":  "1",
 					"runtime":  "python36",
@@ -432,7 +582,7 @@ func TestUpdateConfig(t *testing.T) {
 			{
 				Key: "function",
 				Value: map[string]string{
-					"type":     "function",
+					"type":     ConfigTypeFunction,
 					"function": "process",
 					"version":  "1",
 					"runtime":  "python36",

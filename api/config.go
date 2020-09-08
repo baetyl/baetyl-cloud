@@ -15,9 +15,13 @@ import (
 )
 
 const (
-	ConfigTypeKV       = "kv"
-	ConfigTypeObject   = "object"
-	ConfigTypeFunction = "function"
+	ConfigTypeKV          = "kv"
+	ConfigTypeObject      = "object"
+	ConfigTypeFunction    = "function"
+	ConfigObjectTypeBos   = "baidubos"
+	ConfigObjectTypeMinio = "minio"
+	ConfigObjectTypeAwss3 = "awss3"
+	ConfigObjectTypeHttp  = "http"
 )
 
 // TODO: optimize this layer, general abstraction
@@ -173,7 +177,20 @@ func (api *API) parseAndCheckConfigView(c *common.Context) (*specV1.Configuratio
 		if _type, ok := item.Value["type"]; ok {
 			switch _type {
 			case ConfigTypeObject:
-				res := checkElementsExist(item.Value, "source", "bucket", "object")
+				res := checkElementsExist(item.Value, "source")
+				if !res {
+					return nil, common.Error(common.ErrRequestParamInvalid,
+						common.Field("error", "failed to validate object data of config"))
+				}
+				switch item.Value["source"] {
+				case ConfigObjectTypeBos, ConfigObjectTypeMinio:
+					res = checkElementsExist(item.Value, "bucket", "object")
+				case ConfigObjectTypeAwss3:
+					res = checkElementsExist(item.Value, "endpoint", "bucket", "object",
+						"ak", "sk", "md5")
+				case ConfigObjectTypeHttp:
+					res = checkElementsExist(item.Value, "url")
+				}
 				if !res {
 					return nil, common.Error(common.ErrRequestParamInvalid,
 						common.Field("error", "failed to validate object data of config"))
@@ -251,24 +268,29 @@ func (api *API) toConfigurationView(config *specV1.Configuration) (*models.Confi
 
 	for k, v := range config.Data {
 		obj := models.ConfigDataItem{
+			Key:   k,
 			Value: map[string]string{},
 		}
+
+		var object specV1.ConfigurationObject
 		if strings.HasPrefix(k, common.ConfigObjectPrefix) {
 			obj.Key = strings.TrimPrefix(k, common.ConfigObjectPrefix)
-			var object specV1.ConfigurationObject
 			err := json.Unmarshal([]byte(v), &object)
 			if err != nil {
 				return nil, err
 			}
+		}
+
+		if object.Metadata != nil {
 			delete(object.Metadata, "userID")
 			obj.Value = object.Metadata
 		} else {
-			obj.Key = k
 			obj.Value = map[string]string{
 				"type":  ConfigTypeKV,
 				"value": v,
 			}
 		}
+
 		configView.Data = append(configView.Data, obj)
 	}
 	return configView, nil
@@ -288,6 +310,7 @@ func (api *API) toConfiguration(userID string, configView *models.ConfigurationV
 			config.Data[v.Key] = v.Value["value"]
 		case ConfigTypeFunction, ConfigTypeObject:
 			object := &specV1.ConfigurationObject{
+				URL:      v.Value["url"],
 				MD5:      v.Value["md5"],
 				Metadata: map[string]string{},
 			}

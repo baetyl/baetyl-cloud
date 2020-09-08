@@ -171,6 +171,7 @@ func (t *SyncServiceImpl) PopulateConfigObject(k, v string, cfg *specV1.Configur
 		return err
 	}
 	if obj.URL != "" {
+		obj.Metadata = nil
 		return nil
 	}
 
