@@ -33,6 +33,7 @@ const (
 	templateKubeAPIMetricsYaml       = "kube-api-metrics.yml"
 	templateKubeLocalPathStorageYaml = "kube-local-path-storage.yml"
 	templateInitSetupShell           = "kube-init-setup.sh"
+	templateKubeInitCommand          = `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/kube-init-setup.sh?token={{.Token}}' -osetup.sh && sh setup.sh`
 )
 
 var (
@@ -40,9 +41,7 @@ var (
 	HookNamePopulateParams = "populateParams"
 )
 
-var initCmdMap = map[string]string{
-	"node": `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/kube-init-setup.sh?token={{.Token}}' -osetup.sh && sh setup.sh`,
-}
+var InitCmdMap = map[string]string{}
 
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
 type GetInitResource func(resourceName, node, token string, info map[string]interface{}) ([]byte, error)
@@ -114,6 +113,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	initService.ResourceMapFunc[templateKubeLocalPathStorageYaml] = initService.getLocalPathStorageYaml
 	initService.ResourceMapFunc[templateInitSetupShell] = initService.getInitSetupShell
 	initService.ResourceMapFunc[templateInitDeploymentYaml] = initService.getInitDeploymentYaml
+	InitCmdMap["node"] = templateKubeInitCommand
 
 	return initService, nil
 }
@@ -226,7 +226,7 @@ func (s *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
 	params := map[string]interface{}{
 		"Token": token,
 	}
-	if templateCmd, ok := initCmdMap[kind]; ok {
+	if templateCmd, ok := InitCmdMap[kind]; ok {
 		data, err := s.TemplateService.Execute("setup-command", templateCmd, params)
 		if err != nil {
 			return "", err
