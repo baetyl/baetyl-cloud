@@ -5,6 +5,7 @@ set -e
 OS=$(uname)
 TOKEN="{{.Token}}"
 ADDR="{{GetProperty "init-server-address"}}"
+DEPLOYYML="{{.DeploymentYml}}"
 SUDO=sudo
 
 exec_cmd_nobail() {
@@ -161,7 +162,7 @@ check_and_install_baetyl() {
     exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/object" $SUDO
     exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/store" $SUDO
     exec_cmd_nobail "mkdir -p -m 666 /var/lib/baetyl/log" $SUDO
-    kube_apply "$ADDR/v1/init/baetyl-init-deployment.yml?token=$TOKEN&node=$KUBE_MASTER_NODE_NAME"
+    kube_apply "$ADDR/v1/init/$DEPLOYYML?token=$TOKEN&node=$KUBE_MASTER_NODE_NAME"
   else
     print_status "Can not get kubernetes master or controlplane node, this script will exit now..."
   fi
@@ -177,7 +178,7 @@ kube_apply() {
 check_and_get_metrics() {
   METRICS=$(check_kube_res metrics-server)
   if [ -z "$METRICS" ]; then
-    kube_apply "$ADDR/v1/init/kube-api-metrics.yml"
+    kube_apply "$ADDR/v1/init/kube-api-metrics.yml?token=$TOKEN"
   fi
 }
 
@@ -188,7 +189,7 @@ check_kube_res() {
 check_and_get_storage() {
   PROVISIONER=$(check_kube_res local-path-provisioner)
   if [ -z "$PROVISIONER" ]; then
-    kube_apply "$ADDR/v1/init/kube-local-path-storage.yml"
+    kube_apply "$ADDR/v1/init/kube-local-path-storage.yml?token=$TOKEN"
   fi
 }
 

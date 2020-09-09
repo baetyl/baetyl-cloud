@@ -17,7 +17,7 @@ type InitServer struct {
 	cfg    *config.CloudConfig
 	router *gin.Engine
 	server *http.Server
-	api    api.InitAPI
+	api    *api.InitAPI
 }
 
 // NewInitServer new init server
@@ -62,7 +62,7 @@ func (s *InitServer) Run() {
 	}
 }
 
-func (s *InitServer) SetAPI(api api.InitAPI) {
+func (s *InitServer) SetAPI(api *api.InitAPI) {
 	s.api = api
 }
 

@@ -29,10 +29,10 @@ const (
 	templateCoreAppYaml              = "baetyl-core-app.yml"
 	templateFuncConfYaml             = "baetyl-function-conf.yml"
 	templateFuncAppYaml              = "baetyl-function-app.yml"
-	templateInitDeploymentYaml       = "baetyl-init-deployment.yml"
+	TemplateInitDeploymentYaml       = "baetyl-init-deployment.yml"
 	templateKubeAPIMetricsYaml       = "kube-api-metrics.yml"
 	templateKubeLocalPathStorageYaml = "kube-local-path-storage.yml"
-	templateInitSetupShell           = "kube-init-setup.sh"
+	TemplateInitSetupShell           = "kube-init-setup.sh"
 	templateKubeInitCommand          = `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/kube-init-setup.sh?token={{.Token}}' -osetup.sh && sh setup.sh`
 )
 
@@ -42,6 +42,7 @@ var (
 )
 
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
+type GetInitResource func(resourceName, node, token string, info map[string]interface{}) ([]byte, error)
 
 // InitService
 type InitService interface {
@@ -57,8 +58,9 @@ type InitServiceImpl struct {
 	SecretService   SecretService
 	TemplateService TemplateService
 	*AppCombinedService
-	PKI   PKIService
-	Hooks map[string]interface{}
+	PKI             PKIService
+	Hooks           map[string]interface{}
+	ResourceMapFunc map[string]GetInitResource
 }
 
 // NewSyncService new SyncService
@@ -94,7 +96,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	return &InitServiceImpl{
+	initService := &InitServiceImpl{
 		cfg:                config,
 		AuthService:        authService,
 		NodeService:        nodeService,
@@ -103,43 +105,58 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		AppCombinedService: acs,
 		PKI:                pki,
 		Hooks:              map[string]interface{}{},
-	}, nil
+		ResourceMapFunc:    map[string]GetInitResource{},
+	}
+	initService.ResourceMapFunc[templateKubeAPIMetricsYaml] = initService.getMetricsYaml
+	initService.ResourceMapFunc[templateKubeLocalPathStorageYaml] = initService.getLocalPathStorageYaml
+	initService.ResourceMapFunc[TemplateInitSetupShell] = initService.getInitSetupShell
+	initService.ResourceMapFunc[TemplateInitDeploymentYaml] = initService.getInitDeploymentYaml
+
+	return initService, nil
 }
 
 func (s *InitServiceImpl) GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error) {
-	switch resourceName {
-	case templateKubeAPIMetricsYaml:
-		res, err := s.TemplateService.GetTemplate(resourceName)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		return []byte(res), nil
-	case templateKubeLocalPathStorageYaml:
-		res, err := s.TemplateService.GetTemplate(resourceName)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		return []byte(res), nil
-	case templateInitSetupShell:
-		data, err := s.TemplateService.ParseTemplate(resourceName, map[string]interface{}{"Token": token})
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		return data, nil
-	case templateInitDeploymentYaml:
-		return s.getInitYaml(info, node)
-	default:
-		return nil, common.Error(
-			common.ErrResourceNotFound,
-			common.Field("type", "resource"),
-			common.Field("name", resourceName))
+	if handler, ok := s.ResourceMapFunc[resourceName]; ok {
+		return handler(resourceName, node, token, info)
 	}
+	return nil, common.Error(
+		common.ErrResourceNotFound,
+		common.Field("type", "resource"),
+		common.Field("name", resourceName))
+}
+
+func (s *InitServiceImpl) getMetricsYaml(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
+	res, err := s.TemplateService.GetTemplate(resourceName)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return []byte(res), nil
+}
+
+func (s *InitServiceImpl) getLocalPathStorageYaml(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
+	res, err := s.TemplateService.GetTemplate(resourceName)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return []byte(res), nil
+}
+
+func (s *InitServiceImpl) getInitSetupShell(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
+	data, err := s.TemplateService.ParseTemplate(resourceName, map[string]interface{}{"Token": token, "DeploymentYml": TemplateInitDeploymentYaml})
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return data, nil
+}
+
+func (s *InitServiceImpl) getInitDeploymentYaml(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
+	return s.getInitYaml(info, node)
 }
 
 func (s *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeName string) ([]byte, error) {
 	switch common.Resource(info[InfoKind].(string)) {
 	case common.Node:
-		return s.genInitYml(info[InfoNamespace].(string), info[InfoName].(string), edgeKubeNodeName)
+		return s.GenInitYml(info[InfoNamespace].(string), info[InfoName].(string), edgeKubeNodeName)
 	default:
 		return nil, common.Error(
 			common.ErrRequestParamInvalid,
@@ -147,12 +164,12 @@ func (s *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeN
 	}
 }
 
-func (s *InitServiceImpl) genInitYml(ns, nodeName, edgeKubeNodeName string) ([]byte, error) {
-	app, err := s.getCoreAppFromDesire(ns, nodeName)
+func (s *InitServiceImpl) GenInitYml(ns, nodeName, edgeKubeNodeName string) ([]byte, error) {
+	app, err := s.GetCoreAppFromDesire(ns, nodeName)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	cert, err := s.getNodeCert(app)
+	cert, err := s.GetNodeCert(app)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -169,10 +186,10 @@ func (s *InitServiceImpl) genInitYml(ns, nodeName, edgeKubeNodeName string) ([]b
 		"EdgeNamespace":       common.DefaultBaetylEdgeNamespace,
 		"EdgeSystemNamespace": common.DefaultBaetylEdgeSystemNamespace,
 	}
-	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
+	return s.TemplateService.ParseTemplate(TemplateInitDeploymentYaml, params)
 }
 
-func (s *InitServiceImpl) getNodeCert(app *specV1.Application) (*specV1.Secret, error) {
+func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, error) {
 	certName := ""
 	for _, vol := range app.Volumes {
 		if vol.Name == "node-cert" || vol.Name == "sync-cert" {
@@ -213,7 +230,7 @@ func (s *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
 	return string(data), nil
 }
 
-func (s *InitServiceImpl) getCoreAppFromDesire(ns, nodeName string) (*specV1.Application, error) {
+func (s *InitServiceImpl) GetCoreAppFromDesire(ns, nodeName string) (*specV1.Application, error) {
 	shadowDesire, err := s.NodeService.GetDesire(ns, nodeName)
 	if err != nil {
 		return nil, errors.Trace(err)

@@ -12,16 +12,12 @@ import (
 
 //go:generate mockgen -destination=../mock/api/init.go -package=api github.com/baetyl/baetyl-cloud/v2/api InitAPI
 
-type InitAPI interface {
-	GetResource(c *common.Context) (interface{}, error)
-}
-
-type InitAPIImpl struct {
+type InitAPI struct {
 	Init service.InitService
 	Auth service.AuthService
 }
 
-func NewInitAPI(cfg *config.CloudConfig) (InitAPI, error) {
+func NewInitAPI(cfg *config.CloudConfig) (*InitAPI, error) {
 	initService, err := service.NewInitService(cfg)
 	if err != nil {
 		return nil, err
@@ -30,13 +26,13 @@ func NewInitAPI(cfg *config.CloudConfig) (InitAPI, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &InitAPIImpl{
+	return &InitAPI{
 		Init: initService,
 		Auth: authService,
 	}, nil
 }
 
-func (api *InitAPIImpl) GetResource(c *common.Context) (interface{}, error) {
+func (api *InitAPI) GetResource(c *common.Context) (interface{}, error) {
 	resourceName := c.Param("resource")
 	query := &struct {
 		Token string `form:"token,omitempty"`
@@ -57,11 +53,7 @@ func (api *InitAPIImpl) GetResource(c *common.Context) (interface{}, error) {
 	return api.Init.GetResource(resourceName, query.Node, query.Token, info)
 }
 
-func (a *InitAPIImpl) CheckAndParseToken(token, resourceName string) (map[string]interface{}, error) {
-	// TODO: all requests need token auth @jiangxin
-	if resourceName != "baetyl-init-deployment.yml" {
-		return nil, nil
-	}
+func (a *InitAPI) CheckAndParseToken(token, resourceName string) (map[string]interface{}, error) {
 	// check len
 	if len(token) < 10 {
 		return nil, common.Error(
