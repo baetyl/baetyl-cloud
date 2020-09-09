@@ -29,10 +29,10 @@ const (
 	templateCoreAppYaml              = "baetyl-core-app.yml"
 	templateFuncConfYaml             = "baetyl-function-conf.yml"
 	templateFuncAppYaml              = "baetyl-function-app.yml"
-	templateInitDeploymentYaml       = "baetyl-init-deployment.yml"
+	TemplateInitDeploymentYaml       = "baetyl-init-deployment.yml"
 	templateKubeAPIMetricsYaml       = "kube-api-metrics.yml"
 	templateKubeLocalPathStorageYaml = "kube-local-path-storage.yml"
-	templateInitSetupShell           = "kube-init-setup.sh"
+	TemplateInitSetupShell           = "kube-init-setup.sh"
 	templateKubeInitCommand          = `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/kube-init-setup.sh?token={{.Token}}' -osetup.sh && sh setup.sh`
 )
 
@@ -40,8 +40,6 @@ var (
 	CmdExpirationInSeconds = int64(60 * 60)
 	HookNamePopulateParams = "populateParams"
 )
-
-var InitCmdMap = map[string]string{}
 
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
 type GetInitResource func(resourceName, node, token string, info map[string]interface{}) ([]byte, error)
@@ -111,9 +109,8 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	}
 	initService.ResourceMapFunc[templateKubeAPIMetricsYaml] = initService.getMetricsYaml
 	initService.ResourceMapFunc[templateKubeLocalPathStorageYaml] = initService.getLocalPathStorageYaml
-	initService.ResourceMapFunc[templateInitSetupShell] = initService.getInitSetupShell
-	initService.ResourceMapFunc[templateInitDeploymentYaml] = initService.getInitDeploymentYaml
-	InitCmdMap["node"] = templateKubeInitCommand
+	initService.ResourceMapFunc[TemplateInitSetupShell] = initService.getInitSetupShell
+	initService.ResourceMapFunc[TemplateInitDeploymentYaml] = initService.getInitDeploymentYaml
 
 	return initService, nil
 }
@@ -145,7 +142,7 @@ func (s *InitServiceImpl) getLocalPathStorageYaml(resourceName, node, token stri
 }
 
 func (s *InitServiceImpl) getInitSetupShell(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
-	data, err := s.TemplateService.ParseTemplate(resourceName, map[string]interface{}{"Token": token})
+	data, err := s.TemplateService.ParseTemplate(resourceName, map[string]interface{}{"Token": token, "DeploymentYml": TemplateInitDeploymentYaml})
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -189,7 +186,7 @@ func (s *InitServiceImpl) GenInitYml(ns, nodeName, edgeKubeNodeName string) ([]b
 		"EdgeNamespace":       common.DefaultBaetylEdgeNamespace,
 		"EdgeSystemNamespace": common.DefaultBaetylEdgeSystemNamespace,
 	}
-	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
+	return s.TemplateService.ParseTemplate(TemplateInitDeploymentYaml, params)
 }
 
 func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, error) {
@@ -226,14 +223,11 @@ func (s *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
 	params := map[string]interface{}{
 		"Token": token,
 	}
-	if templateCmd, ok := InitCmdMap[kind]; ok {
-		data, err := s.TemplateService.Execute("setup-command", templateCmd, params)
-		if err != nil {
-			return "", err
-		}
-		return string(data), nil
+	data, err := s.TemplateService.Execute("setup-command", templateKubeInitCommand, params)
+	if err != nil {
+		return "", err
 	}
-	return "", nil
+	return string(data), nil
 }
 
 func (s *InitServiceImpl) GetCoreAppFromDesire(ns, nodeName string) (*specV1.Application, error) {

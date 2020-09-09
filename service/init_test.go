@@ -27,8 +27,8 @@ func TestInitService_GetResource(t *testing.T) {
 	as.AuthService = aus
 	as.ResourceMapFunc[templateKubeAPIMetricsYaml] = as.getMetricsYaml
 	as.ResourceMapFunc[templateKubeLocalPathStorageYaml] = as.getLocalPathStorageYaml
-	as.ResourceMapFunc[templateInitSetupShell] = as.getInitSetupShell
-	as.ResourceMapFunc[templateInitDeploymentYaml] = as.getInitDeploymentYaml
+	as.ResourceMapFunc[TemplateInitSetupShell] = as.getInitSetupShell
+	as.ResourceMapFunc[TemplateInitDeploymentYaml] = as.getInitDeploymentYaml
 	// good case : metrics
 	tp.EXPECT().GetTemplate(templateKubeAPIMetricsYaml).Return("metrics", nil).Times(1)
 	res, _ := as.GetResource(templateKubeAPIMetricsYaml, "", "", nil)
@@ -40,8 +40,8 @@ func TestInitService_GetResource(t *testing.T) {
 	assert.Equal(t, res, []byte("local-path-storage"))
 
 	// good case : setup
-	tp.EXPECT().ParseTemplate(templateInitSetupShell, gomock.Any()).Return([]byte("shell"), nil).Times(1)
-	res, _ = as.GetResource(templateInitSetupShell, "", "", nil)
+	tp.EXPECT().ParseTemplate(TemplateInitSetupShell, gomock.Any()).Return([]byte("shell"), nil).Times(1)
+	res, _ = as.GetResource(TemplateInitSetupShell, "", "", nil)
 	assert.Equal(t, res, []byte("shell"))
 
 	// bad case : not found
@@ -94,7 +94,6 @@ func TestInitService_GenCmd(t *testing.T) {
 	as := InitServiceImpl{}
 	as.AuthService = sAuth
 	as.TemplateService = sTemplate
-	InitCmdMap["node"] = templateKubeInitCommand
 	info := map[string]interface{}{
 		InfoKind:      "node",
 		InfoName:      "name",
@@ -105,7 +104,7 @@ func TestInitService_GenCmd(t *testing.T) {
 	expect := "curl -skfL 'https://1.2.3.4:9003/v1/active/setup.sh?token=tokenexpect' -osetup.sh && sh setup.sh"
 
 	sAuth.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)
-	sTemplate.EXPECT().Execute("setup-command", InitCmdMap["node"], gomock.Any()).Return([]byte(expect), nil).Times(1)
+	sTemplate.EXPECT().Execute("setup-command", templateKubeInitCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
 
 	res, err := as.GenCmd("node", "ns", "name")
 	assert.NoError(t, err)
