@@ -25,45 +25,41 @@ func TestInitService_GetResource(t *testing.T) {
 	as.TemplateService = tp
 	as.NodeService = ns
 	as.AuthService = aus
-	as.ResourceMapFunc[templateKubeAPIMetricsYaml] = as.getMetricsYaml
-	as.ResourceMapFunc[templateKubeLocalPathStorageYaml] = as.getLocalPathStorageYaml
+	as.ResourceMapFunc[templateKubeAPIMetricsYaml] = as.getCommonResource
+	as.ResourceMapFunc[templateKubeLocalPathStorageYaml] = as.getCommonResource
 	as.ResourceMapFunc[TemplateInitSetupShell] = as.getInitSetupShell
 	as.ResourceMapFunc[TemplateInitDeploymentYaml] = as.getInitDeploymentYaml
 	// good case : metrics
 	tp.EXPECT().GetTemplate(templateKubeAPIMetricsYaml).Return("metrics", nil).Times(1)
-	res, _ := as.GetResource(templateKubeAPIMetricsYaml, "", "", nil)
+	res, _ := as.GetResource("", "", templateKubeAPIMetricsYaml, nil)
 	assert.Equal(t, res, []byte("metrics"))
 
 	// good case : local_path_storage
 	tp.EXPECT().GetTemplate(templateKubeLocalPathStorageYaml).Return("local-path-storage", nil).Times(1)
-	res, _ = as.GetResource(templateKubeLocalPathStorageYaml, "", "", nil)
+	res, _ = as.GetResource("", "", templateKubeLocalPathStorageYaml, nil)
 	assert.Equal(t, res, []byte("local-path-storage"))
 
 	// good case : setup
 	tp.EXPECT().ParseTemplate(TemplateInitSetupShell, gomock.Any()).Return([]byte("shell"), nil).Times(1)
-	res, _ = as.GetResource(TemplateInitSetupShell, "", "", nil)
+	res, _ = as.GetResource("", "", TemplateInitSetupShell, nil)
 	assert.Equal(t, res, []byte("shell"))
 
 	// bad case : not found
-	_, err := as.GetResource("dummy", "", "", nil)
+	_, err := as.GetResource("", "", "dummy", nil)
 	assert.EqualError(t, err, "The (resource) resource (dummy) is not found.")
 }
 
 func TestInitService_getInitYaml(t *testing.T) {
-	info := map[string]interface{}{
-		InfoKind:      "123",
-		InfoName:      "n0",
-		InfoNamespace: "default",
-		InfoTimestamp: time.Now().Unix(),
-		InfoExpiry:    60 * 60 * 24 * 3650,
-	}
-	as := InitServiceImpl{}
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
-	auth := service.NewMockAuthService(mockCtl)
-	as.AuthService = auth
-	res, err := as.getInitYaml(info, "kube")
-	assert.Error(t, err, common.ErrRequestParamInvalid)
+
+	sNode := service.NewMockNodeService(mockCtl)
+	as := InitServiceImpl{}
+	as.NodeService = sNode
+
+	sNode.EXPECT().GetDesire("default", "n0").Return(nil, common.Error(common.ErrResourceNotFound))
+	res, err := as.getInitDeploymentYaml("default", "n0", "kube", nil)
+	assert.EqualError(t, err, "The resource is not found.")
 	assert.Nil(t, res)
 }
 
@@ -81,7 +77,7 @@ func TestInitService_getSyncCert(t *testing.T) {
 
 	secret.EXPECT().Get("default", "", "").Return(nil, nil).Times(1)
 	res, err := as.GetNodeCert(app1)
-	assert.Error(t, err, common.ErrResourceNotFound)
+	assert.EqualError(t, err, "The (secret) resource is not found in namespace(default).")
 	assert.Nil(t, res)
 }
 
@@ -95,7 +91,6 @@ func TestInitService_GenCmd(t *testing.T) {
 	as.AuthService = sAuth
 	as.TemplateService = sTemplate
 	info := map[string]interface{}{
-		InfoKind:      "node",
 		InfoName:      "name",
 		InfoNamespace: "ns",
 		InfoExpiry:    CmdExpirationInSeconds,
@@ -106,7 +101,7 @@ func TestInitService_GenCmd(t *testing.T) {
 	sAuth.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)
 	sTemplate.EXPECT().Execute("setup-command", templateKubeInitCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
 
-	res, err := as.GenCmd("node", "ns", "name")
+	res, err := as.GenCmd("ns", "name")
 	assert.NoError(t, err)
 	assert.Equal(t, res, expect)
 }
