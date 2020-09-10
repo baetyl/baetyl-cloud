@@ -47,7 +47,7 @@ type GetInitResource func(ns, nodeName, resourceName string, params map[string]i
 type InitService interface {
 	GetResource(ns, nodeName, resourceName string, params map[string]interface{}) (interface{}, error)
 	GenApps(ns, nodeName string) ([]*specV1.Application, error)
-	GenCmd(ns, nameNode string) (string, error)
+	GenCmd(ns, name string) (string, error)
 }
 
 type InitServiceImpl struct {
@@ -185,10 +185,10 @@ func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, 
 	return cert, nil
 }
 
-func (s *InitServiceImpl) GenCmd(ns, nameNode string) (string, error) {
+func (s *InitServiceImpl) GenCmd(ns, name string) (string, error) {
 	info := map[string]interface{}{
 		InfoNamespace: ns,
-		InfoName:      nameNode,
+		InfoName:      name,
 		InfoExpiry:    CmdExpirationInSeconds,
 		InfoTimestamp: time.Now().Unix(),
 	}
