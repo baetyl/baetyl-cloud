@@ -17,12 +17,6 @@ print_status() {
   echo "## $1"
 }
 
-url_safe_check() {
-  if ! curl -Ifs $1 >/dev/null; then
-    print_status "ERROR: $1 is invalid or Unreachable!"
-  fi
-}
-
 check_cmd() {
   command -v $1 | awk '{print}'
 }
@@ -60,76 +54,6 @@ get_dependencies() {
       ;;
     esac
   fi
-}
-
-install_docker() {
-  TARGET_URL=http://get.daocloud.io/docker/
-  url_safe_check ${TARGET_URL}
-  exec_cmd_nobail "curl -sSL ${TARGET_URL} | $SUDO sh"
-
-  if [[ ! -x "$(command -v docker)" ]]; then
-      print_status "Install docker failed! Check the installing process for help..."
-  fi
-
-  if [[ ! -x "$(command -v systemctl)" ]]; then
-      LSB_DIST=$(. /etc/os-release && echo "$ID" | tr '[:upper:]' '[:lower:]')
-      case "$LSB_DIST" in
-      ubuntu | debian | raspbian)
-          exec_cmd_nobail "apt update && apt install --no-install-recommends -y systemd  >/dev/null 2>&1" $SUDO
-          ;;
-      centos)
-          exec_cmd_nobail "yum install systemd -y  >/dev/null 2>&1" $SUDO
-          ;;
-      *)
-          print_status "Your OS: $OS is not supported!"
-          exit 0
-          ;;
-      esac
-  fi
-
-  exec_cmd_nobail "systemctl enable docker" $SUDO
-  exec_cmd_nobail "systemctl start docker" $SUDO
-}
-
-check_and_get_kube() {
-  if [ ! -x "$(check_cmd kubectl)" ]; then
-    read -p "K8S/K3S is not installed yet, do you want us to install K3S for you? Yes/No (default: Yes):" IS_INSTALL_K3S
-    if [ "$IS_INSTALL_K3S" = "n" -o "$IS_INSTALL_K3S" = "N" -o "$IS_INSTALL_K3S" = "no" -o "$IS_INSTALL_K3S" = "NO" ]; then
-      echo "K3S is needed to run ${NAME}, this script will exit now..."
-      exit 0
-    fi
-
-    if [ $OS = "Linux" ]; then
-        read -p "K3S could run with containerd/docker, which do you want us to install for you? containerd for Yes, docker for No (default: Yes):" IS_INSTALL_CONTAINERD
-        if [ "$IS_INSTALL_CONTAINERD" = "n" -o "$IS_INSTALL_CONTAINERD" = "N" -o "$IS_INSTALL_CONTAINERD" = "no" -o "$IS_INSTALL_CONTAINERD" = "NO" ]; then
-          if [ ! -x "$(check_cmd docker)" ]; then
-            install_docker
-          else
-            print_status "Docker already installed"
-          fi
-          export INSTALL_K3S_EXEC="--docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 666"
-        else
-          export INSTALL_K3S_EXEC="--write-kubeconfig ~/.kube/config --write-kubeconfig-mode 666"
-        fi
-
-      exec_cmd_nobail "curl -sfL https://docs.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn sh -"
-
-      if [ ! -x "$(check_cmd kubectl)" ]; then
-        print_status "Install k3s failed! Check the installing process for help..."
-        exit 0
-      fi
-
-      exec_cmd_nobail "systemctl enable k3s" $SUDO
-      exec_cmd_nobail "systemctl start k3s" $SUDO
-
-    elif [ $OS = "Darwin" ]; then
-      exec_cmd_nobail "curl -sfL https://get.k3s.io | sh -"
-    else
-      print_status "We are not supporting your system, this script will exit now..."
-      exit 0
-    fi
-  fi
-  exec_cmd_nobail "kubectl version" $SUDO
 }
 
 get_kube_master() {
@@ -206,7 +130,6 @@ uninstall() {
 install() {
   check_user
   get_dependencies
-  check_and_get_kube
   check_and_get_metrics
   check_and_get_storage
   check_and_install_baetyl
