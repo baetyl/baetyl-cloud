@@ -915,7 +915,7 @@ func TestGenInitCmdFromNode(t *testing.T) {
 
 	node := getMockNode()
 
-	sInit.EXPECT().GenCmd("node", "default", "abc").Return("setup", nil).Times(1)
+	sInit.EXPECT().GenCmd("default", "abc").Return("setup", nil).Times(1)
 	sNode.EXPECT().Get(node.Namespace, node.Name).Return(node, nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/init", nil)

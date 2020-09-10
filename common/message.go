@@ -142,6 +142,9 @@ var templates = map[Code]string{
 		"a valid value might be 0-3 (to use the first, second, third, and fourth CPU) or 1,3 (to use the second and fourth CPU)",
 	ErrInvalidName: "The field ({{if .nonBaetyl}}{{.nonBaetyl}}{{end}}) cannot contain baetyl (case insensitive)",
 
+	// * Token auth for init server
+	ErrInvalidToken: "The token is invalid",
+
 	// * License
 	ErrLicenseQuota: "Check {{if .name}}({{.name}}){{end}} quota failed, the limited number is {{if .limit}}({{.limit}}){{end}}",
 
