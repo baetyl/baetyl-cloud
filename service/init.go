@@ -17,7 +17,6 @@ import (
 //go:generate mockgen -destination=../mock/service/init.go -package=service github.com/baetyl/baetyl-cloud/v2/service InitService
 
 const (
-	InfoKind      = "k"
 	InfoName      = "n"
 	InfoNamespace = "ns"
 	InfoTimestamp = "ts"
@@ -42,13 +41,13 @@ var (
 )
 
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
-type GetInitResource func(resourceName, node, token string, info map[string]interface{}) ([]byte, error)
+type GetInitResource func(ns, nodeName, resourceName string, params map[string]interface{}) ([]byte, error)
 
 // InitService
 type InitService interface {
-	GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error)
+	GetResource(ns, nodeName, resourceName string, params map[string]interface{}) (interface{}, error)
 	GenApps(ns, nodeName string) ([]*specV1.Application, error)
-	GenCmd(kind, ns, name string) (string, error)
+	GenCmd(ns, nameNode string) (string, error)
 }
 
 type InitServiceImpl struct {
@@ -107,17 +106,20 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		Hooks:              map[string]interface{}{},
 		ResourceMapFunc:    map[string]GetInitResource{},
 	}
-	initService.ResourceMapFunc[templateKubeAPIMetricsYaml] = initService.getMetricsYaml
-	initService.ResourceMapFunc[templateKubeLocalPathStorageYaml] = initService.getLocalPathStorageYaml
+	initService.ResourceMapFunc[templateKubeAPIMetricsYaml] = initService.getCommonResource
+	initService.ResourceMapFunc[templateKubeLocalPathStorageYaml] = initService.getCommonResource
 	initService.ResourceMapFunc[TemplateInitSetupShell] = initService.getInitSetupShell
 	initService.ResourceMapFunc[TemplateInitDeploymentYaml] = initService.getInitDeploymentYaml
 
 	return initService, nil
 }
 
-func (s *InitServiceImpl) GetResource(resourceName, node, token string, info map[string]interface{}) (interface{}, error) {
+func (s *InitServiceImpl) GetResource(ns, nodeName, resourceName string, params map[string]interface{}) (interface{}, error) {
 	if handler, ok := s.ResourceMapFunc[resourceName]; ok {
-		return handler(resourceName, node, token, info)
+		if params == nil {
+			params = map[string]interface{}{}
+		}
+		return handler(ns, nodeName, resourceName, params)
 	}
 	return nil, common.Error(
 		common.ErrResourceNotFound,
@@ -125,7 +127,7 @@ func (s *InitServiceImpl) GetResource(resourceName, node, token string, info map
 		common.Field("name", resourceName))
 }
 
-func (s *InitServiceImpl) getMetricsYaml(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
+func (s *InitServiceImpl) getCommonResource(_, _, resourceName string, _ map[string]interface{}) ([]byte, error) {
 	res, err := s.TemplateService.GetTemplate(resourceName)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -133,38 +135,16 @@ func (s *InitServiceImpl) getMetricsYaml(resourceName, node, token string, info 
 	return []byte(res), nil
 }
 
-func (s *InitServiceImpl) getLocalPathStorageYaml(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
-	res, err := s.TemplateService.GetTemplate(resourceName)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	return []byte(res), nil
-}
-
-func (s *InitServiceImpl) getInitSetupShell(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
-	data, err := s.TemplateService.ParseTemplate(resourceName, map[string]interface{}{"Token": token, "DeploymentYml": TemplateInitDeploymentYaml})
+func (s *InitServiceImpl) getInitSetupShell(_, _, resourceName string, params map[string]interface{}) ([]byte, error) {
+	params["DeploymentYml"] = TemplateInitDeploymentYaml
+	data, err := s.TemplateService.ParseTemplate(resourceName, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	return data, nil
 }
 
-func (s *InitServiceImpl) getInitDeploymentYaml(resourceName, node, token string, info map[string]interface{}) ([]byte, error) {
-	return s.getInitYaml(info, node)
-}
-
-func (s *InitServiceImpl) getInitYaml(info map[string]interface{}, edgeKubeNodeName string) ([]byte, error) {
-	switch common.Resource(info[InfoKind].(string)) {
-	case common.Node:
-		return s.GenInitYml(info[InfoNamespace].(string), info[InfoName].(string), edgeKubeNodeName)
-	default:
-		return nil, common.Error(
-			common.ErrRequestParamInvalid,
-			common.Field("error", "invalid info kind"))
-	}
-}
-
-func (s *InitServiceImpl) GenInitYml(ns, nodeName, edgeKubeNodeName string) ([]byte, error) {
+func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName, _ string, params map[string]interface{}) ([]byte, error) {
 	app, err := s.GetCoreAppFromDesire(ns, nodeName)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -174,18 +154,15 @@ func (s *InitServiceImpl) GenInitYml(ns, nodeName, edgeKubeNodeName string) ([]b
 		return nil, errors.Trace(err)
 	}
 
-	params := map[string]interface{}{
-		"Namespace":           ns,
-		"NodeName":            nodeName,
-		"NodeCertName":        cert.Name,
-		"NodeCertVersion":     cert.Version,
-		"NodeCertPem":         base64.StdEncoding.EncodeToString(cert.Data["client.pem"]),
-		"NodeCertKey":         base64.StdEncoding.EncodeToString(cert.Data["client.key"]),
-		"NodeCertCa":          base64.StdEncoding.EncodeToString(cert.Data["ca.pem"]),
-		"KubeNodeName":        edgeKubeNodeName,
-		"EdgeNamespace":       common.DefaultBaetylEdgeNamespace,
-		"EdgeSystemNamespace": common.DefaultBaetylEdgeSystemNamespace,
-	}
+	params["Namespace"] = ns
+	params["NodeName"] = nodeName
+	params["NodeCertName"] = cert.Name
+	params["NodeCertVersion"] = cert.Version
+	params["NodeCertPem"] = base64.StdEncoding.EncodeToString(cert.Data["client.pem"])
+	params["NodeCertKey"] = base64.StdEncoding.EncodeToString(cert.Data["client.key"])
+	params["NodeCertCa"] = base64.StdEncoding.EncodeToString(cert.Data["ca.pem"])
+	params["EdgeNamespace"] = common.DefaultBaetylEdgeNamespace
+	params["EdgeSystemNamespace"] = common.DefaultBaetylEdgeSystemNamespace
 	return s.TemplateService.ParseTemplate(TemplateInitDeploymentYaml, params)
 }
 
@@ -208,11 +185,10 @@ func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, 
 	return cert, nil
 }
 
-func (s *InitServiceImpl) GenCmd(kind, ns, name string) (string, error) {
+func (s *InitServiceImpl) GenCmd(ns, nameNode string) (string, error) {
 	info := map[string]interface{}{
-		InfoKind:      kind,
-		InfoName:      name,
 		InfoNamespace: ns,
+		InfoName:      nameNode,
 		InfoExpiry:    CmdExpirationInSeconds,
 		InfoTimestamp: time.Now().Unix(),
 	}

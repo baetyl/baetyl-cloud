@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/log"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/service"
@@ -44,61 +46,85 @@ func (api *InitAPI) GetResource(c *common.Context) (interface{}, error) {
 			common.ErrRequestParamInvalid,
 			common.Field("error", err))
 	}
-	info, err := api.CheckAndParseToken(query.Token, resourceName)
+	ns, nodeName, err := api.CheckAndParseToken(query.Token)
 	if err != nil {
 		return nil, common.Error(
 			common.ErrRequestParamInvalid,
 			common.Field("error", err))
 	}
-	return api.Init.GetResource(resourceName, query.Node, query.Token, info)
+	return api.Init.GetResource(ns, nodeName, resourceName, map[string]interface{}{
+		"Token":        query.Token,
+		"KubeNodeName": query.Node,
+	})
 }
 
-func (a *InitAPI) CheckAndParseToken(token, resourceName string) (map[string]interface{}, error) {
+func (a *InitAPI) CheckAndParseToken(token string) (ns, nodeName string, err error) {
 	// check len
 	if len(token) < 10 {
-		return nil, common.Error(
-			common.ErrInvalidToken,
-			common.Field("error", "invalid token length"))
+		log.L().Info("invalid token length")
+		err = common.Error(common.ErrInvalidToken)
+		return
 	}
 	// check sign
 	data, err := hex.DecodeString(token[10:])
 	if err != nil {
-		return nil, err
+		log.L().Info("invalid token string hex", log.Error(err))
+		err = common.Error(common.ErrInvalidToken)
+		return
 	}
 	info := map[string]interface{}{}
 	err = json.Unmarshal(data, &info)
 	if err != nil {
-		return nil, err
+		log.L().Info("invalid token string json", log.Error(err))
+		err = common.Error(common.ErrInvalidToken)
+		return
 	}
 	realToken, err := a.Auth.GenToken(info)
 	if err != nil {
-		return nil, err
+		log.L().Info("invalid token struct", log.Error(err))
+		err = common.Error(common.ErrInvalidToken)
+		return
 	}
 	if realToken != token {
-		return nil, common.Error(
-			common.ErrInvalidToken,
-			common.Field("error", "token check fail"))
+		log.L().Info("token not match", log.Error(err))
+		err = common.Error(common.ErrInvalidToken)
+		return
+	}
+
+	ns, ok := info[service.InfoNamespace].(string)
+	if !ok {
+		log.L().Info("invalid token no namespace", log.Error(err))
+		err = common.Error(common.ErrInvalidToken)
+		return
+	}
+
+	nodeName, ok = info[service.InfoName].(string)
+	if !ok {
+		log.L().Info("invalid token no node name", log.Error(err))
+		err = common.Error(common.ErrInvalidToken)
+		return
 	}
 
 	expiry, ok := info[service.InfoExpiry].(float64)
 	if !ok {
-		return nil, common.Error(
-			common.ErrInvalidToken,
-			common.Field("error", "expiry error"))
+		log.L().Info("invalid token no expiry", log.Error(err))
+		err = common.Error(common.ErrInvalidToken)
+		return
 	}
 
 	ts, ok := info[service.InfoTimestamp].(float64)
 	if !ok {
-		return nil, common.Error(
-			common.ErrInvalidToken,
-			common.Field("error", "infoTimestamp error"))
+		log.L().Info("invalid token no timestamp", log.Error(err))
+		err = common.Error(common.ErrInvalidToken)
+		return
 	}
+
 	// check expiration
 	timestamp := time.Unix(int64(ts), 0)
 	if timestamp.Add(time.Duration(int64(expiry))*time.Second).Unix() < time.Now().Unix() {
-		return nil, common.Error(
-			common.ErrInvalidToken,
-			common.Field("error", "timestamp check error"))
+		log.L().Info("token expired", log.Error(err))
+		err = common.Error(common.ErrInvalidToken)
+		return
 	}
-	return info, nil
+	return
 }
