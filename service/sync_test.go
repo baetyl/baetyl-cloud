@@ -76,7 +76,7 @@ func TestSyncDesire(t *testing.T) {
 		ObjectService: os,
 		Hooks:         map[string]interface{}{},
 	}
-	sync.Hooks[HookNamePopulateConfig] = HandlerPopulateConfig(sync.populateConfig)
+	sync.Hooks[HookNamePopulateConfig] = HandlerPopulateConfig(sync.PopulateConfig)
 	reqs := []specV1.ResourceInfo{
 		{
 			Kind:    specV1.KindApplication,

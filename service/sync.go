@@ -75,7 +75,7 @@ func NewSyncService(config *config.CloudConfig) (SyncService, error) {
 	if err != nil {
 		return nil, err
 	}
-	es.Hooks[HookNamePopulateConfig] = HandlerPopulateConfig(es.populateConfig)
+	es.Hooks[HookNamePopulateConfig] = HandlerPopulateConfig(es.PopulateConfig)
 	return es, nil
 }
 
@@ -152,7 +152,7 @@ func (t *SyncServiceImpl) Desire(namespace string, crdInfos []specV1.ResourceInf
 	return crdDatas, nil
 }
 
-func (t *SyncServiceImpl) populateConfig(cfg *specV1.Configuration, metadata map[string]string) error {
+func (t *SyncServiceImpl) PopulateConfig(cfg *specV1.Configuration, metadata map[string]string) error {
 	for k, v := range cfg.Data {
 		if strings.HasPrefix(k, common.ConfigObjectPrefix) {
 			err := t.PopulateConfigObject(k, v, cfg)
