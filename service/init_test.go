@@ -17,20 +17,58 @@ import (
 func TestInitService_GetResource(t *testing.T) {
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
+	as := InitServiceImpl{}
 	tp := service.NewMockTemplateService(mockCtl)
 	ns := service.NewMockNodeService(mockCtl)
-	aus := service.NewMockAuthService(mockCtl)
-	as := InitServiceImpl{}
+	sc := service.NewMockSecretService(mockCtl)
+	sApp := service.NewMockApplicationService(mockCtl)
+	sConfig := service.NewMockConfigService(mockCtl)
+	sSecret := service.NewMockSecretService(mockCtl)
+	as.AppCombinedService = &AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
 	as.ResourceMapFunc = map[string]GetInitResource{}
 	as.TemplateService = tp
 	as.NodeService = ns
-	as.AuthService = aus
+	as.Secret = sc
 	as.ResourceMapFunc[templateInitDeploymentYaml] = as.getInitDeploymentYaml
-
+	desire := &v1.Desire{
+		"sysapps": []specV1.AppInfo{{
+			Name:    "baetyl-core-node01",
+			Version: "123",
+		}},
+	}
+	app := &specV1.Application{
+		Namespace: "default",
+		Name:      "baetyl-core-node01",
+		Selector:  "test",
+		Version:   "1",
+		Services: []specV1.Service{},
+		Volumes: []specV1.Volume{
+			{
+				Name: "node-cert",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name:    "agent-conf",
+					},
+				},
+			},
+		},
+	}
+	sec := &specV1.Secret{
+		Namespace: "default",
+		Name:      "abc",
+	}
 	// good case : setup
-	//tp.EXPECT().ParseTemplate(templateInitDeploymentYaml, gomock.Any()).Return([]byte("init"), nil).Times(1)
-	//_, _ = as.GetResource("", "", templateInitDeploymentYaml, nil)
-	//assert.Equal(t, res, []byte("shell"))
+	tp.EXPECT().ParseTemplate(templateInitDeploymentYaml, gomock.Any()).Return([]byte("init"), nil).Times(1)
+	ns.EXPECT().GetDesire("default", "node1").Return(desire, nil)
+	sApp.EXPECT().Get("default", "baetyl-core-node01", "").Return(app, nil)
+	sc.EXPECT().Get("default", "agent-conf", "").Return(sec, nil)
+
+	res, _ := as.GetResource("default", "node1", templateInitDeploymentYaml, nil)
+	assert.Equal(t, res, []byte("init"))
 
 	// bad case : not found
 	_, err := as.GetResource("", "", "dummy", nil)
@@ -55,15 +93,21 @@ func TestInitService_getSyncCert(t *testing.T) {
 	as := InitServiceImpl{}
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
-	secret := service.NewMockSecretService(mockCtl)
-	as.SecretService = secret
+	sApp := service.NewMockApplicationService(mockCtl)
+	sConfig := service.NewMockConfigService(mockCtl)
+	sSecret := service.NewMockSecretService(mockCtl)
+	as.AppCombinedService = &AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
 
 	app1 := &specV1.Application{
 		Name:      "baetyl-core",
 		Namespace: "default",
 	}
 
-	secret.EXPECT().Get("default", "", "").Return(nil, nil).Times(1)
+	sSecret.EXPECT().Get("default", "", "").Return(nil, nil).Times(1)
 	res, err := as.GetNodeCert(app1)
 	assert.EqualError(t, err, "The (secret) resource is not found in namespace(default).")
 	assert.Nil(t, res)
