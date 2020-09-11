@@ -38,7 +38,9 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns := c.GetNamespace()
-	var nodesView = []*v1.NodeView{}
+	nodeViewList := models.NodeViewList{
+		Items: make([]v1.NodeView, 0),
+	}
 	for _, name := range nodeNames.Names {
 		node, err := api.Node.Get(ns, name)
 		if err != nil {
@@ -52,9 +54,11 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 			return nil, err
 		}
 		view.Desire = nil
-		nodesView = append(nodesView, view)
+		nodeViewList.Items = append(nodeViewList.Items, *view)
 	}
-	return nodesView, nil
+
+	nodeViewList.Total = len(nodeViewList.Items)
+	return nodeViewList, nil
 }
 
 // GetNodeStats get a node stats
