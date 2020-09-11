@@ -306,7 +306,10 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	cmd, err := api.Init.GenCmd(ns, name)
+	params := map[string]interface{}{
+		"DeploymentYml": "baetyl-init-deployment.yml",
+	}
+	cmd, err := api.Init.GenCmd(ns, name, params)
 	if err != nil {
 		return nil, err
 	}
