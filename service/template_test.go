@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/baetyl/baetyl-go/v2/context"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
-
-	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
 var params = map[string]interface{}{
@@ -20,8 +19,8 @@ var params = map[string]interface{}{
 	"FunctionAppName":     "func-app-name-1",
 	"FunctionConfName":    "func-conf-name-1",
 	"FunctionConfVersion": "func-conf-version-1",
-	"EdgeNamespace":       common.DefaultBaetylEdgeNamespace,
-	"EdgeSystemNamespace": common.DefaultBaetylEdgeSystemNamespace,
+	"EdgeNamespace":       context.BaetylEdgeNamespace,
+	"EdgeSystemNamespace": context.BaetylEdgeSystemNamespace,
 	"KubeNodeName":        "kube-node-1",
 	"NodeCertName":        "node-cert-name-1",
 	"NodeCertVersion":     "node-cert-version-1",
