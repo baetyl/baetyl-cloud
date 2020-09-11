@@ -155,7 +155,7 @@ curl -skfL 'https://0.0.0.0:30003/v1/active/setup.sh?token=f6d21baa9b7b2265223a3
 
 1、 The K3s environment needs to be configured before the edge node installation. For details, please refer to [k3s installation](https://docs.rancher.cn/docs/k3s/installation/install-options/_index/). K3s runs in Containerd runtime  by default, when you want to switch to Docker runtime, please install Docker first, refer to [docker installation](http://get.daocloud.io/#install-docker)
 
-2、If you need to install an edge node on a device other than the machine where baetyl-cloud is deployed, please modify the database, change the node-address and active-address in the baetyl_system_config table to real addresses.
+2、If you need to install an edge node on a device other than the machine where baetyl-cloud is deployed, please modify the database, change the node-address and active-address in the baetyl_property table to real addresses.
 
 Check the status of the edge node. Eventually, two edge services will be in the Running state. You can also call the cloud RESTful API to view the edge node status. You can see that the edge node is online ("ready":true).
 

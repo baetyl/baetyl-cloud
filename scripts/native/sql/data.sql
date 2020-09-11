@@ -7,6 +7,6 @@ INSERT INTO `baetyl_property` (`name`, `value`) VALUES
 ('baetyl-function-runtime-nodejs10','hub.baidubce.com/baetyl/function-node:10.19-v2.0.0'),
 ('baetyl-function-runtime-sql','hub.baidubce.com/baetyl/function-sql:v2.0.0'),
 ('baetyl-version-latest', 'v2.1.0'),
-('docker-install-cmd', 'curl -sSL https://get.daocloud.io/docker | sh'),
-('k3s-install-containerd-cmd', 'curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC="--write-kubeconfig ~/.kube/config --write-kubeconfig-mode 666" sh -'),
-('k3s-install-docker-cmd', 'curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC="--docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 666" sh -');
+('command-docker-installation', 'curl -sSL https://get.daocloud.io/docker | sh'),
+('command-k3s-installation-containerd', 'curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC="--write-kubeconfig ~/.kube/config --write-kubeconfig-mode 666" sh -'),
+('command-k3s-installation-docker', 'curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC="--docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 666" sh -');

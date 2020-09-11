@@ -25,24 +25,12 @@ func TestInitService_GetResource(t *testing.T) {
 	as.TemplateService = tp
 	as.NodeService = ns
 	as.AuthService = aus
-	as.ResourceMapFunc[templateKubeAPIMetricsYaml] = as.getCommonResource
-	as.ResourceMapFunc[templateKubeLocalPathStorageYaml] = as.getCommonResource
-	as.ResourceMapFunc[TemplateInitSetupShell] = as.getInitSetupShell
-	as.ResourceMapFunc[TemplateInitDeploymentYaml] = as.getInitDeploymentYaml
-	// good case : metrics
-	tp.EXPECT().GetTemplate(templateKubeAPIMetricsYaml).Return("metrics", nil).Times(1)
-	res, _ := as.GetResource("", "", templateKubeAPIMetricsYaml, nil)
-	assert.Equal(t, res, []byte("metrics"))
-
-	// good case : local_path_storage
-	tp.EXPECT().GetTemplate(templateKubeLocalPathStorageYaml).Return("local-path-storage", nil).Times(1)
-	res, _ = as.GetResource("", "", templateKubeLocalPathStorageYaml, nil)
-	assert.Equal(t, res, []byte("local-path-storage"))
+	as.ResourceMapFunc[templateInitDeploymentYaml] = as.getInitDeploymentYaml
 
 	// good case : setup
-	tp.EXPECT().ParseTemplate(TemplateInitSetupShell, gomock.Any()).Return([]byte("shell"), nil).Times(1)
-	res, _ = as.GetResource("", "", TemplateInitSetupShell, nil)
-	assert.Equal(t, res, []byte("shell"))
+	//tp.EXPECT().ParseTemplate(templateInitDeploymentYaml, gomock.Any()).Return([]byte("init"), nil).Times(1)
+	//_, _ = as.GetResource("", "", templateInitDeploymentYaml, nil)
+	//assert.Equal(t, res, []byte("shell"))
 
 	// bad case : not found
 	_, err := as.GetResource("", "", "dummy", nil)
@@ -58,7 +46,7 @@ func TestInitService_getInitYaml(t *testing.T) {
 	as.NodeService = sNode
 
 	sNode.EXPECT().GetDesire("default", "n0").Return(nil, common.Error(common.ErrResourceNotFound))
-	res, err := as.getInitDeploymentYaml("default", "n0", "kube", nil)
+	res, err := as.getInitDeploymentYaml("default", "n0", nil)
 	assert.EqualError(t, err, "The resource is not found.")
 	assert.Nil(t, res)
 }
@@ -97,13 +85,15 @@ func TestInitService_GenCmd(t *testing.T) {
 		InfoTimestamp: time.Now().Unix(),
 	}
 	expect := "curl -skfL 'https://1.2.3.4:9003/v1/active/setup.sh?token=tokenexpect' -osetup.sh && sh setup.sh"
-
+	params := map[string]interface{}{
+		"InitApplyYaml": "baetyl-init-deployment.yml",
+	}
 	sAuth.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)
-	sTemplate.EXPECT().Execute("setup-command", templateKubeInitCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
+	sTemplate.EXPECT().Execute("setup-command", TemplateKubeInitCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
 
-	res, err := as.GenCmd("ns", "name")
+	res, err := as.GetInitCommand("ns", "name", params)
 	assert.NoError(t, err)
-	assert.Equal(t, res, expect)
+	assert.Equal(t, string(res), expect)
 }
 
 func TestInitService_getDesireAppInfo(t *testing.T) {

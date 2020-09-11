@@ -29,8 +29,8 @@ const (
 	templateFuncConfYaml             = "baetyl-function-conf.yml"
 	templateFuncAppYaml              = "baetyl-function-app.yml"
 	templateInitDeploymentYaml       = "baetyl-init-deployment.yml"
-	templateDirCreateCommand         = "sudo mkdir -p -m 666 /var/lib/baetyl/host && sudo mkdir -p -m 666 /var/lib/baetyl/object &&sudo mkdir -p -m 666 /var/lib/baetyl/store && sudo mkdir -p -m 666 /var/lib/baetyl/log && sudo mkdir -p -m 666 /var/lib/baetyl/run"
-	TemplateKubeInitCommand          = templateDirCreateCommand + " && " + `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/{{.DeploymentYml}}?token={{.Token}}' -oinit.yml && kubectl apply -f init.yml`
+	TemplateKubeInitCommand          = "sudo mkdir -p -m 666 /var/lib/baetyl/host && sudo mkdir -p -m 666 /var/lib/baetyl/object &&sudo mkdir -p -m 666 /var/lib/baetyl/store && sudo mkdir -p -m 666 /var/lib/baetyl/log && sudo mkdir -p -m 666 /var/lib/baetyl/run" +
+		" && " + `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/{{.InitApplyYaml}}?token={{.Token}}' -oinit.yml && kubectl apply -f init.yml`
 )
 
 var (
@@ -39,13 +39,12 @@ var (
 )
 
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
-type GetInitResource func(ns, nodeName, resourceName string, params map[string]interface{}) ([]byte, error)
+type GetInitResource func(ns, nodeName string, params map[string]interface{}) ([]byte, error)
 
 // InitService
 type InitService interface {
 	GetResource(ns, nodeName, resourceName string, params map[string]interface{}) (interface{}, error)
 	GenApps(ns, nodeName string) ([]*specV1.Application, error)
-	GenCmd(ns, nameNode string, params map[string]interface{}) (string, error)
 }
 
 type InitServiceImpl struct {
@@ -105,6 +104,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		ResourceMapFunc:    map[string]GetInitResource{},
 	}
 	initService.ResourceMapFunc[templateInitDeploymentYaml] = initService.getInitDeploymentYaml
+	initService.ResourceMapFunc[TemplateKubeInitCommand] = initService.GetInitCommand
 
 	return initService, nil
 }
@@ -114,7 +114,7 @@ func (s *InitServiceImpl) GetResource(ns, nodeName, resourceName string, params 
 		if params == nil {
 			params = map[string]interface{}{}
 		}
-		return handler(ns, nodeName, resourceName, params)
+		return handler(ns, nodeName, params)
 	}
 	return nil, common.Error(
 		common.ErrResourceNotFound,
@@ -122,7 +122,7 @@ func (s *InitServiceImpl) GetResource(ns, nodeName, resourceName string, params 
 		common.Field("name", resourceName))
 }
 
-func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName, _ string, params map[string]interface{}) ([]byte, error) {
+func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
 	app, err := s.GetCoreAppFromDesire(ns, nodeName)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -163,23 +163,23 @@ func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, 
 	return cert, nil
 }
 
-func (s *InitServiceImpl) GenCmd(ns, nameNode string, params map[string]interface{}) (string, error) {
+func (s *InitServiceImpl) GetInitCommand(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
 	info := map[string]interface{}{
 		InfoNamespace: ns,
-		InfoName:      nameNode,
+		InfoName:      nodeName,
 		InfoExpiry:    CmdExpirationInSeconds,
 		InfoTimestamp: time.Now().Unix(),
 	}
 	token, err := s.AuthService.GenToken(info)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	params["Token"] = token
 	data, err := s.TemplateService.Execute("setup-command", TemplateKubeInitCommand, params)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(data), nil
+	return data, nil
 }
 
 func (s *InitServiceImpl) GetCoreAppFromDesire(ns, nodeName string) (*specV1.Application, error) {

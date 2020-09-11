@@ -150,7 +150,7 @@ curl -skfL 'https://0.0.0.0:30003/v1/active/setup.sh?token=f6d21baa9b7b2265223a3
 
 1、边缘节点端安装前需配置K3s环境，具体参考 [k3s安装](https://docs.rancher.cn/docs/k3s/installation/install-options/_index/)，K3s默认运行在Containerd运行时，若想切换到Docker运行时，请先安装Docker，具体参考 [docker安装](http://get.daocloud.io/#install-docker)
 
-2、如果需要在 baetyl-cloud 部署地机器以外的设备上安装边缘节点，请修改数据库将 baetyl_system_config 表中的 node-address 和 active-address 修改成真实的地址。
+2、如果需要在 baetyl-cloud 部署地机器以外的设备上安装边缘节点，请修改数据库将 baetyl_property 表中的 node-address 和 active-address 修改成真实的地址。
 
 查看边缘节点的状态，最终会有两个边缘服务处于 Running 状态，也可调用云端 RESTful API 查看边缘节点状态，可以看到边缘节点已经在线（"ready":true）。
 
