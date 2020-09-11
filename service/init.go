@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
@@ -161,8 +162,8 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName, _ string, params m
 	params["NodeCertPem"] = base64.StdEncoding.EncodeToString(cert.Data["client.pem"])
 	params["NodeCertKey"] = base64.StdEncoding.EncodeToString(cert.Data["client.key"])
 	params["NodeCertCa"] = base64.StdEncoding.EncodeToString(cert.Data["ca.pem"])
-	params["EdgeNamespace"] = common.DefaultBaetylEdgeNamespace
-	params["EdgeSystemNamespace"] = common.DefaultBaetylEdgeSystemNamespace
+	params["EdgeNamespace"] = context.BaetylEdgeNamespace
+	params["EdgeSystemNamespace"] = context.BaetylEdgeSystemNamespace
 	return s.TemplateService.ParseTemplate(TemplateInitDeploymentYaml, params)
 }
 
