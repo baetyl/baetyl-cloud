@@ -51,7 +51,6 @@ type InitServiceImpl struct {
 	cfg             *config.CloudConfig
 	AuthService     AuthService
 	NodeService     NodeService
-	SecretService   SecretService
 	TemplateService TemplateService
 	*AppCombinedService
 	PKI             PKIService
@@ -66,10 +65,6 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		return nil, errors.Trace(err)
 	}
 	nodeService, err := NewNodeService(config)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	secretService, err := NewSecretService(config)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -97,7 +92,6 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		AuthService:        authService,
 		NodeService:        nodeService,
 		TemplateService:    templateService,
-		SecretService:      secretService,
 		AppCombinedService: acs,
 		PKI:                pki,
 		Hooks:              map[string]interface{}{},
@@ -152,7 +146,7 @@ func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, 
 			break
 		}
 	}
-	cert, _ := s.SecretService.Get(app.Namespace, certName, "")
+	cert, _ := s.Secret.Get(app.Namespace, certName, "")
 	if cert == nil {
 		return nil, common.Error(
 			common.ErrResourceNotFound,
