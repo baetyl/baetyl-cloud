@@ -30,8 +30,7 @@ const (
 	templateFuncConfYaml             = "baetyl-function-conf.yml"
 	templateFuncAppYaml              = "baetyl-function-app.yml"
 	templateInitDeploymentYaml       = "baetyl-init-deployment.yml"
-	TemplateKubeInitCommand          = "sudo mkdir -p -m 666 /var/lib/baetyl/host && sudo mkdir -p -m 666 /var/lib/baetyl/object &&sudo mkdir -p -m 666 /var/lib/baetyl/store && sudo mkdir -p -m 666 /var/lib/baetyl/log && sudo mkdir -p -m 666 /var/lib/baetyl/run" +
-		" && " + `curl -skfL '{{GetProperty "init-server-address"}}/v1/init/{{.InitApplyYaml}}?token={{.Token}}' -oinit.yml && kubectl apply -f init.yml`
+	TemplateKubeInitCommand          = `sudo mkdir -p -m 666 /var/lib/baetyl/host /var/lib/baetyl/object /var/lib/baetyl/store /var/lib/baetyl/log /var/lib/baetyl/run && curl -skfL '{{GetProperty "init-server-address"}}/v1/init/{{.InitApplyYaml}}?token={{.Token}}' -oinit.yml && kubectl apply -f init.yml`
 )
 
 var (
