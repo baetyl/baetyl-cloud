@@ -10,6 +10,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 const offlineDuration = 40 * time.Second
@@ -310,11 +311,14 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	cmd, err := api.Init.GenCmd(ns, name)
+	params := map[string]interface{}{
+		"InitApplyYaml": "baetyl-init-deployment.yml",
+	}
+	cmd, err := api.Init.GetResource(ns, name, service.TemplateKubeInitCommand, params)
 	if err != nil {
 		return nil, err
 	}
-	return map[string]string{"cmd": cmd}, nil
+	return map[string]string{"cmd": string(cmd.([]byte))}, nil
 }
 
 // GetNodeDeployHistory list node // TODO will support later
