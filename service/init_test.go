@@ -33,7 +33,6 @@ func TestInitService_GetResource(t *testing.T) {
 	as.TemplateService = tp
 	as.NodeService = ns
 	as.Secret = sc
-
 	as.ResourceMapFunc[templateInitDeploymentYaml] = as.getInitDeploymentYaml
 	desire := &v1.Desire{
 		"sysapps": []specV1.AppInfo{{
