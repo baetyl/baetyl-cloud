@@ -5,7 +5,6 @@
 package plugin
 
 import (
-	plugin "github.com/baetyl/baetyl-cloud/v2/plugin"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -47,20 +46,6 @@ func (mr *MockLicenseMockRecorder) CheckLicense() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckLicense", reflect.TypeOf((*MockLicense)(nil).CheckLicense))
 }
 
-// CheckQuota mocks base method
-func (m *MockLicense) CheckQuota(arg0 string, arg1 plugin.QuotaCollector) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckQuota", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CheckQuota indicates an expected call of CheckQuota
-func (mr *MockLicenseMockRecorder) CheckQuota(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckQuota", reflect.TypeOf((*MockLicense)(nil).CheckQuota), arg0, arg1)
-}
-
 // Close mocks base method
 func (m *MockLicense) Close() error {
 	m.ctrl.T.Helper()
@@ -73,6 +58,21 @@ func (m *MockLicense) Close() error {
 func (mr *MockLicenseMockRecorder) Close() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockLicense)(nil).Close))
+}
+
+// GetQuota mocks base method
+func (m *MockLicense) GetQuota(arg0 string) (map[string]int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetQuota", arg0)
+	ret0, _ := ret[0].(map[string]int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetQuota indicates an expected call of GetQuota
+func (mr *MockLicenseMockRecorder) GetQuota(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQuota", reflect.TypeOf((*MockLicense)(nil).GetQuota), arg0)
 }
 
 // ProtectCode mocks base method

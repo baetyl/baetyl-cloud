@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -88,7 +89,7 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 }
 
 func TestAdminServer_Handler(t *testing.T) {
-	s, mkAuth, mkLicense, mockCtl := initAdminServerMock(t)
+	s, mkAuth, _, mockCtl := initAdminServerMock(t)
 	defer mockCtl.Finish()
 
 	s.InitRoute()
@@ -133,7 +134,9 @@ func TestAdminServer_Handler(t *testing.T) {
 
 	// 401
 	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
-	mkLicense.EXPECT().CheckQuota(gomock.Any(), gomock.Any()).Return(fmt.Errorf("err"))
+	mLicense := service.NewMockLicenseService(mockCtl)
+	s.api.License = mLicense
+	mLicense.EXPECT().CheckQuota(gomock.Any(), gomock.Any()).Return(fmt.Errorf("quota error"))
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", nil)
 	w4 = httptest.NewRecorder()
 	s.GetRoute().ServeHTTP(w4, req)

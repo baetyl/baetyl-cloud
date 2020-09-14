@@ -14,6 +14,6 @@ type QuotaCollector func(namespace string) (map[string]int, error)
 type License interface {
 	ProtectCode() error
 	CheckLicense() error
-	CheckQuota(namespace string, collector QuotaCollector) error
+	GetQuota(namespace string) (map[string]int, error)
 	io.Closer
 }
