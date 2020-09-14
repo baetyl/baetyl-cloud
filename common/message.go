@@ -132,10 +132,10 @@ var templates = map[Code]string{
 	// * function(cfc, aws lambda)
 	ErrFunction: "Problem occurred when importing a function.{{if .error}} ({{.error}}){{end}}",
 
-	ErrInvalidResourceName:     "The field ({{if .resourceName}}{{.resourceName}}{{end}}) beginning and ending with an alphanumeric character ([a-z0-9]) with dashes (-), dots (.) or the string which is consist of no more than 63 characters",
-	ErrInvalidLabels:           "The field ({{if .validLabels}}{{.validLabels}}{{end}}) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character",
+	ErrInvalidResourceName:     "The field ({{if .resourceName}}{{.resourceName}}{{end}}) beginning and ending with an alphanumeric character ([a-z0-9]) with dashes (-) or the string which is consist of no more than 63 characters",
+	ErrInvalidLabels:           "The field ({{if .validLabels}}{{.validLabels}}{{end}}) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character",
 	ErrInvalidRequired:         "{{if .error}}{{.error}}{{end}}",
-	ErrInvalidFingerprintValue: "The field ({{if .fingerprintValue}}{{.fingerprintValue}}{{end}}) beginning and ending with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), dots (.) or the string which is consist of no more than 63 characters",
+	ErrInvalidFingerprintValue: "The field ({{if .fingerprintValue}}{{.fingerprintValue}}{{end}}) beginning and ending with an alphanumeric character ([a-z0-9A-Z]) with dashes (-) or the string which is consist of no more than 63 characters",
 	ErrInvalidMemory:           "The ({{if .memory}}{{.memory}}{{end}}) setting must be a positive integer, optionally followed by a corresponding unit (k|m|g|t|p)",
 	ErrInvalidDuration:         "The ({{if .duration}}{{.duration}}{{end}}) must be a positive integer, optionally followed by a corresponding time unit (s|m|h)",
 	ErrInvalidSetcpus: "The ({{if .setcpus}}{{.setcpus}}{{end}}) must be a comma-separated list or hyphen-separated range of CPUs a container can use, " +

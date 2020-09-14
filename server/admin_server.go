@@ -197,6 +197,10 @@ func (s *AdminServer) InitRoute() {
 			}, nil
 		}))
 	}
+	{
+		quotas := v1.Group("/quotas")
+		quotas.GET("", common.Wrapper(s.api.GetQuota))
+	}
 }
 
 // GetRoute get router
@@ -221,7 +225,7 @@ func (s *AdminServer) AuthHandler(c *gin.Context) {
 func (s *AdminServer) NodeQuotaHandler(c *gin.Context) {
 	cc := common.NewContext(c)
 	namespace := cc.GetNamespace()
-	if err := s.license.CheckQuota(namespace, s.api.NodeNumberCollector); err != nil {
+	if err := s.api.License.CheckQuota(namespace, s.api.NodeNumberCollector); err != nil {
 		log.L().Error("quota out of limit",
 			log.Any(cc.GetTrace()),
 			log.Any("namespace", cc.GetNamespace()),
