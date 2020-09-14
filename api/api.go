@@ -7,15 +7,16 @@ import (
 
 // API baetyl api server
 type API struct {
-	NS    service.NamespaceService
-	Node  service.NodeService
-	Index service.IndexService
-	Func  service.FunctionService
-	Obj   service.ObjectService
-	PKI   service.PKIService
-	Auth  service.AuthService
-	Prop  service.PropertyService
-	Init  service.InitService
+	NS      service.NamespaceService
+	Node    service.NodeService
+	Index   service.IndexService
+	Func    service.FunctionService
+	Obj     service.ObjectService
+	PKI     service.PKIService
+	Auth    service.AuthService
+	Prop    service.PropertyService
+	Init    service.InitService
+	License service.LicenseService
 	*service.AppCombinedService
 }
 
@@ -61,6 +62,10 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
+	licenseService, err := service.NewLicenseService(config)
+	if err != nil {
+		return nil, err
+	}
 	return &API{
 		NS:                 namespaceService,
 		Node:               nodeService,
@@ -71,6 +76,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		Auth:               authService,
 		Prop:               propertyService,
 		Init:               initService,
+		License:            licenseService,
 		AppCombinedService: acs,
 	}, nil
 }

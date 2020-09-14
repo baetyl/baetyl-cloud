@@ -45,13 +45,13 @@ func TestInitService_GetResource(t *testing.T) {
 		Name:      "baetyl-core-node01",
 		Selector:  "test",
 		Version:   "1",
-		Services: []specV1.Service{},
+		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
 			{
 				Name: "node-cert",
 				VolumeSource: specV1.VolumeSource{
 					Secret: &specV1.ObjectReference{
-						Name:    "agent-conf",
+						Name: "agent-conf",
 					},
 				},
 			},
