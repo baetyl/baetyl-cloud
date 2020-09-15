@@ -41,13 +41,13 @@ data:
           version: "{{.NodeCertVersion}}"
       - name: "core-store-path"
         hostPath:
-          path: "/var/lib/baetyl/store"
+          path: "{{.BAETYL_CORE_STORE_PATH}}"
       - name: "object-download-path"
         hostPath:
-          path: "/var/lib/baetyl/object"
+          path: "{{.BAETYL_OBJECT_DOWNLOAD_PATH}}"
       - name: "host-root-path"
         hostPath:
-          path: "/var/lib/baetyl/host"
+          path: "{{.BAETYL_HOST_ROOT_PATH}}"
   baetyl-core-conf.yml: |-
     name: "{{.CoreConfName}}"
     namespace: "{{.Namespace}}"
@@ -477,13 +477,13 @@ data:
                 name: baetyl-init-config
             - name: core-store-path
               hostPath:
-                path: /var/lib/baetyl/store
+                path: {{.BAETYL_CORE_STORE_PATH}}
             - name: object-download-path
               hostPath:
-                path: /var/lib/baetyl/object
+                path: {{.BAETYL_OBJECT_DOWNLOAD_PATH}}
             - name: host-root-path
               hostPath:
-                path: /var/lib/baetyl/host
+                path: {{.BAETYL_HOST_ROOT_PATH}}
             {{- if .NodeCertPem}}
             - name: node-cert
               secret:

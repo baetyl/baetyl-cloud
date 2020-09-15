@@ -25,12 +25,15 @@ const (
 )
 
 const (
-	templateCoreConfYaml             = "baetyl-core-conf.yml"
-	templateCoreAppYaml              = "baetyl-core-app.yml"
-	templateFuncConfYaml             = "baetyl-function-conf.yml"
-	templateFuncAppYaml              = "baetyl-function-app.yml"
-	templateInitDeploymentYaml       = "baetyl-init-deployment.yml"
-	TemplateKubeInitCommand          = `sudo mkdir -p -m 666 /var/lib/baetyl/host /var/lib/baetyl/object /var/lib/baetyl/store /var/lib/baetyl/log /var/lib/baetyl/run && curl -skfL '{{GetProperty "init-server-address"}}/v1/init/{{.InitApplyYaml}}?token={{.Token}}' -oinit.yml && kubectl apply -f init.yml`
+	templateCoreConfYaml          = "baetyl-core-conf.yml"
+	templateCoreAppYaml           = "baetyl-core-app.yml"
+	templateFuncConfYaml          = "baetyl-function-conf.yml"
+	templateFuncAppYaml           = "baetyl-function-app.yml"
+	templateInitDeploymentYaml    = "baetyl-init-deployment.yml"
+	TemplateKubeInitCommand       = `sudo mkdir -p -m 666 /var/lib/baetyl/host /var/lib/baetyl/object /var/lib/baetyl/store /var/lib/baetyl/log /var/lib/baetyl/run && curl -skfL '{{GetProperty "init-server-address"}}/v1/init/{{.InitApplyYaml}}?token={{.Token}}' -oinit.yml && kubectl apply -f init.yml`
+	macroBaetylCoreStorePath      = "BAETYL_CORE_STORE_PATH"
+	macroBaetylObjectDownloadPath = "BAETYL_OBJECT_DOWNLOAD_PATH"
+	macroBaetylHostRootPath       = "BAETYL_HOST_ROOT_PATH"
 )
 
 var (
@@ -135,6 +138,9 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["NodeCertCa"] = base64.StdEncoding.EncodeToString(cert.Data["ca.pem"])
 	params["EdgeNamespace"] = context.BaetylEdgeNamespace
 	params["EdgeSystemNamespace"] = context.BaetylEdgeSystemNamespace
+	params[macroBaetylCoreStorePath] = "{{." + macroBaetylCoreStorePath + "}}"
+	params[macroBaetylObjectDownloadPath] = "{{." + macroBaetylObjectDownloadPath + "}}"
+	params[macroBaetylHostRootPath] = "{{." + macroBaetylHostRootPath + "}}"
 	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
 }
 
@@ -248,6 +254,10 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]inte
 	params["CoreConfVersion"] = conf.Version
 	params["NodeCertName"] = cert.Name
 	params["NodeCertVersion"] = cert.Version
+
+	params[macroBaetylCoreStorePath] = "{{." + macroBaetylCoreStorePath + "}}"
+	params[macroBaetylObjectDownloadPath] = "{{." + macroBaetylObjectDownloadPath + "}}"
+	params[macroBaetylHostRootPath] = "{{." + macroBaetylHostRootPath + "}}"
 
 	// create application
 	return s.genApp(ns, templateCoreAppYaml, params)
