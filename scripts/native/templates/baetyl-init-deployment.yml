@@ -371,13 +371,13 @@ spec:
             name: baetyl-init-config
         - name: core-store-path
           hostPath:
-            path: {{.BAETYL_CORE_STORE_PATH}}
+            path: /var/lib/baetyl/store
         - name: object-download-path
           hostPath:
-            path: {{.BAETYL_OBJECT_DOWNLOAD_PATH}}
+            path: /var/lib/baetyl/object
         - name: host-root-path
           hostPath:
-            path: {{.BAETYL_HOST_ROOT_PATH}}
+            path: /var/lib/baetyl/host
         {{- if .NodeCertPem}}
         - name: node-cert
           secret:

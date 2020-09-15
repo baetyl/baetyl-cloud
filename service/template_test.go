@@ -11,25 +11,23 @@ import (
 )
 
 var params = map[string]interface{}{
-	"Namespace":                   "ns-1",
-	"NodeName":                    "node-name-1",
-	"CoreAppName":                 "core-app-1",
-	"CoreConfName":                "core-conf-name-1",
-	"CoreConfVersion":             "core-conf-version-1",
-	"FunctionAppName":             "func-app-name-1",
-	"FunctionConfName":            "func-conf-name-1",
-	"FunctionConfVersion":         "func-conf-version-1",
-	"EdgeNamespace":               context.BaetylEdgeNamespace,
-	"EdgeSystemNamespace":         context.BaetylEdgeSystemNamespace,
-	"KubeNodeName":                "kube-node-1",
-	"NodeCertName":                "node-cert-name-1",
-	"NodeCertVersion":             "node-cert-version-1",
-	"NodeCertPem":                 "---node cert pem---",
-	"NodeCertKey":                 "---node cert key---",
-	"NodeCertCa":                  "---node cert ca---",
-	macroBaetylCoreStorePath:      "{{." + macroBaetylCoreStorePath + "}}",
-	macroBaetylObjectDownloadPath: "{{." + macroBaetylObjectDownloadPath + "}}",
-	macroBaetylHostRootPath:       "{{." + macroBaetylHostRootPath + "}}",
+	"Namespace":           "ns-1",
+	"NodeName":            "node-name-1",
+	"CoreAppName":         "core-app-1",
+	"CoreConfName":        "core-conf-name-1",
+	"CoreConfVersion":     "core-conf-version-1",
+	"FunctionAppName":     "func-app-name-1",
+	"FunctionConfName":    "func-conf-name-1",
+	"FunctionConfVersion": "func-conf-version-1",
+	"EdgeNamespace":       context.BaetylEdgeNamespace,
+	"EdgeSystemNamespace": context.BaetylEdgeSystemNamespace,
+	"KubeNodeName":        "kube-node-1",
+	"NodeCertName":        "node-cert-name-1",
+	"NodeCertVersion":     "node-cert-version-1",
+	"NodeCertPem":         "---node cert pem---",
+	"NodeCertKey":         "---node cert key---",
+	"NodeCertCa":          "---node cert ca---",
+	BaetylHostPathLib:     "{{." + BaetylHostPathLib + "}}",
 }
 
 func TestTemplateServiceImpl_UnmarshalTemplate(t *testing.T) {
@@ -94,13 +92,13 @@ volumes:
     version: node-cert-version-1
 - name: core-store-path
   hostPath:
-    path: '{{.BAETYL_CORE_STORE_PATH}}'
+    path: '{{.BAETYL_HOST_PATH_LIB}}/store'
 - name: object-download-path
   hostPath:
-    path: '{{.BAETYL_OBJECT_DOWNLOAD_PATH}}'
+    path: '{{.BAETYL_HOST_PATH_LIB}}/object'
 - name: host-root-path
   hostPath:
-    path: '{{.BAETYL_HOST_ROOT_PATH}}'
+    path: '{{.BAETYL_HOST_PATH_LIB}}/host'
 system: true
 `,
 		},
@@ -572,13 +570,13 @@ spec:
             name: baetyl-init-config
         - name: core-store-path
           hostPath:
-            path: {{.BAETYL_CORE_STORE_PATH}}
+            path: /var/lib/baetyl/store
         - name: object-download-path
           hostPath:
-            path: {{.BAETYL_OBJECT_DOWNLOAD_PATH}}
+            path: /var/lib/baetyl/object
         - name: host-root-path
           hostPath:
-            path: {{.BAETYL_HOST_ROOT_PATH}}
+            path: /var/lib/baetyl/host
         - name: node-cert
           secret:
             secretName: node-cert-name-1`,

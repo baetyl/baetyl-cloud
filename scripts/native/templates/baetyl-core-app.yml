@@ -38,10 +38,10 @@ volumes:
       version: "{{.NodeCertVersion}}"
   - name: "core-store-path"
     hostPath:
-      path: "{{.BAETYL_CORE_STORE_PATH}}"
+      path: "{{.BAETYL_HOST_PATH_LIB}}/store"
   - name: "object-download-path"
     hostPath:
-      path: "{{.BAETYL_OBJECT_DOWNLOAD_PATH}}"
+      path: "{{.BAETYL_HOST_PATH_LIB}}/object"
   - name: "host-root-path"
     hostPath:
-      path: "{{.BAETYL_HOST_ROOT_PATH}}"
+      path: "{{.BAETYL_HOST_PATH_LIB}}/host"

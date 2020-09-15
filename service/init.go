@@ -25,12 +25,13 @@ const (
 )
 
 const (
-	templateCoreConfYaml             = "baetyl-core-conf.yml"
-	templateCoreAppYaml              = "baetyl-core-app.yml"
-	templateFuncConfYaml             = "baetyl-function-conf.yml"
-	templateFuncAppYaml              = "baetyl-function-app.yml"
-	templateInitDeploymentYaml       = "baetyl-init-deployment.yml"
-	TemplateKubeInitCommand          = `sudo mkdir -p -m 666 /var/lib/baetyl/host /var/lib/baetyl/object /var/lib/baetyl/store /var/lib/baetyl/log /var/lib/baetyl/run && curl -skfL '{{GetProperty "init-server-address"}}/v1/init/{{.InitApplyYaml}}?token={{.Token}}' -oinit.yml && kubectl apply -f init.yml`
+	templateCoreConfYaml       = "baetyl-core-conf.yml"
+	templateCoreAppYaml        = "baetyl-core-app.yml"
+	templateFuncConfYaml       = "baetyl-function-conf.yml"
+	templateFuncAppYaml        = "baetyl-function-app.yml"
+	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
+	TemplateKubeInitCommand    = `sudo mkdir -p -m 666 /var/lib/baetyl/host /var/lib/baetyl/object /var/lib/baetyl/store /var/lib/baetyl/log /var/lib/baetyl/run && curl -skfL '{{GetProperty "init-server-address"}}/v1/init/{{.InitApplyYaml}}?token={{.Token}}' -oinit.yml && kubectl apply -f init.yml`
+	BaetylHostPathLib          = "BAETYL_HOST_PATH_LIB"
 )
 
 var (
@@ -204,8 +205,9 @@ func (s *InitServiceImpl) GetCoreAppFromDesire(ns, nodeName string) (*specV1.App
 
 func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, error) {
 	params := map[string]interface{}{
-		"Namespace": ns,
-		"NodeName":  nodeName,
+		"Namespace":       ns,
+		"NodeName":        nodeName,
+		BaetylHostPathLib: "{{." + BaetylHostPathLib + "}}",
 	}
 	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
 		err := handler.(HandlerPopulateParams)(ns, params)
