@@ -487,7 +487,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character")
+	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
 
 	mNode2 := &specV1.Node{
 		Namespace: "default",
@@ -502,7 +502,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character")
+	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
 
 	mNode3 := &specV1.Node{
 		Namespace: "default",
@@ -517,7 +517,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character")
+	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
 
 	mNode4 := &specV1.Node{
 		Namespace: "default",
@@ -532,7 +532,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character")
+	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
 
 	mNode5 := &specV1.Node{
 		Namespace: "default",
@@ -547,7 +547,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character")
+	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
 }
 
 func TestUpdateNode(t *testing.T) {

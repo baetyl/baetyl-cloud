@@ -21,8 +21,9 @@ func (l *license) ProtectCode() error {
 func (l *license) CheckLicense() error {
 	return nil
 }
-func (l *license) CheckQuota(namespace string, collector plugin.QuotaCollector) error {
-	return nil
+
+func (l *license) GetQuota(namespace string) (map[string]int, error) {
+	return map[string]int{}, nil
 }
 
 func (l *license) Close() error {
