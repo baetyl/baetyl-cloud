@@ -11,7 +11,7 @@ import (
 const (
 	AdminServerPort = "ADMIN_PORT"
 	NodeServerPort  = "NODE_PORT"
-	InitServerPort  = "INIT_PORT"
+	InitServerPort  = "ACTIVE_PORT" // don't change @zhaoxin26
 	MisServerPort   = "MIS_PORT"
 )
 
