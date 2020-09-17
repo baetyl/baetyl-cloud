@@ -82,7 +82,7 @@ func (c *functionService) ListRuntimes() (map[string]string, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	var runtimes map[string]string
+	runtimes := make(map[string]string)
 	for _, item := range res {
 		runtimes[item.Name[len(functionRuntimePrefix):]] = item.Value
 	}

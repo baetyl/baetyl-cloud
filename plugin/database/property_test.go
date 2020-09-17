@@ -60,13 +60,39 @@ func TestProperty(t *testing.T) {
 	page := &models.Filter{
 		PageNo:   1,
 		PageSize: 2,
-		Name:     "%",
 	}
+	page.Format()
 	properties, err := db.ListProperty(page)
 	assert.NoError(t, err)
 	checkProperty(t, property, &properties[0])
 	count, err := db.CountProperty(page.Name)
 	assert.Equal(t, count, 1)
+
+	err = db.CreateProperty(&models.Property{
+		Name:  "baetyl-function-runtime-python3",
+		Value: "python3",
+	})
+	assert.NoError(t, err)
+	err = db.CreateProperty(&models.Property{
+		Name:  "baetyl-function-runtime-nodejs10",
+		Value: "nodejs10",
+	})
+	assert.NoError(t, err)
+	err = db.CreateProperty(&models.Property{
+		Name:  "baetyl-function-runtime-sql",
+		Value: "sql",
+	})
+	assert.NoError(t, err)
+
+	page = &models.Filter{
+		Name: "baetyl-function-runtime-",
+	}
+	page.Format()
+	properties, err = db.ListProperty(page)
+	assert.NoError(t, err)
+	assert.Len(t, properties, 3)
+	count, err = db.CountProperty(page.Name)
+	assert.Equal(t, count, 3)
 
 	err = db.DeleteProperty(property.Name)
 	assert.NoError(t, err)

@@ -1,5 +1,7 @@
 package models
 
+import "strings"
+
 type ListView struct {
 	Total    int         `json:"total,omitempty"`
 	PageNo   int         `json:"pageNo,omitempty"`
@@ -16,7 +18,7 @@ type Filter struct {
 func (f *Filter) Format() {
 	if f.Name == "" {
 		f.Name = "%"
-	} else {
+	} else if !strings.Contains(f.Name, "%") {
 		f.Name = "%" + f.Name + "%"
 	}
 	if f.PageNo <= 0 {
