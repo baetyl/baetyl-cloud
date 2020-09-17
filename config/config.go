@@ -1,18 +1,10 @@
 package config
 
 import (
-	"os"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/baetyl/baetyl-go/v2/utils"
-)
-
-const (
-	AdminServerPort = "ADMIN_PORT"
-	NodeServerPort  = "NODE_PORT"
-	InitServerPort  = "ACTIVE_PORT" // don't change @zhaoxin26
-	MisServerPort   = "MIS_PORT"
 )
 
 // CloudConfig baetyl-cloud config
@@ -58,19 +50,4 @@ type Server struct {
 	WriteTimeout time.Duration     `yaml:"writeTimeout" json:"writeTimeout" default:"30s"`
 	ShutdownTime time.Duration     `yaml:"shutdownTime" json:"shutdownTime" default:"3s"`
 	Certificate  utils.Certificate `yaml:",inline" json:",inline"`
-}
-
-func SetPortFromEnv(cfg *CloudConfig) {
-	adminPort := os.Getenv(AdminServerPort)
-	if adminPort != "" {
-		cfg.AdminServer.Port = ":" + adminPort
-	}
-	initPort := os.Getenv(InitServerPort)
-	if initPort != "" {
-		cfg.InitServer.Port = ":" + initPort
-	}
-	misPort := os.Getenv(MisServerPort)
-	if misPort != "" {
-		cfg.MisServer.Port = ":" + misPort
-	}
 }

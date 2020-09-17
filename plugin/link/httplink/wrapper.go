@@ -9,7 +9,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/server"
 )
 
-func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
+func (l *HTTPLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 	switch tp {
 	case specV1.MessageReport:
 		return func(c *common.Context) (interface{}, error) {
@@ -36,7 +36,7 @@ func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 			}
 			msg.Metadata["name"] = n
 			msg.Metadata["namespace"] = ns
-			resp, err := l.msgRouter[string(specV1.MessageReport)].(server.HandlerMessage)(msg)
+			resp, err := l.MsgRouter[string(specV1.MessageReport)].(server.HandlerMessage)(msg)
 			if err != nil {
 				return nil, err
 			}
@@ -68,7 +68,7 @@ func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 				msg.Metadata[strings.ToLower(k)] = c.GetHeader(k)
 			}
 			msg.Metadata["namespace"] = ns
-			resp, err := l.msgRouter[string(specV1.MessageDesire)].(server.HandlerMessage)(msg)
+			resp, err := l.MsgRouter[string(specV1.MessageDesire)].(server.HandlerMessage)(msg)
 			if err != nil {
 				return nil, err
 			}

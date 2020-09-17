@@ -37,7 +37,6 @@ func main() {
 		ctx.Log().Debug("cloud config", log.Any("cfg", cfg))
 
 		common.SetConfFile(ctx.ConfFile())
-		config.SetPortFromEnv(&cfg)
 
 		a, err := api.NewAPI(&cfg)
 		if err != nil {
