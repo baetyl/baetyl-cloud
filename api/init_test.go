@@ -119,7 +119,7 @@ func TestInitAPIImpl_CheckAndParseToken(t *testing.T) {
 
 	auth.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(1)
 
-	ns, nodeName, err := as.CheckAndParseToken(token)
+	ns, nodeName, err := CheckAndParseToken(token, as.Auth.GenToken)
 	assert.NoError(t, err)
 	assert.Equal(t, info[service.InfoName], nodeName)
 	assert.Equal(t, info[service.InfoNamespace], ns)
