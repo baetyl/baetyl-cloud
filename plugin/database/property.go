@@ -61,10 +61,10 @@ func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error)
 			FROM baetyl_property 
 		WHERE name LIKE ? 
 	`
-	args := []interface{}{page.Name}
-	if page.PageSize > 0 {
+	args := []interface{}{page.GetFuzzyName()}
+	if page.GetLimitOffset() > 0 {
 		selectSQL = selectSQL + "LIMIT ?,?"
-		args = append(args, (page.PageNo-1)*page.PageSize, page.PageSize)
+		args = append(args, (page.GetLimitNumber()-1)*page.PageSize, page.GetLimitOffset())
 	}
 
 	if err := d.query(nil, selectSQL, &cs, args...); err != nil {

@@ -15,13 +15,22 @@ type Filter struct {
 	Name     string `form:"name,omitempty"`
 }
 
-func (f *Filter) Format() {
+func (f *Filter) GetLimitNumber() int {
+	if f.PageNo <= 0 {
+		f.PageNo = 1
+	}
+	return f.PageNo
+}
+
+func (f *Filter) GetLimitOffset() int {
+	return f.PageSize
+}
+
+func (f *Filter) GetFuzzyName() string {
 	if f.Name == "" {
 		f.Name = "%"
 	} else if !strings.Contains(f.Name, "%") {
 		f.Name = "%" + f.Name + "%"
 	}
-	if f.PageNo <= 0 {
-		f.PageNo = 1
-	}
+	return f.Name
 }

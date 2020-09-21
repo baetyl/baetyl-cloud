@@ -88,21 +88,18 @@ func TestListProperty(t *testing.T) {
 	page := &models.Filter{
 		PageNo:   1,
 		PageSize: 2,
-		Name:     "%",
+		Name:     "test",
 	}
 	// good case
 	rs.EXPECT().ListProperty(page).Return([]models.Property{*mConf}, nil).Times(1)
 	rs.EXPECT().CountProperty(page.Name).Return(1, nil).Times(1)
 
-	req, _ := http.NewRequest(http.MethodGet, "/v1/properties?pageNo=1&pageSize=2", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/v1/properties?pageNo=1&pageSize=2&name=test", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	page = &models.Filter{
-		PageNo: 1,
-		Name:   "%",
-	}
+	page = &models.Filter{}
 	// List error case
 	rs.EXPECT().ListProperty(page).Return([]models.Property{*mConf}, fmt.Errorf("GetResource error")).Times(1)
 	req, _ = http.NewRequest(http.MethodGet, "/v1/properties", nil)
