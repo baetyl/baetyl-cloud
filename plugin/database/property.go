@@ -62,9 +62,9 @@ func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error)
 		WHERE name LIKE ? 
 	`
 	args := []interface{}{page.GetFuzzyName()}
-	if page.GetLimitOffset() > 0 {
+	if page.GetLimitNumber() > 0 {
 		selectSQL = selectSQL + "LIMIT ?,?"
-		args = append(args, (page.GetLimitNumber()-1)*page.PageSize, page.GetLimitOffset())
+		args = append(args, page.GetLimitOffset(), page.GetLimitNumber())
 	}
 
 	if err := d.query(nil, selectSQL, &cs, args...); err != nil {

@@ -15,14 +15,14 @@ type Filter struct {
 	Name     string `form:"name,omitempty"`
 }
 
-func (f *Filter) GetLimitNumber() int {
+func (f *Filter) GetLimitOffset() int {
 	if f.PageNo <= 0 {
 		f.PageNo = 1
 	}
-	return f.PageNo
+	return (f.PageNo - 1) * f.GetLimitNumber()
 }
 
-func (f *Filter) GetLimitOffset() int {
+func (f *Filter) GetLimitNumber() int {
 	return f.PageSize
 }
 
