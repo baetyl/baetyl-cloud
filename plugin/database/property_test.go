@@ -61,7 +61,6 @@ func TestProperty(t *testing.T) {
 		PageNo:   1,
 		PageSize: 2,
 	}
-	page.Format()
 	properties, err := db.ListProperty(page)
 	assert.NoError(t, err)
 	checkProperty(t, property, &properties[0])
@@ -87,7 +86,6 @@ func TestProperty(t *testing.T) {
 	page = &models.Filter{
 		Name: "baetyl-function-runtime-",
 	}
-	page.Format()
 	properties, err = db.ListProperty(page)
 	assert.NoError(t, err)
 	assert.Len(t, properties, 3)
