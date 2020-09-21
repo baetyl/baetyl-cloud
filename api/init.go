@@ -46,7 +46,7 @@ func (api *InitAPI) GetResource(c *common.Context) (interface{}, error) {
 			common.ErrRequestParamInvalid,
 			common.Field("error", err))
 	}
-	ns, nodeName, err := api.CheckAndParseToken(query.Token)
+	ns, nodeName, err := CheckAndParseToken(query.Token, api.Auth.GenToken)
 	if err != nil {
 		return nil, common.Error(
 			common.ErrRequestParamInvalid,
@@ -58,7 +58,7 @@ func (api *InitAPI) GetResource(c *common.Context) (interface{}, error) {
 	})
 }
 
-func (a *InitAPI) CheckAndParseToken(token string) (ns, nodeName string, err error) {
+func CheckAndParseToken(token string, genToken func(map[string]interface{}) (string, error)) (ns, nodeName string, err error) {
 	// check len
 	if len(token) < 10 {
 		log.L().Info("invalid token length")
@@ -79,7 +79,7 @@ func (a *InitAPI) CheckAndParseToken(token string) (ns, nodeName string, err err
 		err = common.Error(common.ErrInvalidToken)
 		return
 	}
-	realToken, err := a.Auth.GenToken(info)
+	realToken, err := genToken(info)
 	if err != nil {
 		log.L().Info("invalid token struct", log.Error(err))
 		err = common.Error(common.ErrInvalidToken)
