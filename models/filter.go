@@ -24,7 +24,4 @@ func (f *Filter) Format() {
 	if f.PageNo <= 0 {
 		f.PageNo = 1
 	}
-	if f.PageSize <= 0 {
-		f.PageSize = 20
-	}
 }

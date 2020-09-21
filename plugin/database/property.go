@@ -54,15 +54,20 @@ func (d *dbStorage) GetPropertyValue(name string) (string, error) {
 }
 
 func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error) {
+	var cs []models.Property
 	selectSQL := `
 		SELECT 
 		name, value, create_time, update_time 
 			FROM baetyl_property 
 		WHERE name LIKE ? 
-		LIMIT ?,?
 	`
-	var cs []models.Property
-	if err := d.query(nil, selectSQL, &cs, page.Name, (page.PageNo-1)*page.PageSize, page.PageSize); err != nil {
+	args := []interface{}{page.Name}
+	if page.PageSize > 0 {
+		selectSQL = selectSQL + "LIMIT ?,?"
+		args = append(args, (page.PageNo-1)*page.PageSize, page.PageSize)
+	}
+
+	if err := d.query(nil, selectSQL, &cs, args...); err != nil {
 		return nil, err
 	}
 	return cs, nil

@@ -78,7 +78,11 @@ func (c *functionService) ListSources() []models.FunctionSource {
 }
 
 func (c *functionService) ListRuntimes() (map[string]string, error) {
-	res, err := c.prop.ListProperty(&models.Filter{Name: functionRuntimePrefix})
+	params := &models.Filter{
+		Name: functionRuntimePrefix,
+	}
+	params.Format()
+	res, err := c.prop.ListProperty(params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

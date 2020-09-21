@@ -100,9 +100,8 @@ func TestListProperty(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	page = &models.Filter{
-		PageNo:   1,
-		PageSize: 20,
-		Name:     "%",
+		PageNo: 1,
+		Name:   "%",
 	}
 	// List error case
 	rs.EXPECT().ListProperty(page).Return([]models.Property{*mConf}, fmt.Errorf("GetResource error")).Times(1)
