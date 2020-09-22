@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"net/http"
+	"os"
 
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
@@ -15,11 +16,15 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/server"
 )
 
-type HTTPLink struct {
-	Cfg       *CloudConfig
-	Router    *gin.Engine
-	Svr       *http.Server
-	MsgRouter map[string]interface{}
+const (
+	HTTPLinkPort = "HTTP_LINK_PORT"
+)
+
+type httpLink struct {
+	cfg       *CloudConfig
+	router    *gin.Engine
+	svr       *http.Server
+	msgRouter map[string]interface{}
 }
 
 func init() {
@@ -63,48 +68,56 @@ func NewHTTPLink() (plugin.Plugin, error) {
 		router.Use(server.ExtractNodeCommonNameFromCert)
 	}
 
-	link := &HTTPLink{
-		Cfg:       &cfg,
-		Router:    router,
-		Svr:       svr,
-		MsgRouter: map[string]interface{}{},
+	link := &httpLink{
+		cfg:       &cfg,
+		router:    router,
+		svr:       svr,
+		msgRouter: map[string]interface{}{},
 	}
 	link.initRouter()
+	link.setPortFromEnv()
 	return link, nil
 }
 
-func (l *HTTPLink) Start() {
-	if l.Svr.TLSConfig == nil {
-		if err := l.Svr.ListenAndServe(); err != nil {
+func (l *httpLink) Start() {
+	if l.svr.TLSConfig == nil {
+		if err := l.svr.ListenAndServe(); err != nil {
 			log.L().Info("sync server http stopped", log.Error(err))
 		}
 	} else {
-		if err := l.Svr.ListenAndServeTLS("", ""); err != nil {
+		if err := l.svr.ListenAndServeTLS("", ""); err != nil {
 			log.L().Info("sync server https stopped", log.Error(err))
 		}
 	}
 }
 
-func (l *HTTPLink) AddMsgRouter(k string, v interface{}) {
-	l.MsgRouter[k] = v
+func (l *httpLink) AddMsgRouter(k string, v interface{}) {
+	l.msgRouter[k] = v
 }
 
-func (l *HTTPLink) Close() error {
-	ctx, _ := context.WithTimeout(context.Background(), l.Cfg.HTTPLink.ShutdownTime)
-	return l.Svr.Shutdown(ctx)
+func (l *httpLink) Close() error {
+	ctx, _ := context.WithTimeout(context.Background(), l.cfg.HTTPLink.ShutdownTime)
+	return l.svr.Shutdown(ctx)
 }
 
-func (l *HTTPLink) initRouter() {
-	l.Router.NoRoute(server.NoRouteHandler)
-	l.Router.NoMethod(server.NoMethodHandler)
-	l.Router.GET("/health", server.Health)
+func (l *httpLink) initRouter() {
+	l.router.NoRoute(server.NoRouteHandler)
+	l.router.NoMethod(server.NoMethodHandler)
+	l.router.GET("/health", server.Health)
 
-	l.Router.Use(server.RequestIDHandler)
-	l.Router.Use(server.LoggerHandler)
-	v1 := l.Router.Group("v1")
+	l.router.Use(server.RequestIDHandler)
+	l.router.Use(server.LoggerHandler)
+	v1 := l.router.Group("v1")
 	{
 		sync := v1.Group("/sync")
 		sync.POST("/report", common.Wrapper(l.wrapper(specV1.MessageReport)))
 		sync.POST("/desire", common.Wrapper(l.wrapper(specV1.MessageDesire)))
+	}
+}
+
+func (l *httpLink) setPortFromEnv() {
+	nodePort := os.Getenv(HTTPLinkPort)
+	if nodePort != "" {
+		l.svr.Addr = ":" + nodePort
 	}
 }
