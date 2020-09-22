@@ -125,8 +125,7 @@ func TestInitService_GenCmd(t *testing.T) {
 	info := map[string]interface{}{
 		InfoName:      "name",
 		InfoNamespace: "ns",
-		InfoExpiry:    CmdExpirationInSeconds,
-		InfoTimestamp: time.Now().Unix(),
+		InfoExpiry:    time.Now().Unix() + CmdExpirationInSeconds,
 	}
 	expect := "curl -skfL 'https://1.2.3.4:9003/v1/active/setup.sh?token=tokenexpect' -osetup.sh && sh setup.sh"
 	params := map[string]interface{}{

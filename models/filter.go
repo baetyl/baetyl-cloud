@@ -3,15 +3,15 @@ package models
 import "strings"
 
 type ListView struct {
-	Total    int         `json:"total,omitempty"`
-	PageNo   int         `json:"pageNo,omitempty"`
-	PageSize int         `json:"pageSize,omitempty"`
+	Total    int         `json:"total"`
+	PageNo   int         `json:"pageNo"`
+	PageSize int         `json:"pageSize"`
 	Items    interface{} `json:"items,omitempty"`
 }
 
 type Filter struct {
-	PageNo   int    `form:"pageNo,omitempty"`
-	PageSize int    `form:"pageSize,omitempty"`
+	PageNo   int    `form:"pageNo"`
+	PageSize int    `form:"pageSize"`
 	Name     string `form:"name,omitempty"`
 }
 
