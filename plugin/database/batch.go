@@ -14,8 +14,8 @@ func (d *dbStorage) GetBatch(name, ns string) (*models.Batch, error) {
 	return d.GetBatchTx(nil, name, ns)
 }
 
-func (d *dbStorage) ListBatch(ns, name string, page, size int) ([]models.Batch, error) {
-	return d.ListBatchTx(nil, ns, name, page, size)
+func (d *dbStorage) ListBatch(ns string, filter *models.Filter) ([]models.Batch, error) {
+	return d.ListBatchTx(nil, ns, filter)
 }
 
 func (d *dbStorage) CreateBatch(batch *models.Batch) (sql.Result, error) {
@@ -56,7 +56,7 @@ FROM baetyl_batch WHERE namespace=? AND name=? LIMIT 0,1
 	return nil, nil
 }
 
-func (d *dbStorage) ListBatchTx(tx *sqlx.Tx, ns, name string, pageNo, pageSize int) ([]models.Batch, error) {
+func (d *dbStorage) ListBatchTx(tx *sqlx.Tx, ns string, filter *models.Filter) ([]models.Batch, error) {
 	selectSQL := `
 SELECT  
 name, namespace, description, quota_num, enable_whitelist,
@@ -65,7 +65,7 @@ labels, fingerprint, create_time, update_time
 FROM baetyl_batch WHERE namespace=? AND name LIKE ? ORDER BY create_time DESC LIMIT ?,?
 `
 	batchs := []entities.Batch{}
-	if err := d.query(tx, selectSQL, &batchs, ns, name, (pageNo-1)*pageSize, pageSize); err != nil {
+	if err := d.query(tx, selectSQL, &batchs, ns, filter.GetFuzzyName(), filter.GetLimitOffset(), filter.GetLimitNumber()); err != nil {
 		return nil, err
 	}
 	var res []models.Batch
