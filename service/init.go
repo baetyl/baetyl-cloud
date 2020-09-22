@@ -20,7 +20,6 @@ import (
 const (
 	InfoName      = "n"
 	InfoNamespace = "ns"
-	InfoTimestamp = "ts"
 	InfoExpiry    = "e"
 )
 
@@ -161,8 +160,7 @@ func (s *InitServiceImpl) GetInitCommand(ns, nodeName string, params map[string]
 	info := map[string]interface{}{
 		InfoNamespace: ns,
 		InfoName:      nodeName,
-		InfoExpiry:    CmdExpirationInSeconds,
-		InfoTimestamp: time.Now().Unix(),
+		InfoExpiry:    time.Now().Unix() + CmdExpirationInSeconds,
 	}
 	token, err := s.AuthService.GenToken(info)
 	if err != nil {

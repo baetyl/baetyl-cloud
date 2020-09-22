@@ -49,8 +49,7 @@ func TestInitAPIImpl_GetResource(t *testing.T) {
 	info := map[string]interface{}{
 		service.InfoName:      "n0",
 		service.InfoNamespace: "default",
-		service.InfoTimestamp: time.Now().Unix(),
-		service.InfoExpiry:    60 * 60 * 24 * 3650,
+		service.InfoExpiry:    time.Now().Unix() + 60*60*24*3650,
 	}
 	data, err := json.Marshal(info)
 	assert.NoError(t, err)
@@ -108,8 +107,7 @@ func TestInitAPIImpl_CheckAndParseToken(t *testing.T) {
 	info := map[string]interface{}{
 		service.InfoName:      "n0",
 		service.InfoNamespace: "default",
-		service.InfoTimestamp: time.Now().Unix(),
-		service.InfoExpiry:    60 * 60 * 24 * 3650,
+		service.InfoExpiry:    time.Now().Unix() + 60*60*24*3650,
 	}
 	data, err := json.Marshal(info)
 	assert.NoError(t, err)
@@ -119,8 +117,8 @@ func TestInitAPIImpl_CheckAndParseToken(t *testing.T) {
 
 	auth.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(1)
 
-	ns, nodeName, err := CheckAndParseToken(token, as.Auth.GenToken)
+	res, err := CheckAndParseToken(token, as.Auth.GenToken)
 	assert.NoError(t, err)
-	assert.Equal(t, info[service.InfoName], nodeName)
-	assert.Equal(t, info[service.InfoNamespace], ns)
+	assert.Equal(t, info[service.InfoName], res[service.InfoName].(string))
+	assert.Equal(t, info[service.InfoNamespace], res[service.InfoNamespace].(string))
 }

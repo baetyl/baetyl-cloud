@@ -46,85 +46,69 @@ func (api *InitAPI) GetResource(c *common.Context) (interface{}, error) {
 			common.ErrRequestParamInvalid,
 			common.Field("error", err))
 	}
-	ns, nodeName, err := CheckAndParseToken(query.Token, api.Auth.GenToken)
+	data, err := CheckAndParseToken(query.Token, api.Auth.GenToken)
 	if err != nil {
 		return nil, common.Error(
 			common.ErrRequestParamInvalid,
 			common.Field("error", err))
 	}
-	return api.Init.GetResource(ns, nodeName, resourceName, map[string]interface{}{
+	return api.Init.GetResource(data[service.InfoNamespace].(string), data[service.InfoName].(string), resourceName, map[string]interface{}{
 		"Token":        query.Token,
 		"KubeNodeName": query.Node,
 	})
 }
 
-func CheckAndParseToken(token string, genToken func(map[string]interface{}) (string, error)) (ns, nodeName string, err error) {
+func CheckAndParseToken(token string, genToken func(map[string]interface{}) (string, error)) (map[string]interface{}, error) {
 	// check len
 	if len(token) < 10 {
 		log.L().Info("invalid token length")
-		err = common.Error(common.ErrInvalidToken)
-		return
+		return nil, common.Error(common.ErrInvalidToken)
 	}
 	// check sign
 	data, err := hex.DecodeString(token[10:])
 	if err != nil {
 		log.L().Info("invalid token string hex", log.Error(err))
-		err = common.Error(common.ErrInvalidToken)
-		return
+		return nil, common.Error(common.ErrInvalidToken)
 	}
 	info := map[string]interface{}{}
 	err = json.Unmarshal(data, &info)
 	if err != nil {
 		log.L().Info("invalid token string json", log.Error(err))
-		err = common.Error(common.ErrInvalidToken)
-		return
+		return nil, common.Error(common.ErrInvalidToken)
 	}
 	realToken, err := genToken(info)
 	if err != nil {
 		log.L().Info("invalid token struct", log.Error(err))
-		err = common.Error(common.ErrInvalidToken)
-		return
+		return nil, common.Error(common.ErrInvalidToken)
 	}
 	if realToken != token {
 		log.L().Info("token not match", log.Error(err))
-		err = common.Error(common.ErrInvalidToken)
-		return
+		return nil, common.Error(common.ErrInvalidToken)
 	}
 
-	ns, ok := info[service.InfoNamespace].(string)
+	_, ok := info[service.InfoNamespace].(string)
 	if !ok {
 		log.L().Info("invalid token no namespace", log.Error(err))
-		err = common.Error(common.ErrInvalidToken)
-		return
+		return nil, common.Error(common.ErrInvalidToken)
 	}
 
-	nodeName, ok = info[service.InfoName].(string)
+	_, ok = info[service.InfoName].(string)
 	if !ok {
 		log.L().Info("invalid token no node name", log.Error(err))
-		err = common.Error(common.ErrInvalidToken)
-		return
+		return nil, common.Error(common.ErrInvalidToken)
 	}
 
 	expiry, ok := info[service.InfoExpiry].(float64)
 	if !ok {
 		log.L().Info("invalid token no expiry", log.Error(err))
-		err = common.Error(common.ErrInvalidToken)
-		return
-	}
-
-	ts, ok := info[service.InfoTimestamp].(float64)
-	if !ok {
-		log.L().Info("invalid token no timestamp", log.Error(err))
-		err = common.Error(common.ErrInvalidToken)
-		return
+		return nil, common.Error(common.ErrInvalidToken)
 	}
 
 	// check expiration
-	timestamp := time.Unix(int64(ts), 0)
-	if timestamp.Add(time.Duration(int64(expiry))*time.Second).Unix() < time.Now().Unix() {
+	timestamp := time.Unix(int64(expiry), 0)
+	if timestamp.Unix() < time.Now().Unix() {
 		log.L().Info("token expired", log.Error(err))
-		err = common.Error(common.ErrInvalidToken)
-		return
+		return nil, common.Error(common.ErrInvalidToken)
 	}
-	return
+	return info, nil
 }
