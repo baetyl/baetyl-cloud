@@ -204,8 +204,9 @@ func (s *InitServiceImpl) GetCoreAppFromDesire(ns, nodeName string) (*specV1.App
 
 func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, error) {
 	params := map[string]interface{}{
-		"Namespace": ns,
-		"NodeName":  nodeName,
+		"Namespace":                  ns,
+		"NodeName":                   nodeName,
+		context.KeyBaetylHostPathLib: "/var/lib/baetyl",
 	}
 	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
 		err := handler.(HandlerPopulateParams)(ns, params)
