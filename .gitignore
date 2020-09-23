@@ -27,3 +27,4 @@ coverage.*
 /etc
 /var
 output
+/baetyl-cloud
