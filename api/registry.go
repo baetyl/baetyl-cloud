@@ -18,6 +18,10 @@ func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	res, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
+		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
+			return nil, common.Error(common.ErrResourceNotFound, common.Field("type", common.SecretRegistry),
+				common.Field("name", n))
+		}
 		return nil, err
 	}
 	return hidePwd(res), nil
