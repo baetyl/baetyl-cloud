@@ -107,10 +107,15 @@ SELECT
 name, batch_name, namespace, fingerprint_value, 
 active, node_name, active_ip, active_time, create_time, 
 update_time 
-FROM baetyl_batch_record WHERE namespace=? AND batch_name=? AND fingerprint_value LIKE ? ORDER BY create_time DESC limit ?,?
+FROM baetyl_batch_record WHERE namespace=? AND batch_name=? AND fingerprint_value LIKE ? ORDER BY create_time DESC 
 `
 	records := []models.Record{}
-	if err := d.query(tx, selectSQL, &records, ns, batchName, filter.GetFuzzyName(), filter.GetLimitOffset(), filter.GetLimitNumber()); err != nil {
+	args := []interface{}{ns, batchName, filter.GetFuzzyName()}
+	if filter.GetLimitNumber() > 0 {
+		selectSQL = selectSQL + "LIMIT ?,?"
+		args = append(args, filter.GetLimitOffset(), filter.GetLimitNumber())
+	}
+	if err := d.query(tx, selectSQL, &records, args...); err != nil {
 		return nil, err
 	}
 	return records, nil
