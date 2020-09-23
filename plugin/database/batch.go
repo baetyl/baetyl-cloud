@@ -62,10 +62,15 @@ SELECT
 name, namespace, description, quota_num, enable_whitelist,
 security_type, security_key, callback_name,
 labels, fingerprint, create_time, update_time 
-FROM baetyl_batch WHERE namespace=? AND name LIKE ? ORDER BY create_time DESC LIMIT ?,?
+FROM baetyl_batch WHERE namespace=? AND name LIKE ? ORDER BY create_time DESC 
 `
 	batchs := []entities.Batch{}
-	if err := d.query(tx, selectSQL, &batchs, ns, filter.GetFuzzyName(), filter.GetLimitOffset(), filter.GetLimitNumber()); err != nil {
+	args := []interface{}{ns, filter.GetFuzzyName()}
+	if filter.GetLimitNumber() > 0 {
+		selectSQL = selectSQL + "LIMIT ?,?"
+		args = append(args, filter.GetLimitOffset(), filter.GetLimitNumber())
+	}
+	if err := d.query(tx, selectSQL, &batchs, args...); err != nil {
 		return nil, err
 	}
 	var res []models.Batch

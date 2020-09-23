@@ -43,10 +43,15 @@ func (d *dbStorage) ListApplication(namespace string, filter *models.Filter) ([]
 	selectSQL := `
 SELECT  
 id, namespace, name, version, is_deleted, create_time, update_time, content
-FROM baetyl_application_history WHERE namespace = ? AND name LIKE ? AND is_deleted = 0 LIMIT ?,?
+FROM baetyl_application_history WHERE namespace = ? AND name LIKE ? AND is_deleted = 0 
 `
 	var apps []entities.Application
-	if err := d.query(nil, selectSQL, &apps, namespace, filter.GetFuzzyName(), filter.GetLimitOffset(), filter.GetLimitNumber()); err != nil {
+	args := []interface{}{namespace, filter.GetFuzzyName()}
+	if filter.GetLimitNumber() > 0 {
+		selectSQL = selectSQL + "LIMIT ?,?"
+		args = append(args, filter.GetLimitOffset(), filter.GetLimitNumber())
+	}
+	if err := d.query(nil, selectSQL, &apps, args...); err != nil {
 		return nil, err
 	}
 	var result []specV1.Application

@@ -53,7 +53,7 @@ func (d *dbStorage) GetPropertyValue(name string) (string, error) {
 	return p.Value, nil
 }
 
-func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error) {
+func (d *dbStorage) ListProperty(filter *models.Filter) ([]models.Property, error) {
 	var cs []models.Property
 	selectSQL := `
 		SELECT 
@@ -61,10 +61,10 @@ func (d *dbStorage) ListProperty(page *models.Filter) ([]models.Property, error)
 			FROM baetyl_property 
 		WHERE name LIKE ? 
 	`
-	args := []interface{}{page.GetFuzzyName()}
-	if page.GetLimitNumber() > 0 {
+	args := []interface{}{filter.GetFuzzyName()}
+	if filter.GetLimitNumber() > 0 {
 		selectSQL = selectSQL + "LIMIT ?,?"
-		args = append(args, page.GetLimitOffset(), page.GetLimitNumber())
+		args = append(args, filter.GetLimitOffset(), filter.GetLimitNumber())
 	}
 
 	if err := d.query(nil, selectSQL, &cs, args...); err != nil {
