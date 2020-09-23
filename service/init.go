@@ -140,7 +140,7 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, error) {
 	certName := ""
 	for _, vol := range app.Volumes {
-		if vol.Name == "node-cert" || vol.Name == "sync-cert" {
+		if vol.Name == "node-cert" || vol.Name == "cert-sync" {
 			certName = vol.Secret.Name
 			break
 		}
