@@ -10,7 +10,11 @@ type BucketsView struct {
 }
 
 type ObjectStorageSourceView struct {
-	Sources map[string]ObjectStorageSource `json:"sources"`
+	Sources []ObjectStorageSource `json:"sources"`
+}
+
+type ObjectStorageSourceViewV2 struct {
+	Sources map[string]ObjectStorageSourceV2 `json:"sources"`
 }
 
 type Bucket struct {
@@ -19,6 +23,10 @@ type Bucket struct {
 }
 
 type ObjectStorageSource struct {
+	Name string `json:"name,omitempty"`
+}
+
+type ObjectStorageSourceV2 struct {
 	InternalEnabled bool `json:"internalEnabled,omitempty"`
 }
 

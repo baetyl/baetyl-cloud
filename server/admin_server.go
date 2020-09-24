@@ -205,10 +205,10 @@ func (s *AdminServer) InitRoute() {
 	v2 := s.router.Group("v2")
 	{
 		objects := v2.Group("/objects")
-		objects.GET("", common.Wrapper(s.api.ListObjectSources))
+		objects.GET("", common.Wrapper(s.api.ListObjectSourcesV2))
 		if len(s.cfg.Plugin.Objects) != 0 {
-			objects.GET("/:source/buckets", common.Wrapper(s.api.ListBuckets))
-			objects.GET("/:source/buckets/:bucket/objects", common.Wrapper(s.api.ListBucketObjects))
+			objects.GET("/:source/buckets", common.Wrapper(s.api.ListBucketsV2))
+			objects.GET("/:source/buckets/:bucket/objects", common.Wrapper(s.api.ListBucketObjectsV2))
 		}
 	}
 }

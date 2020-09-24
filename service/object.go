@@ -12,13 +12,14 @@ import (
 //go:generate mockgen -destination=../mock/service/object.go -package=service github.com/baetyl/baetyl-cloud/v2/service ObjectService
 
 type ObjectService interface {
-	ListSources() map[string]models.ObjectStorageSource
+	ListSources() []models.ObjectStorageSource
+	ListSourcesV2() map[string]models.ObjectStorageSourceV2
 
-	ListBuckets(userID, source string) ([]models.Bucket, error)
-	ListBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error)
-	CreateBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error)
-	PutObjectFromURLIfNotExist(userID, bucket, object, url, source string) error
-	GenObjectURL(userID string, bucket, object, source string) (*models.ObjectURL, error)
+	ListInternalBuckets(userID, source string) ([]models.Bucket, error)
+	ListInternalBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error)
+	CreateInternalBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error)
+	PutInternalObjectFromURLIfNotExist(userID, bucket, object, url, source string) error
+	GenInternalObjectURL(userID string, bucket, object, source string) (*models.ObjectURL, error)
 
 	ListExternalBuckets(info models.ExternalObjectInfo, source string) ([]models.Bucket, error)
 	ListExternalBucketObjects(info models.ExternalObjectInfo, bucket, source string) (*models.ListObjectsResult, error)
@@ -45,44 +46,57 @@ func NewObjectService(config *config.CloudConfig) (ObjectService, error) {
 }
 
 //ListSource ListSource
-func (c *objectService) ListSources() map[string]models.ObjectStorageSource {
-	sources := map[string]models.ObjectStorageSource{}
+func (c *objectService) ListSources() []models.ObjectStorageSource {
+	sources := []models.ObjectStorageSource{}
+	for name := range c.objects {
+		source := models.ObjectStorageSource{
+			Name: name,
+		}
+		sources = append(sources, source)
+	}
+	return sources
+}
+
+//ListSource ListSource
+func (c *objectService) ListSourcesV2() map[string]models.ObjectStorageSourceV2 {
+	sources := map[string]models.ObjectStorageSourceV2{}
 	for name, object := range c.objects {
-		sources[name] = models.ObjectStorageSource{
+		sources[name] = models.ObjectStorageSourceV2{
 			InternalEnabled: object.IsInternalEnabled(),
 		}
 	}
 	return sources
 }
 
-// ListBuckets ListBuckets
-func (c *objectService) ListBuckets(userID, source string) ([]models.Bucket, error) {
+// ListInternalBuckets ListInternalBuckets
+func (c *objectService) ListInternalBuckets(userID, source string) ([]models.Bucket, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
-	return objectPlugin.ListBuckets(userID)
+	return objectPlugin.ListInternalBuckets(userID)
 }
 
-//ListBucketObjects ListBucketObjects
-func (c *objectService) ListBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error) {
+//ListInternalBucketObjects ListInternalBucketObjects
+func (c *objectService) ListInternalBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
-	err := objectPlugin.HeadBucket(userID, bucket)
+	err := objectPlugin.HeadInternalBucket(userID, bucket)
 	if err != nil {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "objects"), common.Field("name", bucket))
 	}
-	return objectPlugin.ListBucketObjects(userID, bucket, &models.ObjectParams{})
+	return objectPlugin.ListInternalBucketObjects(userID, bucket, &models.ObjectParams{})
 }
 
-func (c *objectService) CreateBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error) {
+// CreateInternalBucketIfNotExist CreateInternalBucketIfNotExist
+func (c *objectService) CreateInternalBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
-	err := objectPlugin.HeadBucket(userID, bucket)
+	err := objectPlugin.HeadInternalBucket(userID, bucket)
 	if err == nil {
 		return &models.Bucket{
 			Name: bucket,
@@ -90,29 +104,29 @@ func (c *objectService) CreateBucketIfNotExist(userID, bucket, permission, sourc
 	}
 	return &models.Bucket{
 		Name: bucket,
-	}, objectPlugin.CreateBucket(userID, bucket, permission)
+	}, objectPlugin.CreateInternalBucket(userID, bucket, permission)
 }
 
-//ListSource ListSource
-func (c *objectService) PutObjectFromURLIfNotExist(userID, bucket, name, url, source string) error {
+// PutInternalObjectFromURLIfNotExist PutInternalObjectFromURLIfNotExist
+func (c *objectService) PutInternalObjectFromURLIfNotExist(userID, bucket, name, url, source string) error {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
-	if _, err := objectPlugin.HeadObject(userID, bucket, name); err == nil {
+	if _, err := objectPlugin.HeadInternalObject(userID, bucket, name); err == nil {
 		return nil
 	}
-	return objectPlugin.PutObjectFromURL(userID, bucket, name, url)
+	return objectPlugin.PutInternalObjectFromURL(userID, bucket, name, url)
 }
 
-// GetObjectURL GetObjectURL
+// GenInternalObjectURL GenInternalObjectURL
 func (c *objectService) GenObjectURL(userID string, bucket, object, source string) (*models.ObjectURL, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
 
-	return objectPlugin.GenObjectURL(userID, bucket, object)
+	return objectPlugin.GenInternalObjectURL(userID, bucket, object)
 }
 
 // ListExternalBuckets ListExternalBuckets
