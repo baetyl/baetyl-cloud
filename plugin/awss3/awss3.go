@@ -347,7 +347,7 @@ func genObjectURL(cli *s3.S3, bucket, name string, expiration time.Duration) (*m
 
 func (c *awss3Storage) checkInternalSupported() error {
 	if !c.IsInternalEnabled() {
-		return errors.New("plugin awss3 doesn't support internal operating causing it's not configured")
+		return errors.New("plugin awss3 doesn't support internal object caused it's not configured")
 	}
 	return nil
 }

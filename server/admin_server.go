@@ -153,6 +153,7 @@ func (s *AdminServer) InitRoute() {
 		}
 	}
 	{
+		// Deprecated
 		objects := v1.Group("/objects")
 		objects.GET("", common.Wrapper(s.api.ListObjectSources))
 		if len(s.cfg.Plugin.Objects) != 0 {
