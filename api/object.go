@@ -12,7 +12,17 @@ func (api *API) ListObjectSources(c *common.Context) (interface{}, error) {
 
 // ListBuckets ListBuckets
 func (api *API) ListBuckets(c *common.Context) (interface{}, error) {
-	res, err := api.Obj.ListBuckets(c.GetUser().ID, c.Param("source"))
+	params, err := api.parseObject(c)
+	if err != nil {
+		return nil, err
+	}
+
+	var res []models.Bucket
+	if params.Internal {
+		res, err = api.Obj.ListBuckets(c.GetUser().ID, params.Source)
+	} else {
+		res, err = api.Obj.ListExternalBuckets(params.ExternalObjectInfo, params.Source)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -21,8 +31,17 @@ func (api *API) ListBuckets(c *common.Context) (interface{}, error) {
 
 // ListBucketObjects ListBucketObjects
 func (api *API) ListBucketObjects(c *common.Context) (interface{}, error) {
-	id, bucket, source := c.GetUser().ID, c.Param("bucket"), c.Param("source")
-	res, err := api.Obj.ListBucketObjects(id, bucket, source)
+	params, err := api.parseObject(c)
+	if err != nil {
+		return nil, err
+	}
+
+	res := new(models.ListObjectsResult)
+	if params.Internal {
+		res, err = api.Obj.ListBucketObjects(c.GetUser().ID, params.Bucket, params.Source)
+	} else {
+		res, err = api.Obj.ListExternalBucketObjects(params.ExternalObjectInfo, params.Bucket, params.Source)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -33,6 +52,33 @@ func (api *API) ListBucketObjects(c *common.Context) (interface{}, error) {
 		objects = append(objects, view)
 	}
 	return &models.ObjectsView{Objects: objects}, err
+}
+
+func (api *API) parseObject(c *common.Context) (*models.ObjectRequestParams, error) {
+	params := &models.ObjectRequestParams{}
+	if err := c.Bind(params); err != nil {
+		return nil, err
+	}
+	params.Source = c.Param("source")
+	params.Bucket = c.Param("bucket")
+
+	if params.Internal {
+		return params, nil
+	}
+
+	if params.ExternalObjectInfo.Endpoint == "" {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "endpoint field is required when internal is false"))
+	}
+
+	if params.ExternalObjectInfo.Ak == "" {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "ak field is required when internal is false"))
+	}
+
+	if params.ExternalObjectInfo.Sk == "" {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "sk field is required when internal is false"))
+	}
+
+	return params, nil
 }
 
 func (api *API) getDefaultObjectSource() (string, error) {

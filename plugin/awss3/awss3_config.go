@@ -4,7 +4,7 @@ import "time"
 
 // CloudConfig baetyl-cloud config
 type CloudConfig struct {
-	Minio S3Config `yaml:"minio" json:"minio"`
+	AWSS3 *S3Config `yaml:"awss3" json:"awss3"`
 }
 
 type S3Config struct {
