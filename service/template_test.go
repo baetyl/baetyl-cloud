@@ -563,7 +563,7 @@ spec:
             - name: host-root-path
               mountPath: /var/lib/baetyl/host
             - name: node-cert
-              mountPath: var/lib/baetyl/node
+              mountPath: /var/lib/baetyl/node
       volumes:
         - name: init-conf
           configMap:

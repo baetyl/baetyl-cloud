@@ -132,7 +132,7 @@ func TestSyncDesire(t *testing.T) {
 		Object: "object1",
 	}
 	as.EXPECT().Get(namespace, reqs[0].Name, reqs[0].Version).Return(app, nil).Times(1)
-	cs.EXPECT().Get(namespace, reqs[1].Name, "").Return(config, nil).Times(1)
+	cs.EXPECT().Get(namespace, reqs[1].Name, reqs[1].Version).Return(config, nil).Times(1)
 	os.EXPECT().GenObjectURL(namespace, param).Return(objURL, nil).Times(1)
 	res, err := sync.Desire(namespace, reqs, map[string]string{})
 	assert.NoError(t, err)

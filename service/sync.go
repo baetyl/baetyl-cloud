@@ -127,7 +127,7 @@ func (t *SyncServiceImpl) Desire(namespace string, crdInfos []specV1.ResourceInf
 			}
 			crdData.Value.Value = app
 		case specV1.KindConfiguration, specV1.KindConfig:
-			cfg, err := t.ConfigService.Get(namespace, info.Name, "")
+			cfg, err := t.ConfigService.Get(namespace, info.Name, info.Version)
 			if err != nil {
 				log.L().Error("failed to get config", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
@@ -138,7 +138,7 @@ func (t *SyncServiceImpl) Desire(namespace string, crdInfos []specV1.ResourceInf
 			}
 			crdData.Value.Value = cfg
 		case specV1.KindSecret:
-			secret, err := t.SecretService.Get(namespace, info.Name, "")
+			secret, err := t.SecretService.Get(namespace, info.Name, info.Version)
 			if err != nil {
 				log.L().Error("failed to get secret", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
