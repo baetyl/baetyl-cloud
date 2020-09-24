@@ -88,7 +88,7 @@ func (c *awss3Storage) CreateInternalBucket(_, bucket, permission string) error 
 }
 
 // ListBucketObjects ListBucketObjects
-func (c *awss3Storage) ListBucketObjects(_, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error) {
+func (c *awss3Storage) ListInternalBucketObjects(_, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error) {
 	err := c.checkInternalSupported()
 	if err != nil {
 		return nil, err
@@ -127,7 +127,7 @@ func (c *awss3Storage) PutInternalObjectFromURL(_, bucket, name, url string) err
 
 	upParams := &s3manager.UploadInput{
 		Bucket: aws.String(bucket),
-		Key:    aws.String(bucket),
+		Key:    aws.String(name),
 		Body:   resp.Body,
 	}
 	_, err = c.uploader.Upload(upParams)

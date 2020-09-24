@@ -2,6 +2,7 @@ package awss3
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -15,46 +16,75 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	p, err := NewMinio()
+	p, err := New()
 	assert.Error(t, err)
 	assert.Nil(t, p)
 	assert.EqualError(t, err, "open etc/baetyl/cloud.yml: no such file or directory")
 }
 
-func TestNewLocal(t *testing.T) {
-	t.Skip(t.Name())
+func TestNotConfigureInternal(t *testing.T) {
 	conf := `
 minio:
-  endpoint: xx
-  ak: xx
-  sk: xx
+  endpoint: http://106.12.34.129:30900/
+  ak: D4RZ3M9nl4
+  sk: bPJRvxHP1Kcx9edrcUvaz3TDt5kcNwHWxA1Xm22m
 `
 	filename := "cloud.yml"
 	err := ioutil.WriteFile(filename, []byte(conf), 0644)
 	defer os.Remove(filename)
 	common.SetConfFile(filename)
 
-	p, err := NewMinio()
+	p, err := New()
 	assert.NoError(t, err)
 	assert.NotNil(t, p)
 
 	namespace := "default"
 	aws3 := p.(plugin.Object)
 
-	err = aws3.PutObjectFromURL(namespace, "baetyl-test", "csd", "http://sdfdsfsdfdsf.bj-bos-sandbox.baidu-int.com/api.json")
+	bucket := common.RandString(6)
+	err = aws3.CreateInternalBucket(namespace, bucket, common.AWSS3PrivatePermission)
+	assert.Error(t, err)
+	assert.Equal(t, err.Error(), "plugin awss3 doesn't support internal operating causing it's not configured")
+}
+
+func TestAwss3(t *testing.T) {
+	t.Skip(t.Name())
+
+	fmt.Println("------------------> Internal <----------------------")
+	conf := `
+awss3:
+ endpoint: http://106.12.34.129:30900/
+ ak: D4RZ3M9nl4
+ sk: bPJRvxHP1Kcx9edrcUvaz3TDt5kcNwHWxA1Xm22m
+`
+	filename := "cloud.yml"
+	err := ioutil.WriteFile(filename, []byte(conf), 0644)
+	defer os.Remove(filename)
+	common.SetConfFile(filename)
+
+	p, err := New()
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+
+	namespace := "default"
+	aws3 := p.(plugin.Object)
+
+	bucket := common.RandString(6)
+	err = aws3.CreateInternalBucket(namespace, bucket, common.AWSS3PrivatePermission)
 	assert.NoError(t, err)
 
-	buckets, err := aws3.ListBuckets(namespace)
+	err = aws3.HeadInternalBucket(namespace, bucket)
+	assert.NoError(t, err)
+
+	buckets, err := aws3.ListInternalBuckets(namespace)
 	assert.NoError(t, err)
 	assert.NotNil(t, buckets)
+	// Length is not predicted of a unknown repo
 
-	err = aws3.CreateBucket(namespace, "test-xxx-"+namespace, common.AWSS3PrivatePermission)
+	err = aws3.PutInternalObject(namespace, bucket, "a", []byte("test"))
 	assert.NoError(t, err)
 
-	err = aws3.PutObject(namespace, "baetyl-test-test", "a", []byte("test"))
-	assert.NoError(t, err)
-
-	object, err := aws3.GetObject(namespace, "baetyl-test-test", "a")
+	object, err := aws3.GetInternalObject(namespace, bucket, "a")
 	assert.NoError(t, err)
 	assert.NotNil(t, object)
 	buf := new(bytes.Buffer)
@@ -62,79 +92,114 @@ minio:
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("test"), buf.Bytes())
 
-	objectMeta, err := aws3.HeadObject(namespace, "baetyl-test-test", "a")
+	objectMeta, err := aws3.HeadInternalObject(namespace, bucket, "a")
 	assert.Equal(t, int64(4), objectMeta.ContentLength)
 	assert.Equal(t, "098f6bcd4621d373cade4e832627b4f6", objectMeta.ETag)
 
-	url, err := aws3.GenObjectURL(namespace, "baetyl-test-test", "a")
+	err = aws3.PutInternalObject(namespace, bucket, "b", []byte("test2"))
+	assert.NoError(t, err)
+
+	object, err = aws3.GetInternalObject(namespace, bucket, "b")
+	assert.NoError(t, err)
+	assert.NotNil(t, object)
+	buf = new(bytes.Buffer)
+	_, err = io.Copy(buf, object.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, []byte("test2"), buf.Bytes())
+
+	url, err := aws3.GenInternalObjectURL(namespace, bucket, "b")
 	assert.NoError(t, err)
 	assert.NotNil(t, url)
-	assert.Equal(t, url.Token, "")
 
-	err = aws3.PutObjectFromURL(namespace, "baetyl-test-test", "b", url.URL)
+	err = aws3.PutInternalObjectFromURL(namespace, bucket, "c", url.URL)
 	assert.NoError(t, err)
 
-	err = aws3.PutObject(namespace, "baetyl-test-test", "c", []byte("ccc"))
+	object, err = aws3.GetInternalObject(namespace, bucket, "c")
 	assert.NoError(t, err)
-
-	err = aws3.PutObject(namespace, "baetyl-test-test", "d/d", []byte("ddd"))
+	assert.NotNil(t, object)
+	buf = new(bytes.Buffer)
+	_, err = io.Copy(buf, object.Body)
 	assert.NoError(t, err)
+	assert.Equal(t, []byte("test2"), buf.Bytes())
 
-	objects, err := aws3.ListBucketObjects(namespace, "baetyl-test-test", &models.ObjectParams{})
+	objects, err := aws3.ListInternalBucketObjects(namespace, bucket, &models.ObjectParams{})
 	assert.NoError(t, err)
 	assert.NotNil(t, objects)
-	assert.Len(t, objects.Contents, 4)
+	assert.Len(t, objects.Contents, 3)
 
-	objects, err = aws3.ListBucketObjects(namespace, "baetyl-test-test", &models.ObjectParams{
+	objects, err = aws3.ListInternalBucketObjects(namespace, bucket, &models.ObjectParams{
 		Prefix: "c",
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, objects)
 	assert.Len(t, objects.Contents, 1)
 
-	objects, err = aws3.ListBucketObjects(namespace, "baetyl-test-test", &models.ObjectParams{
+	objects, err = aws3.ListInternalBucketObjects(namespace, bucket, &models.ObjectParams{
 		MaxKeys: 2,
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, objects)
 	assert.Len(t, objects.Contents, 2)
 
-	objects, err = aws3.ListBucketObjects(namespace, "baetyl-test-test", &models.ObjectParams{
+	objects, err = aws3.ListInternalBucketObjects(namespace, bucket, &models.ObjectParams{
 		Delimiter: "/",
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, objects)
 	assert.Len(t, objects.Contents, 3)
-	assert.Len(t, objects.CommonPrefixes, 1)
 
-	objects, err = aws3.ListBucketObjects(namespace, "baetyl-test-test", &models.ObjectParams{
-		Marker: "b",
-	})
+	fmt.Println("------------------> External <----------------------")
+
+	externalInfo := models.ExternalObjectInfo{
+		Endpoint: "http://106.12.34.129:30900/",
+		Ak:       "D4RZ3M9nl4",
+		Sk:       "bPJRvxHP1Kcx9edrcUvaz3TDt5kcNwHWxA1Xm22m",
+	}
+
+	buckets, err = aws3.ListExternalBuckets(externalInfo)
+	assert.NoError(t, err)
+	assert.NotNil(t, buckets)
+
+	err = aws3.HeadExternalBucket(externalInfo, bucket)
+	assert.NoError(t, err)
+
+	objects, err = aws3.ListExternalBucketObjects(externalInfo, bucket, &models.ObjectParams{})
 	assert.NoError(t, err)
 	assert.NotNil(t, objects)
-	assert.Len(t, objects.Contents, 2)
+	assert.Len(t, objects.Contents, 3)
 
-	objects, err = aws3.ListBucketObjects(namespace, "baetyl-test-test", &models.ObjectParams{
-		Marker: "c",
-	})
+	url, err = aws3.GenExternalObjectURL(externalInfo, bucket, "b")
 	assert.NoError(t, err)
-	assert.NotNil(t, objects)
-	assert.Len(t, objects.Contents, 1)
+	assert.NotNil(t, url)
 
-	err = aws3.DeleteObject(namespace, "baetyl-test-test", "a")
+	err = aws3.PutInternalObjectFromURL(namespace, bucket, "d", url.URL)
 	assert.NoError(t, err)
 
-	err = aws3.DeleteObject(namespace, "baetyl-test-test", "b")
+	object, err = aws3.GetInternalObject(namespace, bucket, "d")
+	assert.NoError(t, err)
+	assert.NotNil(t, object)
+	buf = new(bytes.Buffer)
+	_, err = io.Copy(buf, object.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, []byte("test2"), buf.Bytes())
+
+	fmt.Println("------------------> Delete <----------------------")
+
+	err = aws3.DeleteInternalObject(namespace, bucket, "a")
 	assert.NoError(t, err)
 
-	err = aws3.DeleteObject(namespace, "baetyl-test-test", "c")
+	err = aws3.DeleteInternalObject(namespace, bucket, "b")
 	assert.NoError(t, err)
 
-	err = aws3.DeleteObject(namespace, "baetyl-test-test", "d/d")
+	err = aws3.DeleteInternalObject(namespace, bucket, "c")
 	assert.NoError(t, err)
 
-	objects, err = aws3.ListBucketObjects(namespace, "baetyl-test-test", &models.ObjectParams{})
+	err = aws3.DeleteInternalObject(namespace, bucket, "d")
+	assert.NoError(t, err)
+
+	objects, err = aws3.ListInternalBucketObjects(namespace, bucket, &models.ObjectParams{})
 	assert.NoError(t, err)
 	assert.NotNil(t, objects)
 	assert.Len(t, objects.Contents, 0)
+
 }

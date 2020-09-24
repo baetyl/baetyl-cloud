@@ -12,8 +12,7 @@ import (
 //go:generate mockgen -destination=../mock/service/object.go -package=service github.com/baetyl/baetyl-cloud/v2/service ObjectService
 
 type ObjectService interface {
-	ListSources() []models.ObjectStorageSource
-	ListSourcesV2() map[string]models.ObjectStorageSourceV2
+	ListSourcesV2() map[string]models.ObjectStorageSource
 
 	ListInternalBuckets(userID, source string) ([]models.Bucket, error)
 	ListInternalBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error)
@@ -24,6 +23,9 @@ type ObjectService interface {
 	ListExternalBuckets(info models.ExternalObjectInfo, source string) ([]models.Bucket, error)
 	ListExternalBucketObjects(info models.ExternalObjectInfo, bucket, source string) (*models.ListObjectsResult, error)
 	GenExternalObjectURL(info models.ExternalObjectInfo, bucket, object, source string) (*models.ObjectURL, error)
+
+	// Deprecated
+	ListSources() []models.ObjectStorageSourceV1
 }
 
 type objectService struct {
@@ -46,10 +48,10 @@ func NewObjectService(config *config.CloudConfig) (ObjectService, error) {
 }
 
 //ListSource ListSource
-func (c *objectService) ListSources() []models.ObjectStorageSource {
-	sources := []models.ObjectStorageSource{}
+func (c *objectService) ListSources() []models.ObjectStorageSourceV1 {
+	sources := []models.ObjectStorageSourceV1{}
 	for name := range c.objects {
-		source := models.ObjectStorageSource{
+		source := models.ObjectStorageSourceV1{
 			Name: name,
 		}
 		sources = append(sources, source)
@@ -58,10 +60,10 @@ func (c *objectService) ListSources() []models.ObjectStorageSource {
 }
 
 //ListSource ListSource
-func (c *objectService) ListSourcesV2() map[string]models.ObjectStorageSourceV2 {
-	sources := map[string]models.ObjectStorageSourceV2{}
+func (c *objectService) ListSourcesV2() map[string]models.ObjectStorageSource {
+	sources := map[string]models.ObjectStorageSource{}
 	for name, object := range c.objects {
-		sources[name] = models.ObjectStorageSourceV2{
+		sources[name] = models.ObjectStorageSource{
 			InternalEnabled: object.IsInternalEnabled(),
 		}
 	}
@@ -120,7 +122,7 @@ func (c *objectService) PutInternalObjectFromURLIfNotExist(userID, bucket, name,
 }
 
 // GenInternalObjectURL GenInternalObjectURL
-func (c *objectService) GenObjectURL(userID string, bucket, object, source string) (*models.ObjectURL, error) {
+func (c *objectService) GenInternalObjectURL(userID string, bucket, object, source string) (*models.ObjectURL, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))

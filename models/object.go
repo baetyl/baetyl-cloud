@@ -10,11 +10,7 @@ type BucketsView struct {
 }
 
 type ObjectStorageSourceView struct {
-	Sources []ObjectStorageSource `json:"sources"`
-}
-
-type ObjectStorageSourceViewV2 struct {
-	Sources map[string]ObjectStorageSourceV2 `json:"sources"`
+	Sources map[string]ObjectStorageSource `json:"sources"`
 }
 
 type Bucket struct {
@@ -23,10 +19,6 @@ type Bucket struct {
 }
 
 type ObjectStorageSource struct {
-	Name string `json:"name,omitempty"`
-}
-
-type ObjectStorageSourceV2 struct {
 	InternalEnabled bool `json:"internalEnabled,omitempty"`
 }
 
@@ -96,12 +88,12 @@ type ObjectURL struct {
 type ObjectRequestParams struct {
 	Source             string             `json:"source,omitempty"`
 	Bucket             string             `json:"bucket,omitempty"`
-	Internal           bool               `json:"internal,omitempty"`
-	ExternalObjectInfo ExternalObjectInfo `json:",inline"`
+	Internal           bool               `form:"internal,omitempty"`
+	ExternalObjectInfo ExternalObjectInfo `form:",inline"`
 }
 
 type ExternalObjectInfo struct {
-	Endpoint string `json:"endpoint,omitempty"`
-	Ak       string `json:"ak,omitempty"`
-	Sk       string `json:"sk,omitempty"`
+	Endpoint string `form:"endpoint,omitempty"`
+	Ak       string `form:"ak,omitempty"`
+	Sk       string `form:"sk,omitempty"`
 }
