@@ -389,8 +389,6 @@ data:
     provisioner: kubernetes.io/no-provisioner
     volumeBindingMode: WaitForFirstConsumer
 
-    {{- if .NodeCertPem}}
-
     ---
     apiVersion: v1
     kind: Secret
@@ -402,7 +400,6 @@ data:
       client.pem: '{{.NodeCertPem}}'
       client.key: '{{.NodeCertKey}}'
       ca.pem: '{{.NodeCertCa}}'
-    {{- end}}
 
     ---
     # baetyl-init configmap
@@ -467,10 +464,8 @@ data:
                   mountPath: /var/lib/baetyl/object
                 - name: host-root-path
                   mountPath: /var/lib/baetyl/host
-                {{- if .NodeCertPem}}
                 - name: node-cert
-                  mountPath: var/lib/baetyl/node
-                {{- end}}
+                  mountPath: /var/lib/baetyl/node
           volumes:
             - name: init-conf
               configMap:
@@ -484,11 +479,9 @@ data:
             - name: host-root-path
               hostPath:
                 path: /var/lib/baetyl/host
-            {{- if .NodeCertPem}}
             - name: node-cert
               secret:
                 secretName: {{.NodeCertName}}
-            {{- end}}
 kind: ConfigMap
 metadata:
   name: baetyl-cloud-templates
