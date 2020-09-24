@@ -139,10 +139,10 @@ func (mr *MockObjectServiceMockRecorder) ListInternalBuckets(arg0, arg1 interfac
 }
 
 // ListSources mocks base method
-func (m *MockObjectService) ListSources() []models.ObjectStorageSourceV1 {
+func (m *MockObjectService) ListSources() []models.ObjectStorageSource {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListSources")
-	ret0, _ := ret[0].([]models.ObjectStorageSourceV1)
+	ret0, _ := ret[0].([]models.ObjectStorageSource)
 	return ret0
 }
 
@@ -153,10 +153,10 @@ func (mr *MockObjectServiceMockRecorder) ListSources() *gomock.Call {
 }
 
 // ListSourcesV2 mocks base method
-func (m *MockObjectService) ListSourcesV2() map[string]models.ObjectStorageSource {
+func (m *MockObjectService) ListSourcesV2() map[string]models.ObjectStorageSourceV2 {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListSourcesV2")
-	ret0, _ := ret[0].(map[string]models.ObjectStorageSource)
+	ret0, _ := ret[0].(map[string]models.ObjectStorageSourceV2)
 	return ret0
 }
 

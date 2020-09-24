@@ -8,7 +8,7 @@ import (
 // ListObjectSources ListObjectSources
 func (api *API) ListObjectSources(c *common.Context) (interface{}, error) {
 	res := api.Obj.ListSources()
-	return &models.ObjectStorageSourceViewV1{Sources: res}, nil
+	return &models.ObjectStorageSourceView{Sources: res}, nil
 }
 
 // ListBuckets ListBuckets
@@ -39,7 +39,7 @@ func (api *API) ListBucketObjects(c *common.Context) (interface{}, error) {
 // ListObjectSourcesV2 ListObjectSourcesV2
 func (api *API) ListObjectSourcesV2(c *common.Context) (interface{}, error) {
 	res := api.Obj.ListSourcesV2()
-	return &models.ObjectStorageSourceView{Sources: res}, nil
+	return &models.ObjectStorageSourceViewV2{Sources: res}, nil
 }
 
 // ListBucketsV2 ListBucketsV2

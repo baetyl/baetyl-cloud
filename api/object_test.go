@@ -60,7 +60,7 @@ func TestListObjectSources(t *testing.T) {
 	mkObjectService := ms.NewMockObjectService(mockCtl)
 	api.Obj = mkObjectService
 
-	sources := []models.ObjectStorageSourceV1{
+	sources := []models.ObjectStorageSource{
 		{
 			Name: "test1",
 		},
@@ -75,7 +75,7 @@ func TestListObjectSources(t *testing.T) {
 	router.ServeHTTP(w0, req0)
 	assert.Equal(t, http.StatusOK, w0.Code)
 	bytes := w0.Body.Bytes()
-	var resSource models.ObjectStorageSourceViewV1
+	var resSource models.ObjectStorageSourceView
 	err := json.Unmarshal(bytes, &resSource)
 	assert.NoError(t, err)
 	assert.Len(t, resSource.Sources, 2)
@@ -183,7 +183,7 @@ func TestListObjectSourcesV2(t *testing.T) {
 	mkObjectService := ms.NewMockObjectService(mockCtl)
 	api.Obj = mkObjectService
 
-	sources := map[string]models.ObjectStorageSource{
+	sources := map[string]models.ObjectStorageSourceV2{
 		"baidubos": {
 			InternalEnabled: true,
 		},
@@ -198,7 +198,7 @@ func TestListObjectSourcesV2(t *testing.T) {
 	router.ServeHTTP(w0, req0)
 	assert.Equal(t, http.StatusOK, w0.Code)
 	bytes := w0.Body.Bytes()
-	var resSource models.ObjectStorageSourceView
+	var resSource models.ObjectStorageSourceViewV2
 	err := json.Unmarshal(bytes, &resSource)
 	assert.NoError(t, err)
 	assert.Len(t, resSource.Sources, 2)
