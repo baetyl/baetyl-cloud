@@ -23,11 +23,12 @@ func TestNew(t *testing.T) {
 }
 
 func TestNotConfigureInternal(t *testing.T) {
+	t.Skip(t.Name())
 	conf := `
 minio:
   endpoint: http://106.12.34.129:30900/
-  ak: D4RZ3M9nl4
-  sk: bPJRvxHP1Kcx9edrcUvaz3TDt5kcNwHWxA1Xm22m
+  ak: xx
+  sk: xx
 `
 	filename := "cloud.yml"
 	err := ioutil.WriteFile(filename, []byte(conf), 0644)
@@ -54,8 +55,8 @@ func TestAwss3(t *testing.T) {
 	conf := `
 awss3:
  endpoint: http://106.12.34.129:30900/
- ak: D4RZ3M9nl4
- sk: bPJRvxHP1Kcx9edrcUvaz3TDt5kcNwHWxA1Xm22m
+ ak: xx
+ sk: xx
 `
 	filename := "cloud.yml"
 	err := ioutil.WriteFile(filename, []byte(conf), 0644)
@@ -152,8 +153,8 @@ awss3:
 
 	externalInfo := models.ExternalObjectInfo{
 		Endpoint: "http://106.12.34.129:30900/",
-		Ak:       "D4RZ3M9nl4",
-		Sk:       "bPJRvxHP1Kcx9edrcUvaz3TDt5kcNwHWxA1Xm22m",
+		Ak:       "xx",
+		Sk:       "xx",
 	}
 
 	buckets, err = aws3.ListExternalBuckets(externalInfo)

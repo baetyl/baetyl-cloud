@@ -33,22 +33,12 @@ func TestObjectService_ListSourcesWithEmptySource(t *testing.T) {
 func TestObjectService_ListSources(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
-	cs, err := NewObjectService(mockObject.conf)
-	assert.NoError(t, err)
-	res := cs.ListSources()
-	assert.NotNil(t, res)
-	assert.Equal(t, len(res), 1)
-}
-
-func TestObjectService_ListSourcesV2(t *testing.T) {
-	mockObject := InitMockEnvironment(t)
-	defer mockObject.Close()
 
 	mockObject.objectStorage.EXPECT().IsInternalEnabled().Return(true).Times(1)
 
 	cs, err := NewObjectService(mockObject.conf)
 	assert.NoError(t, err)
-	res := cs.ListSourcesV2()
+	res := cs.ListSources()
 	assert.NotNil(t, res)
 	assert.Equal(t, len(res), 1)
 }

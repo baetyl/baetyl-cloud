@@ -87,7 +87,7 @@ func (c *awss3Storage) CreateInternalBucket(_, bucket, permission string) error 
 	return createBucket(c.s3Client, bucket, permission)
 }
 
-// ListBucketObjects ListBucketObjects
+// ListInternalBucketObjects ListInternalBucketObjects
 func (c *awss3Storage) ListInternalBucketObjects(_, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error) {
 	err := c.checkInternalSupported()
 	if err != nil {
@@ -200,6 +200,7 @@ func (c *awss3Storage) GenInternalObjectURL(_, bucket, object string) (*models.O
 	return genObjectURL(c.s3Client, bucket, object, c.cfg.Expiration)
 }
 
+// ListExternalBuckets ListExternalBuckets
 func (c *awss3Storage) ListExternalBuckets(info models.ExternalObjectInfo) ([]models.Bucket, error) {
 	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "")
 	if err != nil {
@@ -209,6 +210,7 @@ func (c *awss3Storage) ListExternalBuckets(info models.ExternalObjectInfo) ([]mo
 	return listBuckets(s3.New(sessionProvider))
 }
 
+// HeadExternalBucket HeadExternalBucket
 func (c *awss3Storage) HeadExternalBucket(info models.ExternalObjectInfo, bucket string) error {
 	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "")
 	if err != nil {
@@ -218,6 +220,7 @@ func (c *awss3Storage) HeadExternalBucket(info models.ExternalObjectInfo, bucket
 	return headBucket(s3.New(sessionProvider), bucket)
 }
 
+// ListExternalBucketObjects ListExternalBucketObjects
 func (c *awss3Storage) ListExternalBucketObjects(info models.ExternalObjectInfo, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error) {
 	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "")
 	if err != nil {
@@ -227,6 +230,7 @@ func (c *awss3Storage) ListExternalBucketObjects(info models.ExternalObjectInfo,
 	return listBucketObjects(s3.New(sessionProvider), bucket, params)
 }
 
+// GenExternalObjectURL GenExternalObjectURL
 func (c *awss3Storage) GenExternalObjectURL(info models.ExternalObjectInfo, bucket, object string) (*models.ObjectURL, error) {
 	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "")
 	if err != nil {

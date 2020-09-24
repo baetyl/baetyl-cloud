@@ -139,10 +139,10 @@ func (mr *MockObjectServiceMockRecorder) ListInternalBuckets(arg0, arg1 interfac
 }
 
 // ListSources mocks base method
-func (m *MockObjectService) ListSources() []models.ObjectStorageSource {
+func (m *MockObjectService) ListSources() map[string]models.ObjectStorageSourceV2 {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListSources")
-	ret0, _ := ret[0].([]models.ObjectStorageSource)
+	ret0, _ := ret[0].(map[string]models.ObjectStorageSourceV2)
 	return ret0
 }
 
@@ -150,20 +150,6 @@ func (m *MockObjectService) ListSources() []models.ObjectStorageSource {
 func (mr *MockObjectServiceMockRecorder) ListSources() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSources", reflect.TypeOf((*MockObjectService)(nil).ListSources))
-}
-
-// ListSourcesV2 mocks base method
-func (m *MockObjectService) ListSourcesV2() map[string]models.ObjectStorageSourceV2 {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListSourcesV2")
-	ret0, _ := ret[0].(map[string]models.ObjectStorageSourceV2)
-	return ret0
-}
-
-// ListSourcesV2 indicates an expected call of ListSourcesV2
-func (mr *MockObjectServiceMockRecorder) ListSourcesV2() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSourcesV2", reflect.TypeOf((*MockObjectService)(nil).ListSourcesV2))
 }
 
 // PutInternalObjectFromURLIfNotExist mocks base method

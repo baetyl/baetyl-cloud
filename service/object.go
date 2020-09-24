@@ -12,7 +12,7 @@ import (
 //go:generate mockgen -destination=../mock/service/object.go -package=service github.com/baetyl/baetyl-cloud/v2/service ObjectService
 
 type ObjectService interface {
-	ListSourcesV2() map[string]models.ObjectStorageSourceV2
+	ListSources() map[string]models.ObjectStorageSourceV2
 
 	ListInternalBuckets(userID, source string) ([]models.Bucket, error)
 	ListInternalBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error)
@@ -23,9 +23,6 @@ type ObjectService interface {
 	ListExternalBuckets(info models.ExternalObjectInfo, source string) ([]models.Bucket, error)
 	ListExternalBucketObjects(info models.ExternalObjectInfo, bucket, source string) (*models.ListObjectsResult, error)
 	GenExternalObjectURL(info models.ExternalObjectInfo, bucket, object, source string) (*models.ObjectURL, error)
-
-	// Deprecated
-	ListSources() []models.ObjectStorageSource
 }
 
 type objectService struct {
@@ -48,19 +45,7 @@ func NewObjectService(config *config.CloudConfig) (ObjectService, error) {
 }
 
 //ListSource ListSource
-func (c *objectService) ListSources() []models.ObjectStorageSource {
-	sources := []models.ObjectStorageSource{}
-	for name := range c.objects {
-		source := models.ObjectStorageSource{
-			Name: name,
-		}
-		sources = append(sources, source)
-	}
-	return sources
-}
-
-//ListSource ListSource
-func (c *objectService) ListSourcesV2() map[string]models.ObjectStorageSourceV2 {
+func (c *objectService) ListSources() map[string]models.ObjectStorageSourceV2 {
 	sources := map[string]models.ObjectStorageSourceV2{}
 	for name, object := range c.objects {
 		sources[name] = models.ObjectStorageSourceV2{
