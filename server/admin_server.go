@@ -153,6 +153,7 @@ func (s *AdminServer) InitRoute() {
 		}
 	}
 	{
+		// Deprecated
 		objects := v1.Group("/objects")
 		objects.GET("", common.Wrapper(s.api.ListObjectSources))
 		if len(s.cfg.Plugin.Objects) != 0 {
@@ -200,6 +201,16 @@ func (s *AdminServer) InitRoute() {
 	{
 		quotas := v1.Group("/quotas")
 		quotas.GET("", common.Wrapper(s.api.GetQuota))
+	}
+
+	v2 := s.router.Group("v2")
+	{
+		objects := v2.Group("/objects")
+		objects.GET("", common.Wrapper(s.api.ListObjectSourcesV2))
+		if len(s.cfg.Plugin.Objects) != 0 {
+			objects.GET("/:source/buckets", common.Wrapper(s.api.ListBucketsV2))
+			objects.GET("/:source/buckets/:bucket/objects", common.Wrapper(s.api.ListBucketObjectsV2))
+		}
 	}
 }
 

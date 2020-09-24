@@ -11,15 +11,23 @@ import (
 // Object Object
 //TODO: userID doesn't belong to Object, should in the metedata
 type Object interface {
-	ListBuckets(userID string) ([]models.Bucket, error)
-	HeadBucket(userID, bucket string) error
-	CreateBucket(userID, bucket, permission string) error
-	ListBucketObjects(userID, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error)
-	PutObject(userID, bucket, name string, b []byte) error
-	PutObjectFromURL(userID, bucket, name, url string) error
-	GetObject(userID, bucket, name string) (*models.Object, error)
-	HeadObject(userID, bucket, name string) (*models.ObjectMeta, error)
-	DeleteObject(userID, bucket, name string) error
-	GenObjectURL(userID, bucket, name string) (*models.ObjectURL, error)
+	IsInternalEnabled() bool
+
+	ListInternalBuckets(userID string) ([]models.Bucket, error)
+	HeadInternalBucket(userID, bucket string) error
+	CreateInternalBucket(userID, bucket, permission string) error
+	ListInternalBucketObjects(userID, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error)
+	PutInternalObject(userID, bucket, name string, b []byte) error
+	PutInternalObjectFromURL(userID, bucket, name, url string) error
+	GetInternalObject(userID, bucket, name string) (*models.Object, error)
+	HeadInternalObject(userID, bucket, name string) (*models.ObjectMeta, error)
+	DeleteInternalObject(userID, bucket, name string) error
+	GenInternalObjectURL(userID, bucket, name string) (*models.ObjectURL, error)
+
+	ListExternalBuckets(info models.ExternalObjectInfo) ([]models.Bucket, error)
+	HeadExternalBucket(info models.ExternalObjectInfo, bucket string) error
+	ListExternalBucketObjects(info models.ExternalObjectInfo, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error)
+	GenExternalObjectURL(info models.ExternalObjectInfo, bucket, name string) (*models.ObjectURL, error)
+
 	io.Closer
 }

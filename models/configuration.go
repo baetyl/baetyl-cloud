@@ -41,6 +41,7 @@ type ConfigFunctionItem struct {
 
 type ConfigObjectItem struct {
 	Source   string `json:"source,omitempty"`
+	Internal bool   `json:"internal,omitempty"`
 	Endpoint string `json:"endpoint,omitempty"`
 	Bucket   string `json:"bucket,omitempty"`
 	Object   string `json:"object,omitempty"`

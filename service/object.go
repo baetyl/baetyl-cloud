@@ -2,13 +2,6 @@ package service
 
 import (
 	"fmt"
-	"strings"
-	"time"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
@@ -19,12 +12,17 @@ import (
 //go:generate mockgen -destination=../mock/service/object.go -package=service github.com/baetyl/baetyl-cloud/v2/service ObjectService
 
 type ObjectService interface {
-	ListSources() []models.ObjectStorageSource
-	ListBuckets(userID, source string) ([]models.Bucket, error)
-	ListBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error)
-	CreateBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error)
-	PutObjectFromURLIfNotExist(userID, bucket, name, url, source string) error
-	GenObjectURL(userID string, param models.ConfigObjectItem) (*models.ObjectURL, error)
+	ListSources() map[string]models.ObjectStorageSourceV2
+
+	ListInternalBuckets(userID, source string) ([]models.Bucket, error)
+	ListInternalBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error)
+	CreateInternalBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error)
+	PutInternalObjectFromURLIfNotExist(userID, bucket, object, url, source string) error
+	GenInternalObjectURL(userID string, bucket, object, source string) (*models.ObjectURL, error)
+
+	ListExternalBuckets(info models.ExternalObjectInfo, source string) ([]models.Bucket, error)
+	ListExternalBucketObjects(info models.ExternalObjectInfo, bucket, source string) (*models.ListObjectsResult, error)
+	GenExternalObjectURL(info models.ExternalObjectInfo, bucket, object, source string) (*models.ObjectURL, error)
 }
 
 type objectService struct {
@@ -46,34 +44,46 @@ func NewObjectService(config *config.CloudConfig) (ObjectService, error) {
 	}, nil
 }
 
-// ListBuckets ListBuckets
-func (c *objectService) ListBuckets(userID, source string) ([]models.Bucket, error) {
-	objectPlugin, ok := c.objects[source]
-	if !ok {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+//ListSource ListSource
+func (c *objectService) ListSources() map[string]models.ObjectStorageSourceV2 {
+	sources := map[string]models.ObjectStorageSourceV2{}
+	for name, object := range c.objects {
+		sources[name] = models.ObjectStorageSourceV2{
+			InternalEnabled: object.IsInternalEnabled(),
+		}
 	}
-	return objectPlugin.ListBuckets(userID)
+	return sources
 }
 
-//ListBucketObjects ListBucketObjects
-func (c *objectService) ListBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error) {
+// ListInternalBuckets ListInternalBuckets
+func (c *objectService) ListInternalBuckets(userID, source string) ([]models.Bucket, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
-	err := objectPlugin.HeadBucket(userID, bucket)
+	return objectPlugin.ListInternalBuckets(userID)
+}
+
+//ListInternalBucketObjects ListInternalBucketObjects
+func (c *objectService) ListInternalBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error) {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+	err := objectPlugin.HeadInternalBucket(userID, bucket)
 	if err != nil {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "objects"), common.Field("name", bucket))
 	}
-	return objectPlugin.ListBucketObjects(userID, bucket, &models.ObjectParams{})
+	return objectPlugin.ListInternalBucketObjects(userID, bucket, &models.ObjectParams{})
 }
 
-func (c *objectService) CreateBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error) {
+// CreateInternalBucketIfNotExist CreateInternalBucketIfNotExist
+func (c *objectService) CreateInternalBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
-	err := objectPlugin.HeadBucket(userID, bucket)
+	err := objectPlugin.HeadInternalBucket(userID, bucket)
 	if err == nil {
 		return &models.Bucket{
 			Name: bucket,
@@ -81,75 +91,58 @@ func (c *objectService) CreateBucketIfNotExist(userID, bucket, permission, sourc
 	}
 	return &models.Bucket{
 		Name: bucket,
-	}, objectPlugin.CreateBucket(userID, bucket, permission)
+	}, objectPlugin.CreateInternalBucket(userID, bucket, permission)
 }
 
-//ListSource ListSource
-func (c *objectService) ListSources() []models.ObjectStorageSource {
-	sources := []models.ObjectStorageSource{}
-	for name := range c.objects {
-		source := models.ObjectStorageSource{
-			Name: name,
-		}
-		sources = append(sources, source)
-	}
-	return sources
-}
-
-//ListSource ListSource
-func (c *objectService) PutObjectFromURLIfNotExist(userID, bucket, name, url, source string) error {
+// PutInternalObjectFromURLIfNotExist PutInternalObjectFromURLIfNotExist
+func (c *objectService) PutInternalObjectFromURLIfNotExist(userID, bucket, name, url, source string) error {
 	objectPlugin, ok := c.objects[source]
 	if !ok {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
-	if _, err := objectPlugin.HeadObject(userID, bucket, name); err == nil {
+	if _, err := objectPlugin.HeadInternalObject(userID, bucket, name); err == nil {
 		return nil
 	}
-	return objectPlugin.PutObjectFromURL(userID, bucket, name, url)
+	return objectPlugin.PutInternalObjectFromURL(userID, bucket, name, url)
 }
 
-// GetObjectURL GetObjectURL
-func (c *objectService) GenObjectURL(userID string, param models.ConfigObjectItem) (*models.ObjectURL, error) {
-	if param.Endpoint != "" {
-		return c.GenAwss3ObjectURL(param)
+// GenInternalObjectURL GenInternalObjectURL
+func (c *objectService) GenInternalObjectURL(userID string, bucket, object, source string) (*models.ObjectURL, error) {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
 
-	if _, ok := c.objects[param.Source]; !ok {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", param.Source)))
-	}
-	return c.objects[param.Source].GenObjectURL(userID, param.Bucket, param.Object)
+	return objectPlugin.GenInternalObjectURL(userID, bucket, object)
 }
 
-// GetObjectURL GetObjectURL
-func (c *objectService) GenAwss3ObjectURL(param models.ConfigObjectItem) (*models.ObjectURL, error) {
-	if param.Ak == "" && param.Sk == "" {
-		return &models.ObjectURL{
-			URL: fmt.Sprintf("%s/%s/%s", param.Endpoint, param.Bucket, param.Object),
-		}, nil
+// ListExternalBuckets ListExternalBuckets
+func (c *objectService) ListExternalBuckets(info models.ExternalObjectInfo, source string) ([]models.Bucket, error) {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
-	newSession, err := session.NewSession(&aws.Config{
-		Credentials:      credentials.NewStaticCredentials(param.Ak, param.Sk, ""),
-		Endpoint:         aws.String(param.Endpoint),
-		Region:           aws.String("us-east-1"),
-		DisableSSL:       aws.Bool(!strings.HasPrefix(param.Endpoint, "https")),
-		S3ForcePathStyle: aws.Bool(true),
-	})
-	if err != nil {
-		return nil, err
-	}
+	return objectPlugin.ListExternalBuckets(info)
+}
 
-	cli := s3.New(newSession)
-	req, _ := cli.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(param.Bucket),
-		Key:    aws.String(param.Object),
-	})
-	url, err := req.Presign(7 * time.Hour)
-	if err != nil {
-		return nil, err
+// ListExternalBucketObjects ListExternalBucketObjects
+func (c *objectService) ListExternalBucketObjects(info models.ExternalObjectInfo, bucket, source string) (*models.ListObjectsResult, error) {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
+	err := objectPlugin.HeadExternalBucket(info, bucket)
+	if err != nil {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "objects"), common.Field("name", bucket))
+	}
+	return objectPlugin.ListExternalBucketObjects(info, bucket, &models.ObjectParams{})
+}
 
-	// TODO: Awss3 Etag is not all md5, fix this bug in the future
-	return &models.ObjectURL{
-		URL: url,
-	}, err
+// GenExternalObjectURL GenExternalObjectURL
+func (c *objectService) GenExternalObjectURL(info models.ExternalObjectInfo, bucket, object, source string) (*models.ObjectURL, error) {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+	return objectPlugin.GenExternalObjectURL(info, bucket, object)
 }
