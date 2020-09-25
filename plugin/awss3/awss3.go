@@ -259,6 +259,13 @@ func (c *awss3Storage) Close() error {
 	return nil
 }
 
+func (c *awss3Storage) checkInternalSupported() error {
+	if !c.IsInternalEnabled() {
+		return errors.New("plugin awss3 doesn't support internal object caused it's not configured")
+	}
+	return nil
+}
+
 func newS3Session(endpoint, ak, sk, region string) (*session.Session, error) {
 	if region == "" {
 		region = "us-east-1"
@@ -339,11 +346,4 @@ func genObjectURL(cli *s3.S3, bucket, name string, expiration time.Duration) (*m
 	return &models.ObjectURL{
 		URL: url,
 	}, err
-}
-
-func (c *awss3Storage) checkInternalSupported() error {
-	if !c.IsInternalEnabled() {
-		return errors.New("plugin awss3 doesn't support internal object caused it's not configured")
-	}
-	return nil
 }

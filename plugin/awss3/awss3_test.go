@@ -23,7 +23,6 @@ func TestNew(t *testing.T) {
 }
 
 func TestNotConfigureInternal(t *testing.T) {
-	t.Skip(t.Name())
 	conf := `
 minio:
   endpoint: http://106.12.34.129:30900/
@@ -45,7 +44,7 @@ minio:
 	bucket := common.RandString(6)
 	err = aws3.CreateInternalBucket(namespace, bucket, common.AWSS3PrivatePermission)
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "plugin awss3 doesn't support internal operating causing it's not configured")
+	assert.Equal(t, err.Error(), "plugin awss3 doesn't support internal object caused it's not configured")
 }
 
 func TestAwss3(t *testing.T) {
