@@ -84,7 +84,21 @@ func (c *awss3Storage) CreateInternalBucket(_, bucket, permission string) error 
 		return err
 	}
 
-	return createBucket(c.s3Client, bucket, permission)
+	//TODO: minio not implement acl completely: NotImplemented: A header you provided implies functionality that is not implemented
+	input := &s3.CreateBucketInput{
+		ACL:    nil,
+		Bucket: &bucket,
+	}
+	_, err = c.s3Client.CreateBucket(input)
+	if err != nil {
+		return err
+	}
+	aclInput := &s3.PutBucketAclInput{
+		ACL:    &permission,
+		Bucket: &bucket,
+	}
+	_, err = c.s3Client.PutBucketAcl(aclInput)
+	return err
 }
 
 // ListInternalBucketObjects ListInternalBucketObjects
@@ -275,24 +289,6 @@ func headBucket(cli *s3.S3, bucket string) error {
 		Bucket: &bucket,
 	}
 	_, err := cli.HeadBucket(input)
-	return err
-}
-
-func createBucket(cli *s3.S3, bucket, permission string) error {
-	//TODO: minio not implement acl completely: NotImplemented: A header you provided implies functionality that is not implemented
-	input := &s3.CreateBucketInput{
-		ACL:    nil,
-		Bucket: &bucket,
-	}
-	_, err := cli.CreateBucket(input)
-	if err != nil {
-		return err
-	}
-	aclInput := &s3.PutBucketAclInput{
-		ACL:    &permission,
-		Bucket: &bucket,
-	}
-	_, err = cli.PutBucketAcl(aclInput)
 	return err
 }
 
