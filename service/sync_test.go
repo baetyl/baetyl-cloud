@@ -6,13 +6,12 @@ import (
 	"testing"
 	"time"
 
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestReport(t *testing.T) {
@@ -133,8 +132,8 @@ func TestSyncDesire(t *testing.T) {
 		Object: "object1",
 	}
 	as.EXPECT().Get(namespace, reqs[0].Name, reqs[0].Version).Return(app, nil).Times(1)
-	cs.EXPECT().Get(namespace, reqs[1].Name, reqs[1].Version).Return(config, nil).Times(1)
-	os.EXPECT().GenInternalObjectURL(namespace, param.Bucket, param.Object, param.Source).Return(objURL, nil).Times(1)
+	cs.EXPECT().Get(namespace, reqs[1].Name, "").Return(config, nil).Times(1)
+	os.EXPECT().GenObjectURL(namespace, param).Return(objURL, nil).Times(1)
 	res, err := sync.Desire(namespace, reqs, map[string]string{})
 	assert.NoError(t, err)
 

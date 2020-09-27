@@ -47,220 +47,147 @@ func (mr *MockObjectMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockObject)(nil).Close))
 }
 
-// CreateInternalBucket mocks base method
-func (m *MockObject) CreateInternalBucket(arg0, arg1, arg2 string) error {
+// CreateBucket mocks base method
+func (m *MockObject) CreateBucket(arg0, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateInternalBucket", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "CreateBucket", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CreateInternalBucket indicates an expected call of CreateInternalBucket
-func (mr *MockObjectMockRecorder) CreateInternalBucket(arg0, arg1, arg2 interface{}) *gomock.Call {
+// CreateBucket indicates an expected call of CreateBucket
+func (mr *MockObjectMockRecorder) CreateBucket(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateInternalBucket", reflect.TypeOf((*MockObject)(nil).CreateInternalBucket), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBucket", reflect.TypeOf((*MockObject)(nil).CreateBucket), arg0, arg1, arg2)
 }
 
-// DeleteInternalObject mocks base method
-func (m *MockObject) DeleteInternalObject(arg0, arg1, arg2 string) error {
+// DeleteObject mocks base method
+func (m *MockObject) DeleteObject(arg0, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteInternalObject", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "DeleteObject", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteInternalObject indicates an expected call of DeleteInternalObject
-func (mr *MockObjectMockRecorder) DeleteInternalObject(arg0, arg1, arg2 interface{}) *gomock.Call {
+// DeleteObject indicates an expected call of DeleteObject
+func (mr *MockObjectMockRecorder) DeleteObject(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInternalObject", reflect.TypeOf((*MockObject)(nil).DeleteInternalObject), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteObject", reflect.TypeOf((*MockObject)(nil).DeleteObject), arg0, arg1, arg2)
 }
 
-// GenExternalObjectURL mocks base method
-func (m *MockObject) GenExternalObjectURL(arg0 models.ExternalObjectInfo, arg1, arg2 string) (*models.ObjectURL, error) {
+// GenObjectURL mocks base method
+func (m *MockObject) GenObjectURL(arg0, arg1, arg2 string) (*models.ObjectURL, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenExternalObjectURL", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GenObjectURL", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*models.ObjectURL)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GenExternalObjectURL indicates an expected call of GenExternalObjectURL
-func (mr *MockObjectMockRecorder) GenExternalObjectURL(arg0, arg1, arg2 interface{}) *gomock.Call {
+// GenObjectURL indicates an expected call of GenObjectURL
+func (mr *MockObjectMockRecorder) GenObjectURL(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenExternalObjectURL", reflect.TypeOf((*MockObject)(nil).GenExternalObjectURL), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenObjectURL", reflect.TypeOf((*MockObject)(nil).GenObjectURL), arg0, arg1, arg2)
 }
 
-// GenInternalObjectURL mocks base method
-func (m *MockObject) GenInternalObjectURL(arg0, arg1, arg2 string) (*models.ObjectURL, error) {
+// GetObject mocks base method
+func (m *MockObject) GetObject(arg0, arg1, arg2 string) (*models.Object, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenInternalObjectURL", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*models.ObjectURL)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GenInternalObjectURL indicates an expected call of GenInternalObjectURL
-func (mr *MockObjectMockRecorder) GenInternalObjectURL(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenInternalObjectURL", reflect.TypeOf((*MockObject)(nil).GenInternalObjectURL), arg0, arg1, arg2)
-}
-
-// GetInternalObject mocks base method
-func (m *MockObject) GetInternalObject(arg0, arg1, arg2 string) (*models.Object, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetInternalObject", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetObject", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*models.Object)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetInternalObject indicates an expected call of GetInternalObject
-func (mr *MockObjectMockRecorder) GetInternalObject(arg0, arg1, arg2 interface{}) *gomock.Call {
+// GetObject indicates an expected call of GetObject
+func (mr *MockObjectMockRecorder) GetObject(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInternalObject", reflect.TypeOf((*MockObject)(nil).GetInternalObject), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetObject", reflect.TypeOf((*MockObject)(nil).GetObject), arg0, arg1, arg2)
 }
 
-// HeadExternalBucket mocks base method
-func (m *MockObject) HeadExternalBucket(arg0 models.ExternalObjectInfo, arg1 string) error {
+// HeadBucket mocks base method
+func (m *MockObject) HeadBucket(arg0, arg1 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HeadExternalBucket", arg0, arg1)
+	ret := m.ctrl.Call(m, "HeadBucket", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// HeadExternalBucket indicates an expected call of HeadExternalBucket
-func (mr *MockObjectMockRecorder) HeadExternalBucket(arg0, arg1 interface{}) *gomock.Call {
+// HeadBucket indicates an expected call of HeadBucket
+func (mr *MockObjectMockRecorder) HeadBucket(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeadExternalBucket", reflect.TypeOf((*MockObject)(nil).HeadExternalBucket), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeadBucket", reflect.TypeOf((*MockObject)(nil).HeadBucket), arg0, arg1)
 }
 
-// HeadInternalBucket mocks base method
-func (m *MockObject) HeadInternalBucket(arg0, arg1 string) error {
+// HeadObject mocks base method
+func (m *MockObject) HeadObject(arg0, arg1, arg2 string) (*models.ObjectMeta, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HeadInternalBucket", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// HeadInternalBucket indicates an expected call of HeadInternalBucket
-func (mr *MockObjectMockRecorder) HeadInternalBucket(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeadInternalBucket", reflect.TypeOf((*MockObject)(nil).HeadInternalBucket), arg0, arg1)
-}
-
-// HeadInternalObject mocks base method
-func (m *MockObject) HeadInternalObject(arg0, arg1, arg2 string) (*models.ObjectMeta, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HeadInternalObject", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "HeadObject", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*models.ObjectMeta)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// HeadInternalObject indicates an expected call of HeadInternalObject
-func (mr *MockObjectMockRecorder) HeadInternalObject(arg0, arg1, arg2 interface{}) *gomock.Call {
+// HeadObject indicates an expected call of HeadObject
+func (mr *MockObjectMockRecorder) HeadObject(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeadInternalObject", reflect.TypeOf((*MockObject)(nil).HeadInternalObject), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeadObject", reflect.TypeOf((*MockObject)(nil).HeadObject), arg0, arg1, arg2)
 }
 
-// IsInternalEnabled mocks base method
-func (m *MockObject) IsInternalEnabled() bool {
+// ListBucketObjects mocks base method
+func (m *MockObject) ListBucketObjects(arg0, arg1 string, arg2 *models.ObjectParams) (*models.ListObjectsResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsInternalEnabled")
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsInternalEnabled indicates an expected call of IsInternalEnabled
-func (mr *MockObjectMockRecorder) IsInternalEnabled() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsInternalEnabled", reflect.TypeOf((*MockObject)(nil).IsInternalEnabled))
-}
-
-// ListExternalBucketObjects mocks base method
-func (m *MockObject) ListExternalBucketObjects(arg0 models.ExternalObjectInfo, arg1 string, arg2 *models.ObjectParams) (*models.ListObjectsResult, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListExternalBucketObjects", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "ListBucketObjects", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*models.ListObjectsResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListExternalBucketObjects indicates an expected call of ListExternalBucketObjects
-func (mr *MockObjectMockRecorder) ListExternalBucketObjects(arg0, arg1, arg2 interface{}) *gomock.Call {
+// ListBucketObjects indicates an expected call of ListBucketObjects
+func (mr *MockObjectMockRecorder) ListBucketObjects(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListExternalBucketObjects", reflect.TypeOf((*MockObject)(nil).ListExternalBucketObjects), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBucketObjects", reflect.TypeOf((*MockObject)(nil).ListBucketObjects), arg0, arg1, arg2)
 }
 
-// ListExternalBuckets mocks base method
-func (m *MockObject) ListExternalBuckets(arg0 models.ExternalObjectInfo) ([]models.Bucket, error) {
+// ListBuckets mocks base method
+func (m *MockObject) ListBuckets(arg0 string) ([]models.Bucket, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListExternalBuckets", arg0)
+	ret := m.ctrl.Call(m, "ListBuckets", arg0)
 	ret0, _ := ret[0].([]models.Bucket)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListExternalBuckets indicates an expected call of ListExternalBuckets
-func (mr *MockObjectMockRecorder) ListExternalBuckets(arg0 interface{}) *gomock.Call {
+// ListBuckets indicates an expected call of ListBuckets
+func (mr *MockObjectMockRecorder) ListBuckets(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListExternalBuckets", reflect.TypeOf((*MockObject)(nil).ListExternalBuckets), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBuckets", reflect.TypeOf((*MockObject)(nil).ListBuckets), arg0)
 }
 
-// ListInternalBucketObjects mocks base method
-func (m *MockObject) ListInternalBucketObjects(arg0, arg1 string, arg2 *models.ObjectParams) (*models.ListObjectsResult, error) {
+// PutObject mocks base method
+func (m *MockObject) PutObject(arg0, arg1, arg2 string, arg3 []byte) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListInternalBucketObjects", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*models.ListObjectsResult)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListInternalBucketObjects indicates an expected call of ListInternalBucketObjects
-func (mr *MockObjectMockRecorder) ListInternalBucketObjects(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListInternalBucketObjects", reflect.TypeOf((*MockObject)(nil).ListInternalBucketObjects), arg0, arg1, arg2)
-}
-
-// ListInternalBuckets mocks base method
-func (m *MockObject) ListInternalBuckets(arg0 string) ([]models.Bucket, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListInternalBuckets", arg0)
-	ret0, _ := ret[0].([]models.Bucket)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListInternalBuckets indicates an expected call of ListInternalBuckets
-func (mr *MockObjectMockRecorder) ListInternalBuckets(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListInternalBuckets", reflect.TypeOf((*MockObject)(nil).ListInternalBuckets), arg0)
-}
-
-// PutInternalObject mocks base method
-func (m *MockObject) PutInternalObject(arg0, arg1, arg2 string, arg3 []byte) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PutInternalObject", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "PutObject", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// PutInternalObject indicates an expected call of PutInternalObject
-func (mr *MockObjectMockRecorder) PutInternalObject(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+// PutObject indicates an expected call of PutObject
+func (mr *MockObjectMockRecorder) PutObject(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutInternalObject", reflect.TypeOf((*MockObject)(nil).PutInternalObject), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutObject", reflect.TypeOf((*MockObject)(nil).PutObject), arg0, arg1, arg2, arg3)
 }
 
-// PutInternalObjectFromURL mocks base method
-func (m *MockObject) PutInternalObjectFromURL(arg0, arg1, arg2, arg3 string) error {
+// PutObjectFromURL mocks base method
+func (m *MockObject) PutObjectFromURL(arg0, arg1, arg2, arg3 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PutInternalObjectFromURL", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "PutObjectFromURL", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// PutInternalObjectFromURL indicates an expected call of PutInternalObjectFromURL
-func (mr *MockObjectMockRecorder) PutInternalObjectFromURL(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+// PutObjectFromURL indicates an expected call of PutObjectFromURL
+func (mr *MockObjectMockRecorder) PutObjectFromURL(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutInternalObjectFromURL", reflect.TypeOf((*MockObject)(nil).PutInternalObjectFromURL), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutObjectFromURL", reflect.TypeOf((*MockObject)(nil).PutObjectFromURL), arg0, arg1, arg2, arg3)
 }

@@ -75,12 +75,12 @@ func (api *API) ImportFunction(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	_, err = api.Obj.CreateInternalBucketIfNotExist(id, bucketName, common.AWSS3PrivatePermission, objectSource)
+	_, err = api.Obj.CreateBucketIfNotExist(id, bucketName, common.AWSS3PrivatePermission, objectSource)
 	if err != nil {
 		return nil, err
 	}
 
-	err = api.Obj.PutInternalObjectFromURLIfNotExist(id, bucketName, objectName, functionObj.Code.Location, objectSource)
+	err = api.Obj.PutObjectFromURLIfNotExist(id, bucketName, objectName, functionObj.Code.Location, objectSource)
 	if err != nil {
 		return nil, err
 	}

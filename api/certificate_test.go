@@ -600,7 +600,51 @@ func TestDeleteCertificate(t *testing.T) {
 
 	ns := "default"
 	name := "cert"
+	keyData := `-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEIPcuJ/l+/s8PXvAN5M6VNBZrKD4HDW6n6Y4rQCYinF5doAoGCCqGSM49
+AwEHoUQDQgAEQXCQTGn4+frJYOumFk8gs8BIbgduEuiHonhYdJTFGIPLiOqPQoIv
+DmICod7W0oIzYYXwTF4NfadliSryoXx9IQ==
+-----END EC PRIVATE KEY-----`
+	certData := `-----BEGIN CERTIFICATE-----
+MIICojCCAkigAwIBAgIIFizowlwTTkAwCgYIKoZIzj0EAwIwgaUxCzAJBgNVBAYT
+AkNOMRAwDgYDVQQIEwdCZWlqaW5nMRkwFwYDVQQHExBIYWlkaWFuIERpc3RyaWN0
+MRUwEwYDVQQJEwxCYWlkdSBDYW1wdXMxDzANBgNVBBETBjEwMDA5MzEeMBwGA1UE
+ChMVTGludXggRm91bmRhdGlvbiBFZGdlMQ8wDQYDVQQLEwZCQUVUWUwxEDAOBgNV
+BAMTB3Jvb3QuY2EwHhcNMjAwODIwMDcxODA5WhcNNDAwODE1MDcxODA5WjCBpDEL
+MAkGA1UEBhMCQ04xEDAOBgNVBAgTB0JlaWppbmcxGTAXBgNVBAcTEEhhaWRpYW4g
+RGlzdHJpY3QxFTATBgNVBAkTDEJhaWR1IENhbXB1czEPMA0GA1UEERMGMTAwMDkz
+MR4wHAYDVQQKExVMaW51eCBGb3VuZGF0aW9uIEVkZ2UxDzANBgNVBAsTBkJBRVRZ
+TDEPMA0GA1UEAxMGc2VydmVyMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEQXCQ
+TGn4+frJYOumFk8gs8BIbgduEuiHonhYdJTFGIPLiOqPQoIvDmICod7W0oIzYYXw
+TF4NfadliSryoXx9IaNhMF8wDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsG
+AQUFBwMCBggrBgEFBQcDATAMBgNVHRMBAf8EAjAAMCAGA1UdEQQZMBeCCWxvY2Fs
+aG9zdIcEAAAAAIcEfwAAATAKBggqhkjOPQQDAgNIADBFAiB5vz8+oob7SkN54uf7
+RErbE4tWT5AHtgBgIs3A+TjnyQIhAPvnL8W1dq4qdkVr0eiH5He0xNHdsQc6eWxS
+RcKyjhh1
+-----END CERTIFICATE-----`
+	res := &specV1.Secret{
+		Name:      name,
+		Namespace: ns,
+		Labels: map[string]string{
+			specV1.SecretLabel: specV1.SecretCustomCertificate,
+		},
+		Data: map[string][]byte{
+			"key":                []byte(keyData),
+			"cert":               []byte(certData),
+			"signatureAlgorithm": []byte(`ECDSA-SHA256`),
+			"effectiveTime":      []byte("2020-08-20 07:18:09 +0000 UTC"),
+			"expiredTime":        []byte("2040-08-15 07:18:09 +0000 UTC"),
+			"serialNumber":       []byte("1597907889275752000"),
+			"issuer":             []byte("root.ca"),
+			"fingerPrint":        []byte("8A:80:76:69:91:B0:EB:A6:45:E2:FE:88:03:F0:66:4A:A9:BB:16:96"),
+		},
+		CreationTimestamp: time.Now(),
+		UpdateTimestamp:   time.Now(),
+		Description:       "desp2",
+		Version:           "1234",
+	}
 
+	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(res, nil)
 	mkSecretService.EXPECT().Delete(ns, name).Return(nil)
 	mkIndexService.EXPECT().ListAppIndexBySecret(gomock.Any(), gomock.Any()).Return(nil, nil)
 	// 200

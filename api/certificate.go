@@ -92,6 +92,10 @@ func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
 // DeleteCertificate delete the Certificate
 func (api *API) DeleteCertificate(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
+	_, err := wrapCertificate(api.Secret.Get(ns, n, ""))
+	if err != nil {
+		return nil, err
+	}
 	return api.deleteSecret(ns, n, "certificate")
 }
 

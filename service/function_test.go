@@ -4,10 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultFunctionService_List(t *testing.T) {
@@ -108,38 +106,6 @@ func TestDefaultFunctionService_ListSourcesWithEmptySource(t *testing.T) {
 	res := cs.ListSources()
 	assert.NotNil(t, res)
 	assert.Equal(t, len(res), 0)
-}
-
-func TestDefaultFunctionService_ListRuntimes(t *testing.T) {
-	mockObject := InitMockEnvironment(t)
-	defer mockObject.Close()
-
-	props := []models.Property{
-		{
-			Name:  "baetyl-function-runtime-python3",
-			Value: "python3",
-		},
-		{
-			Name:  "baetyl-function-runtime-nodejs10",
-			Value: "nodejs10",
-		},
-		{
-			Name:  "baetyl-function-runtime-sql",
-			Value: "sql",
-		},
-	}
-
-	mockObject.property.EXPECT().ListProperty(gomock.Any()).Return(props, nil)
-
-	cs, err := NewFunctionService(mockObject.conf)
-	assert.NoError(t, err)
-	res, err := cs.ListRuntimes()
-	assert.NoError(t, err)
-	assert.NotNil(t, res)
-	assert.Equal(t, len(res), 3)
-	assert.Equal(t, "python3", res["python3"])
-	assert.Equal(t, "nodejs10", res["nodejs10"])
-	assert.Equal(t, "sql", res["sql"])
 }
 
 func TestDefaultFunctionService_GetFunction(t *testing.T) {

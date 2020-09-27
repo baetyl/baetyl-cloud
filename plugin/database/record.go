@@ -20,8 +20,8 @@ func (d *dbStorage) GetRecordByFingerprint(batchName, ns, value string) (*models
 	return d.GetRecordByFingerprintTx(nil, batchName, ns, value)
 }
 
-func (d *dbStorage) ListRecord(batchName, ns string, filter *models.Filter) ([]models.Record, error) {
-	return d.ListRecordTx(nil, batchName, ns, filter)
+func (d *dbStorage) ListRecord(batchName, fingerprintValue, ns string, pageNo, pageSize int) ([]models.Record, error) {
+	return d.ListRecordTx(nil, batchName, fingerprintValue, ns, pageNo, pageSize)
 }
 
 func (d *dbStorage) CreateRecord(records []models.Record) (sql.Result, error) {
@@ -101,21 +101,16 @@ FROM baetyl_batch_record WHERE namespace=? and batch_name=? ORDER BY create_time
 	return records, nil
 }
 
-func (d *dbStorage) ListRecordTx(tx *sqlx.Tx, batchName, ns string, filter *models.Filter) ([]models.Record, error) {
+func (d *dbStorage) ListRecordTx(tx *sqlx.Tx, batchName, fingerprintValue, ns string, pageNo, pageSize int) ([]models.Record, error) {
 	selectSQL := `
 SELECT 
 name, batch_name, namespace, fingerprint_value, 
 active, node_name, active_ip, active_time, create_time, 
 update_time 
-FROM baetyl_batch_record WHERE namespace=? AND batch_name=? AND fingerprint_value LIKE ? ORDER BY create_time DESC 
+FROM baetyl_batch_record WHERE namespace=? AND batch_name=? AND fingerprint_value LIKE ? ORDER BY create_time DESC limit ?,?
 `
 	records := []models.Record{}
-	args := []interface{}{ns, batchName, filter.GetFuzzyName()}
-	if filter.GetLimitNumber() > 0 {
-		selectSQL = selectSQL + "LIMIT ?,?"
-		args = append(args, filter.GetLimitOffset(), filter.GetLimitNumber())
-	}
-	if err := d.query(tx, selectSQL, &records, args...); err != nil {
+	if err := d.query(tx, selectSQL, &records, ns, batchName, fingerprintValue, (pageNo-1)*pageSize, pageSize); err != nil {
 		return nil, err
 	}
 	return records, nil

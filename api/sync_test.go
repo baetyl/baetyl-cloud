@@ -38,7 +38,7 @@ func TestSyncAPIImpl_Report(t *testing.T) {
 	msg := specV1.Message{
 		Kind:     specV1.MessageReport,
 		Metadata: map[string]string{"name": "test", "namespace": "default"},
-		Content:  specV1.LazyValue{},
+		Content:  specV1.VariableValue{},
 	}
 	bt, err := json.Marshal(info)
 	assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestSyncAPIImpl_Report(t *testing.T) {
 	expMsg := &specV1.Message{
 		Kind:     msg.Kind,
 		Metadata: msg.Metadata,
-		Content:  specV1.LazyValue{},
+		Content:  specV1.VariableValue{},
 	}
 	mSync.EXPECT().Report("default", "test", gomock.Any()).Return(resp, nil).Times(1)
 	res, err := sync.Report(msg)
@@ -74,7 +74,7 @@ func TestSyncAPIImpl_Desire(t *testing.T) {
 	msg := specV1.Message{
 		Kind:     specV1.MessageDesire,
 		Metadata: map[string]string{"namespace": "default"},
-		Content:  specV1.LazyValue{},
+		Content:  specV1.VariableValue{},
 	}
 	bt, err := json.Marshal(infos)
 	assert.NoError(t, err)
@@ -84,7 +84,7 @@ func TestSyncAPIImpl_Desire(t *testing.T) {
 	expMsg := &specV1.Message{
 		Kind:     msg.Kind,
 		Metadata: msg.Metadata,
-		Content:  specV1.LazyValue{},
+		Content:  specV1.VariableValue{},
 	}
 	mSync.EXPECT().Desire("default", nil, msg.Metadata).Return(resp, nil).Times(1)
 	res, err := sync.Desire(msg)

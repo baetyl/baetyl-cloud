@@ -6,7 +6,6 @@ import (
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
 )
 
@@ -39,19 +38,14 @@ WHERE namespace = ? AND name=? AND version = ? AND is_deleted = 0
 	return nil, nil
 }
 
-func (d *dbStorage) ListApplication(namespace string, filter *models.Filter) ([]specV1.Application, error) {
+func (d *dbStorage) ListApplication(name, namespace string, pageNo, pageSize int) ([]specV1.Application, error) {
 	selectSQL := `
 SELECT  
 id, namespace, name, version, is_deleted, create_time, update_time, content
-FROM baetyl_application_history WHERE namespace = ? AND name LIKE ? AND is_deleted = 0 
+FROM baetyl_application_history WHERE namespace = ? AND name = ? AND is_deleted = 0 LIMIT ?,?
 `
 	var apps []entities.Application
-	args := []interface{}{namespace, filter.GetFuzzyName()}
-	if filter.GetLimitNumber() > 0 {
-		selectSQL = selectSQL + "LIMIT ?,?"
-		args = append(args, filter.GetLimitOffset(), filter.GetLimitNumber())
-	}
-	if err := d.query(nil, selectSQL, &apps, args...); err != nil {
+	if err := d.query(nil, selectSQL, &apps, namespace, name, (pageNo-1)*pageSize, pageSize); err != nil {
 		return nil, err
 	}
 	var result []specV1.Application

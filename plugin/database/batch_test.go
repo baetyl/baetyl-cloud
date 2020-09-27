@@ -83,13 +83,7 @@ func TestBatch(t *testing.T) {
 	assert.NoError(t, err)
 	checkBatch(t, batch, resBatch)
 
-	filter := &models.Filter{
-		PageNo:   1,
-		PageSize: 10,
-		Name:     "%",
-	}
-
-	resBatchList, err := db.ListBatch(batch.Namespace, filter)
+	resBatchList, err := db.ListBatch(batch.Namespace, "%", 1, 10)
 	assert.NoError(t, err)
 	checkBatch(t, batch, &resBatchList[0])
 

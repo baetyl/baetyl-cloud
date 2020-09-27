@@ -24,7 +24,7 @@ func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 
 			msg := specV1.Message{
 				Kind:     specV1.MessageReport,
-				Content:  specV1.LazyValue{},
+				Content:  specV1.VariableValue{},
 				Metadata: map[string]string{},
 			}
 			err = msg.Content.UnmarshalJSON(body)
@@ -56,7 +56,7 @@ func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 
 			msg := specV1.Message{
 				Kind:     specV1.MessageDesire,
-				Content:  specV1.LazyValue{},
+				Content:  specV1.VariableValue{},
 				Metadata: map[string]string{},
 			}
 			err = msg.Content.UnmarshalJSON(body)

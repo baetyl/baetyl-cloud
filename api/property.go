@@ -27,6 +27,7 @@ func (api *API) ListProperty(c *common.Context) (interface{}, error) {
 	if err := c.Bind(params); err != nil {
 		return nil, err
 	}
+	params.Format()
 	properties, err := api.Prop.ListProperty(params)
 	if err != nil {
 		return nil, err

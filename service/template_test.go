@@ -11,23 +11,22 @@ import (
 )
 
 var params = map[string]interface{}{
-	"Namespace":                  "ns-1",
-	"NodeName":                   "node-name-1",
-	"CoreAppName":                "core-app-1",
-	"CoreConfName":               "core-conf-name-1",
-	"CoreConfVersion":            "core-conf-version-1",
-	"FunctionAppName":            "func-app-name-1",
-	"FunctionConfName":           "func-conf-name-1",
-	"FunctionConfVersion":        "func-conf-version-1",
-	"EdgeNamespace":              context.BaetylEdgeNamespace,
-	"EdgeSystemNamespace":        context.BaetylEdgeSystemNamespace,
-	"KubeNodeName":               "kube-node-1",
-	"NodeCertName":               "node-cert-name-1",
-	"NodeCertVersion":            "node-cert-version-1",
-	"NodeCertPem":                "---node cert pem---",
-	"NodeCertKey":                "---node cert key---",
-	"NodeCertCa":                 "---node cert ca---",
-	context.KeyBaetylHostPathLib: "/var/lib/baetyl",
+	"Namespace":           "ns-1",
+	"NodeName":            "node-name-1",
+	"CoreAppName":         "core-app-1",
+	"CoreConfName":        "core-conf-name-1",
+	"CoreConfVersion":     "core-conf-version-1",
+	"FunctionAppName":     "func-app-name-1",
+	"FunctionConfName":    "func-conf-name-1",
+	"FunctionConfVersion": "func-conf-version-1",
+	"EdgeNamespace":       context.BaetylEdgeNamespace,
+	"EdgeSystemNamespace": context.BaetylEdgeSystemNamespace,
+	"KubeNodeName":        "kube-node-1",
+	"NodeCertName":        "node-cert-name-1",
+	"NodeCertVersion":     "node-cert-version-1",
+	"NodeCertPem":         "---node cert pem---",
+	"NodeCertKey":         "---node cert key---",
+	"NodeCertCa":          "---node cert ca---",
 }
 
 func TestTemplateServiceImpl_UnmarshalTemplate(t *testing.T) {
@@ -563,7 +562,7 @@ spec:
             - name: host-root-path
               mountPath: /var/lib/baetyl/host
             - name: node-cert
-              mountPath: /var/lib/baetyl/node
+              mountPath: var/lib/baetyl/node
       volumes:
         - name: init-conf
           configMap:

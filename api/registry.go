@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -19,7 +18,7 @@ func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	res, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, err
 	}
 	return hidePwd(res), nil
 }
@@ -70,7 +69,7 @@ func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	sd, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, err
 	}
 	// only edit description by design
 	if cfg.Description == sd.Description {
@@ -96,7 +95,7 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	sd, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, err
 	}
 	sd.UpdateTimestamp = time.Now()
 	sd.Password = cfg.Password
@@ -119,7 +118,7 @@ func (api *API) DeleteRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	_, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, err
 	}
 	return api.deleteSecret(ns, n, "registry")
 }
@@ -129,7 +128,7 @@ func (api *API) GetAppByRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	res, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, err
 	}
 	return api.listAppBySecret(ns, res.Name)
 }
@@ -184,15 +183,4 @@ func (api *API) validateRegistryModel(r *models.Registry) error {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "address/username/password is required"))
 	}
 	return nil
-}
-
-func wrapRegistryNotFoundError(name string, err error) error {
-	if err != nil {
-		e, ok := err.(errors.Coder)
-		if (ok && e.Code() == common.ErrResourceNotFound) || (!ok && strings.Contains(err.Error(), "not found")) {
-			return common.Error(common.ErrResourceNotFound, common.Field("type", common.SecretRegistry),
-				common.Field("name", name))
-		}
-	}
-	return err
 }

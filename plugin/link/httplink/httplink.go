@@ -12,12 +12,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/server"
-)
-
-const (
-	HTTPLinkPort = "HTTP_LINK_PORT"
 )
 
 type httpLink struct {
@@ -116,7 +113,7 @@ func (l *httpLink) initRouter() {
 }
 
 func (l *httpLink) setPortFromEnv() {
-	nodePort := os.Getenv(HTTPLinkPort)
+	nodePort := os.Getenv(config.NodeServerPort)
 	if nodePort != "" {
 		l.svr.Addr = ":" + nodePort
 	}

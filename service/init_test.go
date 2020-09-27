@@ -119,20 +119,24 @@ func TestInitService_GenCmd(t *testing.T) {
 
 	sAuth := service.NewMockAuthService(mockCtl)
 	sTemplate := service.NewMockTemplateService(mockCtl)
+	sProp := service.NewMockPropertyService(mockCtl)
 	as := InitServiceImpl{}
 	as.AuthService = sAuth
 	as.TemplateService = sTemplate
+	as.Property = sProp
 	info := map[string]interface{}{
 		InfoName:      "name",
 		InfoNamespace: "ns",
-		InfoExpiry:    time.Now().Unix() + CmdExpirationInSeconds,
+		InfoExpiry:    CmdExpirationInSeconds,
+		InfoTimestamp: time.Now().Unix(),
 	}
 	expect := "curl -skfL 'https://1.2.3.4:9003/v1/active/setup.sh?token=tokenexpect' -osetup.sh && sh setup.sh"
 	params := map[string]interface{}{
 		"InitApplyYaml": "baetyl-init-deployment.yml",
 	}
 	sAuth.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)
-	sTemplate.EXPECT().Execute("setup-command", TemplateKubeInitCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
+	sTemplate.EXPECT().Execute("setup-command", expect, gomock.Any()).Return([]byte(expect), nil).Times(1)
+	sProp.EXPECT().GetPropertyValue(TemplateKubeInitCommand).Return(expect, nil).Times(1)
 
 	res, err := as.GetInitCommand("ns", "name", params)
 	assert.NoError(t, err)

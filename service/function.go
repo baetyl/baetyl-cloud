@@ -78,14 +78,11 @@ func (c *functionService) ListSources() []models.FunctionSource {
 }
 
 func (c *functionService) ListRuntimes() (map[string]string, error) {
-	params := &models.Filter{
-		Name: functionRuntimePrefix,
-	}
-	res, err := c.prop.ListProperty(params)
+	res, err := c.prop.ListProperty(&models.Filter{Name: functionRuntimePrefix})
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	runtimes := make(map[string]string)
+	var runtimes map[string]string
 	for _, item := range res {
 		runtimes[item.Name[len(functionRuntimePrefix):]] = item.Value
 	}

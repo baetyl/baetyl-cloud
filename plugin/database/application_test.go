@@ -6,8 +6,6 @@ import (
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 var (
@@ -120,13 +118,7 @@ func TestDbStorage_GetApplication(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 1, num)
 
-	filter := &models.Filter{
-		PageNo:   1,
-		PageSize: 10,
-		Name:     app.Name,
-	}
-
-	apps, err := db.ListApplication(app.Namespace, filter)
+	apps, err := db.ListApplication(app.Name, app.Namespace, 1, 10)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(apps))
 	assert.Equal(t, app.Name, apps[0].Name)

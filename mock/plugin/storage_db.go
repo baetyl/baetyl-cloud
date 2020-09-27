@@ -756,48 +756,48 @@ func (mr *MockDBStorageMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // ListApplication mocks base method
-func (m *MockDBStorage) ListApplication(arg0 string, arg1 *models.Filter) ([]v1.Application, error) {
+func (m *MockDBStorage) ListApplication(arg0, arg1 string, arg2, arg3 int) ([]v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListApplication", arg0, arg1)
+	ret := m.ctrl.Call(m, "ListApplication", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].([]v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListApplication indicates an expected call of ListApplication
-func (mr *MockDBStorageMockRecorder) ListApplication(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockDBStorageMockRecorder) ListApplication(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListApplication", reflect.TypeOf((*MockDBStorage)(nil).ListApplication), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListApplication", reflect.TypeOf((*MockDBStorage)(nil).ListApplication), arg0, arg1, arg2, arg3)
 }
 
 // ListBatch mocks base method
-func (m *MockDBStorage) ListBatch(arg0 string, arg1 *models.Filter) ([]models.Batch, error) {
+func (m *MockDBStorage) ListBatch(arg0, arg1 string, arg2, arg3 int) ([]models.Batch, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListBatch", arg0, arg1)
+	ret := m.ctrl.Call(m, "ListBatch", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].([]models.Batch)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListBatch indicates an expected call of ListBatch
-func (mr *MockDBStorageMockRecorder) ListBatch(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockDBStorageMockRecorder) ListBatch(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBatch", reflect.TypeOf((*MockDBStorage)(nil).ListBatch), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBatch", reflect.TypeOf((*MockDBStorage)(nil).ListBatch), arg0, arg1, arg2, arg3)
 }
 
 // ListBatchTx mocks base method
-func (m *MockDBStorage) ListBatchTx(arg0 *sqlx.Tx, arg1 string, arg2 *models.Filter) ([]models.Batch, error) {
+func (m *MockDBStorage) ListBatchTx(arg0 *sqlx.Tx, arg1, arg2 string, arg3, arg4 int) ([]models.Batch, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListBatchTx", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "ListBatchTx", arg0, arg1, arg2, arg3, arg4)
 	ret0, _ := ret[0].([]models.Batch)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListBatchTx indicates an expected call of ListBatchTx
-func (mr *MockDBStorageMockRecorder) ListBatchTx(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockDBStorageMockRecorder) ListBatchTx(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBatchTx", reflect.TypeOf((*MockDBStorage)(nil).ListBatchTx), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBatchTx", reflect.TypeOf((*MockDBStorage)(nil).ListBatchTx), arg0, arg1, arg2, arg3, arg4)
 }
 
 // ListIndex mocks base method
@@ -831,33 +831,33 @@ func (mr *MockDBStorageMockRecorder) ListIndexTx(arg0, arg1, arg2, arg3, arg4 in
 }
 
 // ListRecord mocks base method
-func (m *MockDBStorage) ListRecord(arg0, arg1 string, arg2 *models.Filter) ([]models.Record, error) {
+func (m *MockDBStorage) ListRecord(arg0, arg1, arg2 string, arg3, arg4 int) ([]models.Record, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListRecord", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "ListRecord", arg0, arg1, arg2, arg3, arg4)
 	ret0, _ := ret[0].([]models.Record)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListRecord indicates an expected call of ListRecord
-func (mr *MockDBStorageMockRecorder) ListRecord(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockDBStorageMockRecorder) ListRecord(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRecord", reflect.TypeOf((*MockDBStorage)(nil).ListRecord), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRecord", reflect.TypeOf((*MockDBStorage)(nil).ListRecord), arg0, arg1, arg2, arg3, arg4)
 }
 
 // ListRecordTx mocks base method
-func (m *MockDBStorage) ListRecordTx(arg0 *sqlx.Tx, arg1, arg2 string, arg3 *models.Filter) ([]models.Record, error) {
+func (m *MockDBStorage) ListRecordTx(arg0 *sqlx.Tx, arg1, arg2, arg3 string, arg4, arg5 int) ([]models.Record, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListRecordTx", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "ListRecordTx", arg0, arg1, arg2, arg3, arg4, arg5)
 	ret0, _ := ret[0].([]models.Record)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListRecordTx indicates an expected call of ListRecordTx
-func (mr *MockDBStorageMockRecorder) ListRecordTx(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+func (mr *MockDBStorageMockRecorder) ListRecordTx(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRecordTx", reflect.TypeOf((*MockDBStorage)(nil).ListRecordTx), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRecordTx", reflect.TypeOf((*MockDBStorage)(nil).ListRecordTx), arg0, arg1, arg2, arg3, arg4, arg5)
 }
 
 // RefreshIndex mocks base method

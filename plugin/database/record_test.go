@@ -76,13 +76,7 @@ func TestRecord(t *testing.T) {
 	assert.NoError(t, err)
 	checkRecord(t, record, resRecord)
 
-	filter := &models.Filter{
-		PageNo:   1,
-		PageSize: 10,
-		Name:     record.FingerprintValue,
-	}
-
-	resRecordList, err := db.ListRecord(record.BatchName, record.Namespace, filter)
+	resRecordList, err := db.ListRecord(record.BatchName, record.FingerprintValue, record.Namespace, 1, 10)
 	assert.NoError(t, err)
 	checkRecord(t, record, &resRecordList[0])
 

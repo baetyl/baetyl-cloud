@@ -1,12 +1,40 @@
 package config
 
 import (
+	"os"
 	"testing"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestSetPortFromEnv(t *testing.T) {
+	cfg := &CloudConfig{
+		InitServer:  Server{Port: ":1"},
+		AdminServer: Server{Port: ":2"},
+		MisServer:   MisServer{},
+	}
+	cfg.MisServer.Port = ":4"
+	// no env
+	SetPortFromEnv(cfg)
+	assert.Equal(t, ":1", cfg.InitServer.Port)
+	assert.Equal(t, ":2", cfg.AdminServer.Port)
+	assert.Equal(t, ":4", cfg.MisServer.Port)
+
+	// env
+	err := os.Setenv(InitServerPort, "4")
+	assert.NoError(t, err)
+	err = os.Setenv(AdminServerPort, "5")
+	assert.NoError(t, err)
+	err = os.Setenv(MisServerPort, "7")
+	assert.NoError(t, err)
+
+	SetPortFromEnv(cfg)
+	assert.Equal(t, ":4", cfg.InitServer.Port)
+	assert.Equal(t, ":5", cfg.AdminServer.Port)
+	assert.Equal(t, ":7", cfg.MisServer.Port)
+}
 
 func TestDefaultValue(t *testing.T) {
 	expect := &CloudConfig{}
@@ -53,5 +81,25 @@ func TestDefaultValue(t *testing.T) {
 	cfg := &CloudConfig{}
 	err := utils.UnmarshalYAML(nil, cfg)
 	assert.NoError(t, err)
+	assert.EqualValues(t, expect, cfg)
+
+	// case 1
+	cfg = &CloudConfig{}
+	in := `
+adminServer:
+  port: ":9993"
+
+initServer:
+  port: ":9995"
+
+misServer:
+  port: ":9996"
+`
+	expect.AdminServer.Port = ":9993"
+	expect.InitServer.Port = ":9995"
+	expect.MisServer.Port = ":9996"
+	err = utils.UnmarshalYAML([]byte(in), cfg)
+	assert.NoError(t, err)
+
 	assert.EqualValues(t, expect, cfg)
 }

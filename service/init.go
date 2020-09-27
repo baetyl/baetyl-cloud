@@ -20,6 +20,7 @@ import (
 const (
 	InfoName      = "n"
 	InfoNamespace = "ns"
+	InfoTimestamp = "ts"
 	InfoExpiry    = "e"
 )
 
@@ -29,7 +30,8 @@ const (
 	templateFuncConfYaml       = "baetyl-function-conf.yml"
 	templateFuncAppYaml        = "baetyl-function-app.yml"
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
-	TemplateKubeInitCommand    = `sudo mkdir -p -m 666 /var/lib/baetyl/host /var/lib/baetyl/object /var/lib/baetyl/store /var/lib/baetyl/log /var/lib/baetyl/run && curl -skfL '{{GetProperty "init-server-address"}}/v1/init/{{.InitApplyYaml}}?token={{.Token}}' -oinit.yml && kubectl apply -f init.yml`
+	TemplateKubeInitCommand    = "baetyl-kube-init-command"
+	TemplateProcessInitCommand = "baetyl-process-init-command"
 )
 
 var (
@@ -51,6 +53,7 @@ type InitServiceImpl struct {
 	AuthService     AuthService
 	NodeService     NodeService
 	TemplateService TemplateService
+	Property        PropertyService
 	*AppCombinedService
 	PKI             PKIService
 	Hooks           map[string]interface{}
@@ -90,6 +93,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		cfg:                config,
 		AuthService:        authService,
 		NodeService:        nodeService,
+		Property:           propertyService,
 		TemplateService:    templateService,
 		AppCombinedService: acs,
 		PKI:                pki,
@@ -140,7 +144,7 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, error) {
 	certName := ""
 	for _, vol := range app.Volumes {
-		if vol.Name == "node-cert" || vol.Name == "cert-sync" {
+		if vol.Name == "node-cert" || vol.Name == "sync-cert" {
 			certName = vol.Secret.Name
 			break
 		}
@@ -160,14 +164,23 @@ func (s *InitServiceImpl) GetInitCommand(ns, nodeName string, params map[string]
 	info := map[string]interface{}{
 		InfoNamespace: ns,
 		InfoName:      nodeName,
-		InfoExpiry:    time.Now().Unix() + CmdExpirationInSeconds,
+		InfoExpiry:    CmdExpirationInSeconds,
+		InfoTimestamp: time.Now().Unix(),
+	}
+	kindMap := map[string]string{
+		"":        TemplateKubeInitCommand,
+		"process": TemplateProcessInitCommand,
+	}
+	initCommand, err := s.Property.GetPropertyValue(kindMap[params["initType"].(string)])
+	if err != nil {
+		return nil, err
 	}
 	token, err := s.AuthService.GenToken(info)
 	if err != nil {
 		return nil, err
 	}
 	params["Token"] = token
-	data, err := s.TemplateService.Execute("setup-command", TemplateKubeInitCommand, params)
+	data, err := s.TemplateService.Execute("setup-command", initCommand, params)
 	if err != nil {
 		return nil, err
 	}
@@ -202,9 +215,8 @@ func (s *InitServiceImpl) GetCoreAppFromDesire(ns, nodeName string) (*specV1.App
 
 func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, error) {
 	params := map[string]interface{}{
-		"Namespace":                  ns,
-		"NodeName":                   nodeName,
-		context.KeyBaetylHostPathLib: "/var/lib/baetyl",
+		"Namespace": ns,
+		"NodeName":  nodeName,
 	}
 	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
 		err := handler.(HandlerPopulateParams)(ns, params)

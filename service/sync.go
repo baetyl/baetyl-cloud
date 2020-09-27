@@ -127,7 +127,7 @@ func (t *SyncServiceImpl) Desire(namespace string, crdInfos []specV1.ResourceInf
 			}
 			crdData.Value.Value = app
 		case specV1.KindConfiguration, specV1.KindConfig:
-			cfg, err := t.ConfigService.Get(namespace, info.Name, info.Version)
+			cfg, err := t.ConfigService.Get(namespace, info.Name, "")
 			if err != nil {
 				log.L().Error("failed to get config", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
@@ -138,7 +138,7 @@ func (t *SyncServiceImpl) Desire(namespace string, crdInfos []specV1.ResourceInf
 			}
 			crdData.Value.Value = cfg
 		case specV1.KindSecret:
-			secret, err := t.SecretService.Get(namespace, info.Name, info.Version)
+			secret, err := t.SecretService.Get(namespace, info.Name, "")
 			if err != nil {
 				log.L().Error("failed to get secret", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err
@@ -185,16 +185,7 @@ func (t *SyncServiceImpl) PopulateConfigObject(k, v string, cfg *specV1.Configur
 		return err
 	}
 
-	var res *models.ObjectURL
-	if item.Endpoint == "" {
-		res, err = t.ObjectService.GenInternalObjectURL(obj.Metadata["userID"], item.Bucket, item.Object, item.Source)
-	} else {
-		res, err = t.ObjectService.GenExternalObjectURL(models.ExternalObjectInfo{
-			Endpoint: item.Endpoint,
-			Ak:       item.Ak,
-			Sk:       item.Sk,
-		}, item.Bucket, item.Object, item.Source)
-	}
+	res, err := t.ObjectService.GenObjectURL(obj.Metadata["userID"], item)
 	if err != nil {
 		return err
 	}

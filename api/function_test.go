@@ -187,8 +187,8 @@ func TestImportFunction(t *testing.T) {
 	bucket := &models.Bucket{
 		Name: fmt.Sprintf("%s-%s", common.BaetylCloud, namespace),
 	}
-	sObj.EXPECT().CreateInternalBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, "awss3").Return(bucket, nil).Times(1)
-	sObj.EXPECT().PutInternalObjectFromURLIfNotExist(namespace, bucket.Name, gomock.Any(), function.Code.Location, "awss3").Return(nil).Times(1)
+	sObj.EXPECT().CreateBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, "awss3").Return(bucket, nil).Times(1)
+	sObj.EXPECT().PutObjectFromURLIfNotExist(namespace, bucket.Name, gomock.Any(), function.Code.Location, "awss3").Return(nil).Times(1)
 
 	// 200
 	url := fmt.Sprintf("/v1/functions/baiducfc/functions/%s/versions/%s", function.Name, function.Version)
@@ -230,7 +230,7 @@ func TestImportFunction(t *testing.T) {
 	sFunc.EXPECT().GetFunction(namespace, function.Name,
 		function.Version, "baiducfc").Return(function, nil).Times(1)
 	sProp.EXPECT().GetPropertyValue(common.ObjectSource).Return("awss3", nil).Times(1)
-	sObj.EXPECT().CreateInternalBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, "awss3").Return(nil, errors.New("err")).Times(1)
+	sObj.EXPECT().CreateBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, "awss3").Return(nil, errors.New("err")).Times(1)
 
 	// 500
 	url = fmt.Sprintf("/v1/functions/baiducfc/functions/%s/versions/%s", function.Name, function.Version)
@@ -242,8 +242,8 @@ func TestImportFunction(t *testing.T) {
 	sFunc.EXPECT().GetFunction(namespace, function.Name,
 		function.Version, "baiducfc").Return(function, nil).Times(1)
 	sProp.EXPECT().GetPropertyValue(common.ObjectSource).Return("awss3", nil).Times(1)
-	sObj.EXPECT().CreateInternalBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, "awss3").Return(bucket, nil).Times(1)
-	sObj.EXPECT().PutInternalObjectFromURLIfNotExist(namespace, bucket.Name, gomock.Any(), function.Code.Location, "awss3").Return(errors.New("err")).Times(1)
+	sObj.EXPECT().CreateBucketIfNotExist(namespace, bucket.Name, common.AWSS3PrivatePermission, "awss3").Return(bucket, nil).Times(1)
+	sObj.EXPECT().PutObjectFromURLIfNotExist(namespace, bucket.Name, gomock.Any(), function.Code.Location, "awss3").Return(errors.New("err")).Times(1)
 
 	// 500
 	url = fmt.Sprintf("/v1/functions/baiducfc/functions/%s/versions/%s", function.Name, function.Version)
