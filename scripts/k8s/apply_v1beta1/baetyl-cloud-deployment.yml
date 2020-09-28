@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baetyl-cloud
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: baetyl-cloud
+  template:
+    metadata:
+      labels:
+        app: baetyl-cloud
+    spec:
+      serviceAccountName: baetyl-cloud
+      containers:
+        # docker build -t baetyl-cloud:local-build -f Dockerfile-local .
+        - image: baetyl-cloud:local-build
+          imagePullPolicy: IfNotPresent
+          name: baetyl-cloud
+          ports:
+            - containerPort: 9004
+              name: admin-port
+              protocol: TCP
+            - containerPort: 9005
+              name: sync-port
+              protocol: TCP
+            - containerPort: 9003
+              name: init-port
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/baetyl
+              name: config
+            - mountPath: /etc/baetyl/templates
+              name: templates
+      volumes:
+        - name: config
+          configMap:
+            name: baetyl-cloud-config
+            defaultMode: 256
+        - name: templates
+          configMap:
+            name: baetyl-cloud-templates
+            defaultMode: 256
+
