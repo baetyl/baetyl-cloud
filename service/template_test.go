@@ -27,7 +27,7 @@ var params = map[string]interface{}{
 	"NodeCertPem":                "---node cert pem---",
 	"NodeCertKey":                "---node cert key---",
 	"NodeCertCa":                 "---node cert ca---",
-	context.KeyBaetylHostPathLib: "/var/lib/baetyl",
+	context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
 }
 
 func TestTemplateServiceImpl_UnmarshalTemplate(t *testing.T) {
@@ -92,13 +92,13 @@ volumes:
     version: node-cert-version-1
 - name: core-store-path
   hostPath:
-    path: /var/lib/baetyl/store
+    path: '{{.BAETYL_HOST_PATH_LIB}}/store'
 - name: object-download-path
   hostPath:
-    path: /var/lib/baetyl/object
+    path: '{{.BAETYL_HOST_PATH_LIB}}/object'
 - name: host-root-path
   hostPath:
-    path: /var/lib/baetyl/host
+    path: '{{.BAETYL_HOST_PATH_LIB}}/host'
 system: true
 `,
 		},
