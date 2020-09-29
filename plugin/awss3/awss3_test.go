@@ -2,6 +2,7 @@ package awss3
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -53,7 +54,7 @@ func TestAwss3(t *testing.T) {
 	fmt.Println("------------------> Internal <----------------------")
 	conf := `
 awss3:
- endpoint: http://106.12.34.129:30900/
+ endpoint: http://106.12.34.129:30900
  ak: xx
  sk: xx
 `
@@ -76,6 +77,9 @@ awss3:
 	err = aws3.HeadInternalBucket(namespace, bucket)
 	assert.NoError(t, err)
 
+	err = aws3.HeadInternalBucket(namespace, "xx")
+	assert.Contains(t, err.Error(), "The (bucket) resource (xx) is not found")
+
 	buckets, err := aws3.ListInternalBuckets(namespace)
 	assert.NoError(t, err)
 	assert.NotNil(t, buckets)
@@ -83,6 +87,9 @@ awss3:
 
 	err = aws3.PutInternalObject(namespace, bucket, "a", []byte("test"))
 	assert.NoError(t, err)
+
+	_, err = aws3.GetInternalObject(namespace, "xx", "a")
+	assert.Contains(t, err.Error(), "The (bucket) resource (xx) is not found")
 
 	object, err := aws3.GetInternalObject(namespace, bucket, "a")
 	assert.NoError(t, err)
@@ -92,7 +99,11 @@ awss3:
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("test"), buf.Bytes())
 
+	_, err = aws3.HeadInternalObject(namespace, "xx", "a")
+	assert.Contains(t, err.Error(), "The (bucket) resource (xx) is not found")
+
 	objectMeta, err := aws3.HeadInternalObject(namespace, bucket, "a")
+	assert.NoError(t, err)
 	assert.Equal(t, int64(4), objectMeta.ContentLength)
 	assert.Equal(t, "098f6bcd4621d373cade4e832627b4f6", objectMeta.ETag)
 
@@ -106,6 +117,9 @@ awss3:
 	_, err = io.Copy(buf, object.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("test2"), buf.Bytes())
+
+	_, err = aws3.GenInternalObjectURL(namespace, "xx", "b")
+	assert.Contains(t, err.Error(), "The (bucket) resource (xx) is not found")
 
 	url, err := aws3.GenInternalObjectURL(namespace, bucket, "b")
 	assert.NoError(t, err)
@@ -121,6 +135,9 @@ awss3:
 	_, err = io.Copy(buf, object.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("test2"), buf.Bytes())
+
+	_, err = aws3.ListInternalBucketObjects(namespace, "xx", &models.ObjectParams{})
+	assert.Contains(t, err.Error(), "The (bucket) resource (xx) is not found")
 
 	objects, err := aws3.ListInternalBucketObjects(namespace, bucket, &models.ObjectParams{})
 	assert.NoError(t, err)
@@ -160,17 +177,29 @@ awss3:
 	assert.NoError(t, err)
 	assert.NotNil(t, buckets)
 
+	err = aws3.HeadExternalBucket(externalInfo, "xx")
+	assert.Contains(t, err.Error(), "The (bucket) resource (xx) is not found")
+
 	err = aws3.HeadExternalBucket(externalInfo, bucket)
 	assert.NoError(t, err)
+
+	_, err = aws3.ListExternalBucketObjects(externalInfo, "xx", &models.ObjectParams{})
+	assert.Contains(t, err.Error(), "The (bucket) resource (xx) is not found")
 
 	objects, err = aws3.ListExternalBucketObjects(externalInfo, bucket, &models.ObjectParams{})
 	assert.NoError(t, err)
 	assert.NotNil(t, objects)
 	assert.Len(t, objects.Contents, 3)
 
+	_, err = aws3.GenExternalObjectURL(externalInfo, "xx", "b")
+	assert.Contains(t, err.Error(), "The (bucket) resource (xx) is not found")
+
 	url, err = aws3.GenExternalObjectURL(externalInfo, bucket, "b")
 	assert.NoError(t, err)
 	assert.NotNil(t, url)
+
+	err = aws3.PutInternalObjectFromURL(namespace, "xx", "d", url.URL)
+	assert.Contains(t, err.Error(), "The (bucket) resource (xx) is not found")
 
 	err = aws3.PutInternalObjectFromURL(namespace, bucket, "d", url.URL)
 	assert.NoError(t, err)
@@ -201,5 +230,15 @@ awss3:
 	assert.NoError(t, err)
 	assert.NotNil(t, objects)
 	assert.Len(t, objects.Contents, 0)
+}
 
+func TestCheckResourceNotFound(t *testing.T) {
+	err := errors.New("[Code: NotFound; Message: 404 Not Found; RequestId: xxx]")
+	assert.True(t, checkResourceNotFound(err))
+	err = errors.New("NotFound: Not Found\n        \t            \t\tstatus code: 404, request id: 1639362962512D92, host id: ")
+	assert.True(t, checkResourceNotFound(err))
+	err = errors.New("NoSuchBucket: The specified bucket does not exist")
+	assert.True(t, checkResourceNotFound(err))
+	err = errors.New("RequestError")
+	assert.False(t, checkResourceNotFound(err))
 }
