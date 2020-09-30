@@ -312,7 +312,35 @@ func TestCreateConfig(t *testing.T) {
 	assert.Equal(t, view.Data[0].Value["function"], "process")
 	assert.Equal(t, view.Data[0].Value["handler"], "index.handler")
 	assert.Equal(t, view.Data[0].Value["runtime"], "python36")
-	assert.Equal(t, view.Data[0].Value["version"], "1")
+
+	mConf = &models.ConfigurationView{
+		Name:      "abc",
+		Namespace: "default",
+		Labels: map[string]string{
+			"test": "test",
+		},
+		Data: []models.ConfigDataItem{
+			{
+				Key: "a b.txt",
+				Value: map[string]string{
+					"type":     "function",
+					"function": "process",
+					"version":  "1",
+					"runtime":  "python36",
+					"handler":  "index.handler",
+					"bucket":   "baetyl",
+					"object":   "a.zip",
+				},
+			},
+		},
+	}
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mConf)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, string(w.Body.Bytes()), "{\"code\":\"ErrRequestParamInvalid\",\"message\":\"The request parameter is invalid. (There is a unknown error (Key: 'ConfigurationView.Data[0].Key' Error:Field validation for 'Key' failed on the 'validConfigKeys' tag). If the attempt to retry does not work, please contact us.)\",\"requestId\":\"\"}")
 
 	mConf = &models.ConfigurationView{
 		Name:      "abc",
