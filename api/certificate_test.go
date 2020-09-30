@@ -326,7 +326,7 @@ RcKyjhh1
 	cert7 := &models.Certificate{
 		Name:        "cert7",
 		Description: "desp7",
-		Data:        models.CertificateDataItem{
+		Data: models.CertificateDataItem{
 			Key:  keyData6,
 			Cert: certData6,
 		},

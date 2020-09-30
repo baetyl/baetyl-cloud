@@ -330,7 +330,11 @@ func newS3Session(endpoint, ak, sk, region string) (*session.Session, error) {
 		DisableSSL:       aws.Bool(!strings.HasPrefix(endpoint, "https")),
 		S3ForcePathStyle: aws.Bool(true),
 	}
-	return session.NewSession(s3Config)
+	s, err := session.NewSession(s3Config)
+	if err != nil {
+		return nil, common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
+	}
+	return s, nil
 }
 
 func listBuckets(cli *s3.S3) ([]models.Bucket, error) {
@@ -400,11 +404,11 @@ func genObjectURL(cli *s3.S3, bucket, name string, expiration time.Duration) (*m
 	})
 	url, err := req.Presign(expiration)
 	if err != nil {
-		return nil, err
+		return nil, common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	return &models.ObjectURL{
 		URL: url,
-	}, err
+	}, nil
 }
 
 func checkResourceNotFound(err error) bool {
