@@ -27,7 +27,7 @@ type ConfigurationView struct {
 }
 
 type ConfigDataItem struct {
-	Key   string            `json:"key,omitempty" validate:"required"`
+	Key   string            `json:"key,omitempty" validate:"required,validConfigKeys"`
 	Value map[string]string `json:"value,omitempty"`
 }
 

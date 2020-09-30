@@ -17,16 +17,18 @@ const (
 	nonBaetyl        = "nonBaetyl"
 	namespace        = "namespace"
 	validLabels      = "validLabels"
+	validConfigKeys  = "validConfigKeys"
 	maxLength        = "maxLength"
 
 	resourceLength = 63
 )
 
 var regexps = map[string]string{
-	namespace: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?([a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
-	memory:    "^[1-9][0-9]*(k|m|g|t|p|)$",
-	duration:  "^[1-9][0-9]*(s|m|h)$",
-	setcpus:   "^(([1-9]\\d*|0)-([1-9]\\d*|0)|([1-9]\\d*|0)(,([1-9]\\d*|0))*)$",
+	namespace:       "^[a-z0-9]([-a-z0-9]*[a-z0-9])?([a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
+	memory:          "^[1-9][0-9]*(k|m|g|t|p|)$",
+	duration:        "^[1-9][0-9]*(s|m|h)$",
+	setcpus:         "^(([1-9]\\d*|0)-([1-9]\\d*|0)|([1-9]\\d*|0)(,([1-9]\\d*|0))*)$",
+	validConfigKeys: "^[-._a-zA-Z0-9]+$",
 }
 
 var validate *validator.Validate
