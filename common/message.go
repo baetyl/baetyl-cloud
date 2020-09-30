@@ -84,6 +84,8 @@ const (
 	ErrLicenseQuota = "ErrLicenseQuota"
 	// * third server error
 	ErrThirdServer = "ErrThirdServer"
+	// * object error
+	ErrObjectOperationException = "ErrObjectOperationException"
 )
 
 var templates = map[Code]string{
@@ -150,6 +152,8 @@ var templates = map[Code]string{
 
 	// * third server error
 	ErrThirdServer: "Third server {{if .name}}({{.name}}){{end}} error.{{if .error}} ({{.error}}){{end}}",
+
+	ErrObjectOperationException: "Problem with {{if .source}}({{.source}}){{end}} object operation.{{if .error}} ({{.error}}){{end}}",
 
 	ErrInvalidArrayLength: "The length of the array exceeds the limit",
 }

@@ -27,7 +27,7 @@ func (api *API) ListBucketsV2(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &models.BucketsView{Buckets: res}, err
+	return &models.BucketsView{Buckets: res}, nil
 }
 
 // ListBucketObjectsV2 ListBucketObjectsV2

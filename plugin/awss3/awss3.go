@@ -91,14 +91,17 @@ func (c *awss3Storage) CreateInternalBucket(_, bucket, permission string) error 
 	}
 	_, err = c.s3Client.CreateBucket(input)
 	if err != nil {
-		return err
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	aclInput := &s3.PutBucketAclInput{
 		ACL:    &permission,
 		Bucket: &bucket,
 	}
 	_, err = c.s3Client.PutBucketAcl(aclInput)
-	return err
+	if err != nil {
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
+	}
+	return nil
 }
 
 // ListInternalBucketObjects ListInternalBucketObjects
@@ -108,14 +111,24 @@ func (c *awss3Storage) ListInternalBucketObjects(_, bucket string, params *model
 		return nil, err
 	}
 
+	err = headBucket(c.s3Client, bucket)
+	if err != nil {
+		return nil, err
+	}
+
 	return listBucketObjects(c.s3Client, bucket, params)
 }
 
 // PutInternalObject PutInternalObject
-func (c *awss3Storage) PutInternalObject(_, bucket, name string, b []byte) (err error) {
-	err = c.checkInternalSupported()
+func (c *awss3Storage) PutInternalObject(_, bucket, name string, b []byte) error {
+	err := c.checkInternalSupported()
 	if err != nil {
-		return
+		return err
+	}
+
+	err = headBucket(c.s3Client, bucket)
+	if err != nil {
+		return err
 	}
 
 	_, err = c.s3Client.PutObject(&s3.PutObjectInput{
@@ -123,7 +136,10 @@ func (c *awss3Storage) PutInternalObject(_, bucket, name string, b []byte) (err 
 		Bucket: aws.String(bucket),
 		Key:    aws.String(name),
 	})
-	return
+	if err != nil {
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
+	}
+	return nil
 }
 
 // PutInternalObjectFromURL PutInternalObjectFromURL
@@ -133,9 +149,14 @@ func (c *awss3Storage) PutInternalObjectFromURL(_, bucket, name, url string) err
 		return err
 	}
 
-	resp, err := http.Get(url)
+	err = headBucket(c.s3Client, bucket)
 	if err != nil {
 		return err
+	}
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	defer resp.Body.Close()
 
@@ -145,7 +166,10 @@ func (c *awss3Storage) PutInternalObjectFromURL(_, bucket, name, url string) err
 		Body:   resp.Body,
 	}
 	_, err = c.uploader.Upload(upParams)
-	return err
+	if err != nil {
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
+	}
+	return nil
 }
 
 // GetInternalObject GetInternalObject
@@ -155,12 +179,20 @@ func (c *awss3Storage) GetInternalObject(_, bucket, name string) (*models.Object
 		return nil, err
 	}
 
+	err = headBucket(c.s3Client, bucket)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := c.s3Client.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(name),
 	})
 	if err != nil {
-		return nil, err
+		if checkResourceNotFound(err) {
+			return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "object"), common.Field("name", name))
+		}
+		return nil, common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	var res models.Object
 	err = copier.Copy(&res, resp)
@@ -170,6 +202,11 @@ func (c *awss3Storage) GetInternalObject(_, bucket, name string) (*models.Object
 // HeadInternalObject HeadInternalObject
 func (c *awss3Storage) HeadInternalObject(_, bucket, name string) (*models.ObjectMeta, error) {
 	err := c.checkInternalSupported()
+	if err != nil {
+		return nil, err
+	}
+
+	err = headBucket(c.s3Client, bucket)
 	if err != nil {
 		return nil, err
 	}
@@ -211,6 +248,11 @@ func (c *awss3Storage) GenInternalObjectURL(_, bucket, object string) (*models.O
 		return nil, err
 	}
 
+	err = headBucket(c.s3Client, bucket)
+	if err != nil {
+		return nil, err
+	}
+
 	return genObjectURL(c.s3Client, bucket, object, c.cfg.Expiration)
 }
 
@@ -241,12 +283,22 @@ func (c *awss3Storage) ListExternalBucketObjects(info models.ExternalObjectInfo,
 		return nil, err
 	}
 
+	err = headBucket(c.s3Client, bucket)
+	if err != nil {
+		return nil, err
+	}
+
 	return listBucketObjects(s3.New(sessionProvider), bucket, params)
 }
 
 // GenExternalObjectURL GenExternalObjectURL
 func (c *awss3Storage) GenExternalObjectURL(info models.ExternalObjectInfo, bucket, object string) (*models.ObjectURL, error) {
 	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "")
+	if err != nil {
+		return nil, err
+	}
+
+	err = headBucket(c.s3Client, bucket)
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +336,7 @@ func newS3Session(endpoint, ak, sk, region string) (*session.Session, error) {
 func listBuckets(cli *s3.S3) ([]models.Bucket, error) {
 	buckets, err := cli.ListBuckets(&s3.ListBucketsInput{})
 	if err != nil {
-		return nil, err
+		return nil, common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	var res []models.Bucket
 	err = copier.Copy(&res, buckets.Buckets)
@@ -296,7 +348,14 @@ func headBucket(cli *s3.S3, bucket string) error {
 		Bucket: &bucket,
 	}
 	_, err := cli.HeadBucket(input)
-	return err
+	if err == nil {
+		return nil
+	}
+
+	if checkResourceNotFound(err) {
+		return common.Error(common.ErrResourceNotFound, common.Field("type", "bucket"), common.Field("name", bucket))
+	}
+	return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 }
 
 func listBucketObjects(cli *s3.S3, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error) {
@@ -317,7 +376,7 @@ func listBucketObjects(cli *s3.S3, bucket string, params *models.ObjectParams) (
 	}
 	objectsResult, err := cli.ListObjects(input)
 	if err != nil {
-		return nil, err
+		return nil, common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	return toObjectList(objectsResult)
 }
@@ -346,4 +405,16 @@ func genObjectURL(cli *s3.S3, bucket, name string, expiration time.Duration) (*m
 	return &models.ObjectURL{
 		URL: url,
 	}, err
+}
+
+func checkResourceNotFound(err error) bool {
+	msg := err.Error()
+	if strings.Contains(msg, "404") ||
+		strings.Contains(strings.ToUpper(msg), "NOTFOUND") ||
+		strings.Contains(strings.ToUpper(msg), "NOT FOUND") ||
+		strings.Contains(strings.ToUpper(msg), "NOTEXIST") ||
+		strings.Contains(strings.ToUpper(msg), "NOT EXIST") {
+		return true
+	}
+	return false
 }
