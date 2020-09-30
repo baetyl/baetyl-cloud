@@ -36,10 +36,11 @@ func (api *API) ListCertificate(c *common.Context) (interface{}, error) {
 
 // CreateCertificate create one Certificate
 func (api *API) CreateCertificate(c *common.Context) (interface{}, error) {
-	cfg, err := api.parseAndCheckCertificateModel(c)
+	cfg, err := parseAndCheckCertificateModelWhenGet(c)
 	if err != nil {
 		return nil, err
 	}
+
 	ns, name := c.GetNamespace(), cfg.Name
 	sd, err := api.Secret.Get(ns, name, "")
 	if err != nil {
@@ -60,17 +61,18 @@ func (api *API) CreateCertificate(c *common.Context) (interface{}, error) {
 
 // UpdateCertificate update the Certificate
 func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
-	cfg, err := api.parseAndCheckCertificateModel(c)
+	cfg, err := parseAndCheckCertificateModelWhenUpdate(c)
 	if err != nil {
 		return nil, err
 	}
+
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	sd, err := wrapCertificate(api.Secret.Get(ns, n, ""))
 	if err != nil {
 		return nil, err
 	}
 	if cfg.Data.Key == "" {
-		cfg.Data.Key = sd.Data.Key
+		cfg.Data = sd.Data
 	}
 	// only edit description by design
 	if cfg.Equal(sd) {
@@ -105,8 +107,29 @@ func (api *API) GetAppByCertificate(c *common.Context) (interface{}, error) {
 	return api.listAppBySecret(ns, res.Name)
 }
 
-// parseAndCheckCertificateModel parse and check the config model
-func (api *API) parseAndCheckCertificateModel(c *common.Context) (*models.Certificate, error) {
+func parseAndCheckCertificateModelWhenGet(c *common.Context) (*models.Certificate, error) {
+	cert, err := parseAndCheckCertificateModel(c)
+	if err != nil {
+		return nil, err
+	}
+	if cert.Data.Key == "" || cert.Data.Cert == "" {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "private key and certificate can't be empty"))
+	}
+	return cert, nil
+}
+
+func parseAndCheckCertificateModelWhenUpdate(c *common.Context) (*models.Certificate, error) {
+	cert, err := parseAndCheckCertificateModel(c)
+	if err != nil {
+		return nil, err
+	}
+	if cert.Data.Key != "" && cert.Data.Cert == "" {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "private key and certificate can't be empty"))
+	}
+	return cert, nil
+}
+
+func parseAndCheckCertificateModel(c *common.Context) (*models.Certificate, error) {
 	certificate := new(models.Certificate)
 	certificate.Name = c.GetNameFromParam()
 	err := c.LoadBody(certificate)

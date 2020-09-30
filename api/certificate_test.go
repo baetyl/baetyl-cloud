@@ -326,7 +326,10 @@ RcKyjhh1
 	cert7 := &models.Certificate{
 		Name:        "cert7",
 		Description: "desp7",
-		Data:        models.CertificateDataItem{},
+		Data:        models.CertificateDataItem{
+			Key:  keyData6,
+			Cert: certData6,
+		},
 	}
 
 	mkSecretService.EXPECT().Get(gomock.Any(), cert7.Name, gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
@@ -357,6 +360,18 @@ RcKyjhh1
 	req, _ = http.NewRequest(http.MethodPost, "/v1/certificates", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	cert9 := &models.Certificate{
+		Name:        "cert9",
+		Description: "desp9",
+		Data:        models.CertificateDataItem{},
+	}
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(cert9)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/certificates", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 func TestUpdateCertificate(t *testing.T) {
