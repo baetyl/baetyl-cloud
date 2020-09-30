@@ -91,7 +91,7 @@ func (c *awss3Storage) CreateInternalBucket(_, bucket, permission string) error 
 	}
 	_, err = c.s3Client.CreateBucket(input)
 	if err != nil {
-		return common.Error(common.ErrObject, common.Field("error", err.Error()), common.Field("source", "awss3"))
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	aclInput := &s3.PutBucketAclInput{
 		ACL:    &permission,
@@ -99,7 +99,7 @@ func (c *awss3Storage) CreateInternalBucket(_, bucket, permission string) error 
 	}
 	_, err = c.s3Client.PutBucketAcl(aclInput)
 	if err != nil {
-		return common.Error(common.ErrObject, common.Field("error", err.Error()), common.Field("source", "awss3"))
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	return nil
 }
@@ -137,7 +137,7 @@ func (c *awss3Storage) PutInternalObject(_, bucket, name string, b []byte) error
 		Key:    aws.String(name),
 	})
 	if err != nil {
-		return common.Error(common.ErrObject, common.Field("error", err.Error()), common.Field("source", "awss3"))
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	return nil
 }
@@ -156,7 +156,7 @@ func (c *awss3Storage) PutInternalObjectFromURL(_, bucket, name, url string) err
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return common.Error(common.ErrObject, common.Field("error", err.Error()), common.Field("source", "awss3"))
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	defer resp.Body.Close()
 
@@ -167,7 +167,7 @@ func (c *awss3Storage) PutInternalObjectFromURL(_, bucket, name, url string) err
 	}
 	_, err = c.uploader.Upload(upParams)
 	if err != nil {
-		return common.Error(common.ErrObject, common.Field("error", err.Error()), common.Field("source", "awss3"))
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	return nil
 }
@@ -192,7 +192,7 @@ func (c *awss3Storage) GetInternalObject(_, bucket, name string) (*models.Object
 		if checkResourceNotFound(err) {
 			return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "object"), common.Field("name", name))
 		}
-		return nil, common.Error(common.ErrObject, common.Field("error", err.Error()), common.Field("source", "awss3"))
+		return nil, common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	var res models.Object
 	err = copier.Copy(&res, resp)
@@ -336,7 +336,7 @@ func newS3Session(endpoint, ak, sk, region string) (*session.Session, error) {
 func listBuckets(cli *s3.S3) ([]models.Bucket, error) {
 	buckets, err := cli.ListBuckets(&s3.ListBucketsInput{})
 	if err != nil {
-		return nil, common.Error(common.ErrObject, common.Field("error", err.Error()), common.Field("source", "awss3"))
+		return nil, common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	var res []models.Bucket
 	err = copier.Copy(&res, buckets.Buckets)
@@ -355,7 +355,7 @@ func headBucket(cli *s3.S3, bucket string) error {
 	if checkResourceNotFound(err) {
 		return common.Error(common.ErrResourceNotFound, common.Field("type", "bucket"), common.Field("name", bucket))
 	}
-	return common.Error(common.ErrObject, common.Field("error", err.Error()), common.Field("source", "awss3"))
+	return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 }
 
 func listBucketObjects(cli *s3.S3, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error) {
@@ -376,7 +376,7 @@ func listBucketObjects(cli *s3.S3, bucket string, params *models.ObjectParams) (
 	}
 	objectsResult, err := cli.ListObjects(input)
 	if err != nil {
-		return nil, common.Error(common.ErrObject, common.Field("error", err.Error()), common.Field("source", "awss3"))
+		return nil, common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	return toObjectList(objectsResult)
 }
