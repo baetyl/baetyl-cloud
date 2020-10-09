@@ -53,7 +53,7 @@ func New() (plugin.Plugin, error) {
 	}, nil
 }
 
-func (c *awss3Storage) IsInternalEnabled() bool {
+func (c *awss3Storage) IsAccountEnabled() bool {
 	return c.cfg != nil
 }
 
@@ -315,7 +315,7 @@ func (c *awss3Storage) Close() error {
 }
 
 func (c *awss3Storage) checkInternalSupported() error {
-	if !c.IsInternalEnabled() {
+	if !c.IsAccountEnabled() {
 		return errors.New("plugin awss3 doesn't support internal object caused it's not configured")
 	}
 	return nil
