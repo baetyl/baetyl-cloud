@@ -11,7 +11,7 @@ import (
 // Object Object
 //TODO: userID doesn't belong to Object, should in the metedata
 type Object interface {
-	IsInternalEnabled() bool
+	IsAccountEnabled() bool
 
 	ListInternalBuckets(userID string) ([]models.Bucket, error)
 	HeadInternalBucket(userID, bucket string) error

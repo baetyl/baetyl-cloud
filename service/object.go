@@ -49,7 +49,7 @@ func (c *objectService) ListSources() map[string]models.ObjectStorageSourceV2 {
 	sources := map[string]models.ObjectStorageSourceV2{}
 	for name, object := range c.objects {
 		sources[name] = models.ObjectStorageSourceV2{
-			InternalEnabled: object.IsInternalEnabled(),
+			AccountEnabled: object.IsAccountEnabled(),
 		}
 	}
 	return sources

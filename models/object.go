@@ -19,7 +19,7 @@ type Bucket struct {
 }
 
 type ObjectStorageSourceV2 struct {
-	InternalEnabled bool `json:"internalEnabled,omitempty"`
+	AccountEnabled bool `json:"accountEnabled,omitempty"`
 }
 
 type ObjectParams struct {
