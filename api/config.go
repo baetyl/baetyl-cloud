@@ -303,6 +303,7 @@ func (api *API) toConfiguration(userID string, configView *models.ConfigurationV
 			object := &specV1.ConfigurationObject{
 				URL:      v.Value["url"],
 				MD5:      v.Value["md5"],
+				Unpack:   v.Value["unpack"],
 				Metadata: map[string]string{},
 			}
 			object.Metadata = v.Value
