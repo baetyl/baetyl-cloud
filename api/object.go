@@ -5,6 +5,10 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
+const (
+	CurrentAccount = "current"
+)
+
 // ListObjectSourcesV2 ListObjectSourcesV2
 func (api *API) ListObjectSourcesV2(c *common.Context) (interface{}, error) {
 	res := api.Obj.ListSources()
@@ -19,7 +23,7 @@ func (api *API) ListBucketsV2(c *common.Context) (interface{}, error) {
 	}
 
 	var res []models.Bucket
-	if params.Internal {
+	if params.Account == CurrentAccount {
 		res, err = api.Obj.ListInternalBuckets(c.GetUser().ID, params.Source)
 	} else {
 		res, err = api.Obj.ListExternalBuckets(params.ExternalObjectInfo, params.Source)
@@ -38,7 +42,7 @@ func (api *API) ListBucketObjectsV2(c *common.Context) (interface{}, error) {
 	}
 
 	res := new(models.ListObjectsResult)
-	if params.Internal {
+	if params.Account == CurrentAccount {
 		res, err = api.Obj.ListInternalBucketObjects(c.GetUser().ID, params.Bucket, params.Source)
 	} else {
 		res, err = api.Obj.ListExternalBucketObjects(params.ExternalObjectInfo, params.Bucket, params.Source)
@@ -63,7 +67,7 @@ func (api *API) parseObject(c *common.Context) (*models.ObjectRequestParams, err
 	params.Source = c.Param("source")
 	params.Bucket = c.Param("bucket")
 
-	if params.Internal {
+	if params.Account == CurrentAccount {
 		return params, nil
 	}
 

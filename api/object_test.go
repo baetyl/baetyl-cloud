@@ -77,7 +77,7 @@ func TestListBucketsV2(t *testing.T) {
 		},
 	}
 	mkObjectService.EXPECT().ListInternalBuckets("default", "baidubos").Return(buckets, nil).Times(1)
-	req, _ := http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets?internal=true", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets?account=current", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -88,23 +88,23 @@ func TestListBucketsV2(t *testing.T) {
 		Sk:       "xxx",
 	}
 	mkObjectService.EXPECT().ListExternalBuckets(info, "baidubos").Return(buckets, nil).Times(1)
-	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets?internal=false&endpoint=x&ak=xx&sk=xxx", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets?account=other&endpoint=x&ak=xx&sk=xxx", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets?internal=false&endpoint=x", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets?account=other&endpoint=x", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
-	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets?internal=false&endpoint=x&ak=xx", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets?account=other&endpoint=x&ak=xx", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	mkObjectService.EXPECT().ListExternalBuckets(info, "test").Return(nil, errors.New("error")).Times(1)
-	req2, _ := http.NewRequest(http.MethodGet, "/v2/objects/test/buckets?internal=false&endpoint=x&ak=xx&sk=xxx", nil)
+	req2, _ := http.NewRequest(http.MethodGet, "/v2/objects/test/buckets?account=other&endpoint=x&ak=xx&sk=xxx", nil)
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req2)
 	assert.Equal(t, http.StatusInternalServerError, w2.Code)
@@ -152,28 +152,28 @@ func TestListBucketObjectsV2(t *testing.T) {
 	mkObjectService.EXPECT().ListInternalBucketObjects("default", "baetyl-test", "baidubos").Return(objectsResult, nil).Times(1)
 
 	// 200
-	req, _ := http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?internal=true", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?account=current", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	mkObjectService.EXPECT().ListInternalBucketObjects("default", "unknown", "baidubos").Return(nil, errors.New("error")).Times(1)
 	// 404
-	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/unknown/objects?internal=true", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/unknown/objects?account=current", nil)
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req)
 	assert.Equal(t, http.StatusInternalServerError, w2.Code)
 
 	mkObjectService.EXPECT().ListInternalBucketObjects("default", "unknown2", "baidubos").Return(nil, errors.New("error")).Times(1)
 	// 500
-	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/unknown2/objects?internal=true", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/unknown2/objects?account=current", nil)
 	w3 := httptest.NewRecorder()
 	router.ServeHTTP(w3, req)
 	assert.Equal(t, http.StatusInternalServerError, w3.Code)
 
 	mkObjectService.EXPECT().ListInternalBucketObjects("default", "unknown3", "baidubos").Return(nil, common.Error(common.ErrResourceNotFound, common.Field("type", "object"))).Times(1)
 	// 500
-	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/unknown3/objects?internal=true", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/unknown3/objects?account=current", nil)
 	w4 := httptest.NewRecorder()
 	router.ServeHTTP(w4, req)
 	assert.Equal(t, http.StatusNotFound, w4.Code)
@@ -184,23 +184,23 @@ func TestListBucketObjectsV2(t *testing.T) {
 		Sk:       "xxx",
 	}
 	mkObjectService.EXPECT().ListExternalBucketObjects(info, "baetyl-test", "baidubos").Return(objectsResult, nil).Times(1)
-	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?internal=false&endpoint=x&ak=xx&sk=xxx", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?account=other&endpoint=x&ak=xx&sk=xxx", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?internal=false&endpoint=x", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?account=other&endpoint=x", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
-	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?internal=false&endpoint=x&ak=xx", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?account=other&endpoint=x&ak=xx", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	mkObjectService.EXPECT().ListExternalBucketObjects(info, "baetyl-test", "baidubos").Return(nil, errors.New("error")).Times(1)
-	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?internal=false&endpoint=x&ak=xx&sk=xxx", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?account=other&endpoint=x&ak=xx&sk=xxx", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
