@@ -163,18 +163,18 @@ func (mr *MockObjectMockRecorder) HeadInternalObject(arg0, arg1, arg2 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeadInternalObject", reflect.TypeOf((*MockObject)(nil).HeadInternalObject), arg0, arg1, arg2)
 }
 
-// IsInternalEnabled mocks base method
-func (m *MockObject) IsInternalEnabled() bool {
+// IsAccountEnabled mocks base method
+func (m *MockObject) IsAccountEnabled() bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsInternalEnabled")
+	ret := m.ctrl.Call(m, "IsAccountEnabled")
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
-// IsInternalEnabled indicates an expected call of IsInternalEnabled
-func (mr *MockObjectMockRecorder) IsInternalEnabled() *gomock.Call {
+// IsAccountEnabled indicates an expected call of IsAccountEnabled
+func (mr *MockObjectMockRecorder) IsAccountEnabled() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsInternalEnabled", reflect.TypeOf((*MockObject)(nil).IsInternalEnabled))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAccountEnabled", reflect.TypeOf((*MockObject)(nil).IsAccountEnabled))
 }
 
 // ListExternalBucketObjects mocks base method

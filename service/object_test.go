@@ -34,7 +34,7 @@ func TestObjectService_ListSources(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
-	mockObject.objectStorage.EXPECT().IsInternalEnabled().Return(true).Times(1)
+	mockObject.objectStorage.EXPECT().IsAccountEnabled().Return(true).Times(1)
 
 	cs, err := NewObjectService(mockObject.conf)
 	assert.NoError(t, err)

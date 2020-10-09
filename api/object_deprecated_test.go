@@ -44,10 +44,10 @@ func TestListObjectSources(t *testing.T) {
 
 	sources := map[string]models.ObjectStorageSourceV2{
 		"baidubos": {
-			InternalEnabled: true,
+			AccountEnabled: true,
 		},
 		"awss3": {
-			InternalEnabled: false,
+			AccountEnabled: false,
 		},
 	}
 	// 200
