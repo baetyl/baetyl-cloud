@@ -916,9 +916,10 @@ func TestGenInitCmdFromNode(t *testing.T) {
 	node := getMockNode()
 	params := map[string]interface{}{
 		"InitApplyYaml": "baetyl-init-deployment.yml",
+		"initType":"",
 	}
 	var expect interface{} = []byte("setup")
-	sInit.EXPECT().GetResource("default", "abc", service.TemplateKubeInitCommand, params).Return(expect, nil).Times(1)
+	sInit.EXPECT().GetResource("default", "abc", service.TemplateBaetylInitCommand, params).Return(expect, nil).Times(1)
 	sNode.EXPECT().Get(node.Namespace, node.Name).Return(node, nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/init", nil)

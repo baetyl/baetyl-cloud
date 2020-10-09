@@ -311,10 +311,13 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	initType := c.Query("initType")
 	params := map[string]interface{}{
 		"InitApplyYaml": "baetyl-init-deployment.yml",
+		"initType":      initType,
 	}
-	cmd, err := api.Init.GetResource(ns, name, service.TemplateKubeInitCommand, params)
+	cmd, err := api.Init.GetResource(ns, name, service.TemplateBaetylInitCommand, params)
 	if err != nil {
 		return nil, err
 	}
