@@ -286,12 +286,14 @@ func (c *awss3Storage) ListExternalBucketObjects(info models.ExternalObjectInfo,
 		return nil, err
 	}
 
-	err = headBucket(c.s3Client, bucket)
+	cli := s3.New(sessionProvider)
+
+	err = headBucket(cli, bucket)
 	if err != nil {
 		return nil, err
 	}
 
-	return listBucketObjects(s3.New(sessionProvider), bucket, params)
+	return listBucketObjects(cli, bucket, params)
 }
 
 // GenExternalObjectURL GenExternalObjectURL
@@ -301,12 +303,14 @@ func (c *awss3Storage) GenExternalObjectURL(info models.ExternalObjectInfo, buck
 		return nil, err
 	}
 
-	err = headBucket(c.s3Client, bucket)
+	cli := s3.New(sessionProvider)
+
+	err = headBucket(cli, bucket)
 	if err != nil {
 		return nil, err
 	}
 
-	return genObjectURL(s3.New(sessionProvider), bucket, object, time.Hour)
+	return genObjectURL(cli, bucket, object, time.Hour)
 }
 
 // Close Close
