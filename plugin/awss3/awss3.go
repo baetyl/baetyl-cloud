@@ -216,7 +216,10 @@ func (c *awss3Storage) HeadInternalObject(_, bucket, name string) (*models.Objec
 		Key:    aws.String(name),
 	})
 	if err != nil {
-		return nil, err
+		if checkResourceNotFound(err) {
+			return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "object"), common.Field("name", name))
+		}
+		return nil, common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
 	}
 	var res models.ObjectMeta
 	err = copier.Copy(&res, resp)
