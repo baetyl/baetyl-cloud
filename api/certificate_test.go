@@ -96,8 +96,8 @@ tu5nww5RdjCz4Uks08P2GNmZjLO81MgYkhR7B9wi3KDNxg==
 		Name:        "cert1",
 		Description: "desp1",
 		Data: models.CertificateDataItem{
-			Key:  keyData1,
-			Cert: certData1,
+			Key:         keyData1,
+			Certificate: certData1,
 		},
 	}
 
@@ -162,8 +162,8 @@ RcKyjhh1
 		Name:        "cert2",
 		Description: "desp2",
 		Data: models.CertificateDataItem{
-			Key:  keyData2,
-			Cert: certData2,
+			Key:         keyData2,
+			Certificate: certData2,
 		},
 	}
 
@@ -208,8 +208,8 @@ RcKyjhh1
 		Name:        "cert3",
 		Description: "desp3",
 		Data: models.CertificateDataItem{
-			Key:  keyData3,
-			Cert: certData3,
+			Key:         keyData3,
+			Certificate: certData3,
 		},
 	}
 
@@ -227,8 +227,8 @@ DmICod7W0oIzYYXwTF4NfadliSryoXx9IQ==
 		Name:        "cert4",
 		Description: "desp4",
 		Data: models.CertificateDataItem{
-			Key:  keyData4,
-			Cert: certData4,
+			Key:         keyData4,
+			Certificate: certData4,
 		},
 	}
 
@@ -258,8 +258,8 @@ RcKyjhh1
 		Name:        "cert5",
 		Description: "desp5",
 		Data: models.CertificateDataItem{
-			Key:  keyData5,
-			Cert: certData5,
+			Key:         keyData5,
+			Certificate: certData5,
 		},
 	}
 
@@ -315,8 +315,8 @@ RcKyjhh1
 		Name:        "cert6",
 		Description: "desp6",
 		Data: models.CertificateDataItem{
-			Key:  keyData6,
-			Cert: certData6,
+			Key:         keyData6,
+			Certificate: certData6,
 		},
 	}
 
@@ -327,8 +327,8 @@ RcKyjhh1
 		Name:        "cert7",
 		Description: "desp7",
 		Data: models.CertificateDataItem{
-			Key:  keyData6,
-			Cert: certData6,
+			Key:         keyData6,
+			Certificate: certData6,
 		},
 	}
 
@@ -343,8 +343,8 @@ RcKyjhh1
 		Name:        "cert8",
 		Description: "desp8",
 		Data: models.CertificateDataItem{
-			Key:  keyData2,
-			Cert: certData2,
+			Key:         keyData2,
+			Certificate: certData2,
 		},
 	}
 
@@ -433,8 +433,8 @@ tu5nww5RdjCz4Uks08P2GNmZjLO81MgYkhR7B9wi3KDNxg==
 		Name:        name,
 		Description: "desp1",
 		Data: models.CertificateDataItem{
-			Key:  keyData1,
-			Cert: certData1,
+			Key:         keyData1,
+			Certificate: certData1,
 		},
 	}
 
