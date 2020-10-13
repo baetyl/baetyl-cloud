@@ -20,7 +20,7 @@ type CloudConfig struct {
 		Path string `yaml:"path" json:"path" default:"/etc/baetyl/templates"`
 	} `yaml:"template" json:"template"`
 	Plugin struct {
-		MQ        string   `yaml:"mq" json:"mq" default:"defaultmq"`
+		Pubsub    string   `yaml:"pubsub" json:"pubsub" default:"defaultpb"`
 		PKI       string   `yaml:"pki" json:"pki" default:"defaultpki"`
 		Auth      string   `yaml:"auth" json:"auth" default:"defaultauth"`
 		License   string   `yaml:"license" json:"license" default:"defaultlicense"`
