@@ -112,7 +112,7 @@ func parseAndCheckCertificateModelWhenGet(c *common.Context) (*models.Certificat
 	if err != nil {
 		return nil, err
 	}
-	if cert.Data.Key == "" || cert.Data.Cert == "" {
+	if cert.Data.Key == "" || cert.Data.Certificate == "" {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "private key and certificate can't be empty"))
 	}
 	return cert, nil
@@ -123,7 +123,7 @@ func parseAndCheckCertificateModelWhenUpdate(c *common.Context) (*models.Certifi
 	if err != nil {
 		return nil, err
 	}
-	if cert.Data.Key != "" && cert.Data.Cert == "" {
+	if cert.Data.Key != "" && cert.Data.Certificate == "" {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "private key and certificate can't be empty"))
 	}
 	return cert, nil
