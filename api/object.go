@@ -67,6 +67,10 @@ func (api *API) parseObject(c *common.Context) (*models.ObjectRequestParams, err
 	params.Source = c.Param("source")
 	params.Bucket = c.Param("bucket")
 
+	if params.Account == "" {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the parameter 'account' is required"))
+	}
+
 	if params.Account == CurrentAccount {
 		return params, nil
 	}
