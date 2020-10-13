@@ -275,7 +275,7 @@ func (api *API) toApplicationView(app *specV1.Application) (*models.ApplicationV
 	appView := &models.ApplicationView{}
 	copier.Copy(appView, app)
 
-	err := api.translateSecretsToReistriesAndCertificates(appView)
+	err := api.translateSecretsToSecretLikedModels(appView)
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +312,7 @@ func (api *API) toApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 	app := new(specV1.Application)
 	copier.Copy(app, appView)
 
-	translateReistriesAndCertificatesToSecrets(appView, app)
+	translateSecretLikedModelsToSecrets(appView, app)
 
 	if app.Type != common.FunctionApp {
 		return app, nil, nil
@@ -359,7 +359,7 @@ func (api *API) toApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 	return app, configs, nil
 }
 
-func translateReistriesAndCertificatesToSecrets(appView *models.ApplicationView, app *specV1.Application) {
+func translateSecretLikedModelsToSecrets(appView *models.ApplicationView, app *specV1.Application) {
 	for k, v := range appView.Volumes {
 		if v.Certificate == nil {
 			continue
@@ -382,7 +382,7 @@ func translateReistriesAndCertificatesToSecrets(appView *models.ApplicationView,
 	}
 }
 
-func (api *API) translateSecretsToReistriesAndCertificates(appView *models.ApplicationView) error {
+func (api *API) translateSecretsToSecretLikedModels(appView *models.ApplicationView) error {
 	appView.Registries = make([]models.RegistryView, 0)
 	volumes := make([]models.VolumeView, 0)
 	for _, volume := range appView.Volumes {

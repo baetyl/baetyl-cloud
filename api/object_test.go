@@ -157,6 +157,11 @@ func TestListBucketObjectsV2(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?account=unknown", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
 	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
