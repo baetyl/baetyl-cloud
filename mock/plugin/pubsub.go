@@ -47,9 +47,11 @@ func (mr *MockPubsubMockRecorder) Close() *gomock.Call {
 }
 
 // Publish mocks base method
-func (m *MockPubsub) Publish(arg0 string, arg1 interface{}) {
+func (m *MockPubsub) Publish(arg0 string, arg1 interface{}) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Publish", arg0, arg1)
+	ret := m.ctrl.Call(m, "Publish", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Publish indicates an expected call of Publish
@@ -59,11 +61,12 @@ func (mr *MockPubsubMockRecorder) Publish(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // Subscribe mocks base method
-func (m *MockPubsub) Subscribe(arg0 string) chan interface{} {
+func (m *MockPubsub) Subscribe(arg0 string) (chan interface{}, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Subscribe", arg0)
 	ret0, _ := ret[0].(chan interface{})
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Subscribe indicates an expected call of Subscribe
@@ -73,9 +76,11 @@ func (mr *MockPubsubMockRecorder) Subscribe(arg0 interface{}) *gomock.Call {
 }
 
 // Unsubscribe mocks base method
-func (m *MockPubsub) Unsubscribe(arg0 string, arg1 chan interface{}) {
+func (m *MockPubsub) Unsubscribe(arg0 string, arg1 chan interface{}) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Unsubscribe", arg0, arg1)
+	ret := m.ctrl.Call(m, "Unsubscribe", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Unsubscribe indicates an expected call of Unsubscribe
