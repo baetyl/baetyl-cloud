@@ -44,7 +44,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Objects = []string{}
 	expect.Plugin.Property = "database"
 	expect.Plugin.SyncLinks = []string{"httplink"}
-	expect.Plugin.Pubsub = "defaultpb"
+	expect.Plugin.Pubsub = "defaultpubsub"
 
 	expect.Template.Path = "/etc/baetyl/templates"
 
