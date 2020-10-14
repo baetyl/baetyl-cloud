@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/baetyl/baetyl-go/v2/http"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
@@ -93,13 +94,22 @@ func TestNewHTTPLink(t *testing.T) {
 	go link.Start()
 
 	cli := http.NewClient(&http.ClientOptions{
-		Address: "http://0.0.0.0:9939/v1/sync",
+		Address: "http://0.0.0.0:9939",
 	})
+
+	// wait server start
+	for {
+		_, err := cli.GetURL("http://0.0.0.0:9939/health")
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
 
 	// report
 	dt, err := json.Marshal(reportMsg.Content.Value)
 	assert.NoError(t, err)
-	resp, err := cli.PostJSON("report", dt, map[string]string{"cn": "default.test"})
+	resp, err := cli.PostJSON("v1/sync/report", dt, map[string]string{"cn": "default.test"})
 	assert.NoError(t, err)
 
 	reportResp := map[string]string{}
@@ -110,7 +120,7 @@ func TestNewHTTPLink(t *testing.T) {
 	// desire
 	dt, err = json.Marshal(desiretMsg.Content.Value)
 	assert.NoError(t, err)
-	resp, err = cli.PostJSON("desire", dt, map[string]string{"cn": "default.test"})
+	resp, err = cli.PostJSON("v1/sync/desire", dt, map[string]string{"cn": "default.test"})
 	assert.NoError(t, err)
 
 	desireResp := map[string]string{}
