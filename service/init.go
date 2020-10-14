@@ -31,7 +31,7 @@ const (
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
 	TemplateBaetylInitCommand  = "baetyl-init-command"
 	TemplateKubeInitCommand    = "baetyl-kube-init-command"
-	TemplateProcessInitCommand = "baetyl-process-init-command"
+	TemplateNativeInitCommand  = "baetyl-native-init-command"
 )
 
 var (
@@ -167,10 +167,10 @@ func (s *InitServiceImpl) GetInitCommand(ns, nodeName string, params map[string]
 		InfoExpiry:    time.Now().Unix() + CmdExpirationInSeconds,
 	}
 	kindMap := map[string]string{
-		"":        TemplateKubeInitCommand,
-		"process": TemplateProcessInitCommand,
+		"":       TemplateKubeInitCommand,
+		"native": TemplateNativeInitCommand,
 	}
-	initCommand, err := s.Property.GetPropertyValue(kindMap[params["initType"].(string)])
+	initCommand, err := s.Property.GetPropertyValue(kindMap[params["mode"].(string)])
 	if err != nil {
 		return nil, err
 	}
