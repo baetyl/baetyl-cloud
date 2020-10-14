@@ -275,7 +275,7 @@ func (api *API) toApplicationView(app *specV1.Application) (*models.ApplicationV
 	appView := &models.ApplicationView{}
 	copier.Copy(appView, app)
 
-	err := api.translateSecretsToRegistries(appView)
+	err := api.translateSecretsToSecretLikedModels(appView)
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +312,7 @@ func (api *API) toApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 	app := new(specV1.Application)
 	copier.Copy(app, appView)
 
-	translateReistriesToSecrets(appView, app)
+	translateSecretLikedModelsToSecrets(appView, app)
 
 	if app.Type != common.FunctionApp {
 		return app, nil, nil
@@ -359,7 +359,16 @@ func (api *API) toApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 	return app, configs, nil
 }
 
-func translateReistriesToSecrets(appView *models.ApplicationView, app *specV1.Application) {
+func translateSecretLikedModelsToSecrets(appView *models.ApplicationView, app *specV1.Application) {
+	for k, v := range appView.Volumes {
+		if v.Certificate == nil {
+			continue
+		}
+		app.Volumes[k].Secret = &specV1.ObjectReference{
+			Name: appView.Volumes[k].Certificate.Name,
+		}
+	}
+
 	for _, reg := range appView.Registries {
 		secretVolume := specV1.Volume{
 			Name: reg.Name,
@@ -373,9 +382,9 @@ func translateReistriesToSecrets(appView *models.ApplicationView, app *specV1.Ap
 	}
 }
 
-func (api *API) translateSecretsToRegistries(appView *models.ApplicationView) error {
+func (api *API) translateSecretsToSecretLikedModels(appView *models.ApplicationView) error {
 	appView.Registries = make([]models.RegistryView, 0)
-	volumes := make([]specV1.Volume, 0)
+	volumes := make([]models.VolumeView, 0)
 	for _, volume := range appView.Volumes {
 		if volume.Secret != nil {
 			secret, err := api.Secret.Get(appView.Namespace, volume.Secret.Name, "")
@@ -395,6 +404,16 @@ func (api *API) translateSecretsToRegistries(appView *models.ApplicationView) er
 				})
 				continue
 			}
+
+			if label, ok := secret.Labels[specV1.SecretLabel]; ok && label == specV1.SecretCustomCertificate {
+				volume = models.VolumeView{
+					Name: volume.Name,
+					Certificate: &specV1.ObjectReference{
+						Name:    volume.Secret.Name,
+						Version: volume.Secret.Version,
+					},
+				}
+			}
 		}
 		volumes = append(volumes, volume)
 	}
@@ -406,14 +425,20 @@ func (api *API) translateSecretsToRegistries(appView *models.ApplicationView) er
 
 func (api *API) validApplication(namesapce string, app *models.ApplicationView) error {
 	for _, v := range app.Volumes {
-		if v.VolumeSource.Config != nil {
-			_, err := api.Config.Get(namesapce, v.VolumeSource.Config.Name, "")
+		if v.Config != nil {
+			_, err := api.Config.Get(namesapce, v.Config.Name, "")
 			if err != nil {
 				return err
 			}
 		}
-		if v.VolumeSource.Secret != nil {
-			_, err := api.Secret.Get(namesapce, v.VolumeSource.Secret.Name, "")
+		if v.Secret != nil {
+			_, err := api.Secret.Get(namesapce, v.Secret.Name, "")
+			if err != nil {
+				return err
+			}
+		}
+		if v.Certificate != nil {
+			_, err := api.Secret.Get(namesapce, v.Certificate.Name, "")
 			if err != nil {
 				return err
 			}

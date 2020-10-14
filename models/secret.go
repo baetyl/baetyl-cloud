@@ -65,8 +65,8 @@ func FromSecretToCertificate(s *specV1.Secret) *Certificate {
 	if v, ok := s.Data["key"]; ok {
 		res.Data.Key = string(v)
 	}
-	if v, ok := s.Data["cert"]; ok {
-		res.Data.Cert = string(v)
+	if v, ok := s.Data["certificate"]; ok {
+		res.Data.Certificate = string(v)
 	}
 	if v, ok := s.Data["signatureAlgorithm"]; ok {
 		res.SignatureAlgorithm = string(v)

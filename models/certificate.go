@@ -61,8 +61,8 @@ type Certificate struct {
 }
 
 type CertificateDataItem struct {
-	Key  string `json:"key,omitempty"`
-	Cert string `json:"cert,omitempty"`
+	Key         string `json:"key,omitempty"`
+	Certificate string `json:"certificate,omitempty"`
 }
 
 // CertificateList Certificate List
@@ -89,7 +89,7 @@ func (r *Certificate) ToSecret() *specV1.Secret {
 	}
 	res.Data = map[string][]byte{
 		"key":                []byte(r.Data.Key),
-		"cert":               []byte(r.Data.Cert),
+		"certificate":        []byte(r.Data.Certificate),
 		"signatureAlgorithm": []byte(r.SignatureAlgorithm),
 		"effectiveTime":      []byte(r.EffectiveTime),
 		"expiredTime":        []byte(r.ExpiredTime),
@@ -101,13 +101,13 @@ func (r *Certificate) ToSecret() *specV1.Secret {
 }
 
 func (r *Certificate) ParseCertInfo() error {
-	_, err := tls.X509KeyPair([]byte(r.Data.Cert), []byte(r.Data.Key))
+	_, err := tls.X509KeyPair([]byte(r.Data.Certificate), []byte(r.Data.Key))
 	if err != nil {
 		return err
 	}
 
 	var block *pem.Block
-	rest := []byte(r.Data.Cert)
+	rest := []byte(r.Data.Certificate)
 	block, rest = pem.Decode(rest)
 	if block == nil {
 		return errors.New("failed to find cert that matched private key")

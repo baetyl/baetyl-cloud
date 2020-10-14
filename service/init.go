@@ -136,8 +136,8 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["NodeCertPem"] = base64.StdEncoding.EncodeToString(cert.Data["client.pem"])
 	params["NodeCertKey"] = base64.StdEncoding.EncodeToString(cert.Data["client.key"])
 	params["NodeCertCa"] = base64.StdEncoding.EncodeToString(cert.Data["ca.pem"])
-	params["EdgeNamespace"] = context.BaetylEdgeNamespace
-	params["EdgeSystemNamespace"] = context.BaetylEdgeSystemNamespace
+	params["EdgeNamespace"] = context.EdgeNamespace()
+	params["EdgeSystemNamespace"] = context.EdgeSystemNamespace()
 	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
 }
 

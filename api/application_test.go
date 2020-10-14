@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
@@ -315,58 +316,52 @@ func TestCreateContainerApplication(t *testing.T) {
 	api.Node = sNode
 
 	appView := &models.ApplicationView{
-		Application: specV1.Application{
-			Namespace: "baetyl-cloud",
-			Name:      "abc",
-			Type:      common.ContainerApp,
-			Services: []specV1.Service{
-				{
-					Name:     "Agent",
-					Hostname: "test-agent",
-					Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
-					Replica:  1,
-					VolumeMounts: []specV1.VolumeMount{
-						{
-							Name:      "name",
-							MountPath: "mountPath",
-						},
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.ContainerApp,
+		Services: []specV1.Service{
+			{
+				Name:     "Agent",
+				Hostname: "test-agent",
+				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "name",
+						MountPath: "mountPath",
 					},
-					Ports: []specV1.ContainerPort{
-						{
-							HostPort:      8080,
-							ContainerPort: 8080,
-						},
+				},
+				Ports: []specV1.ContainerPort{
+					{
+						HostPort:      8080,
+						ContainerPort: 8080,
 					},
-					Devices: []specV1.Device{
-						{
-							DevicePath: "DevicePath",
-						},
+				},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
 					},
-					Args: []string{"test"},
-					Env: []specV1.Environment{
-						{
-							Name:  "name",
-							Value: "value",
-						},
+				},
+				Args: []string{"test"},
+				Env: []specV1.Environment{
+					{
+						Name:  "name",
+						Value: "value",
 					},
 				},
 			},
-			Volumes: []specV1.Volume{
-				{
-					Name: "name",
-					VolumeSource: specV1.VolumeSource{
-						Config: &specV1.ObjectReference{
-							Name: "agent-conf",
-						},
-					},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "name",
+				Config: &specV1.ObjectReference{
+					Name: "agent-conf",
 				},
-				{
-					Name: "secret",
-					VolumeSource: specV1.VolumeSource{
-						Secret: &specV1.ObjectReference{
-							Name: "secret01",
-						},
-					},
+			},
+			{
+				Name: "secret",
+				Secret: &specV1.ObjectReference{
+					Name: "secret01",
 				},
 			},
 		},
@@ -524,6 +519,206 @@ func TestCreateContainerApplication(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestCreateApplicationHasCertificates(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode := ms.NewMockNodeService(mockCtl)
+	sIndex := ms.NewMockIndexService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+
+	appView := &models.ApplicationView{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.ContainerApp,
+		Services: []specV1.Service{
+			{
+				Name:     "Agent",
+				Hostname: "test-agent",
+				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "name",
+						MountPath: "mountPath",
+					},
+				},
+				Ports: []specV1.ContainerPort{
+					{
+						HostPort:      8080,
+						ContainerPort: 8080,
+					},
+				},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
+					},
+				},
+				Args: []string{"test"},
+				Env: []specV1.Environment{
+					{
+						Name:  "name",
+						Value: "value",
+					},
+				},
+			},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "name",
+				Config: &specV1.ObjectReference{
+					Name: "agent-conf",
+				},
+			},
+			{
+				Name: "secret",
+				Secret: &specV1.ObjectReference{
+					Name: "secret01",
+				},
+			},
+			{
+				Name: "certificate",
+				Certificate: &specV1.ObjectReference{
+					Name: "certificate01",
+				},
+			},
+		},
+		Registries: []models.RegistryView{
+			{
+				Name: "registry01",
+			},
+		},
+	}
+
+	config := &specV1.Configuration{}
+	secret := &specV1.Secret{}
+	secretRegistry := &specV1.Secret{
+		Name: "registry01",
+		Labels: map[string]string{
+			specV1.SecretLabel: specV1.SecretRegistry,
+		},
+	}
+	secretCertificate := &specV1.Secret{
+		Name: "certificate01",
+		Labels: map[string]string{
+			specV1.SecretLabel: specV1.SecretCustomCertificate,
+		},
+	}
+	app := &specV1.Application{
+		Name:              "abc",
+		Type:              common.ContainerApp,
+		Labels:            nil,
+		Namespace:         "baetyl-cloud",
+		CreationTimestamp: time.Time{},
+		Version:           "",
+		Selector:          "",
+		Services: []specV1.Service{
+			{
+				Name:     "Agent",
+				Hostname: "test-agent",
+				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "name",
+						MountPath: "mountPath",
+					},
+				},
+				Ports: []specV1.ContainerPort{
+					{
+						HostPort:      8080,
+						ContainerPort: 8080,
+					},
+				},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
+					},
+				},
+				Args: []string{"test"},
+				Env: []specV1.Environment{
+					{
+						Name:  "name",
+						Value: "value",
+					},
+				},
+			},
+		},
+		Volumes: []specV1.Volume{
+			{
+				Name: "name",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "agent-conf",
+					},
+				},
+			},
+			{
+				Name: "secret",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name: "secret01",
+					},
+				},
+			},
+			{
+				Name: "certificate",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name: "certificate01",
+					},
+				},
+			},
+			{
+				Name: "registry01",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name: "registry01",
+					},
+				},
+			},
+		},
+		Description: "",
+		System:      false,
+	}
+
+	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secret, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, app, nil).Return(app, nil)
+	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return([]string{}, nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secretRegistry, nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secretCertificate, nil).Times(1)
+
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(appView)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	appViewRes := &models.ApplicationView{}
+	err := json.Unmarshal(w.Body.Bytes(), appViewRes)
+	assert.NoError(t, err)
+	assert.Len(t, appViewRes.Volumes, 3)
+	assert.Len(t, appViewRes.Registries, 1)
+	assert.Equal(t, appViewRes.Registries, appView.Registries)
+	assert.Equal(t, appViewRes.Volumes, appView.Volumes)
+}
+
 func TestUpdateContainerApplication(t *testing.T) {
 	api, router, mockCtl := initApplicationAPI(t)
 	defer mockCtl.Finish()
@@ -625,47 +820,43 @@ func TestCreateFunctionApplication(t *testing.T) {
 	api.Func = sFunc
 
 	appView := &models.ApplicationView{
-		Application: specV1.Application{
-			Namespace: "baetyl-cloud",
-			Name:      "abc",
-			Type:      common.FunctionApp,
-			Services: []specV1.Service{
-				{
-					Name:     "Agent",
-					Hostname: "test-agent",
-					Replica:  1,
-					VolumeMounts: []specV1.VolumeMount{
-						{
-							Name:      "baetyl-function-code-Agent",
-							MountPath: "/var/lib/baetyl/code",
-						},
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.FunctionApp,
+		Services: []specV1.Service{
+			{
+				Name:     "Agent",
+				Hostname: "test-agent",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "baetyl-function-code-Agent",
+						MountPath: "/var/lib/baetyl/code",
 					},
-					Devices: []specV1.Device{
-						{
-							DevicePath: "DevicePath",
-						},
+				},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
 					},
-					FunctionConfig: &specV1.ServiceFunctionConfig{
-						Name:    "func1",
-						Runtime: "python36",
-					},
-					Functions: []specV1.ServiceFunction{
-						{
-							Name:    "process",
-							Handler: "index.handler",
-							CodeDir: "path",
-						},
+				},
+				FunctionConfig: &specV1.ServiceFunctionConfig{
+					Name:    "func1",
+					Runtime: "python36",
+				},
+				Functions: []specV1.ServiceFunction{
+					{
+						Name:    "process",
+						Handler: "index.handler",
+						CodeDir: "path",
 					},
 				},
 			},
-			Volumes: []specV1.Volume{
-				{
-					Name: "baetyl-function-code-Agent",
-					VolumeSource: specV1.VolumeSource{
-						Config: &specV1.ObjectReference{
-							Name: "func1",
-						},
-					},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "baetyl-function-code-Agent",
+				Config: &specV1.ObjectReference{
+					Name: "func1",
 				},
 			},
 		},
@@ -1189,99 +1380,91 @@ func TestUpdateFunctionApplication(t *testing.T) {
 		},
 	}
 	newAppView := &models.ApplicationView{
-		Application: specV1.Application{
-			Namespace: namespace,
-			Type:      common.FunctionApp,
-			Services: []specV1.Service{
-				{
-					Name:     "Agent2",
-					Hostname: "test-agent2",
-					Replica:  1,
-					VolumeMounts: []specV1.VolumeMount{
-						{
-							Name:      "baetyl-funciton-code-Agent2",
-							MountPath: "/var/lib/baetyl/code",
-						},
-						{
-							Name:      "baetyl-function-config-Agent2",
-							MountPath: "/etc/baetyl",
-						},
+		Namespace: namespace,
+		Type:      common.FunctionApp,
+		Services: []specV1.Service{
+			{
+				Name:     "Agent2",
+				Hostname: "test-agent2",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "baetyl-funciton-code-Agent2",
+						MountPath: "/var/lib/baetyl/code",
 					},
-					Devices: []specV1.Device{
-						{
-							DevicePath: "DevicePath",
-						},
-					},
-					Args: []string{"test"},
-					FunctionConfig: &specV1.ServiceFunctionConfig{
-						Name:    "func2",
-						Runtime: "python36",
-					},
-					Functions: []specV1.ServiceFunction{
-						{
-							Name:    "process2",
-							Handler: "index.handler",
-							CodeDir: "path",
-						},
-						{
-							Name:    "process2extra",
-							Handler: "index.handler",
-							CodeDir: "path",
-						},
+					{
+						Name:      "baetyl-function-config-Agent2",
+						MountPath: "/etc/baetyl",
 					},
 				},
-				{
-					Name:     "Agent3",
-					Hostname: "test-agent3",
-					Replica:  1,
-					VolumeMounts: []specV1.VolumeMount{
-						{
-							Name:      "baetyl-function-code-Agent2",
-							MountPath: "/var/lib/baetyl/code",
-						},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
 					},
-					Devices: []specV1.Device{
-						{
-							DevicePath: "DevicePath",
-						},
+				},
+				Args: []string{"test"},
+				FunctionConfig: &specV1.ServiceFunctionConfig{
+					Name:    "func2",
+					Runtime: "python36",
+				},
+				Functions: []specV1.ServiceFunction{
+					{
+						Name:    "process2",
+						Handler: "index.handler",
+						CodeDir: "path",
 					},
-					FunctionConfig: &specV1.ServiceFunctionConfig{
-						Name:    "func3",
-						Runtime: "python36",
-					},
-					Functions: []specV1.ServiceFunction{
-						{
-							Name:    "process3",
-							Handler: "index.handler",
-							CodeDir: "path",
-						},
+					{
+						Name:    "process2extra",
+						Handler: "index.handler",
+						CodeDir: "path",
 					},
 				},
 			},
-			Volumes: []specV1.Volume{
-				{
-					Name: "baetyl-function-code-Agent2",
-					VolumeSource: specV1.VolumeSource{
-						Config: &specV1.ObjectReference{
-							Name: "func2",
-						},
+			{
+				Name:     "Agent3",
+				Hostname: "test-agent3",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "baetyl-function-code-Agent2",
+						MountPath: "/var/lib/baetyl/code",
 					},
 				},
-				{
-					Name: "baetyl-function-code-Agent3",
-					VolumeSource: specV1.VolumeSource{
-						Config: &specV1.ObjectReference{
-							Name: "func3",
-						},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
 					},
 				},
-				{
-					Name: "baetyl-function-config-Agent2",
-					VolumeSource: specV1.VolumeSource{
-						Config: &specV1.ObjectReference{
-							Name: "baetyl-function-config-app-service-2",
-						},
+				FunctionConfig: &specV1.ServiceFunctionConfig{
+					Name:    "func3",
+					Runtime: "python36",
+				},
+				Functions: []specV1.ServiceFunction{
+					{
+						Name:    "process3",
+						Handler: "index.handler",
+						CodeDir: "path",
 					},
+				},
+			},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "baetyl-function-code-Agent2",
+				Config: &specV1.ObjectReference{
+					Name: "func2",
+				},
+			},
+			{
+				Name: "baetyl-function-code-Agent3",
+				Config: &specV1.ObjectReference{
+					Name: "func3",
+				},
+			},
+			{
+				Name: "baetyl-function-config-Agent2",
+				Config: &specV1.ObjectReference{
+					Name: "baetyl-function-config-app-service-2",
 				},
 			},
 		},
