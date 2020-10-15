@@ -29,7 +29,9 @@ const (
 	templateFuncConfYaml       = "baetyl-function-conf.yml"
 	templateFuncAppYaml        = "baetyl-function-app.yml"
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
-	TemplateKubeInitCommand    = `sudo mkdir -p -m 666 /var/lib/baetyl/host /var/lib/baetyl/object /var/lib/baetyl/store /var/lib/baetyl/log /var/lib/baetyl/run && curl -skfL '{{GetProperty "init-server-address"}}/v1/init/{{.InitApplyYaml}}?token={{.Token}}' -oinit.yml && kubectl apply -f init.yml`
+	TemplateBaetylInitCommand  = "baetyl-init-command"
+	TemplateKubeInitCommand    = "baetyl-kube-init-command"
+	TemplateNativeInitCommand  = "baetyl-native-init-command"
 )
 
 var (
@@ -50,6 +52,7 @@ type InitServiceImpl struct {
 	cfg             *config.CloudConfig
 	AuthService     AuthService
 	NodeService     NodeService
+	Property        PropertyService
 	TemplateService TemplateService
 	*AppCombinedService
 	PKI             PKIService
@@ -90,6 +93,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		cfg:                config,
 		AuthService:        authService,
 		NodeService:        nodeService,
+		Property:           propertyService,
 		TemplateService:    templateService,
 		AppCombinedService: acs,
 		PKI:                pki,
@@ -97,7 +101,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		ResourceMapFunc:    map[string]GetInitResource{},
 	}
 	initService.ResourceMapFunc[templateInitDeploymentYaml] = initService.getInitDeploymentYaml
-	initService.ResourceMapFunc[TemplateKubeInitCommand] = initService.GetInitCommand
+	initService.ResourceMapFunc[TemplateBaetylInitCommand] = initService.GetInitCommand
 
 	return initService, nil
 }
@@ -162,12 +166,20 @@ func (s *InitServiceImpl) GetInitCommand(ns, nodeName string, params map[string]
 		InfoName:      nodeName,
 		InfoExpiry:    time.Now().Unix() + CmdExpirationInSeconds,
 	}
+	kindMap := map[string]string{
+		"":       TemplateKubeInitCommand,
+		"native": TemplateNativeInitCommand,
+	}
+	initCommand, err := s.Property.GetPropertyValue(kindMap[params["mode"].(string)])
+	if err != nil {
+		return nil, err
+	}
 	token, err := s.AuthService.GenToken(info)
 	if err != nil {
 		return nil, err
 	}
 	params["Token"] = token
-	data, err := s.TemplateService.Execute("setup-command", TemplateKubeInitCommand, params)
+	data, err := s.TemplateService.Execute("setup-command", initCommand, params)
 	if err != nil {
 		return nil, err
 	}
