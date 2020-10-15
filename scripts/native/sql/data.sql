@@ -9,4 +9,7 @@ INSERT INTO `baetyl_property` (`name`, `value`) VALUES
 ('baetyl-version-latest', 'v2.1.0'),
 ('command-docker-installation', 'curl -sSL https://get.daocloud.io/docker | sh'),
 ('command-k3s-installation-containerd', 'curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC="--write-kubeconfig ~/.kube/config --write-kubeconfig-mode 666" sh -'),
-('command-k3s-installation-docker', 'curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC="--docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 666" sh -');
+('command-k3s-installation-docker', 'curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_EXEC="--docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 666" sh -'),
+('baetyl-kube-init-command', 'sudo mkdir -p -m 666 /var/lib/baetyl/host /var/lib/baetyl/object /var/lib/baetyl/store /var/lib/baetyl/log /var/lib/baetyl/run && curl -sfL '{{GetProperty "init-server-address"}}/v1/init/{{.InitApplyYaml}}?token={{.Token}}' -oinit.yml && kubectl delete -f init.yml --ignore-not-found=true && kubectl apply -f init.yml'),
+('baetyl-native-init-command', 'sudo mkdir -p -m 666 /var/lib/baetyl/host /var/lib/baetyl/object /var/lib/baetyl/store /var/lib/baetyl/log /var/lib/baetyl/run && baetyl apply -f '{{GetProperty "init-server-address"}}/v1/init/baetyl-init-apply.json?token={{.Token}}' --skip-verify=true'),
+('command-baetyl-installation', 'curl -sSL https://baetyl-repo-gz.gz.bcebos.com/v2/install.sh | sh');
