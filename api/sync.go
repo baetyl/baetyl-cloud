@@ -36,6 +36,7 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 		return nil, err
 	}
 
+	setNodeAddressIfExist(msg, &report)
 	desire, err := s.Sync.Report(msg.Metadata["namespace"], msg.Metadata["name"], report)
 	if err != nil {
 		return nil, err
@@ -64,4 +65,19 @@ func (s *SyncAPIImpl) Desire(msg specV1.Message) (*specV1.Message, error) {
 		Metadata: msg.Metadata,
 		Content:  specV1.LazyValue{Value: specV1.DesireResponse{Values: res}},
 	}, nil
+}
+
+func setNodeAddressIfExist(msg specV1.Message, report *specV1.Report) {
+	if addr, ok := msg.Metadata["address"]; !ok {
+		return
+	} else {
+		nodeVal, ok := (*report)["node"]
+		if ok {
+			node, ok := nodeVal.(map[string]interface{})
+			if ok {
+				node["address"] = addr
+				(*report)["node"] = node
+			}
+		}
+	}
 }
