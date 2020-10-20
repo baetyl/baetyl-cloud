@@ -85,7 +85,7 @@ data:
 
     database:
       type: "mysql"
-      url: "root:secretpassword@(mariadb:3306)/baetyl_cloud?charset=utf8&parseTime=true"
+      url: "root:secretpassword@(host.docker.internal:3306)/baetyl_cloud?charset=utf8&parseTime=true"
 
     defaultpki:
       rootCAFile: "/etc/baetyl/client_ca.crt"
