@@ -101,7 +101,10 @@ data:
       level: debug
       encoding: console
 
-  token.key: |-
+    template:
+      path: "/etc/templates"
+
+        token.key: |-
     -----BEGIN RSA PRIVATE KEY-----
     MIIEowIBAAKCAQEA41Ux2wPALzq5agrwhNOr0B+BYePAf5CrVPXtfFKmQDdOqBkB
     jM5M61cXyWkcET3d/nKyewvNvWjKjXbaWxxaHAbQsen/5vcte9drW5dVvAquYi45

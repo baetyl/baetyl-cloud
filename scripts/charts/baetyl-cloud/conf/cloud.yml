@@ -17,6 +17,9 @@ plugin:
   modelStorage: "kubernetes"
   databaseStorage: "database"
 
+template:
+  path: "/etc/templates"
+
 kubernetes:
   inCluster: true
 

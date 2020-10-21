@@ -32,15 +32,9 @@ spec:
           volumeMounts:
             - mountPath: /etc/baetyl
               name: config
-            - mountPath: /etc/baetyl/templates
-              name: templates
       volumes:
         - name: config
           configMap:
             name: baetyl-cloud-config
-            defaultMode: 256
-        - name: templates
-          configMap:
-            name: baetyl-cloud-templates
             defaultMode: 256
 
