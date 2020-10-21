@@ -20,9 +20,6 @@ plugin:
 template:
   path: "/etc/templates"
 
-kubernetes:
-  inCluster: true
-
 database:
   type: "mysql"
   url: "root:secretpassword@(mariadb:3306)/baetyl_cloud?charset=utf8&parseTime=true"
