@@ -8,8 +8,9 @@ podSecurityContext: {}
 securityContext: {}
 
 image:
-  repository: hub.baidubce.com/baetyl/cloud
-  tag: v2.0.0
+  # docker build -t baetyl-cloud:local-build -f Dockerfile-local .
+  repository: baetyl-cloud
+  tag: local-build
   pullPolicy: IfNotPresent
 
 baetylCloud:
