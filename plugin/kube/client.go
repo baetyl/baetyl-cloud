@@ -44,6 +44,7 @@ func New() (plugin.Plugin, error) {
 		return clientcmd.BuildConfigFromFlags(
 			"", cfg.Kube.ConfigPath)
 	}()
+	kubeConfig.QPS = -1
 
 	if err != nil {
 		return nil, err
