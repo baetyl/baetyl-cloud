@@ -168,6 +168,7 @@ func (s *InitServiceImpl) GetInitCommand(ns, nodeName string, params map[string]
 	}
 	kindMap := map[string]string{
 		"":       TemplateKubeInitCommand,
+		"kube":   TemplateKubeInitCommand,
 		"native": TemplateNativeInitCommand,
 	}
 	initCommand, err := s.Property.GetPropertyValue(kindMap[params["mode"].(string)])
