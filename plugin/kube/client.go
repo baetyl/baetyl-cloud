@@ -48,6 +48,7 @@ func New() (plugin.Plugin, error) {
 	if err != nil {
 		return nil, err
 	}
+	kubeConfig.QPS = -1
 	kubeClient, err := kubernetes.NewForConfig(kubeConfig)
 	if err != nil {
 		return nil, err
