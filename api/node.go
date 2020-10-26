@@ -359,5 +359,5 @@ func (api *API) ParseAndCheckNodeNames(c *common.Context) (*models.NodeNames, er
 }
 
 func (api *API) NodeNumberCollector(namespace string) (map[string]int, error) {
-	return api.Node.CountNumber(namespace)
+	return api.Node.Count(namespace)
 }

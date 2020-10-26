@@ -1076,20 +1076,15 @@ func TestAPI_NodeNumberCollector(t *testing.T) {
 	api.Node = sNode
 	namespace := "iotCoreId"
 
-	sNode.EXPECT().List(namespace, gomock.Any()).Return(nil, errors.New("error"))
+	sNode.EXPECT().Count(namespace).Return(nil, errors.New("error"))
 	_, err := api.NodeNumberCollector(namespace)
 	assert.Error(t, err)
 
-	list := &models.NodeList{
-		Items: []specV1.Node{
-			{
-				Namespace: namespace,
-				Name:      "test1",
-			},
-		},
+	list := map[string]int {
+		plugin.QuotaNode : 12,
 	}
-	sNode.EXPECT().List(namespace, gomock.Any()).Return(list, nil)
+	sNode.EXPECT().Count(namespace).Return(list, nil)
 	res, err := api.NodeNumberCollector(namespace)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, res[plugin.QuotaNode])
+	assert.Equal(t, 12, res[plugin.QuotaNode])
 }

@@ -19,7 +19,7 @@ import (
 type NodeService interface {
 	Get(namespace, name string) (*specV1.Node, error)
 	List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error)
-	CountNumber(namespace string) (map[string]int, error)
+	Count(namespace string) (map[string]int, error)
 	Create(namespace string, node *specV1.Node) (*specV1.Node, error)
 	Update(namespace string, node *specV1.Node) (*specV1.Node, error)
 	Delete(namespace, name string) error
@@ -147,8 +147,8 @@ func (n *nodeService) List(namespace string, listOptions *models.ListOptions) (*
 	return list, nil
 }
 
-// CountNumber get current node number
-func (n *nodeService) CountNumber(namespace string) (map[string]int, error) {
+// Count get current node number
+func (n *nodeService) Count(namespace string) (map[string]int, error) {
 	list, err := n.List(namespace, &models.ListOptions{})
 	if err != nil {
 		return nil, err
