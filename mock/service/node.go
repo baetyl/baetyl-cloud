@@ -34,6 +34,21 @@ func (m *MockNodeService) EXPECT() *MockNodeServiceMockRecorder {
 	return m.recorder
 }
 
+// CountNumber mocks base method
+func (m *MockNodeService) CountNumber(arg0 string) (map[string]int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountNumber", arg0)
+	ret0, _ := ret[0].(map[string]int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountNumber indicates an expected call of CountNumber
+func (mr *MockNodeServiceMockRecorder) CountNumber(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountNumber", reflect.TypeOf((*MockNodeService)(nil).CountNumber), arg0)
+}
+
 // Create mocks base method
 func (m *MockNodeService) Create(arg0 string, arg1 *v1.Node) (*v1.Node, error) {
 	m.ctrl.T.Helper()
