@@ -9,7 +9,6 @@ import (
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
@@ -360,11 +359,5 @@ func (api *API) ParseAndCheckNodeNames(c *common.Context) (*models.NodeNames, er
 }
 
 func (api *API) NodeNumberCollector(namespace string) (map[string]int, error) {
-	list, err := api.Node.List(namespace, &models.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	return map[string]int{
-		plugin.QuotaNode: len(list.Items),
-	}, nil
+	return api.Node.Count(namespace)
 }
