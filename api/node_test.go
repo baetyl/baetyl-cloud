@@ -916,7 +916,7 @@ func TestGenInitCmdFromNode(t *testing.T) {
 	node := getMockNode()
 	params := map[string]interface{}{
 		"InitApplyYaml": "baetyl-init-deployment.yml",
-		"mode":"",
+		"mode":          "",
 	}
 	var expect interface{} = []byte("setup")
 	sInit.EXPECT().GetResource("default", "abc", service.TemplateBaetylInitCommand, params).Return(expect, nil).Times(1)
@@ -1080,8 +1080,8 @@ func TestAPI_NodeNumberCollector(t *testing.T) {
 	_, err := api.NodeNumberCollector(namespace)
 	assert.Error(t, err)
 
-	list := map[string]int {
-		plugin.QuotaNode : 12,
+	list := map[string]int{
+		plugin.QuotaNode: 12,
 	}
 	sNode.EXPECT().Count(namespace).Return(list, nil)
 	res, err := api.NodeNumberCollector(namespace)
