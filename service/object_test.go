@@ -117,7 +117,6 @@ func TestObjectService_ListInternalObjects(t *testing.T) {
 
 	namespace := "default"
 	bucket := "test1"
-	mockObject.objectStorage.EXPECT().HeadInternalBucket(namespace, bucket).Return(nil).Times(1)
 	mockObject.objectStorage.EXPECT().ListInternalBucketObjects(namespace, bucket, gomock.Any()).Return(objectsResult, nil).Times(1)
 	cs, err := NewObjectService(mockObject.conf)
 	assert.NoError(t, err)
@@ -125,12 +124,6 @@ func TestObjectService_ListInternalObjects(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
 	assert.Equal(t, res, objectsResult)
-
-	namespace2 := "default2"
-	bucket2 := "test2"
-	mockObject.objectStorage.EXPECT().HeadInternalBucket(namespace2, bucket2).Return(errors.New("error")).Times(1)
-	_, err2 := cs.ListInternalBucketObjects(namespace2, bucket2, mockObject.conf.Plugin.Objects[0])
-	assert.Error(t, err2)
 }
 
 func TestObjectService_GenInternalObjectURL(t *testing.T) {
@@ -285,7 +278,6 @@ func TestObjectService_ListExternalObjects(t *testing.T) {
 	}
 
 	bucket := "test1"
-	mockObject.objectStorage.EXPECT().HeadExternalBucket(info, bucket).Return(nil).Times(1)
 	mockObject.objectStorage.EXPECT().ListExternalBucketObjects(info, bucket, gomock.Any()).Return(objectsResult, nil).Times(1)
 	cs, err := NewObjectService(mockObject.conf)
 	assert.NoError(t, err)
@@ -293,11 +285,6 @@ func TestObjectService_ListExternalObjects(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
 	assert.Equal(t, res, objectsResult)
-
-	bucket2 := "test2"
-	mockObject.objectStorage.EXPECT().HeadExternalBucket(info, bucket2).Return(errors.New("error")).Times(1)
-	_, err2 := cs.ListExternalBucketObjects(info, bucket2, mockObject.conf.Plugin.Objects[0])
-	assert.Error(t, err2)
 }
 
 func TestObjectService_GenExternalObjectURL(t *testing.T) {
