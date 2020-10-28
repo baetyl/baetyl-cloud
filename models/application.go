@@ -14,8 +14,8 @@ type ApplicationView struct {
 	CreationTimestamp time.Time         `json:"createTime,omitempty"`
 	Version           string            `json:"version,omitempty"`
 	Selector          string            `json:"selector,omitempty"`
-	Services          []specV1.Service  `json:"services,omitempty"`
-	Volumes           []VolumeView      `json:"volumes,omitempty"`
+	Services          []specV1.Service  `json:"services,omitempty" validate:"dive"`
+	Volumes           []VolumeView      `json:"volumes,omitempty" validate:"dive"`
 	Description       string            `json:"description,omitempty"`
 	System            bool              `json:"system,omitempty"`
 	Registries        []RegistryView    `json:"registries,omitempty"`
