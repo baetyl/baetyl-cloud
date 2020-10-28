@@ -28,7 +28,7 @@ func getMockContainerApp() *specV1.Application {
 		Type:      common.ContainerApp,
 		Services: []specV1.Service{
 			{
-				Name:     "Agent",
+				Name:     "agent",
 				Hostname: "test-agent",
 				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
 				Replica:  1,
@@ -87,16 +87,16 @@ func getMockFunctionApp() *specV1.Application {
 		Type:      common.FunctionApp,
 		Services: []specV1.Service{
 			{
-				Name:     "Agent",
+				Name:     "agent",
 				Hostname: "test-agent",
 				Replica:  1,
 				VolumeMounts: []specV1.VolumeMount{
 					{
-						Name:      "baetyl-function-code-Agent",
+						Name:      "baetyl-function-code-agent",
 						MountPath: "mountPath",
 					},
 					{
-						Name:      "baetyl-function-config-Agent",
+						Name:      "baetyl-function-config-agent",
 						MountPath: "mountPath",
 					},
 				},
@@ -120,7 +120,7 @@ func getMockFunctionApp() *specV1.Application {
 		},
 		Volumes: []specV1.Volume{
 			{
-				Name: "baetyl-function-code-Agent",
+				Name: "baetyl-function-code-agent",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "func1",
@@ -128,7 +128,7 @@ func getMockFunctionApp() *specV1.Application {
 				},
 			},
 			{
-				Name: "baetyl-function-config-Agent",
+				Name: "baetyl-function-config-agent",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "baetyl-function-app-service-xxxxxxxxx",
@@ -321,7 +321,7 @@ func TestCreateContainerApplication(t *testing.T) {
 		Type:      common.ContainerApp,
 		Services: []specV1.Service{
 			{
-				Name:     "Agent",
+				Name:     "agent",
 				Hostname: "test-agent",
 				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
 				Replica:  1,
@@ -543,7 +543,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		Type:      common.ContainerApp,
 		Services: []specV1.Service{
 			{
-				Name:     "Agent",
+				Name:     "agent",
 				Hostname: "test-agent",
 				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
 				Replica:  1,
@@ -624,7 +624,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		Selector:          "",
 		Services: []specV1.Service{
 			{
-				Name:     "Agent",
+				Name:     "agent",
 				Hostname: "test-agent",
 				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
 				Replica:  1,
@@ -825,12 +825,13 @@ func TestCreateFunctionApplication(t *testing.T) {
 		Type:      common.FunctionApp,
 		Services: []specV1.Service{
 			{
-				Name:     "Agent",
+				Name:     "agent",
 				Hostname: "test-agent",
 				Replica:  1,
+				Image:    "image",
 				VolumeMounts: []specV1.VolumeMount{
 					{
-						Name:      "baetyl-function-code-Agent",
+						Name:      "baetyl-function-code-agent",
 						MountPath: "/var/lib/baetyl/code",
 					},
 				},
@@ -854,7 +855,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 		},
 		Volumes: []models.VolumeView{
 			{
-				Name: "baetyl-function-code-Agent",
+				Name: "baetyl-function-code-agent",
 				Config: &specV1.ObjectReference{
 					Name: "func1",
 				},
@@ -966,7 +967,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 	data, err := json.Marshal(&functions)
 	assert.NoError(t, err)
 	config = &specV1.Configuration{
-		Name: fmt.Sprintf("baetyl-function-%s-%s-%s", app.Name, "Agent", common.RandString(9)),
+		Name: fmt.Sprintf("baetyl-function-%s-%s-%s", app.Name, "agent", common.RandString(9)),
 		Labels: map[string]string{
 			common.LabelSystem: "true",
 		},
@@ -1014,17 +1015,17 @@ func TestCreateFunctionApplication(t *testing.T) {
 		Type:      common.FunctionApp,
 		Services: []specV1.Service{
 			{
-				Name:     "Agent",
+				Name:     "agent",
 				Image:    "image",
 				Hostname: "test-agent",
 				Replica:  1,
 				VolumeMounts: []specV1.VolumeMount{
 					{
-						Name:      "baetyl-function-code-Agent",
+						Name:      "baetyl-function-code-agent",
 						MountPath: "/var/lib/baetyl/code",
 					},
 					{
-						Name:      "baetyl-function-config-Agent",
+						Name:      "baetyl-function-config-agent",
 						MountPath: "/etc/baetyl",
 					},
 				},
@@ -1048,7 +1049,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 		},
 		Volumes: []specV1.Volume{
 			{
-				Name: "baetyl-function-code-Agent",
+				Name: "baetyl-function-code-agent",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "func1",
@@ -1056,7 +1057,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 				},
 			},
 			{
-				Name: "baetyl-function-config-Agent",
+				Name: "baetyl-function-config-agent",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "baetyl-function-app-service-xxx",
@@ -1118,16 +1119,17 @@ func TestUpdateFunctionApplication(t *testing.T) {
 		Type:      common.FunctionApp,
 		Services: []specV1.Service{
 			{
-				Name:     "Agent",
+				Name:     "agent",
 				Hostname: "test-agent",
 				Replica:  1,
+				Image:    "image",
 				VolumeMounts: []specV1.VolumeMount{
 					{
-						Name:      "baetyl-function-code-Agent",
+						Name:      "baetyl-function-code-agent",
 						MountPath: "/var/lib/baetyl/code",
 					},
 					{
-						Name:      "baetyl-function-config-Agent",
+						Name:      "baetyl-function-config-agent",
 						MountPath: "/etc/baetyl",
 					},
 				},
@@ -1142,16 +1144,17 @@ func TestUpdateFunctionApplication(t *testing.T) {
 				},
 			},
 			{
-				Name:     "Agent2",
+				Name:     "agent2",
 				Hostname: "test-agent2",
 				Replica:  1,
+				Image:    "image2",
 				VolumeMounts: []specV1.VolumeMount{
 					{
-						Name:      "baetyl-function-code-Agent2",
+						Name:      "baetyl-function-code-agent2",
 						MountPath: "/var/lib/baetyl/code",
 					},
 					{
-						Name:      "baetyl-function-config-Agent2",
+						Name:      "baetyl-function-config-agent2",
 						MountPath: "/etc/baetyl",
 					},
 				},
@@ -1169,7 +1172,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 		},
 		Volumes: []specV1.Volume{
 			{
-				Name: "baetyl-funciton-code-Agent",
+				Name: "baetyl-funciton-code-agent",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "func1",
@@ -1177,7 +1180,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 				},
 			},
 			{
-				Name: "baetyl-function-code-Agent2",
+				Name: "baetyl-function-code-agent2",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "func2",
@@ -1185,7 +1188,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 				},
 			},
 			{
-				Name: "baetyl-function-config-Agent",
+				Name: "baetyl-function-config-agent",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "baetyl-function-config-app-service-1",
@@ -1193,7 +1196,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 				},
 			},
 			{
-				Name: "baetyl-function-config-Agent2",
+				Name: "baetyl-function-config-agent2",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "baetyl-function-config-app-service-2",
@@ -1215,7 +1218,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	data2, err := json.Marshal(&functions2)
 	assert.NoError(t, err)
 	config2 := &specV1.Configuration{
-		Name: fmt.Sprintf("baetyl-function-config-%s-%s-%s", oldApp.Name, "Agent", common.RandString(9)),
+		Name: fmt.Sprintf("baetyl-function-config-%s-%s-%s", oldApp.Name, "agent", common.RandString(9)),
 		Labels: map[string]string{
 			common.LabelSystem: "true",
 		},
@@ -1241,7 +1244,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	data2extra, err := json.Marshal(&functions2extra)
 	assert.NoError(t, err)
 	config2extra := &specV1.Configuration{
-		Name: fmt.Sprintf("baetyl-function-config-%s-%s-%s", oldApp.Name, "Agent", common.RandString(9)),
+		Name: fmt.Sprintf("baetyl-function-config-%s-%s-%s", oldApp.Name, "agent", common.RandString(9)),
 		Labels: map[string]string{
 			common.LabelSystem: "true",
 		},
@@ -1262,7 +1265,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	data3, err := json.Marshal(&functions3)
 	assert.NoError(t, err)
 	config3 := &specV1.Configuration{
-		Name: fmt.Sprintf("baetyl-function-config-%s-%s-%s", oldApp.Name, "Agent", common.RandString(9)),
+		Name: fmt.Sprintf("baetyl-function-config-%s-%s-%s", oldApp.Name, "agent", common.RandString(9)),
 		Labels: map[string]string{
 			common.LabelSystem: "true",
 		},
@@ -1277,16 +1280,17 @@ func TestUpdateFunctionApplication(t *testing.T) {
 		Type:      common.FunctionApp,
 		Services: []specV1.Service{
 			{
-				Name:     "Agent2",
+				Name:     "agent2",
 				Hostname: "test-agent2",
 				Replica:  1,
+				Image:    "image2",
 				VolumeMounts: []specV1.VolumeMount{
 					{
-						Name:      "baetyl-function-code-Agent2",
+						Name:      "baetyl-function-code-agent2",
 						MountPath: "/var/lib/baetyl/code",
 					},
 					{
-						Name:      "baetyl-function-config-Agent2",
+						Name:      "baetyl-function-config-agent2",
 						MountPath: "/etc/baetyl",
 					},
 				},
@@ -1313,16 +1317,17 @@ func TestUpdateFunctionApplication(t *testing.T) {
 				},
 			},
 			{
-				Name:     "Agent3",
+				Name:     "agent3",
 				Hostname: "test-agent3",
 				Replica:  1,
+				Image:    "image2",
 				VolumeMounts: []specV1.VolumeMount{
 					{
-						Name:      "baetyl-function-code-Agent3",
+						Name:      "baetyl-function-code-agent3",
 						MountPath: "/var/lib/baetyl/code",
 					},
 					{
-						Name:      "baetyl-function-config-Agent3",
+						Name:      "baetyl-function-config-agent3",
 						MountPath: "/etc/baetyl",
 					},
 				},
@@ -1346,7 +1351,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 		},
 		Volumes: []specV1.Volume{
 			{
-				Name: "baetyl-function-code-Agent2",
+				Name: "baetyl-function-code-agent2",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "func2",
@@ -1354,7 +1359,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 				},
 			},
 			{
-				Name: "baetyl-function-code-Agent3",
+				Name: "baetyl-function-code-agent3",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "func3",
@@ -1362,7 +1367,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 				},
 			},
 			{
-				Name: "baetyl-function-config-Agent2",
+				Name: "baetyl-function-config-agent2",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "baetyl-function-config-app-service-2",
@@ -1370,7 +1375,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 				},
 			},
 			{
-				Name: "baetyl-function-config-Agent3",
+				Name: "baetyl-function-config-agent3",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "baetyl-function-config-app-service-3",
@@ -1384,16 +1389,17 @@ func TestUpdateFunctionApplication(t *testing.T) {
 		Type:      common.FunctionApp,
 		Services: []specV1.Service{
 			{
-				Name:     "Agent2",
+				Name:     "agent2",
 				Hostname: "test-agent2",
 				Replica:  1,
+				Image:    "image2",
 				VolumeMounts: []specV1.VolumeMount{
 					{
-						Name:      "baetyl-funciton-code-Agent2",
+						Name:      "baetyl-funciton-code-agent2",
 						MountPath: "/var/lib/baetyl/code",
 					},
 					{
-						Name:      "baetyl-function-config-Agent2",
+						Name:      "baetyl-function-config-agent2",
 						MountPath: "/etc/baetyl",
 					},
 				},
@@ -1421,12 +1427,13 @@ func TestUpdateFunctionApplication(t *testing.T) {
 				},
 			},
 			{
-				Name:     "Agent3",
+				Name:     "agent3",
 				Hostname: "test-agent3",
 				Replica:  1,
+				Image:    "image3",
 				VolumeMounts: []specV1.VolumeMount{
 					{
-						Name:      "baetyl-function-code-Agent2",
+						Name:      "baetyl-function-code-agent2",
 						MountPath: "/var/lib/baetyl/code",
 					},
 				},
@@ -1450,19 +1457,19 @@ func TestUpdateFunctionApplication(t *testing.T) {
 		},
 		Volumes: []models.VolumeView{
 			{
-				Name: "baetyl-function-code-Agent2",
+				Name: "baetyl-function-code-agent2",
 				Config: &specV1.ObjectReference{
 					Name: "func2",
 				},
 			},
 			{
-				Name: "baetyl-function-code-Agent3",
+				Name: "baetyl-function-code-agent3",
 				Config: &specV1.ObjectReference{
 					Name: "func3",
 				},
 			},
 			{
-				Name: "baetyl-function-config-Agent2",
+				Name: "baetyl-function-config-agent2",
 				Config: &specV1.ObjectReference{
 					Name: "baetyl-function-config-app-service-2",
 				},
@@ -1573,7 +1580,7 @@ func TestDeleteApplication(t *testing.T) {
 		Type:      common.FunctionApp,
 		Services: []specV1.Service{
 			{
-				Name:     "Agent",
+				Name:     "agent",
 				Hostname: "test-agent",
 				Replica:  1,
 				VolumeMounts: []specV1.VolumeMount{
@@ -1606,7 +1613,7 @@ func TestDeleteApplication(t *testing.T) {
 		},
 		Volumes: []specV1.Volume{
 			{
-				Name: "baetyl-function-code-Agent",
+				Name: "baetyl-function-code-agent",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "func1",
@@ -1614,7 +1621,7 @@ func TestDeleteApplication(t *testing.T) {
 				},
 			},
 			{
-				Name: "baetyl-function-conf-Agent",
+				Name: "baetyl-function-conf-agent",
 				VolumeSource: specV1.VolumeSource{
 					Config: &specV1.ObjectReference{
 						Name: "baetyl-function-config-app-service-xxxxxxxxx",
