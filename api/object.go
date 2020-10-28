@@ -24,10 +24,10 @@ func (api *API) ListBucketsV2(c *common.Context) (interface{}, error) {
 	}
 
 	var res []models.Bucket
-	if params.Account == CurrentAccount {
-		res, err = api.Obj.ListInternalBuckets(c.GetUser().ID, params.Source)
-	} else {
+	if params.Account == OtherAccount {
 		res, err = api.Obj.ListExternalBuckets(params.ExternalObjectInfo, params.Source)
+	} else {
+		res, err = api.Obj.ListInternalBuckets(c.GetUser().ID, params.Source)
 	}
 	if err != nil {
 		return nil, err
@@ -43,10 +43,10 @@ func (api *API) ListBucketObjectsV2(c *common.Context) (interface{}, error) {
 	}
 
 	res := new(models.ListObjectsResult)
-	if params.Account == CurrentAccount {
-		res, err = api.Obj.ListInternalBucketObjects(c.GetUser().ID, params.Bucket, params.Source)
-	} else {
+	if params.Account == OtherAccount {
 		res, err = api.Obj.ListExternalBucketObjects(params.ExternalObjectInfo, params.Bucket, params.Source)
+	} else {
+		res, err = api.Obj.ListInternalBucketObjects(c.GetUser().ID, params.Bucket, params.Source)
 	}
 	if err != nil {
 		return nil, err
@@ -68,11 +68,7 @@ func (api *API) parseObject(c *common.Context) (*models.ObjectRequestParams, err
 	params.Source = c.Param("source")
 	params.Bucket = c.Param("bucket")
 
-	if params.Account != CurrentAccount && params.Account != OtherAccount {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the parameter 'account' must be 'current' or 'other'"))
-	}
-
-	if params.Account == CurrentAccount {
+	if params.Account != OtherAccount {
 		return params, nil
 	}
 
