@@ -70,10 +70,6 @@ func (c *objectService) ListInternalBucketObjects(userID, bucket, source string)
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
-	err := objectPlugin.HeadInternalBucket(userID, bucket)
-	if err != nil {
-		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "objects"), common.Field("name", bucket))
-	}
 	return objectPlugin.ListInternalBucketObjects(userID, bucket, &models.ObjectParams{})
 }
 
@@ -130,10 +126,6 @@ func (c *objectService) ListExternalBucketObjects(info models.ExternalObjectInfo
 	objectPlugin, ok := c.objects[source]
 	if !ok {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
-	}
-	err := objectPlugin.HeadExternalBucket(info, bucket)
-	if err != nil {
-		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "objects"), common.Field("name", bucket))
 	}
 	return objectPlugin.ListExternalBucketObjects(info, bucket, &models.ObjectParams{})
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
-const offlineDuration = 40 * time.Second
+const OfflineDuration = 40 * time.Second
 
 // GetNode get a node
 func (api *API) GetNode(c *common.Context) (interface{}, error) {
@@ -22,7 +22,7 @@ func (api *API) GetNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view, err := node.View(offlineDuration)
+	view, err := node.View(OfflineDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 			}
 			return nil, err
 		}
-		view, err := node.View(offlineDuration)
+		view, err := node.View(OfflineDuration)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view, err := node.View(offlineDuration)
+	view, err := node.View(OfflineDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 		n := &nodeList.Items[idx]
 
 		var view *v1.NodeView
-		view, err = n.View(offlineDuration)
+		view, err = n.View(OfflineDuration)
 		if err != nil {
 			return nil, err
 		}
@@ -148,7 +148,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		}
 	}
 
-	view, err := node.View(offlineDuration)
+	view, err := node.View(OfflineDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view, err := node.View(offlineDuration)
+	view, err := node.View(OfflineDuration)
 	if err != nil {
 		return nil, err
 	}
