@@ -30,7 +30,7 @@ func (api *API) GetConfig(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return api.toConfigurationView(config)
+	return api.ToConfigurationView(config)
 }
 
 // ListConfig list config
@@ -74,7 +74,7 @@ func (api *API) CreateConfig(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return api.toConfigurationView(config)
+	return api.ToConfigurationView(config)
 }
 
 // UpdateConfig update the config
@@ -91,7 +91,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 	}
 
 	if models.EqualConfig(res, config) {
-		return api.toConfigurationView(res)
+		return api.ToConfigurationView(res)
 	}
 
 	config.Version = res.Version
@@ -113,7 +113,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return api.toConfigurationView(res)
+	return api.ToConfigurationView(res)
 }
 
 // DeleteConfig delete the config
@@ -202,7 +202,7 @@ func (api *API) parseAndCheckConfigView(c *common.Context) (*specV1.Configuratio
 		}
 	}
 
-	config, err := api.toConfiguration(c.GetUser().ID, configView)
+	config, err := api.ToConfiguration(c.GetUser().ID, configView)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +250,7 @@ func needUpdateApp(config *specV1.Configuration, app *specV1.Application) bool {
 	return appNeedUpdate
 }
 
-func (api *API) toConfigurationView(config *specV1.Configuration) (*models.ConfigurationView, error) {
+func (api *API) ToConfigurationView(config *specV1.Configuration) (*models.ConfigurationView, error) {
 	configView := new(models.ConfigurationView)
 	err := copier.Copy(configView, config)
 	if err != nil {
@@ -287,7 +287,7 @@ func (api *API) toConfigurationView(config *specV1.Configuration) (*models.Confi
 	return configView, nil
 }
 
-func (api *API) toConfiguration(userID string, configView *models.ConfigurationView) (*specV1.Configuration, error) {
+func (api *API) ToConfiguration(userID string, configView *models.ConfigurationView) (*specV1.Configuration, error) {
 	config := new(specV1.Configuration)
 	err := copier.Copy(config, configView)
 	if err != nil {
