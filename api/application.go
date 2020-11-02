@@ -30,7 +30,7 @@ func (api *API) GetApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return api.toApplicationView(app)
+	return api.ToApplicationView(app)
 }
 
 // ListApplication list application
@@ -76,7 +76,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "the type of baseApp is conflicted"))
 	}
 
-	app, configs, err := api.toApplication(appView, nil)
+	app, configs, err := api.ToApplication(appView, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return api.toApplicationView(app)
+	return api.ToApplicationView(app)
 }
 
 // UpdateApplication update the application
@@ -119,7 +119,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	}
 
 	appView.Version = oldApp.Version
-	app, configs, err := api.toApplication(appView, oldApp)
+	app, configs, err := api.ToApplication(appView, oldApp)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 
 	api.cleanGeneratedConfigsOfFunctionApp(configs, oldApp)
 
-	return api.toApplicationView(app)
+	return api.ToApplicationView(app)
 }
 
 // DeleteApplication delete the application
@@ -271,7 +271,7 @@ func (api *API) DeleteNodeAndAppIndex(namespace string, app *specV1.Application)
 	return api.Index.RefreshNodesIndexByApp(namespace, app.Name, make([]string, 0))
 }
 
-func (api *API) toApplicationView(app *specV1.Application) (*models.ApplicationView, error) {
+func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationView, error) {
 	appView := &models.ApplicationView{}
 	copier.Copy(appView, app)
 
@@ -308,7 +308,7 @@ func (api *API) toApplicationView(app *specV1.Application) (*models.ApplicationV
 	return appView, nil
 }
 
-func (api *API) toApplication(appView *models.ApplicationView, oldApp *specV1.Application) (*specV1.Application, []specV1.Configuration, error) {
+func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Application) (*specV1.Application, []specV1.Configuration, error) {
 	app := new(specV1.Application)
 	copier.Copy(app, appView)
 
