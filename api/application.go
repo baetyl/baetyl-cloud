@@ -200,6 +200,9 @@ func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, er
 			if v.FunctionConfig != nil || v.Functions != nil {
 				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "add function info in container app"))
 			}
+			if v.Image == "" {
+				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "image is required in container app"))
+			}
 		}
 	} else if app.Type == common.FunctionApp {
 		for _, v := range app.Services {
