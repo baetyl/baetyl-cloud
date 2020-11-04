@@ -16,21 +16,21 @@ import (
 // GetSecret get a secret
 func (api *API) GetSecret(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapSecret(api.Secret.Get(ns, n, ""))
-	if res == nil {
-		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "secret"), common.Field("name", n))
+	res, err := api.Secret.Get(ns, n, "")
+	if err != nil {
+		return nil, err
 	}
-	return res, err
+	return api.ToSecretView(res)
 }
 
 // ListSecret list secret
 func (api *API) ListSecret(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	res, err := wrapSecretList(api.Secret.List(ns, api.parseListOptionsAppendSystemLabel(c)))
+	res, err := api.Secret.List(ns, api.parseListOptionsAppendSystemLabel(c))
 	if err != nil {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+		return nil, err
 	}
-	return res, err
+	return api.ToSecretViewList(res)
 }
 
 // CreateSecret create one secret
@@ -49,7 +49,11 @@ func (api *API) CreateSecret(c *common.Context) (interface{}, error) {
 	if sd != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
-	return wrapSecret(api.Secret.Create(ns, cfg.ToSecret()))
+	res, err := api.Secret.Create(ns, cfg.ToSecret())
+	if err != nil {
+		return nil, err
+	}
+	return api.ToSecretView(res)
 }
 
 // UpdateSecret update the secret
@@ -59,7 +63,11 @@ func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	sd, err := wrapSecret(api.Secret.Get(ns, n, ""))
+	oldSecret, err := api.Secret.Get(ns, n, "")
+	if err != nil {
+		return nil, err
+	}
+	sd, err := api.ToSecretView(oldSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +76,11 @@ func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
 	}
 	cfg.Version = sd.Version
 	cfg.UpdateTimestamp = time.Now()
-	res, err := wrapSecret(api.Secret.Update(ns, cfg.ToSecret()))
+	secret, err := api.Secret.Update(ns, cfg.ToSecret())
+	if err != nil {
+		return nil, err
+	}
+	res, err := api.ToSecretView(secret)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +100,11 @@ func (api *API) DeleteSecret(c *common.Context) (interface{}, error) {
 // GetAppBySecret list app
 func (api *API) GetAppBySecret(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapSecret(api.Secret.Get(ns, n, ""))
+	secret, err := api.Secret.Get(ns, n, "")
+	if err != nil {
+		return nil, err
+	}
+	res, err := api.ToSecretView(secret)
 	if err != nil {
 		return nil, err
 	}
@@ -113,18 +129,18 @@ func (api *API) parseAndCheckSecretModel(c *common.Context) (*models.SecretView,
 	return secret, err
 }
 
-func wrapSecret(s *specV1.Secret, e error) (*models.SecretView, error) {
+func (api *API) ToSecretView(s *specV1.Secret) (*models.SecretView, error) {
 	if s != nil {
-		return models.FromSecretToView(s), e
+		return models.FromSecretToView(s), nil
 	}
-	return nil, e
+	return nil, nil
 }
 
-func wrapSecretList(s *models.SecretList, e error) (*models.SecretViewList, error) {
+func (api *API) ToSecretViewList(s *models.SecretList) (*models.SecretViewList, error) {
 	if s != nil {
-		return models.FromSecretListToView(s), e
+		return models.FromSecretListToView(s), nil
 	}
-	return nil, e
+	return nil, nil
 }
 
 func wrapSecretListOption(lo *models.ListOptions) *models.ListOptions {
