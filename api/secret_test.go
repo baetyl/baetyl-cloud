@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -62,8 +61,8 @@ func TestGetSecret(t *testing.T) {
 		},
 	}
 
-	sSecret.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(mConf2, nil)
-	sSecret.EXPECT().Get(mConf.Namespace, "cba", "").Return(nil, fmt.Errorf("error"))
+	sSecret.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(mConf2, nil).Times(1)
+	sSecret.EXPECT().Get(mConf.Namespace, "cba", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/secrets/abc", nil)
