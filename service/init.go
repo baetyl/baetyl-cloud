@@ -28,8 +28,13 @@ const (
 	templateCoreAppYaml        = "baetyl-core-app.yml"
 	templateFuncConfYaml       = "baetyl-function-conf.yml"
 	templateFuncAppYaml        = "baetyl-function-app.yml"
+<<<<<<< HEAD
 	templateBrokerConfYaml     = "baetyl-broker-conf.yml"
 	templateBrokerAppYaml      = "baetyl-broker-app.yml"
+=======
+	templateBrokerConfYaml       = "baetyl-broker-conf.yml"
+	templateBrokerAppYaml        = "baetyl-broker-app.yml"
+>>>>>>> add broker sysapp
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
 	TemplateBaetylInitCommand  = "baetyl-init-command"
 	TemplateKubeInitCommand    = "baetyl-kube-init-command"
