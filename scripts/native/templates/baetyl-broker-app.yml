@@ -6,7 +6,7 @@ labels:
 type: "container"
 system: true
 services:
-  - name: "broker-broekr"
+  - name: "baetyl-broker"
     image: "{{GetProperty "baetyl-broker-image"}}"
     replica: 1
     volumeMounts:

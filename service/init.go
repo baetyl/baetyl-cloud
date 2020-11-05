@@ -28,8 +28,8 @@ const (
 	templateCoreAppYaml        = "baetyl-core-app.yml"
 	templateFuncConfYaml       = "baetyl-function-conf.yml"
 	templateFuncAppYaml        = "baetyl-function-app.yml"
-	templateBrokerConfYaml       = "baetyl-broker-conf.yml"
-	templateBrokerAppYaml        = "baetyl-broker-app.yml"
+	templateBrokerConfYaml     = "baetyl-broker-conf.yml"
+	templateBrokerAppYaml      = "baetyl-broker-app.yml"
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
 	TemplateBaetylInitCommand  = "baetyl-init-command"
 	TemplateKubeInitCommand    = "baetyl-kube-init-command"
@@ -308,8 +308,8 @@ func (s *InitServiceImpl) genBrokerApp(ns, nodeName string, params map[string]in
 	confName := fmt.Sprintf("baetyl-broker-conf-%s", common.RandString(9))
 	// create config
 	confMap := map[string]interface{}{
-		"Namespace":        ns,
-		"NodeName":         nodeName,
+		"Namespace":      ns,
+		"NodeName":       nodeName,
 		"BrokerAppName":  appName,
 		"BrokerConfName": confName,
 	}
@@ -323,8 +323,8 @@ func (s *InitServiceImpl) genBrokerApp(ns, nodeName string, params map[string]in
 
 	// create application
 	appMap := map[string]interface{}{
-		"Namespace":           ns,
-		"NodeName":            nodeName,
+		"Namespace":         ns,
+		"NodeName":          nodeName,
 		"BrokerAppName":     appName,
 		"BrokerConfName":    conf.Name,
 		"BrokerConfVersion": conf.Version,
