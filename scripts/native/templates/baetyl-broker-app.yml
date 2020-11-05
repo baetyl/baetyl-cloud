@@ -1,0 +1,23 @@
+name: "{{.BrokerAppName}}"
+namespace: "{{.Namespace}}"
+selector: "baetyl-node-name={{.NodeName}}"
+labels:
+  baetyl-cloud-system: "true"
+type: "container"
+system: true
+services:
+  - name: "baetyl-broker"
+    image: "{{GetProperty "baetyl-broker-image"}}"
+    replica: 1
+    volumeMounts:
+      - name: "broker-conf"
+        mountPath: "/etc/baetyl"
+        readOnly: true
+    ports:
+      - containerPort: 50010
+        protocol: "TCP"
+volumes:
+  - name: "broker-conf"
+    config:
+      name: "{{.BrokerConfName}}"
+      version: "{{.BrokerConfVersion}}"

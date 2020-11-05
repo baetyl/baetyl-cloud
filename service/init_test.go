@@ -220,13 +220,15 @@ func TestInitService_GenApps(t *testing.T) {
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-core-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-app.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-broker-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-broker-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sPKI.EXPECT().SignClientCertificate("ns.abc", gomock.Any()).Return(cert, nil)
 	sPKI.EXPECT().GetCA().Return([]byte("RootCA"), nil)
-	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(2)
+	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(3)
 	sSecret.EXPECT().Create("ns", gomock.Any()).Return(secret, nil).Times(1)
-	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(2)
+	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(3)
 
 	out, err := is.GenApps("ns", "abc")
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(out))
+	assert.Equal(t, 3, len(out))
 }
