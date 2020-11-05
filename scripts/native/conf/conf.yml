@@ -27,7 +27,7 @@ database:
   type: "mysql"
   # kubectl port-forward --namespace default svc/mariadb 3306:3306
   url: "root:secretpassword@(localhost:3306)/baetyl_cloud?charset=utf8&parseTime=true"
-  
+
 defaultpki:
   rootCAFile: "./certs/client_ca.crt"
   rootCAKeyFile: "./certs/client_ca.key"

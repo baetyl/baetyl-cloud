@@ -18,7 +18,7 @@ import (
 
 // SyncService sync service
 type SyncService interface {
-	Report(namespace, name string, report specV1.Report) (specV1.Desire, error)
+	Report(namespace, name string, report specV1.Report) (specV1.Delta, error)
 	Desire(namespace string, infos []specV1.ResourceInfo, metadata map[string]string) ([]specV1.ResourceValue, error)
 }
 
@@ -73,7 +73,7 @@ func NewSyncService(config *config.CloudConfig) (SyncService, error) {
 	return es, nil
 }
 
-func (t *SyncServiceImpl) Report(namespace, name string, report specV1.Report) (specV1.Desire, error) {
+func (t *SyncServiceImpl) Report(namespace, name string, report specV1.Report) (specV1.Delta, error) {
 	shadow, err := t.NodeService.UpdateReport(namespace, name, report)
 	if err != nil {
 		log.L().Error("failed to update node reported status",
@@ -93,16 +93,55 @@ func (t *SyncServiceImpl) Report(namespace, name string, report specV1.Report) (
 		return nil, err
 	}
 
-	delta, err := shadow.Desire.Diff(shadow.Report)
+	node, err := t.NodeService.Get(namespace, name)
 	if err != nil {
-		log.L().Error("failed to calculate node delta",
+		log.L().Error("failed to get node",
 			log.Any(common.KeyContextNamespace, namespace),
 			log.Any("name", name),
 			log.Error(err))
 		return nil, err
 	}
+	var syncMode string
+	if node.Attributes == nil {
+		node.Attributes = map[string]interface{}{}
+	}
+	if syncModeVal, ok := node.Attributes[common.KeySyncMode]; ok {
+		syncMode, ok = syncModeVal.(string)
+		if !ok {
+			log.L().Error("invalid sync mode value",
+				log.Any(common.KeyContextNamespace, namespace),
+				log.Any("name", name),
+				log.Error(err))
+		}
+	}
+
+	var delta specV1.Delta
+	if syncMode == "" || syncMode == string(common.CloudMode) {
+		delta, err = shadow.Desire.DiffWithNil(extractComparingReport(shadow.Report))
+		if err != nil {
+			log.L().Error("failed to calculate node delta",
+				log.Any(common.KeyContextNamespace, namespace),
+				log.Any("name", name),
+				log.Error(err))
+			return nil, err
+		}
+	}
 
 	return delta, nil
+}
+
+func extractComparingReport(report specV1.Report) specV1.Report {
+	res := map[string]interface{}{}
+	if apps, ok := report["apps"]; ok {
+		res["apps"] = apps
+	}
+	if sysapps, ok := report["sysapps"]; ok {
+		res["sysapps"] = sysapps
+	}
+	if nodeTwin, ok := report[common.NodeProps]; ok {
+		res[common.NodeProps] = nodeTwin
+	}
+	return res
 }
 
 func (t *SyncServiceImpl) Desire(namespace string, crdInfos []specV1.ResourceInfo, metadata map[string]string) ([]specV1.ResourceValue, error) {

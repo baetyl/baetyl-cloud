@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -33,6 +34,10 @@ type NodeService interface {
 
 	UpdateNodeAppVersion(namespace string, app *specV1.Application) ([]string, error)
 	DeleteNodeAppVersion(namespace string, app *specV1.Application) ([]string, error)
+
+	GetNodeProperties(ns, name string) (*models.NodeProperties, error)
+	UpdateNodeProperties(ns, name string, props *models.NodeProperties) (*models.NodeProperties, error)
+	UpdateNodeMode(ns, name, mode string) error
 }
 
 type nodeService struct {
@@ -218,6 +223,41 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 		}
 	}
 
+	// update node props meta
+	node, err := n.storage.GetNode(namespace, name)
+	if err != nil {
+		return nil, err
+	}
+	meta, err := getNodePropertiesMeta(node)
+	if err != nil {
+		return nil, err
+	}
+	oldReport := map[string]interface{}{}
+	if props, ok := shadow.Report[common.NodeProps]; ok {
+		oldReport, ok = props.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid report of node properties")
+		}
+	}
+	newReport := map[string]interface{}{}
+	if props, ok := report[common.NodeProps]; ok {
+		newReport, ok = props.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid report of node properties")
+		}
+	}
+	diff, err := specV1.Desire(oldReport).DiffWithNil(newReport)
+	now := time.Now().UTC().String()
+	for key, val := range diff {
+		meta.ReportMeta[key] = now
+		if val == nil {
+			delete(meta.ReportMeta, key)
+		}
+	}
+	setNodePropertiesMeta(node, meta)
+	if _, err := n.storage.UpdateNode(namespace, node); err != nil {
+		return nil, err
+	}
 	return n.shadow.UpdateReport(shadow)
 }
 
@@ -437,4 +477,201 @@ func toShadowMap(shadowList *models.ShadowList) map[string]*models.Shadow {
 	}
 
 	return shadowMap
+}
+
+func (n *nodeService) GetNodeProperties(namespace, name string) (*models.NodeProperties, error) {
+	node, err := n.storage.GetNode(namespace, name)
+	if err != nil {
+		return nil, err
+	}
+	shadow, err := n.shadow.Get(namespace, name)
+	if err != nil {
+		return nil, err
+	}
+	propsMeta, err := getNodePropertiesMeta(node)
+	if err != nil {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("node", node.Name), common.Field("meta", "node properties meta"))
+	}
+	nodeProps := &models.NodeProperties{}
+	report := map[string]interface{}{}
+	props, ok := shadow.Report[common.NodeProps]
+	if ok && props != nil {
+		report, ok = props.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid report shadow")
+		}
+	}
+	desire := map[string]interface{}{}
+	props, ok = shadow.Desire[common.NodeProps]
+	if ok && props != nil {
+		desire, ok = props.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid report shadow")
+		}
+	}
+	// only support string value and string meta yet
+	for key, val := range report {
+		prop := models.NodeProperty{
+			Name: key,
+			Type: "string",
+		}
+		prop.Current.Value = val.(string)
+		if rMeta, ok := propsMeta.ReportMeta[key]; ok {
+			prop.Current.UpdateTime = rMeta.(string)
+		}
+		if dVal, ok := desire[key]; ok {
+			prop.Expect.Value = dVal.(string)
+		}
+		if dMeta, ok := propsMeta.DesireMeta[key]; ok {
+			prop.Expect.UpdateTime = dMeta.(string)
+		}
+		nodeProps.Properties = append(nodeProps.Properties, prop)
+	}
+	for key, val := range desire {
+		if _, ok := report[key]; !ok {
+			prop := models.NodeProperty{
+				Name: key,
+				Type: "string",
+			}
+			prop.Expect.Value = val.(string)
+			if dMeta, ok := propsMeta.DesireMeta[key]; ok {
+				prop.Expect.UpdateTime = dMeta.(string)
+			}
+			nodeProps.Properties = append(nodeProps.Properties, prop)
+		}
+	}
+	return nodeProps, nil
+}
+
+// UpdateNodeProperties update desire of node properties
+// and can not update report of node properties
+func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models.NodeProperties) (*models.NodeProperties, error) {
+	node, err := n.storage.GetNode(namespace, name)
+	if err != nil {
+		return nil, err
+	}
+	shadow, err := n.shadow.Get(namespace, name)
+	if err != nil {
+		return nil, err
+	}
+	meta, err := getNodePropertiesMeta(node)
+	if err != nil {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("node", node.Name), common.Field("meta", "shadow meta"))
+	}
+	oldDesire := map[string]interface{}{}
+	if props, ok := shadow.Desire[common.NodeProps]; ok && props != nil {
+		oldDesire, ok = props.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid desire of node properties")
+		}
+	}
+	var newDesire specV1.Desire = map[string]interface{}{}
+	for _, prop := range props.Properties {
+		newDesire[prop.Name] = prop.Expect.Value
+	}
+	diff, err := newDesire.DiffWithNil(oldDesire)
+	if err != nil {
+		return nil, err
+	}
+	now := time.Now().UTC().String()
+	for key, val := range diff {
+		meta.DesireMeta[key] = now
+		if val == nil {
+			delete(meta.ReportMeta, key)
+		}
+	}
+	report := map[string]interface{}{}
+	if props, ok := shadow.Report[common.NodeProps]; ok && props != nil {
+		report, ok = props.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid report of node properties")
+		}
+	}
+	for i, prop := range props.Properties {
+		if expect, ok := meta.DesireMeta[prop.Name]; ok {
+			props.Properties[i].Expect.UpdateTime = expect.(string)
+		}
+		if current, ok := report[prop.Name]; ok {
+			props.Properties[i].Current.Value = current.(string)
+			if rMeta, ok := meta.ReportMeta[prop.Name]; ok {
+				props.Properties[i].Current.UpdateTime = rMeta.(string)
+			}
+			delete(report, prop.Name)
+		}
+	}
+	// those key-val in report but not in desire
+	for k, v := range report {
+		prop := models.NodeProperty{
+			Name:    k,
+			Type:    "string",
+			Current: models.PropertyValue{Value: v.(string)},
+		}
+		if rMeta, ok := meta.ReportMeta[k]; ok {
+			prop.Current.UpdateTime = rMeta.(string)
+		}
+		props.Properties = append(props.Properties, prop)
+	}
+	shadow.Desire[common.NodeProps] = newDesire
+	_, err = n.shadow.UpdateDesire(shadow)
+	if err != nil {
+		return nil, err
+	}
+	setNodePropertiesMeta(node, meta)
+	if _, err := n.storage.UpdateNode(namespace, node); err != nil {
+		return nil, err
+	}
+	return props, nil
+}
+
+func (n *nodeService) UpdateNodeMode(ns, name, mode string) error {
+	node, err := n.storage.GetNode(ns, name)
+	if err != nil {
+		return err
+	}
+	if node.Attributes == nil {
+		node.Attributes = map[string]interface{}{}
+	}
+	node.Attributes[specV1.KeySyncMode] = specV1.SyncMode(mode)
+	_, err = n.storage.UpdateNode(ns, node)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getNodePropertiesMeta(node *specV1.Node) (*models.NodePropertiesMeta, error) {
+	propsMeta := &models.NodePropertiesMeta{
+		ReportMeta: map[string]interface{}{},
+		DesireMeta: map[string]interface{}{},
+	}
+	meta, ok := node.Attributes[common.ReportMeta]
+	if ok && meta != nil {
+		propsMeta.ReportMeta, ok = meta.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid report meta")
+		}
+	}
+	meta, ok = node.Attributes[common.DesireMeta]
+	if ok && meta != nil {
+		propsMeta.DesireMeta, ok = meta.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid desire meta")
+		}
+	}
+	return propsMeta, nil
+}
+
+func setNodePropertiesMeta(node *specV1.Node, meta *models.NodePropertiesMeta) {
+	if meta == nil {
+		return
+	}
+	if node.Attributes == nil {
+		node.Attributes = map[string]interface{}{}
+	}
+	if meta.ReportMeta != nil {
+		node.Attributes[common.ReportMeta] = meta.ReportMeta
+	}
+	if meta.DesireMeta != nil {
+		node.Attributes[common.DesireMeta] = meta.DesireMeta
+	}
 }

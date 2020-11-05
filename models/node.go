@@ -28,3 +28,28 @@ type ListOptions struct {
 type NodeNames struct {
 	Names []string `json:"names,"validate:"maxLength=20"`
 }
+
+type NodeProperties struct {
+	Properties []NodeProperty `yaml:"properties,omitempty" json:"properties,omitempty"`
+}
+
+type NodeProperty struct {
+	Name    string        `yaml:"name,omitempty" json:"name,omitempty"`
+	Type    string        `yaml:"type,omitempty" json:"type,omitempty"`
+	Current PropertyValue `yaml:"current,omitempty" json:"current,omitempty"`
+	Expect  PropertyValue `yaml:"expect,omitempty" json:"expect,omitempty"`
+}
+
+type PropertyValue struct {
+	Value      string `yaml:"value,omitempty" json:"value,omitempty"`
+	UpdateTime string `yaml:"updateTime,omitempty" json:"updateTime,omitempty"`
+}
+
+type NodeMode struct {
+	Mode string `yaml:"mode,omitempty" json:"mode,omitempty"`
+}
+
+type NodePropertiesMeta struct {
+	ReportMeta map[string]interface{}
+	DesireMeta map[string]interface{}
+}

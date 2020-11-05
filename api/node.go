@@ -361,3 +361,67 @@ func (api *API) ParseAndCheckNodeNames(c *common.Context) (*models.NodeNames, er
 func (api *API) NodeNumberCollector(namespace string) (map[string]int, error) {
 	return api.Node.Count(namespace)
 }
+
+func (api *API) GetNodeProperties(c *common.Context) (interface{}, error) {
+	ns, n := c.GetNamespace(), c.GetNameFromParam()
+	props, err := api.Node.GetNodeProperties(ns, n)
+	if err != nil {
+		return nil, err
+	}
+	return props, nil
+}
+
+func (api *API) UpdateNodeProperties(c *common.Context) (interface{}, error) {
+	ns, n := c.GetNamespace(), c.GetNameFromParam()
+	props, err := api.ParseAndCheckProperties(c)
+	if err != nil {
+		return nil, err
+	}
+	props, err = api.Node.UpdateNodeProperties(ns, n, props)
+	if err != nil {
+		return nil, err
+	}
+	return props, nil
+}
+
+func (api *API) UpdateNodeMode(c *common.Context) (interface{}, error) {
+	ns, n := c.GetNamespace(), c.GetNameFromParam()
+	nodeMode, err := api.ParseAndCheckNodeMode(c)
+	if err != nil {
+		return nil, err
+	}
+	err = api.Node.UpdateNodeMode(ns, n, nodeMode.Mode)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (api *API) ParseAndCheckNodeMode(c *common.Context) (*models.NodeMode, error) {
+	nodeMode := &models.NodeMode{}
+	err := c.LoadBody(nodeMode)
+	if err != nil {
+		return nil, err
+	}
+	if nodeMode.Mode != string(common.CloudMode) && nodeMode.Mode != string(common.LocalMode) {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("mode", "mode should be local or cloud"))
+	}
+	return nodeMode, nil
+}
+
+func (api *API) ParseAndCheckProperties(c *common.Context) (*models.NodeProperties, error) {
+	props := new(models.NodeProperties)
+	err := c.LoadBody(props)
+	if err != nil {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+	}
+	keySet := map[string]struct{}{}
+	for _, prop := range props.Properties {
+		if _, ok := keySet[prop.Name]; !ok {
+			keySet[prop.Name] = struct{}{}
+		} else {
+			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate prop name is not allowed"))
+		}
+	}
+	return props, nil
+}
