@@ -28,6 +28,8 @@ const (
 	templateCoreAppYaml        = "baetyl-core-app.yml"
 	templateFuncConfYaml       = "baetyl-function-conf.yml"
 	templateFuncAppYaml        = "baetyl-function-app.yml"
+	templateBrokerConfYaml       = "baetyl-broker-conf.yml"
+	templateBrokerAppYaml        = "baetyl-broker-app.yml"
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
 	TemplateBaetylInitCommand  = "baetyl-init-command"
 	TemplateKubeInitCommand    = "baetyl-kube-init-command"
@@ -235,7 +237,11 @@ func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, e
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	apps = append(apps, ca, fa)
+	ba, err := s.genBrokerApp(ns, nodeName, params)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	apps = append(apps, ca, fa, ba)
 	return apps, nil
 }
 
@@ -295,6 +301,38 @@ func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]
 		appMap[k] = v
 	}
 	return s.genApp(ns, templateFuncAppYaml, appMap)
+}
+
+func (s *InitServiceImpl) genBrokerApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
+	appName := fmt.Sprintf("baetyl-broker-%s", common.RandString(9))
+	confName := fmt.Sprintf("baetyl-broker-conf-%s", common.RandString(9))
+	// create config
+	confMap := map[string]interface{}{
+		"Namespace":        ns,
+		"NodeName":         nodeName,
+		"BrokerAppName":  appName,
+		"BrokerConfName": confName,
+	}
+	for k, v := range params {
+		confMap[k] = v
+	}
+	conf, err := s.genConfig(ns, templateBrokerConfYaml, confMap)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	// create application
+	appMap := map[string]interface{}{
+		"Namespace":           ns,
+		"NodeName":            nodeName,
+		"BrokerAppName":     appName,
+		"BrokerConfName":    conf.Name,
+		"BrokerConfVersion": conf.Version,
+	}
+	for k, v := range params {
+		appMap[k] = v
+	}
+	return s.genApp(ns, templateBrokerAppYaml, appMap)
 }
 
 func (s *InitServiceImpl) genNodeCerts(ns, nodeName, appName string) (*specV1.Secret, error) {
