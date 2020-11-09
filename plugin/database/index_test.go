@@ -36,9 +36,9 @@ CREATE TABLE baetyl_index_application_config
 	}
 )
 
-func (d *dbStorage) MockCreateIndexTable() {
+func (d *DB) MockCreateIndexTable() {
 	for _, sql := range tables {
-		_, err := d.exec(nil, sql)
+		_, err := d.Exec(nil, sql)
 		if err != nil {
 			panic(fmt.Sprintf("create table exception: %s", err.Error()))
 		}
@@ -129,7 +129,7 @@ func TestIndex(t *testing.T) {
 	assert.Error(t, err, "rollback test")
 }
 
-func TestDbStorage_RefreshIndex(t *testing.T) {
+func TestDBConnection_RefreshIndex(t *testing.T) {
 	db, err := MockNewDB()
 	if err != nil {
 		fmt.Printf("get mock sqlite3 error = %s", err.Error())

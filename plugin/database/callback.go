@@ -9,23 +9,23 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
 )
 
-func (d *dbStorage) GetCallback(name, namespace string) (*models.Callback, error) {
+func (d *DB) GetCallback(name, namespace string) (*models.Callback, error) {
 	return d.GetCallbackTx(nil, name, namespace)
 }
 
-func (d *dbStorage) CreateCallback(callback *models.Callback) (sql.Result, error) {
+func (d *DB) CreateCallback(callback *models.Callback) (sql.Result, error) {
 	return d.CreateCallbackTx(nil, callback)
 }
 
-func (d *dbStorage) UpdateCallback(callback *models.Callback) (sql.Result, error) {
+func (d *DB) UpdateCallback(callback *models.Callback) (sql.Result, error) {
 	return d.UpdateCallbackTx(nil, callback)
 }
 
-func (d *dbStorage) DeleteCallback(name, ns string) (sql.Result, error) {
+func (d *DB) DeleteCallback(name, ns string) (sql.Result, error) {
 	return d.DeleteCallbackTx(nil, name, ns)
 }
 
-func (d *dbStorage) GetCallbackTx(tx *sqlx.Tx, name, namespace string) (*models.Callback, error) {
+func (d *DB) GetCallbackTx(tx *sqlx.Tx, name, namespace string) (*models.Callback, error) {
 	selectSQL := `
 SELECT name, namespace, method, params, 
 header, body, url, description, create_time, 
@@ -34,7 +34,7 @@ FROM baetyl_callback
 WHERE namespace=? and name=? LIMIT 0,1
 `
 	var callback []entities.Callback
-	if err := d.query(tx, selectSQL, &callback, namespace, name); err != nil {
+	if err := d.Query(tx, selectSQL, &callback, namespace, name); err != nil {
 		return nil, err
 	}
 	if len(callback) > 0 {
@@ -43,7 +43,7 @@ WHERE namespace=? and name=? LIMIT 0,1
 	return nil, nil
 }
 
-func (d *dbStorage) CreateCallbackTx(tx *sqlx.Tx, callback *models.Callback) (sql.Result, error) {
+func (d *DB) CreateCallbackTx(tx *sqlx.Tx, callback *models.Callback) (sql.Result, error) {
 	insertSQL := `
 INSERT INTO baetyl_callback (
 name, namespace, method, params, 
@@ -51,26 +51,26 @@ header, body, url, description)
 VALUES (?,?,?,?,?,?,?,?)
 `
 	callbackDB := entities.FromCallbackModel(callback)
-	return d.exec(tx, insertSQL, callbackDB.Name,
+	return d.Exec(tx, insertSQL, callbackDB.Name,
 		callbackDB.Namespace, callbackDB.Method, callbackDB.Params,
 		callbackDB.Header, callbackDB.Body, callbackDB.Url, callbackDB.Description)
 }
 
-func (d *dbStorage) UpdateCallbackTx(tx *sqlx.Tx, callback *models.Callback) (sql.Result, error) {
+func (d *DB) UpdateCallbackTx(tx *sqlx.Tx, callback *models.Callback) (sql.Result, error) {
 	updateSQL := `
 UPDATE baetyl_callback SET method=?,params=?,
 header=?,body=?,url=?,description=? 
 WHERE namespace=? AND name=?
 `
 	callbackDB := entities.FromCallbackModel(callback)
-	return d.exec(tx, updateSQL, callbackDB.Method, callbackDB.Params,
+	return d.Exec(tx, updateSQL, callbackDB.Method, callbackDB.Params,
 		callbackDB.Header, callbackDB.Body, callbackDB.Url, callbackDB.Description,
 		callbackDB.Namespace, callbackDB.Name)
 }
 
-func (d *dbStorage) DeleteCallbackTx(tx *sqlx.Tx, name, ns string) (sql.Result, error) {
+func (d *DB) DeleteCallbackTx(tx *sqlx.Tx, name, ns string) (sql.Result, error) {
 	deleteSQL := `
 DELETE FROM baetyl_callback where namespace=? AND name=?
 `
-	return d.exec(tx, deleteSQL, ns, name)
+	return d.Exec(tx, deleteSQL, ns, name)
 }

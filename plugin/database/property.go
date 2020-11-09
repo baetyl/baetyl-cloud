@@ -5,28 +5,28 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
-func (d *dbStorage) CreateProperty(property *models.Property) error {
+func (d *DB) CreateProperty(property *models.Property) error {
 	insertSQL := `
 		INSERT INTO baetyl_property(name, value) 
 		VALUES (?,?)
 	`
-	_, err := d.exec(nil, insertSQL, property.Name, property.Value)
+	_, err := d.Exec(nil, insertSQL, property.Name, property.Value)
 	if err != nil {
 		return common.Error(common.ErrDatabase, common.Field("error", err.Error()))
 	}
 	return nil
 }
 
-func (d *dbStorage) DeleteProperty(name string) error {
+func (d *DB) DeleteProperty(name string) error {
 	deleteSQL := `
 		DELETE FROM baetyl_property 
 		WHERE name=?
 	`
-	_, err := d.exec(nil, deleteSQL, name)
+	_, err := d.Exec(nil, deleteSQL, name)
 	return err
 }
 
-func (d *dbStorage) GetProperty(name string) (*models.Property, error) {
+func (d *DB) GetProperty(name string) (*models.Property, error) {
 	selectSQL := `
 		SELECT 
 		name, value, create_time, update_time 
@@ -34,7 +34,7 @@ func (d *dbStorage) GetProperty(name string) (*models.Property, error) {
 		WHERE name=?
 	`
 	var cs []models.Property
-	if err := d.query(nil, selectSQL, &cs, name); err != nil {
+	if err := d.Query(nil, selectSQL, &cs, name); err != nil {
 		return nil, err
 	}
 	if len(cs) == 0 {
@@ -45,7 +45,7 @@ func (d *dbStorage) GetProperty(name string) (*models.Property, error) {
 	return &cs[0], nil
 }
 
-func (d *dbStorage) GetPropertyValue(name string) (string, error) {
+func (d *DB) GetPropertyValue(name string) (string, error) {
 	p, err := d.GetProperty(name)
 	if err != nil {
 		return "", err
@@ -53,7 +53,7 @@ func (d *dbStorage) GetPropertyValue(name string) (string, error) {
 	return p.Value, nil
 }
 
-func (d *dbStorage) ListProperty(filter *models.Filter) ([]models.Property, error) {
+func (d *DB) ListProperty(filter *models.Filter) ([]models.Property, error) {
 	var cs []models.Property
 	selectSQL := `
 		SELECT 
@@ -67,13 +67,13 @@ func (d *dbStorage) ListProperty(filter *models.Filter) ([]models.Property, erro
 		args = append(args, filter.GetLimitOffset(), filter.GetLimitNumber())
 	}
 
-	if err := d.query(nil, selectSQL, &cs, args...); err != nil {
+	if err := d.Query(nil, selectSQL, &cs, args...); err != nil {
 		return nil, err
 	}
 	return cs, nil
 }
 
-func (d *dbStorage) CountProperty(name string) (int, error) {
+func (d *DB) CountProperty(name string) (int, error) {
 	selectSQL := `
 		SELECT 
 		count(name) AS count 
@@ -83,18 +83,18 @@ func (d *dbStorage) CountProperty(name string) (int, error) {
 	var res []struct {
 		Count int `db:"count"`
 	}
-	if err := d.query(nil, selectSQL, &res, name); err != nil {
+	if err := d.Query(nil, selectSQL, &res, name); err != nil {
 		return 0, err
 	}
 	return res[0].Count, nil
 }
 
-func (d *dbStorage) UpdateProperty(property *models.Property) error {
+func (d *DB) UpdateProperty(property *models.Property) error {
 	updateSQL := `
 		UPDATE baetyl_property 
 			SET value=? 
 		WHERE name=?
 	`
-	_, err := d.exec(nil, updateSQL, property.Value, property.Name)
+	_, err := d.Exec(nil, updateSQL, property.Value, property.Name)
 	return err
 }

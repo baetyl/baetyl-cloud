@@ -52,9 +52,9 @@ func genBatch() *models.Batch {
 	}
 }
 
-func (d *dbStorage) MockCreateBatchTable() {
+func (d *DB) MockCreateBatchTable() {
 	for _, sql := range batchTables {
-		_, err := d.exec(nil, sql)
+		_, err := d.Exec(nil, sql)
 		if err != nil {
 			panic(fmt.Sprintf("create table exception: %s", err.Error()))
 		}

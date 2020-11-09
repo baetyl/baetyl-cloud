@@ -26,9 +26,9 @@ CREATE TABLE baetyl_node_shadow(
 	}
 )
 
-func (d *dbStorage) MockCreateShadowTable() {
+func (d *DB) MockCreateShadowTable() {
 	for _, sql := range shaodowTables {
-		_, err := d.exec(nil, sql)
+		_, err := d.Exec(nil, sql)
 		if err != nil {
 			panic(fmt.Sprintf("create table exception: %s", err.Error()))
 		}
