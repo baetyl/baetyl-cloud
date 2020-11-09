@@ -5,7 +5,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func MockNewDB() (*dbStorage, error) {
+func MockNewDB() (*DB, error) {
 	var cfg CloudConfig
 	cfg.Database.Type = "sqlite3"
 	cfg.Database.URL = ":memory:"
@@ -17,5 +17,5 @@ func MockNewDB() (*dbStorage, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &dbStorage{db: db, cfg: cfg}, nil
+	return &DB{db: db, cfg: cfg}, nil
 }

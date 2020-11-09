@@ -6,7 +6,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-func (d dbStorage) CreateCert(cert plugin.Cert) error {
+func (d DB) CreateCert(cert plugin.Cert) error {
 	insertSQL := `
 INSERT INTO baetyl_certificate (
 cert_id, parent_id, type, common_name, 
@@ -20,7 +20,7 @@ VALUES (?,?,?,?,?,?,?,?,?,?)
 	return err
 }
 
-func (d dbStorage) DeleteCert(certId string) error {
+func (d DB) DeleteCert(certId string) error {
 	deleteSQL := `
 DELETE FROM baetyl_certificate where cert_id=?
 `
@@ -28,7 +28,7 @@ DELETE FROM baetyl_certificate where cert_id=?
 	return err
 }
 
-func (d dbStorage) UpdateCert(cert plugin.Cert) error {
+func (d DB) UpdateCert(cert plugin.Cert) error {
 	updateSQL := `
 UPDATE baetyl_certificate SET parent_id=?,type=?,
 common_name=?,description=?,csr=?,content=?,private_key=?,
@@ -41,7 +41,7 @@ WHERE cert_id=?
 	return err
 }
 
-func (d dbStorage) GetCert(certId string) (*plugin.Cert, error) {
+func (d DB) GetCert(certId string) (*plugin.Cert, error) {
 	selectSQL := `
 SELECT cert_id, parent_id, type, common_name, 
 description, csr, content, private_key, not_before, not_after
@@ -58,7 +58,7 @@ WHERE cert_id=? LIMIT 0,1
 	return nil, os.ErrNotExist
 }
 
-func (d dbStorage) CountCertByParentId(parentId string) (int, error) {
+func (d DB) CountCertByParentId(parentId string) (int, error) {
 	selectSQL := `
 SELECT count(cert_id) AS count 
 FROM baetyl_certificate 

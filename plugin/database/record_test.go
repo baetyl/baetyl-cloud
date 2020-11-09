@@ -31,9 +31,9 @@ CREATE TABLE baetyl_batch_record
 	}
 )
 
-func (d *dbStorage) MockCreateRecordTable() {
+func (d *DB) MockCreateRecordTable() {
 	for _, sql := range recordTables {
-		_, err := d.exec(nil, sql)
+		_, err := d.Exec(nil, sql)
 		if err != nil {
 			panic(fmt.Sprintf("create table exception: %s", err.Error()))
 		}

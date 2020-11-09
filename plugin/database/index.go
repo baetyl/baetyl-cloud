@@ -11,38 +11,38 @@ import (
 
 var cache = map[string]string{}
 
-func (d *dbStorage) CreateIndex(namespace string, keyA, keyB common.Resource, valueA, valueB string) (sql.Result, error) {
+func (d *DB) CreateIndex(namespace string, keyA, keyB common.Resource, valueA, valueB string) (sql.Result, error) {
 	return d.CreateIndexTx(nil, namespace, keyA, keyB, valueA, valueB)
 }
 
-func (d *dbStorage) ListIndex(namespace string, keyA, byKeyB common.Resource, valueB string) ([]string, error) {
+func (d *DB) ListIndex(namespace string, keyA, byKeyB common.Resource, valueB string) ([]string, error) {
 	return d.ListIndexTx(nil, namespace, keyA, byKeyB, valueB)
 }
 
-func (d *dbStorage) DeleteIndex(namespace string, keyA, byKeyB common.Resource, valueB string) (sql.Result, error) {
+func (d *DB) DeleteIndex(namespace string, keyA, byKeyB common.Resource, valueB string) (sql.Result, error) {
 	return d.DeleteIndexTx(nil, namespace, keyA, byKeyB, valueB)
 }
 
-func (d *dbStorage) CreateIndexTx(tx *sqlx.Tx, namespace string, keyA, keyB common.Resource, valueA, valueB string) (sql.Result, error) {
+func (d *DB) CreateIndexTx(tx *sqlx.Tx, namespace string, keyA, keyB common.Resource, valueA, valueB string) (sql.Result, error) {
 	selectSQL := fmt.Sprintf(`INSERT INTO %s (namespace, %s, %s) VALUES (?, ?, ?)`, getTable(keyA, keyB), keyA, keyB)
-	return d.exec(tx, selectSQL, namespace, valueA, valueB)
+	return d.Exec(tx, selectSQL, namespace, valueA, valueB)
 }
 
-func (d *dbStorage) ListIndexTx(tx *sqlx.Tx, namespace string, keyA, byKeyB common.Resource, valueB string) ([]string, error) {
+func (d *DB) ListIndexTx(tx *sqlx.Tx, namespace string, keyA, byKeyB common.Resource, valueB string) ([]string, error) {
 	selectSQL := fmt.Sprintf(`SELECT %s FROM %s WHERE namespace = ? and %s = ?`, keyA, getTable(keyA, byKeyB), byKeyB)
 	var res []string
-	if err := d.query(tx, selectSQL, &res, namespace, valueB); err != nil {
+	if err := d.Query(tx, selectSQL, &res, namespace, valueB); err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (d *dbStorage) DeleteIndexTx(tx *sqlx.Tx, namespace string, keyA, byKeyB common.Resource, valueB string) (sql.Result, error) {
+func (d *DB) DeleteIndexTx(tx *sqlx.Tx, namespace string, keyA, byKeyB common.Resource, valueB string) (sql.Result, error) {
 	selectSQL := fmt.Sprintf(`DELETE FROM %s WHERE namespace = ? and %s = ?`, getTable(keyA, byKeyB), byKeyB)
-	return d.exec(tx, selectSQL, namespace, valueB)
+	return d.Exec(tx, selectSQL, namespace, valueB)
 }
 
-func (d *dbStorage) RefreshIndex(namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error {
+func (d *DB) RefreshIndex(namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error {
 	return d.Transact(func(tx *sqlx.Tx) error {
 		if _, err := d.DeleteIndexTx(tx, namespace, keyB, keyA, valueA); err != nil {
 			return err

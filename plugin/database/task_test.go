@@ -30,9 +30,9 @@ CREATE TABLE baetyl_task
 	}
 )
 
-func (d *dbStorage) MockCreateTaskTable() {
+func (d *DB) MockCreateTaskTable() {
 	for _, sql := range taskTables {
-		_, err := d.exec(nil, sql)
+		_, err := d.Exec(nil, sql)
 		if err != nil {
 			panic(fmt.Sprintf("create table exception: %s", err.Error()))
 		}

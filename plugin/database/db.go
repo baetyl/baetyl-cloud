@@ -10,8 +10,8 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-// dbStorage
-type dbStorage struct {
+// DBStorage
+type DB struct {
 	db  *sqlx.DB
 	cfg CloudConfig
 }
@@ -37,18 +37,18 @@ func New() (plugin.Plugin, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &dbStorage{
+	return &DB{
 		db:  db,
 		cfg: cfg,
 	}, nil
 }
 
 // Close Close
-func (d *dbStorage) Close() error {
+func (d *DB) Close() error {
 	return d.db.Close()
 }
 
-func (d *dbStorage) Transact(handler func(*sqlx.Tx) error) (err error) {
+func (d *DB) Transact(handler func(*sqlx.Tx) error) (err error) {
 	tx, err := d.db.Beginx()
 	if err != nil {
 		return
@@ -67,14 +67,14 @@ func (d *dbStorage) Transact(handler func(*sqlx.Tx) error) (err error) {
 	return
 }
 
-func (d *dbStorage) exec(tx *sqlx.Tx, sql string, args ...interface{}) (sql.Result, error) {
+func (d *DB) Exec(tx *sqlx.Tx, sql string, args ...interface{}) (sql.Result, error) {
 	if tx == nil {
 		return d.db.Exec(sql, args...)
 	}
 	return tx.Exec(sql, args...)
 }
 
-func (d *dbStorage) query(tx *sqlx.Tx, sql string, data interface{}, args ...interface{}) error {
+func (d *DB) Query(tx *sqlx.Tx, sql string, data interface{}, args ...interface{}) error {
 	if tx == nil {
 		return d.db.Select(data, sql, args...)
 	}

@@ -11,11 +11,11 @@ import (
 
 const batchSize = 200
 
-func (d *dbStorage) Get(namespace, name string) (*models.Shadow, error) {
+func (d *DB) Get(namespace, name string) (*models.Shadow, error) {
 	return d.GetShadowTx(nil, namespace, name)
 }
 
-func (d *dbStorage) Create(shadow *models.Shadow) (*models.Shadow, error) {
+func (d *DB) Create(shadow *models.Shadow) (*models.Shadow, error) {
 	var shd *models.Shadow
 	err := d.Transact(func(tx *sqlx.Tx) error {
 		_, err := d.CreateShadowTx(tx, shadow)
@@ -29,7 +29,7 @@ func (d *dbStorage) Create(shadow *models.Shadow) (*models.Shadow, error) {
 	return shd, err
 }
 
-func (d *dbStorage) List(namespace string, nodeList *models.NodeList) (*models.ShadowList, error) {
+func (d *DB) List(namespace string, nodeList *models.NodeList) (*models.ShadowList, error) {
 	names := make([]string, 0, len(nodeList.Items))
 	for _, node := range nodeList.Items {
 		names = append(names, node.Name)
@@ -55,12 +55,12 @@ func (d *dbStorage) List(namespace string, nodeList *models.NodeList) (*models.S
 	return result, nil
 }
 
-func (d *dbStorage) Delete(namespace, name string) error {
+func (d *DB) Delete(namespace, name string) error {
 	_, err := d.DeleteShadowTx(nil, namespace, name)
 	return err
 }
 
-func (d *dbStorage) UpdateDesire(shadow *models.Shadow) (*models.Shadow, error) {
+func (d *DB) UpdateDesire(shadow *models.Shadow) (*models.Shadow, error) {
 	var shd *models.Shadow
 	err := d.Transact(func(tx *sqlx.Tx) error {
 		_, err := d.UpdateShadowDesireTx(tx, shadow)
@@ -73,7 +73,7 @@ func (d *dbStorage) UpdateDesire(shadow *models.Shadow) (*models.Shadow, error) 
 
 	return shd, err
 }
-func (d *dbStorage) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
+func (d *DB) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
 	var shd *models.Shadow
 	err := d.Transact(func(tx *sqlx.Tx) error {
 		_, err := d.UpdateShadowReportTx(tx, shadow)
@@ -87,14 +87,14 @@ func (d *dbStorage) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) 
 	return shd, err
 }
 
-func (d *dbStorage) GetShadowTx(tx *sqlx.Tx, namespace, name string) (*models.Shadow, error) {
+func (d *DB) GetShadowTx(tx *sqlx.Tx, namespace, name string) (*models.Shadow, error) {
 	selectSQL := `
 SELECT 
 id, name, namespace, report, desire, create_time, update_time 
 FROM baetyl_node_shadow WHERE namespace=? AND name=?
 `
 	var shadows []entities.Shadow
-	if err := d.query(tx, selectSQL, &shadows, namespace, name); err != nil {
+	if err := d.Query(tx, selectSQL, &shadows, namespace, name); err != nil {
 		return nil, err
 	}
 	if len(shadows) > 0 {
@@ -103,7 +103,7 @@ FROM baetyl_node_shadow WHERE namespace=? AND name=?
 	return nil, nil
 }
 
-func (d *dbStorage) CreateShadowTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
+func (d *DB) CreateShadowTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
 	insertSQL := `
 INSERT INTO baetyl_node_shadow (namespace, name, report, desire)
 VALUES (?, ?, ?, ?)
@@ -114,17 +114,17 @@ VALUES (?, ?, ?, ?)
 		return nil, err
 	}
 
-	return d.exec(tx, insertSQL, shd.Namespace, shd.Name, shd.Report, shd.Desire)
+	return d.Exec(tx, insertSQL, shd.Namespace, shd.Name, shd.Report, shd.Desire)
 }
 
-func (d *dbStorage) DeleteShadowTx(tx *sqlx.Tx, namespace, name string) (sql.Result, error) {
+func (d *DB) DeleteShadowTx(tx *sqlx.Tx, namespace, name string) (sql.Result, error) {
 	deleteSql := `
 DELETE FROM baetyl_node_shadow WHERE namespace=? AND name=?
 `
-	return d.exec(tx, deleteSql, namespace, name)
+	return d.Exec(tx, deleteSql, namespace, name)
 }
 
-func (d *dbStorage) UpdateShadowDesireTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
+func (d *DB) UpdateShadowDesireTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
 	updateSQL := `
 UPDATE baetyl_node_shadow
 SET desire=?
@@ -134,10 +134,10 @@ WHERE namespace=? AND name=?
 	if err != nil {
 		return nil, err
 	}
-	return d.exec(tx, updateSQL, desire, shadow.Namespace, shadow.Name)
+	return d.Exec(tx, updateSQL, desire, shadow.Namespace, shadow.Name)
 }
 
-func (d *dbStorage) UpdateShadowReportTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
+func (d *DB) UpdateShadowReportTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
 	updateSQL := `
 UPDATE baetyl_node_shadow
 SET report=?
@@ -148,10 +148,10 @@ WHERE namespace=? AND name=?
 		return nil, err
 	}
 
-	return d.exec(tx, updateSQL, report, shadow.Namespace, shadow.Name)
+	return d.Exec(tx, updateSQL, report, shadow.Namespace, shadow.Name)
 }
 
-func (d *dbStorage) ListShadowByNamesTx(tx *sqlx.Tx, namespace string, names []string) ([]entities.Shadow, error) {
+func (d *DB) ListShadowByNamesTx(tx *sqlx.Tx, namespace string, names []string) ([]entities.Shadow, error) {
 	selectSQL := `
 SELECT 
 id, name, namespace, report, desire, create_time, update_time 
@@ -172,7 +172,7 @@ FROM baetyl_node_shadow WHERE namespace=? AND name in (?)
 			return nil, err
 		}
 
-		if err := d.query(tx, sql, &shadows, args...); err != nil {
+		if err := d.Query(tx, sql, &shadows, args...); err != nil {
 			return nil, err
 		}
 		result = append(result, shadows...)

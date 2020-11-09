@@ -26,9 +26,9 @@ func genProperty() *models.Property {
 		Value: "http://test.baetyl/0.1.0",
 	}
 }
-func (d *dbStorage) MockCreatePropertyTable() {
+func (d *DB) MockCreatePropertyTable() {
 	for _, sql := range propertyTables {
-		_, err := d.exec(nil, sql)
+		_, err := d.Exec(nil, sql)
 		if err != nil {
 			panic(fmt.Sprintf("create table exception: %s", err.Error()))
 		}

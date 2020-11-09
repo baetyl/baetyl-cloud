@@ -28,16 +28,16 @@ CREATE TABLE baetyl_application_history
 	}
 )
 
-func (d *dbStorage) MockCreateApplicationTable() {
+func (d *DB) MockCreateApplicationTable() {
 	for _, sql := range applicationTebles {
-		_, err := d.exec(nil, sql)
+		_, err := d.Exec(nil, sql)
 		if err != nil {
 			panic(fmt.Sprintf("create table exception: %s", err.Error()))
 		}
 	}
 }
 
-func mockDb(t *testing.T) *dbStorage {
+func mockDb(t *testing.T) *DB {
 	db, err := MockNewDB()
 	if err != nil {
 		fmt.Printf("get mock sqlite3 error = %s", err.Error())
@@ -48,7 +48,7 @@ func mockDb(t *testing.T) *dbStorage {
 	return db
 }
 
-func TestDbStorage_CreateApplication(t *testing.T) {
+func TestDB_CreateApplication(t *testing.T) {
 	app := &specV1.Application{
 		Name:        "29987d6a2b8f11eabc62186590da6863",
 		Namespace:   "default",
@@ -64,7 +64,7 @@ func TestDbStorage_CreateApplication(t *testing.T) {
 
 }
 
-func TestDbStorage_UpdateApplication(t *testing.T) {
+func TestDB_UpdateApplication(t *testing.T) {
 	db := mockDb(t)
 	app := &specV1.Application{
 		Name:        "test",
@@ -100,7 +100,7 @@ func TestDbStorage_UpdateApplication(t *testing.T) {
 	assert.Equal(t, int64(1), num)
 }
 
-func TestDbStorage_GetApplication(t *testing.T) {
+func TestDB_GetApplication(t *testing.T) {
 	db := mockDb(t)
 	app := &specV1.Application{
 		Name:        "29987d6a2b8f11eabc62186590da6863",

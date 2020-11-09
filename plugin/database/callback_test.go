@@ -31,9 +31,9 @@ CREATE TABLE baetyl_callback
 	}
 )
 
-func (d *dbStorage) MockCreateCallbackTable() {
+func (d *DB) MockCreateCallbackTable() {
 	for _, sql := range callbackTables {
-		_, err := d.exec(nil, sql)
+		_, err := d.Exec(nil, sql)
 		if err != nil {
 			panic(fmt.Sprintf("create table exception: %s", err.Error()))
 		}

@@ -54,7 +54,7 @@ func genCertificate() *plugin.Cert {
 	}
 }
 
-func (d *dbStorage) MockCreateCertificateTable() {
+func (d *DB) MockCreateCertificateTable() {
 	for _, sql := range certificateTables {
 		_, err := d.db.Exec(sql)
 		if err != nil {
