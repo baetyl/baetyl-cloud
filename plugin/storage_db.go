@@ -15,6 +15,8 @@ import (
 // DBStorage DBStorage
 type DBStorage interface {
 	Transact(func(*sqlx.Tx) error) error
+	Exec(tx *sqlx.Tx, sql string, args ...interface{}) (sql.Result, error)
+	Query(tx *sqlx.Tx, sql string, data interface{}, args ...interface{}) error
 
 	// index
 	CreateIndex(namespace string, keyA, keyB common.Resource, valueA, valueB string) (sql.Result, error)
