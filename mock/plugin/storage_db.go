@@ -560,6 +560,26 @@ func (mr *MockDBStorageMockRecorder) DeleteTaskTx(arg0, arg1 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTaskTx", reflect.TypeOf((*MockDBStorage)(nil).DeleteTaskTx), arg0, arg1)
 }
 
+// Exec mocks base method
+func (m *MockDBStorage) Exec(arg0 *sqlx.Tx, arg1 string, arg2 ...interface{}) (sql.Result, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Exec", varargs...)
+	ret0, _ := ret[0].(sql.Result)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Exec indicates an expected call of Exec
+func (mr *MockDBStorageMockRecorder) Exec(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockDBStorage)(nil).Exec), varargs...)
+}
+
 // Get mocks base method
 func (m *MockDBStorage) Get(arg0, arg1 string) (*models.Shadow, error) {
 	m.ctrl.T.Helper()
@@ -858,6 +878,25 @@ func (m *MockDBStorage) ListRecordTx(arg0 *sqlx.Tx, arg1, arg2 string, arg3 *mod
 func (mr *MockDBStorageMockRecorder) ListRecordTx(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRecordTx", reflect.TypeOf((*MockDBStorage)(nil).ListRecordTx), arg0, arg1, arg2, arg3)
+}
+
+// Query mocks base method
+func (m *MockDBStorage) Query(arg0 *sqlx.Tx, arg1 string, arg2 interface{}, arg3 ...interface{}) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1, arg2}
+	for _, a := range arg3 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Query", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Query indicates an expected call of Query
+func (mr *MockDBStorageMockRecorder) Query(arg0, arg1, arg2 interface{}, arg3 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockDBStorage)(nil).Query), varargs...)
 }
 
 // RefreshIndex mocks base method
