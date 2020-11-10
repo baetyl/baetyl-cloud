@@ -30,7 +30,13 @@ type NodeNames struct {
 }
 
 type NodeProperties struct {
-	Properties []NodeProperty `yaml:"properties,omitempty" json:"properties,omitempty"`
+	State NodePropertiesState    `yaml:"state,omitempty" json:"state,omitempty"`
+	Meta  NodePropertiesMetadata `yaml:"metadata,omitempty" json:"metadata,omitempty"`
+}
+
+type NodePropertiesState struct {
+	Report map[string]interface{} `yaml:"report,omitempty" json:"report,omitempty"`
+	Desire map[string]interface{} `yaml:"desire,omitempty" json:"desire,omitempty"`
 }
 
 type NodeProperty struct {
@@ -49,7 +55,7 @@ type NodeMode struct {
 	Mode string `yaml:"mode,omitempty" json:"mode,omitempty"`
 }
 
-type NodePropertiesMeta struct {
+type NodePropertiesMetadata struct {
 	ReportMeta map[string]interface{}
 	DesireMeta map[string]interface{}
 }

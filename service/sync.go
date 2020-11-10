@@ -105,7 +105,7 @@ func (t *SyncServiceImpl) Report(namespace, name string, report specV1.Report) (
 	if node.Attributes == nil {
 		node.Attributes = map[string]interface{}{}
 	}
-	if syncModeVal, ok := node.Attributes[common.KeySyncMode]; ok {
+	if syncModeVal, ok := node.Attributes[specV1.KeySyncMode]; ok {
 		syncMode, ok = syncModeVal.(string)
 		if !ok {
 			log.L().Error("invalid sync mode value",
@@ -116,7 +116,7 @@ func (t *SyncServiceImpl) Report(namespace, name string, report specV1.Report) (
 	}
 
 	var delta specV1.Delta
-	if syncMode == "" || syncMode == string(common.CloudMode) {
+	if syncMode == "" || syncMode == string(specV1.CloudMode) {
 		delta, err = shadow.Desire.DiffWithNil(extractComparingReport(shadow.Report))
 		if err != nil {
 			log.L().Error("failed to calculate node delta",

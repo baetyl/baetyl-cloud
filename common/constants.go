@@ -192,7 +192,7 @@ var (
 )
 
 const (
-	ReportMeta           = "reportMeta"
-	DesireMeta           = "desireMeta"
-	NodeProps            = "nodeProps"
+	ReportMeta = "reportMeta"
+	DesireMeta = "desireMeta"
+	NodeProps  = "nodeProps"
 )

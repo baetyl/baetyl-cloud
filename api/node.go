@@ -403,7 +403,7 @@ func (api *API) ParseAndCheckNodeMode(c *common.Context) (*models.NodeMode, erro
 	if err != nil {
 		return nil, err
 	}
-	if nodeMode.Mode != string(common.CloudMode) && nodeMode.Mode != string(common.LocalMode) {
+	if nodeMode.Mode != string(v1.CloudMode) && nodeMode.Mode != string(v1.LocalMode) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("mode", "mode should be local or cloud"))
 	}
 	return nodeMode, nil
@@ -414,14 +414,6 @@ func (api *API) ParseAndCheckProperties(c *common.Context) (*models.NodeProperti
 	err := c.LoadBody(props)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
-	}
-	keySet := map[string]struct{}{}
-	for _, prop := range props.Properties {
-		if _, ok := keySet[prop.Name]; !ok {
-			keySet[prop.Name] = struct{}{}
-		} else {
-			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate prop name is not allowed"))
-		}
 	}
 	return props, nil
 }
