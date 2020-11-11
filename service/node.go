@@ -34,20 +34,31 @@ type NodeService interface {
 }
 
 type nodeService struct {
-	storage      plugin.ModelStorage
 	indexService IndexService
+	node         plugin.Node
 	shadow       plugin.Shadow
+	app          plugin.Application
+	matcher      plugin.Matcher
 }
 
 // NewNodeService NewNodeService
 func NewNodeService(config *config.CloudConfig) (NodeService, error) {
-	ms, err := plugin.GetPlugin(config.Plugin.ModelStorage)
+	node, err := plugin.GetPlugin(config.Plugin.Node)
 	if err != nil {
-		log.L().Error("get storage plugin failed", log.Error(err))
 		return nil, err
 	}
 
 	shadow, err := plugin.GetPlugin(config.Plugin.Shadow)
+	if err != nil {
+		return nil, err
+	}
+
+	app, err := plugin.GetPlugin(config.Plugin.Application)
+	if err != nil {
+		return nil, err
+	}
+
+	matcher, err := plugin.GetPlugin(config.Plugin.Matcher)
 	if err != nil {
 		return nil, err
 	}
@@ -58,15 +69,17 @@ func NewNodeService(config *config.CloudConfig) (NodeService, error) {
 	}
 
 	return &nodeService{
-		storage:      ms.(plugin.ModelStorage),
 		indexService: is,
+		node:         node.(plugin.Node),
 		shadow:       shadow.(plugin.Shadow),
+		app:          app.(plugin.Application),
+		matcher:      matcher.(plugin.Matcher),
 	}, nil
 }
 
 // Get get the node
 func (n *nodeService) Get(namespace, name string) (*specV1.Node, error) {
-	node, err := n.storage.GetNode(namespace, name)
+	node, err := n.node.GetNode(namespace, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
@@ -89,7 +102,7 @@ func (n *nodeService) Get(namespace, name string) (*specV1.Node, error) {
 
 // Create create a node
 func (n *nodeService) Create(namespace string, node *specV1.Node) (*specV1.Node, error) {
-	res, err := n.storage.CreateNode(namespace, node)
+	res, err := n.node.CreateNode(namespace, node)
 	if err != nil {
 		log.L().Error("create node failed", log.Error(err))
 		return nil, err
@@ -108,7 +121,7 @@ func (n *nodeService) Create(namespace string, node *specV1.Node) (*specV1.Node,
 
 // Update update node
 func (n *nodeService) Update(namespace string, node *specV1.Node) (*specV1.Node, error) {
-	res, err := n.storage.UpdateNode(namespace, node)
+	res, err := n.node.UpdateNode(namespace, node)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +139,7 @@ func (n *nodeService) Update(namespace string, node *specV1.Node) (*specV1.Node,
 
 // List get list node
 func (n *nodeService) List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
-	list, err := n.storage.ListNode(namespace, listOptions)
+	list, err := n.node.ListNode(namespace, listOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +173,7 @@ func (n *nodeService) Count(namespace string) (map[string]int, error) {
 
 // Delete delete node
 func (n *nodeService) Delete(namespace, name string) error {
-	if err := n.storage.DeleteNode(namespace, name); err != nil {
+	if err := n.node.DeleteNode(namespace, name); err != nil {
 		return err
 	}
 
@@ -194,7 +207,7 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 	}
 
 	if shadow == nil {
-		_, err = n.storage.GetNode(namespace, name)
+		_, err = n.node.GetNode(namespace, name)
 		if err != nil {
 			return nil, err
 		}
@@ -249,7 +262,7 @@ func (n *nodeService) GetDesire(namespace, name string) (*specV1.Desire, error) 
 }
 
 func (n *nodeService) updateNodeAndAppIndex(namespace string, node *specV1.Node) error {
-	apps, err := n.storage.ListApplication(namespace, &models.ListOptions{})
+	apps, err := n.app.ListApplication(namespace, &models.ListOptions{})
 	if err != nil {
 		log.L().Error("list application error", log.Error(err))
 		return err
@@ -286,7 +299,7 @@ func (n *nodeService) rematchApplicationsForNode(apps *models.ApplicationList, l
 			continue
 		}
 
-		if ok, err := n.storage.IsLabelMatch(app.Selector, labels); err == nil && ok {
+		if ok, err := n.matcher.IsLabelMatch(app.Selector, labels); err == nil && ok {
 			if app.System {
 				sysApps = append(sysApps, specV1.AppInfo{
 					Name:    app.Name,

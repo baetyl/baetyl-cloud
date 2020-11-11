@@ -171,21 +171,6 @@ func (mr *MockDBStorageMockRecorder) CountTask(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountTask", reflect.TypeOf((*MockDBStorage)(nil).CountTask), arg0)
 }
 
-// Create mocks base method
-func (m *MockDBStorage) Create(arg0 *models.Shadow) (*models.Shadow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0)
-	ret0, _ := ret[0].(*models.Shadow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Create indicates an expected call of Create
-func (mr *MockDBStorageMockRecorder) Create(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockDBStorage)(nil).Create), arg0)
-}
-
 // CreateApplication mocks base method
 func (m *MockDBStorage) CreateApplication(arg0 *v1.Application) (sql.Result, error) {
 	m.ctrl.T.Helper()
@@ -364,20 +349,6 @@ func (m *MockDBStorage) CreateTaskTx(arg0 *sqlx.Tx, arg1 *models.Task) (sql.Resu
 func (mr *MockDBStorageMockRecorder) CreateTaskTx(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTaskTx", reflect.TypeOf((*MockDBStorage)(nil).CreateTaskTx), arg0, arg1)
-}
-
-// Delete mocks base method
-func (m *MockDBStorage) Delete(arg0, arg1 string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Delete indicates an expected call of Delete
-func (mr *MockDBStorageMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockDBStorage)(nil).Delete), arg0, arg1)
 }
 
 // DeleteApplication mocks base method
@@ -580,21 +551,6 @@ func (mr *MockDBStorageMockRecorder) Exec(arg0, arg1 interface{}, arg2 ...interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockDBStorage)(nil).Exec), varargs...)
 }
 
-// Get mocks base method
-func (m *MockDBStorage) Get(arg0, arg1 string) (*models.Shadow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0, arg1)
-	ret0, _ := ret[0].(*models.Shadow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Get indicates an expected call of Get
-func (mr *MockDBStorageMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockDBStorage)(nil).Get), arg0, arg1)
-}
-
 // GetApplication mocks base method
 func (m *MockDBStorage) GetApplication(arg0, arg1, arg2 string) (*v1.Application, error) {
 	m.ctrl.T.Helper()
@@ -758,21 +714,6 @@ func (m *MockDBStorage) GetTaskTx(arg0 *sqlx.Tx, arg1 string) (*models.Task, err
 func (mr *MockDBStorageMockRecorder) GetTaskTx(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTaskTx", reflect.TypeOf((*MockDBStorage)(nil).GetTaskTx), arg0, arg1)
-}
-
-// List mocks base method
-func (m *MockDBStorage) List(arg0 string, arg1 *models.NodeList) (*models.ShadowList, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", arg0, arg1)
-	ret0, _ := ret[0].(*models.ShadowList)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// List indicates an expected call of List
-func (mr *MockDBStorageMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockDBStorage)(nil).List), arg0, arg1)
 }
 
 // ListApplication mocks base method
@@ -1017,21 +958,6 @@ func (mr *MockDBStorageMockRecorder) UpdateCallbackTx(arg0, arg1 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCallbackTx", reflect.TypeOf((*MockDBStorage)(nil).UpdateCallbackTx), arg0, arg1)
 }
 
-// UpdateDesire mocks base method
-func (m *MockDBStorage) UpdateDesire(arg0 *models.Shadow) (*models.Shadow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateDesire", arg0)
-	ret0, _ := ret[0].(*models.Shadow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateDesire indicates an expected call of UpdateDesire
-func (mr *MockDBStorageMockRecorder) UpdateDesire(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDesire", reflect.TypeOf((*MockDBStorage)(nil).UpdateDesire), arg0)
-}
-
 // UpdateRecord mocks base method
 func (m *MockDBStorage) UpdateRecord(arg0 *models.Record) (sql.Result, error) {
 	m.ctrl.T.Helper()
@@ -1060,21 +986,6 @@ func (m *MockDBStorage) UpdateRecordTx(arg0 *sqlx.Tx, arg1 *models.Record) (sql.
 func (mr *MockDBStorageMockRecorder) UpdateRecordTx(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRecordTx", reflect.TypeOf((*MockDBStorage)(nil).UpdateRecordTx), arg0, arg1)
-}
-
-// UpdateReport mocks base method
-func (m *MockDBStorage) UpdateReport(arg0 *models.Shadow) (*models.Shadow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateReport", arg0)
-	ret0, _ := ret[0].(*models.Shadow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateReport indicates an expected call of UpdateReport
-func (mr *MockDBStorageMockRecorder) UpdateReport(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateReport", reflect.TypeOf((*MockDBStorage)(nil).UpdateReport), arg0)
 }
 
 // UpdateTask mocks base method

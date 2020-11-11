@@ -29,7 +29,6 @@ const (
 )
 
 type SyncServiceImpl struct {
-	plugin.ModelStorage
 	plugin.DBStorage
 
 	ConfigService ConfigService
@@ -42,18 +41,13 @@ type SyncServiceImpl struct {
 
 // NewSyncService new SyncService
 func NewSyncService(config *config.CloudConfig) (SyncService, error) {
-	ms, err := plugin.GetPlugin(config.Plugin.ModelStorage)
-	if err != nil {
-		return nil, err
-	}
 	db, err := plugin.GetPlugin(config.Plugin.DatabaseStorage)
 	if err != nil {
 		return nil, err
 	}
 	es := &SyncServiceImpl{
-		ModelStorage: ms.(plugin.ModelStorage),
-		DBStorage:    db.(plugin.DBStorage),
-		Hooks:        map[string]interface{}{},
+		DBStorage: db.(plugin.DBStorage),
+		Hooks:     map[string]interface{}{},
 	}
 	es.ConfigService, err = NewConfigService(config)
 	if err != nil {

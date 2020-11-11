@@ -67,10 +67,7 @@ func TestNewAPI(t *testing.T) {
 	c.Plugin.Shadow = c.Plugin.ModelStorage
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
-	mockModelStorage := mockPlugin.NewMockModelStorage(mockCtl)
-	plugin.RegisterFactory(c.Plugin.ModelStorage, func() (plugin.Plugin, error) {
-		return mockModelStorage, nil
-	})
+
 	mockDBStorage := mockPlugin.NewMockDBStorage(mockCtl)
 	plugin.RegisterFactory(c.Plugin.DatabaseStorage, func() (plugin.Plugin, error) {
 		return mockDBStorage, nil

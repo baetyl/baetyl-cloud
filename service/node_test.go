@@ -7,8 +7,8 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-go/v2/spec/v1"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -50,19 +50,19 @@ func TestDefaultNodeService_Get(t *testing.T) {
 	node := genNodeTestCase()
 	shadow := genShadowTestCase()
 
-	mockObject.dbStorage.EXPECT().Get(node.Namespace, node.Name).Return(shadow, nil).AnyTimes()
+	mockObject.shadow.EXPECT().Get(node.Namespace, node.Name).Return(shadow, nil).AnyTimes()
 	cs, err := NewNodeService(mockObject.conf)
-	mockObject.modelStorage.EXPECT().GetNode(node.Namespace, node.Name).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(node, nil)
 	assert.NoError(t, err)
 	_, err = cs.Get(node.Namespace, node.Name)
 	assert.NoError(t, err)
 
-	mockObject.modelStorage.EXPECT().GetNode(node.Namespace, node.Name).Return(nil, fmt.Errorf("node not found"))
+	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(nil, fmt.Errorf("node not found"))
 	n, err := cs.Get(node.Namespace, node.Name)
 	assert.Error(t, err)
 	assert.Nil(t, n)
 
-	mockObject.modelStorage.EXPECT().GetNode(node.Namespace, node.Name).Return(nil, fmt.Errorf("err"))
+	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(nil, fmt.Errorf("err"))
 	_, err = cs.Get(node.Namespace, node.Name)
 	assert.Error(t, err)
 }
@@ -86,23 +86,23 @@ func TestDefaultNodeService_List(t *testing.T) {
 	}
 
 	nsvc := nodeService{
-		storage: mockObject.modelStorage,
-		shadow:  mockObject.dbStorage,
+		shadow: mockObject.shadow,
+		node:   mockObject.node,
 	}
 
-	mockObject.modelStorage.EXPECT().ListNode(ns, s).Return(list, nil)
-	mockObject.dbStorage.EXPECT().List(ns, gomock.Any()).Return(shadowList, nil)
+	mockObject.node.EXPECT().ListNode(ns, s).Return(list, nil)
+	mockObject.shadow.EXPECT().List(ns, gomock.Any()).Return(shadowList, nil)
 	res, err := nsvc.List(ns, s)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(res.Items))
 	assert.Equal(t, ns, res.Items[0].Namespace)
 
-	mockObject.modelStorage.EXPECT().ListNode(ns, s).Return(nil, fmt.Errorf("error"))
+	mockObject.node.EXPECT().ListNode(ns, s).Return(nil, fmt.Errorf("error"))
 	_, err = nsvc.List(ns, s)
 	assert.Error(t, err)
 
-	mockObject.modelStorage.EXPECT().ListNode(ns, s).Return(list, nil)
-	mockObject.dbStorage.EXPECT().List(ns, gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.node.EXPECT().ListNode(ns, s).Return(list, nil)
+	mockObject.shadow.EXPECT().List(ns, gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = nsvc.List(ns, s)
 	assert.Error(t, err)
 }
@@ -112,24 +112,24 @@ func TestDefaultNodeService_Delete(t *testing.T) {
 	defer mockObject.Close()
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	cs := nodeService{
-		storage:      mockObject.modelStorage,
 		indexService: mockIndexService,
-		shadow:       mockObject.dbStorage,
+		shadow:       mockObject.shadow,
+		node:         mockObject.node,
 	}
 
 	node := genNodeTestCase()
-	mockObject.dbStorage.EXPECT().Delete(node.Namespace, node.Name).Return(nil).AnyTimes()
+	mockObject.shadow.EXPECT().Delete(node.Namespace, node.Name).Return(nil).AnyTimes()
 
-	mockObject.modelStorage.EXPECT().DeleteNode(node.Namespace, node.Name).Return(fmt.Errorf("error"))
+	mockObject.node.EXPECT().DeleteNode(node.Namespace, node.Name).Return(fmt.Errorf("error"))
 	err := cs.Delete(node.Namespace, node.Name)
 	assert.Error(t, err)
 
-	mockObject.modelStorage.EXPECT().DeleteNode(node.Namespace, node.Name).Return(nil)
+	mockObject.node.EXPECT().DeleteNode(node.Namespace, node.Name).Return(nil)
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("error"))
 	err = cs.Delete(node.Namespace, node.Name)
 	assert.NoError(t, err)
 
-	mockObject.modelStorage.EXPECT().DeleteNode(node.Namespace, node.Name).Return(nil)
+	mockObject.node.EXPECT().DeleteNode(node.Namespace, node.Name).Return(nil)
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 	err = cs.Delete(node.Namespace, node.Name)
 	assert.NoError(t, err)
@@ -140,23 +140,25 @@ func TestDefaultNodeService_Create(t *testing.T) {
 	defer mockObject.Close()
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	ns := nodeService{
-		storage:      mockObject.modelStorage,
 		indexService: mockIndexService,
-		shadow:       mockObject.dbStorage,
+		shadow:       mockObject.shadow,
+		node:         mockObject.node,
+		app:          mockObject.app,
+		matcher:      mockObject.matcher,
 	}
 	node := genNodeTestCase()
 	shadow := genShadowTestCase()
 
-	mockObject.dbStorage.EXPECT().Create(gomock.Any()).Return(shadow, nil).AnyTimes()
+	mockObject.shadow.EXPECT().Create(gomock.Any()).Return(shadow, nil).AnyTimes()
 
-	mockObject.dbStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
 
-	mockObject.modelStorage.EXPECT().CreateNode(node.Namespace, node).Return(nil, fmt.Errorf("error"))
+	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(nil, fmt.Errorf("error"))
 	_, err := ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockObject.modelStorage.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
-	mockObject.modelStorage.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
+	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
 
@@ -166,23 +168,23 @@ func TestDefaultNodeService_Create(t *testing.T) {
 		},
 	}
 
-	mockObject.modelStorage.EXPECT().IsLabelMatch(gomock.Any(), gomock.Any()).Return(true, nil).AnyTimes()
-	mockObject.modelStorage.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
-	mockObject.modelStorage.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil)
-	mockObject.dbStorage.EXPECT().UpdateDesire(gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.matcher.EXPECT().IsLabelMatch(gomock.Any(), gomock.Any()).Return(true, nil).AnyTimes()
+	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
+	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil)
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockObject.modelStorage.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
-	mockObject.modelStorage.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil)
-	mockObject.dbStorage.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil)
+	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
+	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil)
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil)
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("error"))
 	_, err = ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockObject.modelStorage.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
-	mockObject.modelStorage.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil)
-	mockObject.dbStorage.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil)
+	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
+	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil)
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil)
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 	_, err = ns.Create(node.Namespace, node)
 	assert.NoError(t, err)
@@ -194,9 +196,11 @@ func TestDefaultNodeService_Update(t *testing.T) {
 
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	ns := nodeService{
-		storage:      mockObject.modelStorage,
 		indexService: mockIndexService,
-		shadow:       mockObject.dbStorage,
+		shadow:       mockObject.shadow,
+		node:         mockObject.node,
+		app:          mockObject.app,
+		matcher:      mockObject.matcher,
 	}
 	app := &specV1.Application{
 		Name:    "appTest",
@@ -210,21 +214,21 @@ func TestDefaultNodeService_Update(t *testing.T) {
 
 	shadow := genShadowTestCase()
 
-	mockObject.dbStorage.EXPECT().UpdateDesire(gomock.Any()).Return(shadow, nil).AnyTimes()
-	mockObject.dbStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(shadow, nil).AnyTimes()
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
 
-	mockObject.modelStorage.EXPECT().UpdateNode(node.Namespace, node).Return(nil, fmt.Errorf("error"))
+	mockObject.node.EXPECT().UpdateNode(node.Namespace, node).Return(nil, fmt.Errorf("error"))
 	_, err := ns.Update(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockObject.modelStorage.EXPECT().UpdateNode(node.Namespace, node).Return(node, nil).AnyTimes()
+	mockObject.node.EXPECT().UpdateNode(node.Namespace, node).Return(node, nil).AnyTimes()
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("error"))
 	_, err = ns.Update(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockObject.modelStorage.EXPECT().IsLabelMatch(gomock.Any(), gomock.Any()).Return(true, nil).AnyTimes()
+	mockObject.matcher.EXPECT().IsLabelMatch(gomock.Any(), gomock.Any()).Return(true, nil).AnyTimes()
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	mockObject.modelStorage.EXPECT().ListApplication(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.app.EXPECT().ListApplication(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = ns.Update(node.Namespace, node)
 	assert.NotNil(t, err)
 
@@ -250,8 +254,8 @@ func TestDefaultNodeService_Update(t *testing.T) {
 			Version:   app.Version,
 		},
 	}}
-	mockObject.modelStorage.EXPECT().ListApplication(gomock.Any(), gomock.Any()).Return(appList, nil).AnyTimes()
-	mockObject.modelStorage.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
+	mockObject.app.EXPECT().ListApplication(gomock.Any(), gomock.Any()).Return(appList, nil).AnyTimes()
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
 	shad, err := ns.Update(node.Namespace, node)
 	assert.NoError(t, err)
 	assert.Equal(t, node.Name, shad.Name)
@@ -262,9 +266,10 @@ func TestUpdateNodeAppVersion(t *testing.T) {
 	defer mockObject.Close()
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	ss := nodeService{
-		storage:      mockObject.modelStorage,
 		indexService: mockIndexService,
-		shadow:       mockObject.dbStorage,
+		shadow:       mockObject.shadow,
+		node:         mockObject.node,
+		app:          mockObject.app,
 	}
 	app := &specV1.Application{
 		Name:    "appTest",
@@ -276,7 +281,7 @@ func TestUpdateNodeAppVersion(t *testing.T) {
 	_, err := ss.UpdateNodeAppVersion(node.Namespace, app)
 	assert.NoError(t, err)
 	app.Selector = "test=example"
-	mockObject.modelStorage.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.node.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = ss.UpdateNodeAppVersion(node.Namespace, app)
 	assert.NotNil(t, err)
 
@@ -370,19 +375,19 @@ func TestUpdateNodeAppVersion(t *testing.T) {
 		},
 	}
 
-	mockObject.dbStorage.EXPECT().List(node.Namespace, gomock.Any()).Return(shadowList, nil).AnyTimes()
+	mockObject.shadow.EXPECT().List(node.Namespace, gomock.Any()).Return(shadowList, nil).AnyTimes()
 
-	mockObject.dbStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
-	mockObject.modelStorage.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil)
-	mockObject.modelStorage.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
-	mockObject.dbStorage.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.node.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil)
+	mockObject.node.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
 	_, err = ss.UpdateNodeAppVersion(node.Namespace, app)
 	assert.NotNil(t, err)
 
-	mockObject.dbStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(&shadowList.Items[2], nil).AnyTimes()
-	mockObject.dbStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
-	mockObject.modelStorage.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
-	mockObject.modelStorage.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(&nodeList.Items[0], nil).AnyTimes()
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(&shadowList.Items[2], nil).AnyTimes()
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
+	mockObject.node.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(&nodeList.Items[0], nil).AnyTimes()
 	_, err = ss.UpdateNodeAppVersion(node.Namespace, app)
 	assert.NoError(t, err)
 
@@ -398,9 +403,10 @@ func TestDeleteNodeAppVersion(t *testing.T) {
 	defer mockObject.Close()
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	ss := nodeService{
-		storage:      mockObject.modelStorage,
 		indexService: mockIndexService,
-		shadow:       mockObject.modelStorage,
+		shadow:       mockObject.shadow,
+		node:         mockObject.node,
+		app:          mockObject.app,
 	}
 	app := &specV1.Application{
 		Name:    "appTest",
@@ -414,12 +420,12 @@ func TestDeleteNodeAppVersion(t *testing.T) {
 
 	app.Selector = "test=dev"
 
-	mockObject.modelStorage.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
+	mockObject.node.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
 	_, err = ss.DeleteNodeAppVersion(node.Namespace, app)
 	assert.Equal(t, fmt.Errorf("error"), err)
 
-	mockObject.modelStorage.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(&models.NodeList{}, nil).Times(1)
-	mockObject.modelStorage.EXPECT().List(node.Namespace, gomock.Any()).Return(&models.ShadowList{}, nil)
+	mockObject.node.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(&models.NodeList{}, nil).Times(1)
+	mockObject.shadow.EXPECT().List(node.Namespace, gomock.Any()).Return(&models.ShadowList{}, nil)
 	_, err = ss.DeleteNodeAppVersion(node.Namespace, app)
 	assert.NoError(t, err)
 
@@ -511,28 +517,28 @@ func TestDeleteNodeAppVersion(t *testing.T) {
 		},
 	}
 
-	mockObject.modelStorage.EXPECT().List(node.Namespace, gomock.Any()).Return(shadowList, nil).AnyTimes()
+	mockObject.shadow.EXPECT().List(node.Namespace, gomock.Any()).Return(shadowList, nil).AnyTimes()
 
-	mockObject.modelStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
-	mockObject.modelStorage.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil)
-	mockObject.modelStorage.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
-	mockObject.modelStorage.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.node.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil)
+	mockObject.node.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
 	_, err = ss.DeleteNodeAppVersion(node.Namespace, app)
 	assert.Equal(t, fmt.Errorf("error"), err)
 
-	mockObject.modelStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
-	mockObject.modelStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(&shadowList.Items[2], nil).AnyTimes()
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(&shadowList.Items[2], nil).AnyTimes()
 
-	mockObject.modelStorage.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
-	mockObject.modelStorage.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
+	mockObject.node.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
 	_, err = ss.DeleteNodeAppVersion(node.Namespace, app)
 	assert.NoError(t, err)
 
 	app.Labels = map[string]string{
 		common.LabelSystem: app.Name,
 	}
-	mockObject.modelStorage.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
-	mockObject.modelStorage.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
+	mockObject.node.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
 	_, err = ss.DeleteNodeAppVersion(node.Namespace, app)
 	assert.NoError(t, err)
 }
@@ -542,8 +548,9 @@ func TestUpdateReport(t *testing.T) {
 	defer mockObject.Close()
 
 	ss := nodeService{
-		storage: mockObject.modelStorage,
-		shadow:  mockObject.dbStorage,
+		shadow: mockObject.shadow,
+		node:   mockObject.node,
+		app:    mockObject.app,
 	}
 
 	node := &specV1.Node{
@@ -570,17 +577,17 @@ func TestUpdateReport(t *testing.T) {
 
 	shadow := genShadowTestCase()
 
-	mockObject.dbStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
 	//mockObject.dbStorage.EXPECT().Create(gomock.Any()).Return(nil, nil)
 
-	mockObject.modelStorage.EXPECT().GetNode(node.Namespace, node.Name).Return(nil, fmt.Errorf("error"))
+	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(nil, fmt.Errorf("error"))
 	_, err := ss.UpdateReport(node.Namespace, node.Name, node.Report)
 	assert.NotNil(t, err)
 
-	mockObject.dbStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil)
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil)
 	//mockObject.dbStorage.EXPECT().Create(gomock.Any()).Return(shadow, nil)
 	//mockObject.modelStorage.EXPECT().GetNode(node.Namespace, node.Name).Return(node, nil)
-	mockObject.dbStorage.EXPECT().UpdateReport(gomock.Any()).Return(shadow, nil)
+	mockObject.shadow.EXPECT().UpdateReport(gomock.Any()).Return(shadow, nil)
 	shad, err := ss.UpdateReport(node.Namespace, node.Name, report)
 	assert.NoError(t, err)
 	assert.Equal(t, node.Name, shad.Name)
@@ -737,8 +744,9 @@ func TestUpdateDesired(t *testing.T) {
 	defer mockObject.Close()
 
 	ns := nodeService{
-		storage: mockObject.modelStorage,
-		shadow:  mockObject.modelStorage,
+		shadow: mockObject.shadow,
+		node:   mockObject.node,
+		app:    mockObject.app,
 	}
 
 	namespace := "test"
@@ -753,8 +761,8 @@ func TestUpdateDesired(t *testing.T) {
 	}
 
 	shadow := genShadowTestCase()
-	mockObject.modelStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil)
-	mockObject.modelStorage.EXPECT().UpdateDesire(gomock.Any()).Return(shadow, nil)
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil)
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(shadow, nil)
 
 	shd, err := ns.UpdateDesire(namespace, name, desire)
 	assert.NoError(t, err)
@@ -762,8 +770,8 @@ func TestUpdateDesired(t *testing.T) {
 	assert.Equal(t, 1, len(apps))
 	assert.Equal(t, "app01", apps[0].Name)
 
-	mockObject.modelStorage.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
-	mockObject.modelStorage.EXPECT().Create(gomock.Any()).Return(shadow, nil)
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	mockObject.shadow.EXPECT().Create(gomock.Any()).Return(shadow, nil)
 	//mockObject.modelStorage.EXPECT().UpdateDesire(gomock.Any()).Return(shadow, nil)
 
 	shd, err = ns.UpdateDesire(namespace, name, desire)
@@ -778,8 +786,10 @@ func TestRematchApplicationForNode(t *testing.T) {
 	defer mockObject.Close()
 
 	ns := nodeService{
-		storage: mockObject.modelStorage,
-		shadow:  mockObject.dbStorage,
+		shadow:  mockObject.shadow,
+		node:    mockObject.node,
+		app:     mockObject.app,
+		matcher: mockObject.matcher,
 	}
 
 	apps := &models.ApplicationList{
@@ -823,8 +833,8 @@ func TestRematchApplicationForNode(t *testing.T) {
 	labels := map[string]string{"env": "dev"}
 
 	names := []string{"app02", "app03"}
-	mockObject.modelStorage.EXPECT().IsLabelMatch("env=dev", labels).Return(true, nil).Times(2)
-	mockObject.modelStorage.EXPECT().IsLabelMatch("env=test", labels).Return(false, nil)
+	mockObject.matcher.EXPECT().IsLabelMatch("env=dev", labels).Return(true, nil).Times(2)
+	mockObject.matcher.EXPECT().IsLabelMatch("env=test", labels).Return(false, nil)
 	desire, appNames := ns.rematchApplicationsForNode(apps, labels)
 	assert.Equal(t, expect, desire)
 	assert.Equal(t, names, appNames)

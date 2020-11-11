@@ -39,7 +39,13 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.License = "defaultlicense"
 	expect.Plugin.DatabaseStorage = "database"
 	expect.Plugin.ModelStorage = "kube"
+	expect.Plugin.Node = "kube"
 	expect.Plugin.Shadow = "database"
+	expect.Plugin.Namespace = "kube"
+	expect.Plugin.Configuration = "kube"
+	expect.Plugin.Secret = "kube"
+	expect.Plugin.Application = "kube"
+	expect.Plugin.Matcher = "kube"
 	expect.Plugin.Functions = []string{}
 	expect.Plugin.Objects = []string{}
 	expect.Plugin.Property = "database"

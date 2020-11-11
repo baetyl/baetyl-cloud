@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"database/sql"
+	"io"
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/jmoiron/sqlx"
@@ -92,5 +93,5 @@ type DBStorage interface {
 	DeleteApplicationWithTx(tx *sqlx.Tx, name, namespace, version string) (sql.Result, error)
 	CountApplication(tx *sqlx.Tx, name, namespace string) (int, error)
 
-	Shadow
+	io.Closer
 }
