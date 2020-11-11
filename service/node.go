@@ -1,12 +1,10 @@
 package service
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
-	"github.com/baetyl/baetyl-go/v2/utils"
-
+	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
@@ -227,14 +225,14 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 	if props, ok := shadow.Report[common.NodeProps]; ok {
 		oldReport, ok = props.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("invalid report of node properties")
+			return nil, errors.New("invalid report of node properties")
 		}
 	}
 	newReport := map[string]interface{}{}
 	if props, ok := report[common.NodeProps]; ok {
 		newReport, ok = props.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("invalid report of node properties")
+			return nil, errors.New("invalid report of node properties")
 		}
 	}
 	diff, err := specV1.Desire(newReport).DiffWithNil(oldReport)
@@ -245,7 +243,7 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 			delete(meta.ReportMeta, key)
 		}
 	}
-	setNodePropertiesMeta(node, meta)
+	updateNodePropertiesMeta(node, meta)
 	if _, err := n.storage.UpdateNode(namespace, node); err != nil {
 		return nil, err
 	}
@@ -497,7 +495,7 @@ func (n *nodeService) GetNodeProperties(namespace, name string) (*models.NodePro
 	if ok && props != nil {
 		report, ok = props.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("invalid report shadow")
+			return nil, errors.New("invalid report shadow")
 		}
 	}
 	desire := map[string]interface{}{}
@@ -505,7 +503,7 @@ func (n *nodeService) GetNodeProperties(namespace, name string) (*models.NodePro
 	if ok && props != nil {
 		desire, ok = props.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("invalid report shadow")
+			return nil, errors.New("invalid report shadow")
 		}
 	}
 	nodeProps := &models.NodeProperties{
@@ -540,7 +538,7 @@ func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models
 	if props, ok := shadow.Desire[common.NodeProps]; ok && props != nil {
 		oldDesire, ok = props.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("invalid desire of node properties")
+			return nil, errors.New("invalid desire of node properties")
 		}
 	}
 	var newDesire specV1.Desire = props.State.Desire
@@ -559,7 +557,7 @@ func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models
 	if props, ok := shadow.Report[common.NodeProps]; ok && props != nil {
 		report, ok = props.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("invalid report of node properties")
+			return nil, errors.New("invalid report of node properties")
 		}
 	}
 	props.State.Report = report
@@ -571,7 +569,7 @@ func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models
 	if err != nil {
 		return nil, err
 	}
-	setNodePropertiesMeta(node, meta)
+	updateNodePropertiesMeta(node, meta)
 	if _, err := n.storage.UpdateNode(namespace, node); err != nil {
 		return nil, err
 	}
@@ -603,20 +601,20 @@ func getNodePropertiesMeta(node *specV1.Node) (*models.NodePropertiesMetadata, e
 	if ok && meta != nil {
 		propsMeta.ReportMeta, ok = meta.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("invalid report meta")
+			return nil, errors.New("invalid report meta")
 		}
 	}
 	meta, ok = node.Attributes[common.DesireMeta]
 	if ok && meta != nil {
 		propsMeta.DesireMeta, ok = meta.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("invalid desire meta")
+			return nil, errors.New("invalid desire meta")
 		}
 	}
 	return propsMeta, nil
 }
 
-func setNodePropertiesMeta(node *specV1.Node, meta *models.NodePropertiesMetadata) {
+func updateNodePropertiesMeta(node *specV1.Node, meta *models.NodePropertiesMetadata) {
 	if meta == nil {
 		return
 	}
