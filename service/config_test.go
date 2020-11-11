@@ -17,7 +17,7 @@ func TestDefaultConfigService_Create(t *testing.T) {
 	namespace := "default"
 	name := "ConfigService-Create"
 	mConf := &specV1.Configuration{Name: name}
-	mockObject.modelStorage.EXPECT().CreateConfig(namespace, mConf).Return(mConf, nil)
+	mockObject.configuration.EXPECT().CreateConfig(namespace, mConf).Return(mConf, nil)
 	cs, err := NewConfigService(mockObject.conf)
 	assert.NoError(t, err)
 	res, err := cs.Create(namespace, mConf)
@@ -36,7 +36,7 @@ func TestDefaultConfigService_Get(t *testing.T) {
 		Version: "get.0.0.1",
 	}
 
-	mockObject.modelStorage.EXPECT().GetConfig(namespace, name, "").Return(mConf, nil)
+	mockObject.configuration.EXPECT().GetConfig(namespace, name, "").Return(mConf, nil)
 
 	cs, err := NewConfigService(mockObject.conf)
 	assert.NoError(t, err)
@@ -67,7 +67,7 @@ func TestDefaultConfigService_List(t *testing.T) {
 		Items:       []specV1.Configuration{mConf},
 	}
 
-	mockObject.modelStorage.EXPECT().ListConfig(namespace, selector).Return(configList, nil)
+	mockObject.configuration.EXPECT().ListConfig(namespace, selector).Return(configList, nil)
 
 	cs, err := NewConfigService(mockObject.conf)
 	assert.NoError(t, err)
@@ -80,7 +80,7 @@ func TestDefaultConfigService_Update(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 	cs := configService{
-		storage: mockObject.modelStorage,
+		config: mockObject.configuration,
 	}
 
 	namespace := "default"
@@ -90,11 +90,11 @@ func TestDefaultConfigService_Update(t *testing.T) {
 		Version: "1243",
 	}
 
-	mockObject.modelStorage.EXPECT().UpdateConfig(namespace, mConf).Return(nil, fmt.Errorf("error"))
+	mockObject.configuration.EXPECT().UpdateConfig(namespace, mConf).Return(nil, fmt.Errorf("error"))
 	_, err := cs.Update(namespace, mConf)
 	assert.NotNil(t, err)
 
-	mockObject.modelStorage.EXPECT().UpdateConfig(namespace, mConf).Return(mConf, nil).AnyTimes()
+	mockObject.configuration.EXPECT().UpdateConfig(namespace, mConf).Return(mConf, nil).AnyTimes()
 	_, err = cs.Update(namespace, mConf)
 	assert.NoError(t, err)
 }
@@ -103,7 +103,7 @@ func TestDefaultConfigService_Upsert(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 	cs := configService{
-		storage: mockObject.modelStorage,
+		config: mockObject.configuration,
 	}
 
 	namespace := "default"
@@ -113,12 +113,12 @@ func TestDefaultConfigService_Upsert(t *testing.T) {
 		Version: "1243",
 	}
 
-	mockObject.modelStorage.EXPECT().GetConfig(namespace, mConf.Name, "").Return(nil, fmt.Errorf("error"))
-	mockObject.modelStorage.EXPECT().CreateConfig(namespace, mConf).Return(mConf, nil)
+	mockObject.configuration.EXPECT().GetConfig(namespace, mConf.Name, "").Return(nil, fmt.Errorf("error"))
+	mockObject.configuration.EXPECT().CreateConfig(namespace, mConf).Return(mConf, nil)
 	_, err := cs.Upsert(namespace, mConf)
 	assert.NoError(t, err)
 
-	mockObject.modelStorage.EXPECT().GetConfig(namespace, mConf.Name, "").Return(mConf, nil)
+	mockObject.configuration.EXPECT().GetConfig(namespace, mConf.Name, "").Return(mConf, nil)
 	_, err = cs.Upsert(namespace, mConf)
 	assert.NoError(t, err)
 }
@@ -130,7 +130,7 @@ func TestDefaultConfigService_Delete(t *testing.T) {
 	namespace := "default"
 	name := "ConfigService-update"
 
-	mockObject.modelStorage.EXPECT().DeleteConfig(namespace, name).Return(nil)
+	mockObject.configuration.EXPECT().DeleteConfig(namespace, name).Return(nil)
 	mockObject.dbStorage.EXPECT().ListIndex(namespace, common.Application, common.Config, name).Return([]string{}, nil).AnyTimes()
 
 	cs, err := NewConfigService(mockObject.conf)

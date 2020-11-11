@@ -25,35 +25,48 @@ type ApplicationService interface {
 }
 
 type applicationService struct {
-	storage      plugin.ModelStorage
 	dbStorage    plugin.DBStorage
+	config       plugin.Configuration
+	secret       plugin.Secret
+	app          plugin.Application
 	indexService IndexService
 }
 
 // NewApplicationService NewApplicationService
 func NewApplicationService(config *config.CloudConfig) (ApplicationService, error) {
-	ms, err := plugin.GetPlugin(config.Plugin.ModelStorage)
-	if err != nil {
-		return nil, err
-	}
 	db, err := plugin.GetPlugin(config.Plugin.DatabaseStorage)
 	if err != nil {
 		return nil, err
 	}
+	cfg, err := plugin.GetPlugin(config.Plugin.Configuration)
+	if err != nil {
+		return nil, err
+	}
+	secret, err := plugin.GetPlugin(config.Plugin.Secret)
+	if err != nil {
+		return nil, err
+	}
+	app, err := plugin.GetPlugin(config.Plugin.Application)
+	if err != nil {
+		return nil, err
+	}
+
 	is, err := NewIndexService(config)
 	if err != nil {
 		return nil, err
 	}
 	return &applicationService{
-		storage:      ms.(plugin.ModelStorage),
 		indexService: is,
 		dbStorage:    db.(plugin.DBStorage),
+		config:       cfg.(plugin.Configuration),
+		secret:       secret.(plugin.Secret),
+		app:          app.(plugin.Application),
 	}, nil
 }
 
 // Get get application
 func (a *applicationService) Get(namespace, name, version string) (*specV1.Application, error) {
-	app, err := a.storage.GetApplication(namespace, name, version)
+	app, err := a.app.GetApplication(namespace, name, version)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"),
 			common.Field("name", name))
@@ -73,7 +86,7 @@ func (a *applicationService) Create(namespace string, app *specV1.Application) (
 	}
 
 	// create application
-	app, err = a.storage.CreateApplication(namespace, app)
+	app, err = a.app.CreateApplication(namespace, app)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +116,7 @@ func (a *applicationService) Update(namespace string, app *specV1.Application) (
 		return nil, err
 	}
 
-	newApp, err := a.storage.UpdateApplication(namespace, app)
+	newApp, err := a.app.UpdateApplication(namespace, app)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +143,7 @@ func (a *applicationService) Update(namespace string, app *specV1.Application) (
 
 // Delete delete application
 func (a *applicationService) Delete(namespace, name, version string) error {
-	if err := a.storage.DeleteApplication(namespace, name); err != nil {
+	if err := a.app.DeleteApplication(namespace, name); err != nil {
 		return err
 	}
 
@@ -156,7 +169,7 @@ func (a *applicationService) Delete(namespace, name, version string) error {
 // List get list config
 func (a *applicationService) List(namespace string,
 	listOptions *models.ListOptions) (*models.ApplicationList, error) {
-	return a.storage.ListApplication(namespace, listOptions)
+	return a.app.ListApplication(namespace, listOptions)
 }
 
 // CreateBaseOther create application with base
@@ -183,7 +196,7 @@ func (a *applicationService) CreateWithBase(namespace string, app, base *specV1.
 func (a *applicationService) constuctConfig(namespace string, base *specV1.Application) error {
 	for _, v := range base.Volumes {
 		if v.Config != nil {
-			cfg, err := a.storage.GetConfig(base.Namespace, v.Config.Name, "")
+			cfg, err := a.config.GetConfig(base.Namespace, v.Config.Name, "")
 			if err != nil {
 				log.L().Error("failed to get system config",
 					log.Any(common.KeyContextNamespace, base.Namespace),
@@ -194,13 +207,13 @@ func (a *applicationService) constuctConfig(namespace string, base *specV1.Appli
 					common.Field("name", v.Config.Name))
 			}
 
-			config, err := a.storage.CreateConfig(namespace, cfg)
+			config, err := a.config.CreateConfig(namespace, cfg)
 			if err != nil {
 				log.L().Error("failed to create user config",
 					log.Any(common.KeyContextNamespace, namespace),
 					log.Any("name", v.Config.Name))
 				cfg.Name = cfg.Name + "-" + common.RandString(9)
-				config, err = a.storage.CreateConfig(namespace, cfg)
+				config, err = a.config.CreateConfig(namespace, cfg)
 				if err != nil {
 					return err
 				}
@@ -219,7 +232,7 @@ func (a *applicationService) getConfigsAndSecrets(namespace string, app *specV1.
 	for _, vol := range app.Volumes {
 		if vol.Config != nil {
 			// set the lastest config version
-			config, err := a.storage.GetConfig(namespace, vol.Config.Name, "")
+			config, err := a.config.GetConfig(namespace, vol.Config.Name, "")
 			if err != nil {
 				return nil, nil, err
 			}
@@ -227,7 +240,7 @@ func (a *applicationService) getConfigsAndSecrets(namespace string, app *specV1.
 			configs = append(configs, vol.Config.Name)
 		}
 		if vol.Secret != nil {
-			secret, err := a.storage.GetSecret(namespace, vol.Secret.Name, "")
+			secret, err := a.secret.GetSecret(namespace, vol.Secret.Name, "")
 			if err != nil {
 				return nil, nil, err
 			}

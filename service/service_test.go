@@ -15,13 +15,17 @@ import (
 type MockServices struct {
 	conf           *config.CloudConfig
 	ctl            *gomock.Controller
-	modelStorage   *mockPlugin.MockModelStorage
 	dbStorage      *mockPlugin.MockDBStorage
+	node           *mockPlugin.MockNode
+	namespace      *mockPlugin.MockNamespace
+	configuration  *mockPlugin.MockConfiguration
+	secret         *mockPlugin.MockSecret
+	app            *mockPlugin.MockApplication
 	objectStorage  *mockPlugin.MockObject
 	functionPlugin *mockPlugin.MockFunction
 	pki            *mockPlugin.MockPKI
 	auth           *mockPlugin.MockAuth
-	shadowStorage  *mockPlugin.MockShadow
+	shadow         *mockPlugin.MockShadow
 	license        *mockPlugin.MockLicense
 	property       *mockPlugin.MockProperty
 }
@@ -30,13 +34,6 @@ func (m *MockServices) Close() {
 	if m.ctl != nil {
 		m.ctl.Finish()
 	}
-}
-
-func mockStorageModel(mock plugin.ModelStorage) plugin.Factory {
-	factory := func() (plugin.Plugin, error) {
-		return mock, nil
-	}
-	return factory
 }
 
 func mockStorageDB(mock plugin.DBStorage) plugin.Factory {
@@ -88,6 +85,48 @@ func mockLicense(mock plugin.License) plugin.Factory {
 	return qc
 }
 
+func mockProperty(mock plugin.Property) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return factory
+}
+
+func mockNode(mock plugin.Node) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return factory
+}
+
+func mockNamespace(mock plugin.Namespace) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return factory
+}
+
+func mockConfig(mock plugin.Configuration) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return factory
+}
+
+func mockSecret(mock plugin.Secret) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return factory
+}
+
+func mockApplication(mock plugin.Application) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return factory
+}
+
 func mockTestConfig() *config.CloudConfig {
 	conf := &config.CloudConfig{}
 	conf.Plugin.ModelStorage = common.RandString(9)
@@ -96,7 +135,12 @@ func mockTestConfig() *config.CloudConfig {
 	conf.Plugin.PKI = common.RandString(9)
 	conf.Plugin.Auth = common.RandString(9)
 	conf.Plugin.Functions = []string{common.RandString(9)}
-	conf.Plugin.Shadow = conf.Plugin.DatabaseStorage
+	conf.Plugin.Shadow = common.RandString(9)
+	conf.Plugin.Node = common.RandString(9)
+	conf.Plugin.Namespace = common.RandString(9)
+	conf.Plugin.Configuration = common.RandString(9)
+	conf.Plugin.Application = common.RandString(9)
+	conf.Plugin.Secret = common.RandString(9)
 	conf.Plugin.License = common.RandString(9)
 	conf.Plugin.Property = common.RandString(9)
 	conf.Template.Path = "../scripts/native/templates"
@@ -113,8 +157,7 @@ func mockEmptyTestConfig() *config.CloudConfig {
 func InitMockEnvironment(t *testing.T) *MockServices {
 	conf := mockTestConfig()
 	mockCtl := gomock.NewController(t)
-	mockModelStorage := mockPlugin.NewMockModelStorage(mockCtl)
-	plugin.RegisterFactory(conf.Plugin.ModelStorage, mockStorageModel(mockModelStorage))
+
 	mockDBStorage := mockPlugin.NewMockDBStorage(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.DatabaseStorage, mockStorageDB(mockDBStorage))
 	mPKI := mockPlugin.NewMockPKI(mockCtl)
@@ -132,16 +175,41 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 
 	mLicense := mockPlugin.NewMockLicense(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.License, mockLicense(mLicense))
-	_, err := NewSyncService(conf)
-	assert.Nil(t, err)
 
 	mProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Property, mockProperty(mProperty))
+
+	mNode := mockPlugin.NewMockNode(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Node, mockNode(mNode))
+
+	mShadow := mockPlugin.NewMockShadow(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Shadow, mockShadowStorage(mShadow))
+
+	mNamespace := mockPlugin.NewMockNamespace(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Namespace, mockNamespace(mNamespace))
+
+	mConfig := mockPlugin.NewMockConfiguration(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Configuration, mockConfig(mConfig))
+
+	mSecret := mockPlugin.NewMockSecret(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Secret, mockSecret(mSecret))
+
+	mApp := mockPlugin.NewMockApplication(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Application, mockApplication(mApp))
+
+	_, err := NewSyncService(conf)
+	assert.Nil(t, err)
+
 	return &MockServices{
 		conf:           conf,
 		ctl:            mockCtl,
-		modelStorage:   mockModelStorage,
 		dbStorage:      mockDBStorage,
+		node:           mNode,
+		shadow:         mShadow,
+		namespace:      mNamespace,
+		configuration:  mConfig,
+		secret:         mSecret,
+		app:            mApp,
 		objectStorage:  mockObjectStorage,
 		functionPlugin: mockFunctionPlugin,
 		pki:            mPKI,
@@ -171,11 +239,4 @@ func InitEmptyMockEnvironment(t *testing.T) *MockServices {
 		functionPlugin: mockFunctionPlugin,
 		property:       mProperty,
 	}
-}
-
-func mockProperty(mock plugin.Property) plugin.Factory {
-	factory := func() (plugin.Plugin, error) {
-		return mock, nil
-	}
-	return factory
 }

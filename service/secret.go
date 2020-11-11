@@ -22,23 +22,23 @@ type SecretService interface {
 }
 
 type secretService struct {
-	storage plugin.ModelStorage
+	secret plugin.Secret
 }
 
 // NewSecretService NewSecretService
 func NewSecretService(config *config.CloudConfig) (SecretService, error) {
-	ms, err := plugin.GetPlugin(config.Plugin.ModelStorage)
+	secret, err := plugin.GetPlugin(config.Plugin.Secret)
 	if err != nil {
 		return nil, err
 	}
 	return &secretService{
-		storage: ms.(plugin.ModelStorage),
+		secret: secret.(plugin.Secret),
 	}, nil
 }
 
 // Get get a Secret
 func (s *secretService) Get(namespace, name, version string) (*specV1.Secret, error) {
-	res, err := s.storage.GetSecret(namespace, name, version)
+	res, err := s.secret.GetSecret(namespace, name, version)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "secret"),
 			common.Field("name", name))
@@ -48,21 +48,21 @@ func (s *secretService) Get(namespace, name, version string) (*specV1.Secret, er
 
 // List get list Secret
 func (s *secretService) List(namespace string, listOptions *models.ListOptions) (*models.SecretList, error) {
-	return s.storage.ListSecret(namespace, listOptions)
+	return s.secret.ListSecret(namespace, listOptions)
 }
 
 // Create Create a Secret
 func (s *secretService) Create(namespace string, secret *specV1.Secret) (*specV1.Secret, error) {
-	return s.storage.CreateSecret(namespace, secret)
+	return s.secret.CreateSecret(namespace, secret)
 
 }
 
 // Update update a Secret
 func (s *secretService) Update(namespace string, secret *specV1.Secret) (*specV1.Secret, error) {
-	return s.storage.UpdateSecret(namespace, secret)
+	return s.secret.UpdateSecret(namespace, secret)
 }
 
 // Delete Delete a Secret
 func (s *secretService) Delete(namespace, name string) error {
-	return s.storage.DeleteSecret(namespace, name)
+	return s.secret.DeleteSecret(namespace, name)
 }

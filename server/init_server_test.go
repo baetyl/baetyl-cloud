@@ -23,7 +23,12 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	c.Plugin.Auth = common.RandString(9)
 	c.Plugin.ModelStorage = common.RandString(9)
 	c.Plugin.DatabaseStorage = common.RandString(9)
-	c.Plugin.Shadow = c.Plugin.DatabaseStorage
+	c.Plugin.Shadow = common.RandString(9)
+	c.Plugin.Node = common.RandString(9)
+	c.Plugin.Namespace = common.RandString(9)
+	c.Plugin.Configuration = common.RandString(9)
+	c.Plugin.Secret = common.RandString(9)
+	c.Plugin.Application = common.RandString(9)
 	c.Plugin.Objects = []string{common.RandString(9)}
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9)}
@@ -34,12 +39,6 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	c.InitServer.Certificate.Key = "../scripts/demo/native/certs/server.key"
 	mockCtl := gomock.NewController(t)
 
-	mockModelStorage := mockPlugin.NewMockModelStorage(mockCtl)
-	plugin.RegisterFactory(c.Plugin.ModelStorage, func() (plugin.Plugin, error) {
-		return mockModelStorage, nil
-	})
-	res := &models.ConfigurationList{}
-	mockModelStorage.EXPECT().ListConfig(gomock.Any(), gomock.Any()).Return(res, nil).AnyTimes()
 	mockDBStorage := mockPlugin.NewMockDBStorage(mockCtl)
 	plugin.RegisterFactory(c.Plugin.DatabaseStorage, func() (plugin.Plugin, error) {
 		return mockDBStorage, nil
@@ -74,6 +73,26 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	mockProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
 		return mockProperty, nil
+	})
+	mockNamespace := mockPlugin.NewMockNamespace(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Namespace, func() (plugin.Plugin, error) {
+		return mockNamespace, nil
+	})
+	mockConfig := mockPlugin.NewMockConfiguration(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Configuration, func() (plugin.Plugin, error) {
+		return mockConfig, nil
+	})
+	res := &models.ConfigurationList{}
+	mockConfig.EXPECT().ListConfig(gomock.Any(), gomock.Any()).Return(res, nil).AnyTimes()
+
+	mockSecret := mockPlugin.NewMockSecret(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Secret, func() (plugin.Plugin, error) {
+		return mockSecret, nil
+	})
+
+	mockApplication := mockPlugin.NewMockApplication(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Application, func() (plugin.Plugin, error) {
+		return mockApplication, nil
 	})
 
 	mockInitAPI, err := api.NewInitAPI(c)
