@@ -364,11 +364,7 @@ func (api *API) NodeNumberCollector(namespace string) (map[string]int, error) {
 
 func (api *API) GetNodeProperties(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	props, err := api.Node.GetNodeProperties(ns, n)
-	if err != nil {
-		return nil, err
-	}
-	return props, nil
+	return api.Node.GetNodeProperties(ns, n)
 }
 
 func (api *API) UpdateNodeProperties(c *common.Context) (interface{}, error) {
@@ -377,11 +373,7 @@ func (api *API) UpdateNodeProperties(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	props, err = api.Node.UpdateNodeProperties(ns, n, props)
-	if err != nil {
-		return nil, err
-	}
-	return props, nil
+	return api.Node.UpdateNodeProperties(ns, n, props)
 }
 
 func (api *API) UpdateNodeMode(c *common.Context) (interface{}, error) {

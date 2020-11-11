@@ -7,6 +7,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	"github.com/baetyl/baetyl-go/v2/utils"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
@@ -213,7 +214,7 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 	}
 
 	// update node props meta
-	node, err := n.storage.GetNode(namespace, name)
+	node, err := n.node.GetNode(namespace, name)
 	if err != nil {
 		return nil, err
 	}
@@ -221,21 +222,21 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 	if err != nil {
 		return nil, err
 	}
-	oldReport := map[string]interface{}{}
-	if props, ok := shadow.Report[common.NodeProps]; ok {
-		oldReport, ok = props.(map[string]interface{})
+	newPropsReport := map[string]interface{}{}
+	if props, ok := report[common.NodeProps]; ok && props != nil {
+		newPropsReport, ok = props.(map[string]interface{})
 		if !ok {
 			return nil, errors.New("invalid report of node properties")
 		}
 	}
-	newReport := map[string]interface{}{}
-	if props, ok := report[common.NodeProps]; ok {
-		newReport, ok = props.(map[string]interface{})
+	oldPropsReport := map[string]interface{}{}
+	if props, ok := shadow.Report[common.NodeProps]; ok && props != nil {
+		oldPropsReport, ok = props.(map[string]interface{})
 		if !ok {
 			return nil, errors.New("invalid report of node properties")
 		}
 	}
-	diff, err := specV1.Desire(newReport).DiffWithNil(oldReport)
+	diff, err := specV1.Desire(newPropsReport).DiffWithNil(oldPropsReport)
 	now := time.Now().UTC().String()
 	for key, val := range diff {
 		meta.ReportMeta[key] = now
@@ -244,7 +245,7 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 		}
 	}
 	updateNodePropertiesMeta(node, meta)
-	if _, err := n.storage.UpdateNode(namespace, node); err != nil {
+	if _, err := n.node.UpdateNode(namespace, node); err != nil {
 		return nil, err
 	}
 
@@ -254,6 +255,13 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 		err = shadow.Report.Merge(report)
 		if err != nil {
 			return nil, err
+		}
+		// TODO refactor merge and remove this
+		// since merge won't delete exist key-val, node props should override
+		if len(newPropsReport) == 0 {
+			delete(shadow.Report, common.NodeProps)
+		} else {
+			shadow.Report[common.NodeProps] = newPropsReport
 		}
 	}
 	return n.shadow.UpdateReport(shadow)
@@ -478,7 +486,7 @@ func toShadowMap(shadowList *models.ShadowList) map[string]*models.Shadow {
 }
 
 func (n *nodeService) GetNodeProperties(namespace, name string) (*models.NodeProperties, error) {
-	node, err := n.storage.GetNode(namespace, name)
+	node, err := n.node.GetNode(namespace, name)
 	if err != nil {
 		return nil, err
 	}
@@ -522,7 +530,7 @@ func (n *nodeService) GetNodeProperties(namespace, name string) (*models.NodePro
 // UpdateNodeProperties update desire of node properties
 // and can not update report of node properties
 func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models.NodeProperties) (*models.NodeProperties, error) {
-	node, err := n.storage.GetNode(namespace, name)
+	node, err := n.node.GetNode(namespace, name)
 	if err != nil {
 		return nil, err
 	}
@@ -570,14 +578,14 @@ func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models
 		return nil, err
 	}
 	updateNodePropertiesMeta(node, meta)
-	if _, err := n.storage.UpdateNode(namespace, node); err != nil {
+	if _, err := n.node.UpdateNode(namespace, node); err != nil {
 		return nil, err
 	}
 	return props, nil
 }
 
 func (n *nodeService) UpdateNodeMode(ns, name, mode string) error {
-	node, err := n.storage.GetNode(ns, name)
+	node, err := n.node.GetNode(ns, name)
 	if err != nil {
 		return err
 	}
@@ -585,7 +593,7 @@ func (n *nodeService) UpdateNodeMode(ns, name, mode string) error {
 		node.Attributes = map[string]interface{}{}
 	}
 	node.Attributes[specV1.KeySyncMode] = specV1.SyncMode(mode)
-	_, err = n.storage.UpdateNode(ns, node)
+	_, err = n.node.UpdateNode(ns, node)
 	if err != nil {
 		return err
 	}
