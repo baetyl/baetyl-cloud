@@ -415,5 +415,10 @@ func (api *API) ParseAndCheckProperties(c *common.Context) (*models.NodeProperti
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
+	for _, v := range props.State.Desire {
+		if _, ok := v.(string); !ok {
+			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("value", "desire value should be string"))
+		}
+	}
 	return props, nil
 }

@@ -56,6 +56,6 @@ type NodeMode struct {
 }
 
 type NodePropertiesMetadata struct {
-	ReportMeta map[string]interface{}
-	DesireMeta map[string]interface{}
+	ReportMeta map[string]interface{} `yaml:"report,omitempty" json:"report,omitempty"`
+	DesireMeta map[string]interface{} `yaml:"desire,omitempty" json:"desire,omitempty"`
 }

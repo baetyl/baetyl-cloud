@@ -237,7 +237,7 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 			return nil, fmt.Errorf("invalid report of node properties")
 		}
 	}
-	diff, err := specV1.Desire(oldReport).DiffWithNil(newReport)
+	diff, err := specV1.Desire(newReport).DiffWithNil(oldReport)
 	now := time.Now().UTC().String()
 	for key, val := range diff {
 		meta.ReportMeta[key] = now
@@ -552,7 +552,7 @@ func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models
 	for key, val := range diff {
 		meta.DesireMeta[key] = now
 		if val == nil {
-			delete(meta.ReportMeta, key)
+			delete(meta.DesireMeta, key)
 		}
 	}
 	report := map[string]interface{}{}
@@ -563,7 +563,9 @@ func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models
 		}
 	}
 	props.State.Report = report
+	props.State.Desire = newDesire
 	props.Meta.ReportMeta = meta.ReportMeta
+	props.Meta.DesireMeta = meta.DesireMeta
 	shadow.Desire[common.NodeProps] = newDesire
 	_, err = n.shadow.UpdateDesire(shadow)
 	if err != nil {
