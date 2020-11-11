@@ -144,7 +144,6 @@ func TestDefaultNodeService_Create(t *testing.T) {
 		shadow:       mockObject.shadow,
 		node:         mockObject.node,
 		app:          mockObject.app,
-		matcher:      mockObject.matcher,
 	}
 	node := genNodeTestCase()
 	shadow := genShadowTestCase()
@@ -168,7 +167,7 @@ func TestDefaultNodeService_Create(t *testing.T) {
 		},
 	}
 
-	mockObject.matcher.EXPECT().IsLabelMatch(gomock.Any(), gomock.Any()).Return(true, nil).AnyTimes()
+	//mockObject.matcher.EXPECT().IsLabelMatch(gomock.Any(), gomock.Any()).Return(true, nil).AnyTimes()
 	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
 	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil)
 	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, fmt.Errorf("error"))
@@ -200,7 +199,6 @@ func TestDefaultNodeService_Update(t *testing.T) {
 		shadow:       mockObject.shadow,
 		node:         mockObject.node,
 		app:          mockObject.app,
-		matcher:      mockObject.matcher,
 	}
 	app := &specV1.Application{
 		Name:    "appTest",
@@ -226,7 +224,7 @@ func TestDefaultNodeService_Update(t *testing.T) {
 	_, err = ns.Update(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockObject.matcher.EXPECT().IsLabelMatch(gomock.Any(), gomock.Any()).Return(true, nil).AnyTimes()
+	//mockObject.matcher.EXPECT().IsLabelMatch(gomock.Any(), gomock.Any()).Return(true, nil).AnyTimes()
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 	mockObject.app.EXPECT().ListApplication(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = ns.Update(node.Namespace, node)
@@ -786,10 +784,9 @@ func TestRematchApplicationForNode(t *testing.T) {
 	defer mockObject.Close()
 
 	ns := nodeService{
-		shadow:  mockObject.shadow,
-		node:    mockObject.node,
-		app:     mockObject.app,
-		matcher: mockObject.matcher,
+		shadow: mockObject.shadow,
+		node:   mockObject.node,
+		app:    mockObject.app,
 	}
 
 	apps := &models.ApplicationList{
@@ -833,8 +830,8 @@ func TestRematchApplicationForNode(t *testing.T) {
 	labels := map[string]string{"env": "dev"}
 
 	names := []string{"app02", "app03"}
-	mockObject.matcher.EXPECT().IsLabelMatch("env=dev", labels).Return(true, nil).Times(2)
-	mockObject.matcher.EXPECT().IsLabelMatch("env=test", labels).Return(false, nil)
+	//mockObject.matcher.EXPECT().IsLabelMatch("env=dev", labels).Return(true, nil).Times(2)
+	//mockObject.matcher.EXPECT().IsLabelMatch("env=test", labels).Return(false, nil)
 	desire, appNames := ns.rematchApplicationsForNode(apps, labels)
 	assert.Equal(t, expect, desire)
 	assert.Equal(t, names, appNames)

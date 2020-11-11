@@ -36,7 +36,6 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	c.Plugin.Configuration = common.RandString(9)
 	c.Plugin.Secret = common.RandString(9)
 	c.Plugin.Application = common.RandString(9)
-	c.Plugin.Matcher = common.RandString(9)
 	c.Plugin.Objects = []string{common.RandString(9)}
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9)}
@@ -108,11 +107,6 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	mockApplication := mockPlugin.NewMockApplication(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Application, func() (plugin.Plugin, error) {
 		return mockApplication, nil
-	})
-
-	mockMatcher := mockPlugin.NewMockMatcher(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Matcher, func() (plugin.Plugin, error) {
-		return mockMatcher, nil
 	})
 
 	mockAPI, err := api.NewAPI(c)

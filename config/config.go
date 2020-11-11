@@ -30,7 +30,6 @@ type CloudConfig struct {
 		Configuration string   `yaml:"configuration" json:"configuration" default:"kube"`
 		Secret        string   `yaml:"secret" json:"secret" default:"kube"`
 		Application   string   `yaml:"application" json:"application" default:"kube"`
-		Matcher       string   `yaml:"matcher" json:"matcher" default:"kube"`
 		Objects       []string `yaml:"objects" json:"objects" default:"[]"`
 		Functions     []string `yaml:"functions" json:"functions" default:"[]"`
 		Property      string   `yaml:"property" json:"property" default:"database"`

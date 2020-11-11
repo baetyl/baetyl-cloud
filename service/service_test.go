@@ -21,7 +21,6 @@ type MockServices struct {
 	configuration  *mockPlugin.MockConfiguration
 	secret         *mockPlugin.MockSecret
 	app            *mockPlugin.MockApplication
-	matcher        *mockPlugin.MockMatcher
 	objectStorage  *mockPlugin.MockObject
 	functionPlugin *mockPlugin.MockFunction
 	pki            *mockPlugin.MockPKI
@@ -128,13 +127,6 @@ func mockApplication(mock plugin.Application) plugin.Factory {
 	return factory
 }
 
-func mockMatcher(mock plugin.Matcher) plugin.Factory {
-	factory := func() (plugin.Plugin, error) {
-		return mock, nil
-	}
-	return factory
-}
-
 func mockTestConfig() *config.CloudConfig {
 	conf := &config.CloudConfig{}
 	conf.Plugin.ModelStorage = common.RandString(9)
@@ -148,7 +140,6 @@ func mockTestConfig() *config.CloudConfig {
 	conf.Plugin.Namespace = common.RandString(9)
 	conf.Plugin.Configuration = common.RandString(9)
 	conf.Plugin.Application = common.RandString(9)
-	conf.Plugin.Matcher = common.RandString(9)
 	conf.Plugin.Secret = common.RandString(9)
 	conf.Plugin.License = common.RandString(9)
 	conf.Plugin.Property = common.RandString(9)
@@ -206,9 +197,6 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 	mApp := mockPlugin.NewMockApplication(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Application, mockApplication(mApp))
 
-	mMatcher := mockPlugin.NewMockMatcher(mockCtl)
-	plugin.RegisterFactory(conf.Plugin.Matcher, mockMatcher(mMatcher))
-
 	_, err := NewSyncService(conf)
 	assert.Nil(t, err)
 
@@ -222,7 +210,6 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 		configuration:  mConfig,
 		secret:         mSecret,
 		app:            mApp,
-		matcher:        mMatcher,
 		objectStorage:  mockObjectStorage,
 		functionPlugin: mockFunctionPlugin,
 		pki:            mPKI,

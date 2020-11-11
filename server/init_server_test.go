@@ -29,7 +29,6 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	c.Plugin.Configuration = common.RandString(9)
 	c.Plugin.Secret = common.RandString(9)
 	c.Plugin.Application = common.RandString(9)
-	c.Plugin.Matcher = common.RandString(9)
 	c.Plugin.Objects = []string{common.RandString(9)}
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9)}
@@ -94,11 +93,6 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	mockApplication := mockPlugin.NewMockApplication(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Application, func() (plugin.Plugin, error) {
 		return mockApplication, nil
-	})
-
-	mockMatcher := mockPlugin.NewMockMatcher(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Matcher, func() (plugin.Plugin, error) {
-		return mockMatcher, nil
 	})
 
 	mockInitAPI, err := api.NewInitAPI(c)

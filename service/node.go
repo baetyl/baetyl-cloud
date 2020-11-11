@@ -4,6 +4,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/utils"
+
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
@@ -38,7 +40,6 @@ type nodeService struct {
 	node         plugin.Node
 	shadow       plugin.Shadow
 	app          plugin.Application
-	matcher      plugin.Matcher
 }
 
 // NewNodeService NewNodeService
@@ -58,11 +59,6 @@ func NewNodeService(config *config.CloudConfig) (NodeService, error) {
 		return nil, err
 	}
 
-	matcher, err := plugin.GetPlugin(config.Plugin.Matcher)
-	if err != nil {
-		return nil, err
-	}
-
 	is, err := NewIndexService(config)
 	if err != nil {
 		return nil, err
@@ -73,7 +69,6 @@ func NewNodeService(config *config.CloudConfig) (NodeService, error) {
 		node:         node.(plugin.Node),
 		shadow:       shadow.(plugin.Shadow),
 		app:          app.(plugin.Application),
-		matcher:      matcher.(plugin.Matcher),
 	}, nil
 }
 
@@ -299,7 +294,7 @@ func (n *nodeService) rematchApplicationsForNode(apps *models.ApplicationList, l
 			continue
 		}
 
-		if ok, err := n.matcher.IsLabelMatch(app.Selector, labels); err == nil && ok {
+		if ok, err := utils.IsLabelMatch(app.Selector, labels); err == nil && ok {
 			if app.System {
 				sysApps = append(sysApps, specV1.AppInfo{
 					Name:    app.Name,
