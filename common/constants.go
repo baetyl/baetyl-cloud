@@ -194,5 +194,5 @@ var (
 const (
 	ReportMeta = "reportMeta"
 	DesireMeta = "desireMeta"
-	NodeProps  = "nodeProps"
+	NodeProps  = "nodeprops"
 )

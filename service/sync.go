@@ -138,8 +138,8 @@ func extractComparingReport(report specV1.Report) specV1.Report {
 	if sysapps, ok := report["sysapps"]; ok {
 		res["sysapps"] = sysapps
 	}
-	if nodeTwin, ok := report[common.NodeProps]; ok {
-		res[common.NodeProps] = nodeTwin
+	if nodeProps, ok := report[common.NodeProps]; ok {
+		res[common.NodeProps] = nodeProps
 	}
 	return res
 }
