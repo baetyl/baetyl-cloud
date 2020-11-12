@@ -124,8 +124,8 @@ func TestDefaultApplicationService_Delete(t *testing.T) {
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	as := applicationService{
 		indexService: mockIndexService,
-		dbStorage:    mockObject.dbStorage,
 		app:          mockObject.app,
+		appHis:       mockObject.appHis,
 	}
 	newApp, _ := genAppTestCase()
 
@@ -136,13 +136,13 @@ func TestDefaultApplicationService_Delete(t *testing.T) {
 	mockObject.app.EXPECT().DeleteApplication(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 	mockIndexService.EXPECT().RefreshConfigIndexByApp(gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("error"))
 	mockIndexService.EXPECT().RefreshSecretIndexByApp(gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("error"))
-	mockObject.dbStorage.EXPECT().DeleteApplication(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.appHis.EXPECT().DeleteApplication(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	err = as.Delete(newApp.Namespace, newApp.Name, "")
 	assert.NoError(t, err)
 
 	mockIndexService.EXPECT().RefreshConfigIndexByApp(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 	mockIndexService.EXPECT().RefreshSecretIndexByApp(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-	mockObject.dbStorage.EXPECT().DeleteApplication(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
+	mockObject.appHis.EXPECT().DeleteApplication(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
 
 	err = as.Delete(newApp.Namespace, newApp.Name, "")
 	assert.NoError(t, err)
@@ -156,10 +156,10 @@ func TestDefaultApplicationService_CreateWithBase(t *testing.T) {
 
 	as := applicationService{
 		indexService: mockIndexService,
-		dbStorage:    mockObject.dbStorage,
 		config:       mockObject.configuration,
 		secret:       mockObject.secret,
 		app:          mockObject.app,
+		appHis:       mockObject.appHis,
 	}
 	config := &specV1.Configuration{Name: "agent-conf", Version: "123"}
 	secret2 := &specV1.Secret{Name: "test-secret-02", Version: "123"}
@@ -170,12 +170,12 @@ func TestDefaultApplicationService_CreateWithBase(t *testing.T) {
 	mockObject.app.EXPECT().CreateApplication(gomock.Any(), gomock.Any()).Return(newApp, nil).Times(1)
 	mockObject.configuration.EXPECT().GetConfig(gomock.Any(), gomock.Any(), gomock.Any()).Return(config, nil).Times(2)
 	mockObject.secret.EXPECT().GetSecret(gomock.Any(), gomock.Any(), gomock.Any()).Return(secret2, nil)
-	mockObject.dbStorage.EXPECT().CreateApplication(gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.appHis.EXPECT().CreateApplication(gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err := as.CreateWithBase(newApp.Namespace, newApp, baseApp)
 	assert.NoError(t, err)
 
 	mockObject.configuration.EXPECT().CreateConfig(gomock.Any(), gomock.Any()).Return(config, nil).AnyTimes()
-	mockObject.dbStorage.EXPECT().CreateApplication(gomock.Any()).Return(nil, nil).AnyTimes()
+	mockObject.appHis.EXPECT().CreateApplication(gomock.Any()).Return(nil, nil).AnyTimes()
 	mockObject.configuration.EXPECT().GetConfig(gomock.Any(), gomock.Any(), gomock.Any()).Return(config, fmt.Errorf("error")).Times(1)
 	baseApp.Namespace = "test01"
 	_, err = as.CreateWithBase(newApp.Namespace, newApp, baseApp)
@@ -227,10 +227,10 @@ func TestDefaultApplicationService_Update(t *testing.T) {
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	as := applicationService{
 		indexService: mockIndexService,
-		dbStorage:    mockObject.dbStorage,
 		config:       mockObject.configuration,
 		secret:       mockObject.secret,
 		app:          mockObject.app,
+		appHis:       mockObject.appHis,
 	}
 
 	newApp, oldApp := genAppTestCase()
@@ -247,7 +247,7 @@ func TestDefaultApplicationService_Update(t *testing.T) {
 	mockObject.configuration.EXPECT().GetConfig(gomock.Any(), gomock.Any(), "").Return(&specV1.Configuration{Version: "1"}, nil).AnyTimes()
 	mockObject.secret.EXPECT().GetSecret(gomock.Any(), secret1.Name, gomock.Any()).Return(secret1, nil).AnyTimes()
 	mockObject.secret.EXPECT().GetSecret(gomock.Any(), secret2.Name, gomock.Any()).Return(secret2, nil).AnyTimes()
-	mockObject.dbStorage.EXPECT().CreateApplication(gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.appHis.EXPECT().CreateApplication(gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = as.Update(newApp.Namespace, newApp)
 	assert.NoError(t, err)
 

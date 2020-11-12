@@ -29,24 +29,24 @@ type IndexService interface {
 }
 
 type indexService struct {
-	storage plugin.DBStorage
+	index plugin.Index
 }
 
 // NewIndexService New Index Service
 func NewIndexService(config *config.CloudConfig) (IndexService, error) {
-	ds, err := plugin.GetPlugin(config.Plugin.DatabaseStorage)
+	index, err := plugin.GetPlugin(config.Plugin.Index)
 	if err != nil {
 		return nil, err
 	}
-	return &indexService{storage: ds.(plugin.DBStorage)}, nil
+	return &indexService{index: index.(plugin.Index)}, nil
 }
 
 func (i *indexService) RefreshIndex(namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error {
-	return i.storage.RefreshIndex(namespace, keyA, keyB, valueA, valueBs)
+	return i.index.RefreshIndex(namespace, keyA, keyB, valueA, valueBs)
 }
 
 func (i *indexService) ListIndex(namespace string, keyA, byKeyB common.Resource, valueB string) ([]string, error) {
-	return i.storage.ListIndex(namespace, keyA, byKeyB, valueB)
+	return i.index.ListIndex(namespace, keyA, byKeyB, valueB)
 }
 
 // helper

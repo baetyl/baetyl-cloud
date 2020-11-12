@@ -15,12 +15,13 @@ import (
 type MockServices struct {
 	conf           *config.CloudConfig
 	ctl            *gomock.Controller
-	dbStorage      *mockPlugin.MockDBStorage
 	node           *mockPlugin.MockNode
 	namespace      *mockPlugin.MockNamespace
 	configuration  *mockPlugin.MockConfiguration
 	secret         *mockPlugin.MockSecret
 	app            *mockPlugin.MockApplication
+	index          *mockPlugin.MockIndex
+	appHis         *mockPlugin.MockAppHistory
 	objectStorage  *mockPlugin.MockObject
 	functionPlugin *mockPlugin.MockFunction
 	pki            *mockPlugin.MockPKI
@@ -34,13 +35,6 @@ func (m *MockServices) Close() {
 	if m.ctl != nil {
 		m.ctl.Finish()
 	}
-}
-
-func mockStorageDB(mock plugin.DBStorage) plugin.Factory {
-	factory := func() (plugin.Plugin, error) {
-		return mock, nil
-	}
-	return factory
 }
 
 func mockStorageObject(mock plugin.Object) plugin.Factory {
@@ -127,10 +121,23 @@ func mockApplication(mock plugin.Application) plugin.Factory {
 	return factory
 }
 
+func mockIndex(mock plugin.Index) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return factory
+}
+
+func mockAppHis(mock plugin.AppHistory) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return factory
+}
+
 func mockTestConfig() *config.CloudConfig {
 	conf := &config.CloudConfig{}
 	conf.Plugin.ModelStorage = common.RandString(9)
-	conf.Plugin.DatabaseStorage = common.RandString(9)
 	conf.Plugin.Objects = []string{common.RandString(9)}
 	conf.Plugin.PKI = common.RandString(9)
 	conf.Plugin.Auth = common.RandString(9)
@@ -140,6 +147,8 @@ func mockTestConfig() *config.CloudConfig {
 	conf.Plugin.Namespace = common.RandString(9)
 	conf.Plugin.Configuration = common.RandString(9)
 	conf.Plugin.Application = common.RandString(9)
+	conf.Plugin.Index = common.RandString(9)
+	conf.Plugin.AppHistory = common.RandString(9)
 	conf.Plugin.Secret = common.RandString(9)
 	conf.Plugin.License = common.RandString(9)
 	conf.Plugin.Property = common.RandString(9)
@@ -158,8 +167,6 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 	conf := mockTestConfig()
 	mockCtl := gomock.NewController(t)
 
-	mockDBStorage := mockPlugin.NewMockDBStorage(mockCtl)
-	plugin.RegisterFactory(conf.Plugin.DatabaseStorage, mockStorageDB(mockDBStorage))
 	mPKI := mockPlugin.NewMockPKI(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.PKI, mockPKI(mPKI))
 	mAuth := mockPlugin.NewMockAuth(mockCtl)
@@ -197,19 +204,26 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 	mApp := mockPlugin.NewMockApplication(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Application, mockApplication(mApp))
 
+	mIndex := mockPlugin.NewMockIndex(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Index, mockIndex(mIndex))
+
+	mAppHis := mockPlugin.NewMockAppHistory(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.AppHistory, mockAppHis(mAppHis))
+
 	_, err := NewSyncService(conf)
 	assert.Nil(t, err)
 
 	return &MockServices{
 		conf:           conf,
 		ctl:            mockCtl,
-		dbStorage:      mockDBStorage,
 		node:           mNode,
 		shadow:         mShadow,
 		namespace:      mNamespace,
 		configuration:  mConfig,
 		secret:         mSecret,
 		app:            mApp,
+		index:          mIndex,
+		appHis:         mAppHis,
 		objectStorage:  mockObjectStorage,
 		functionPlugin: mockFunctionPlugin,
 		pki:            mPKI,

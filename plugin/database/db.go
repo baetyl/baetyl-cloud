@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"io"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -9,6 +10,15 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
+
+// DBStorage
+type DBStorage interface {
+	Transact(func(*sqlx.Tx) error) error
+	Exec(tx *sqlx.Tx, sql string, args ...interface{}) (sql.Result, error)
+	Query(tx *sqlx.Tx, sql string, data interface{}, args ...interface{}) error
+
+	io.Closer
+}
 
 // DBStorage
 type DB struct {

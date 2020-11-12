@@ -11,7 +11,6 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 //go:generate mockgen -destination=../mock/service/sync.go -package=service github.com/baetyl/baetyl-cloud/v2/service SyncService
@@ -29,8 +28,6 @@ const (
 )
 
 type SyncServiceImpl struct {
-	plugin.DBStorage
-
 	ConfigService ConfigService
 	NodeService   NodeService
 	AppService    ApplicationService
@@ -41,14 +38,10 @@ type SyncServiceImpl struct {
 
 // NewSyncService new SyncService
 func NewSyncService(config *config.CloudConfig) (SyncService, error) {
-	db, err := plugin.GetPlugin(config.Plugin.DatabaseStorage)
-	if err != nil {
-		return nil, err
-	}
 	es := &SyncServiceImpl{
-		DBStorage: db.(plugin.DBStorage),
-		Hooks:     map[string]interface{}{},
+		Hooks: map[string]interface{}{},
 	}
+	var err error
 	es.ConfigService, err = NewConfigService(config)
 	if err != nil {
 		return nil, err
