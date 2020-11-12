@@ -1,22 +1,24 @@
 package api
 
 import (
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 // API baetyl api server
 type API struct {
-	NS      service.NamespaceService
-	Node    service.NodeService
-	Index   service.IndexService
-	Func    service.FunctionService
-	Obj     service.ObjectService
-	PKI     service.PKIService
-	Auth    service.AuthService
-	Prop    service.PropertyService
-	Init    service.InitService
-	License service.LicenseService
+	NS       service.NamespaceService
+	Node     service.NodeService
+	Index    service.IndexService
+	Func     service.FunctionService
+	Obj      service.ObjectService
+	PKI      service.PKIService
+	Auth     service.AuthService
+	Prop     service.PropertyService
+	Init     service.InitService
+	License  service.LicenseService
+	Template service.TemplateService
 	*service.AppCombinedService
 }
 
@@ -66,6 +68,13 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
+	templateService, err := service.NewTemplateService(config, map[string]interface{}{
+		"GetProperty": propertyService.GetPropertyValue,
+		"RandString":  common.RandString,
+	})
+	if err != nil {
+		return nil, err
+	}
 	return &API{
 		NS:                 namespaceService,
 		Node:               nodeService,
@@ -77,6 +86,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		Prop:               propertyService,
 		Init:               initService,
 		License:            licenseService,
+		Template:           templateService,
 		AppCombinedService: acs,
 	}, nil
 }

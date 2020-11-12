@@ -16,10 +16,12 @@ import (
 )
 
 const (
-	ConfigDir                 = "/etc/baetyl"
-	FunctionConfigPrefix      = "baetyl-function-config"
-	FunctionCodePrefix        = "baetyl-function-code"
-	FunctionDefaultConfigFile = "conf.yml"
+	ConfigDir                   = "/etc/baetyl"
+	ProgramConfigDir            = "/var/lib/baetyl/bin"
+	FunctionConfigPrefix        = "baetyl-function-config"
+	FunctionProgramConfigPrefix = "baetyl-function-program-config"
+	FunctionCodePrefix          = "baetyl-function-code"
+	FunctionDefaultConfigFile   = "conf.yml"
 )
 
 // GetApplication get a application
@@ -293,6 +295,11 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 			return nil, err
 		}
 
+		generatedProgramConfigName, err := getGeneratedProgramConfigNameOfFunctionService(app, service.Name)
+		if err != nil {
+			return nil, err
+		}
+
 		config, err := api.Config.Get(appView.Namespace, generatedConfigName, "")
 		if err != nil {
 			return nil, err
@@ -304,6 +311,11 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 				return nil, err
 			}
 			service.Functions = serviceFunctions.Functions
+		}
+
+		_, err = api.Config.Get(appView.Namespace, generatedProgramConfigName, "")
+		if err != nil {
+			return nil, err
 		}
 
 		populateFunctionVolumeMount(service)
@@ -336,10 +348,20 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 		}
 		configs = append(configs, *config)
 
+		programConfig, err := generateProgramConfigOfFunctionService(api, service, app)
+		if err != nil {
+			return nil, nil, err
+		}
+		configs = append(configs, *programConfig)
+
 		if _, ok := oldServices[service.Name]; !ok {
 			volumeMount, volume := generateVolumeAndVolumeMount(service.Name, config.Name)
 			service.VolumeMounts = append(service.VolumeMounts, volumeMount)
 			app.Volumes = append(app.Volumes, volume)
+
+			volumeMountPrpgram, volumeProgram := generateProgramConfigurationVolumeAndVolumeMount(service.Name, programConfig.Name)
+			service.VolumeMounts = append(service.VolumeMounts, volumeMountPrpgram)
+			app.Volumes = append(app.Volumes, volumeProgram)
 		}
 
 		runtimes, err := api.Func.ListRuntimes()
@@ -490,8 +512,8 @@ func (api *API) cleanGeneratedConfigsOfFunctionApp(configs []specV1.Configuratio
 
 	for _, v := range oldApp.Volumes {
 		if v.VolumeSource.Config != nil {
-			if _, ok := m[v.VolumeSource.Config.Name]; !ok &&
-				strings.HasPrefix(v.VolumeSource.Config.Name, FunctionConfigPrefix) {
+			if _, ok := m[v.VolumeSource.Config.Name]; !ok && (strings.HasPrefix(v.VolumeSource.Config.Name, FunctionConfigPrefix) ||
+				strings.HasPrefix(v.VolumeSource.Config.Name, FunctionProgramConfigPrefix)) {
 				err := api.Config.Delete(oldApp.Namespace, v.VolumeSource.Config.Name)
 				if err != nil {
 					common.LogDirtyData(err,
@@ -516,6 +538,19 @@ func getGeneratedConfigNameOfFunctionService(app *specV1.Application, serviceNam
 		}
 	}
 	return strings.ToLower(fmt.Sprintf("%s-%s-%s-%s", FunctionConfigPrefix, app.Name, serviceName, common.RandString(9))), nil
+}
+
+func getGeneratedProgramConfigNameOfFunctionService(app *specV1.Application, serviceName string) (string, error) {
+	volumeMountName := getNameOfFunctionProgramConfigVolumeMount(serviceName)
+	for _, v := range app.Volumes {
+		if v.Name == volumeMountName {
+			if v.VolumeSource.Config == nil {
+				return "", common.Error(common.ErrVolumeType, common.Field("name", v.Name), common.Field("type", common.Config))
+			}
+			return v.VolumeSource.Config.Name, nil
+		}
+	}
+	return strings.ToLower(fmt.Sprintf("%s-%s-%s-%s", FunctionProgramConfigPrefix, app.Name, serviceName, common.RandString(9))), nil
 }
 
 func generateConfigOfFunctionService(service *specV1.Service, app *specV1.Application) (*specV1.Configuration, error) {
@@ -546,6 +581,26 @@ func generateConfigOfFunctionService(service *specV1.Service, app *specV1.Applic
 	return config, nil
 }
 
+func generateProgramConfigOfFunctionService(api *API, service *specV1.Service, app *specV1.Application) (*specV1.Configuration, error) {
+	generatedConfigName, err := getGeneratedProgramConfigNameOfFunctionService(app, service.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	config := &specV1.Configuration{}
+	tempalteName := fmt.Sprintf("baetyl-%s-program.yml", service.FunctionConfig.Runtime)
+	params := map[string]interface{}{
+		"Namespace":  app.Namespace,
+		"ConfigName": generatedConfigName,
+	}
+
+	err = api.Template.UnmarshalTemplate(tempalteName, params, config)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return config, nil
+}
+
 func generateVolumeAndVolumeMount(serviceName, configName string) (specV1.VolumeMount, specV1.Volume) {
 	volumeMount := specV1.VolumeMount{
 		Name:      getNameOfFunctionConfigVolumeMount(serviceName),
@@ -564,13 +619,32 @@ func generateVolumeAndVolumeMount(serviceName, configName string) (specV1.Volume
 	return volumeMount, generatedConfigVolume
 }
 
+func generateProgramConfigurationVolumeAndVolumeMount(serviceName, configName string) (specV1.VolumeMount, specV1.Volume) {
+	volumeMount := specV1.VolumeMount{
+		Name:      getNameOfFunctionProgramConfigVolumeMount(serviceName),
+		MountPath: ProgramConfigDir,
+		ReadOnly:  true,
+	}
+
+	generatedConfigVolume := specV1.Volume{
+		Name: volumeMount.Name,
+		VolumeSource: specV1.VolumeSource{
+			Config: &specV1.ObjectReference{
+				Name: configName,
+			},
+		},
+	}
+	return volumeMount, generatedConfigVolume
+}
+
 func populateFunctionVolumeMount(service *specV1.Service) {
 	codeVm := getNameOfFunctionCodeVolumeMount(service.Name)
 	confVm := getNameOfFunctionConfigVolumeMount(service.Name)
+	programConfVm := getNameOfFunctionProgramConfigVolumeMount(service.Name)
 
 	for i := range service.VolumeMounts {
 		mount := &service.VolumeMounts[i]
-		if mount.Name == codeVm || mount.Name == confVm {
+		if mount.Name == codeVm || mount.Name == confVm || mount.Name == programConfVm {
 			mount.Immutable = true
 		}
 	}
@@ -578,6 +652,10 @@ func populateFunctionVolumeMount(service *specV1.Service) {
 
 func getNameOfFunctionConfigVolumeMount(serviceName string) string {
 	return fmt.Sprintf("%s-%s", FunctionConfigPrefix, serviceName)
+}
+
+func getNameOfFunctionProgramConfigVolumeMount(serviceName string) string {
+	return fmt.Sprintf("%s-%s", FunctionProgramConfigPrefix, serviceName)
 }
 
 func getNameOfFunctionCodeVolumeMount(serviceName string) string {
