@@ -402,4 +402,3 @@ func (s *InitServiceImpl) genApp(ns, template string, params map[string]interfac
 	}
 	return app, nil
 }
-

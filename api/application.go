@@ -83,7 +83,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	err = api.updateGeneratedConfigsOfFunctionApp(ns, configs)
+	err = api.updateGenConfigsOfFunctionApp(ns, configs)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	err = api.updateGeneratedConfigsOfFunctionApp(ns, configs)
+	err = api.updateGenConfigsOfFunctionApp(ns, configs)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	api.cleanGeneratedConfigsOfFunctionApp(configs, oldApp)
+	api.cleanGenConfigsOfFunctionApp(configs, oldApp)
 
 	return api.ToApplicationView(app)
 }
@@ -179,7 +179,7 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	api.cleanGeneratedConfigsOfFunctionApp(nil, app)
+	api.cleanGenConfigsOfFunctionApp(nil, app)
 	return nil, nil
 }
 
@@ -290,12 +290,12 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 	}
 	for index := range appView.Services {
 		service := &appView.Services[index]
-		generatedConfigName, err := getGeneratedConfigNameOfFunctionService(app, service.Name)
+		generatedConfigName, err := getGenConfigNameOfFunctionService(app, service.Name)
 		if err != nil {
 			return nil, err
 		}
 
-		generatedProgramConfigName, err := getGeneratedProgramConfigNameOfFunctionService(app, service.Name)
+		generatedProgramConfigName, err := getGenProgramNameOfFunctionService(app, service.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -348,18 +348,18 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 		}
 		configs = append(configs, *config)
 
-		programConfig, err := generateProgramConfigOfFunctionService(api, service, app)
+		programConfig, err := generateProgramOfFunctionService(api, service, app)
 		if err != nil {
 			return nil, nil, err
 		}
 		configs = append(configs, *programConfig)
 
 		if _, ok := oldServices[service.Name]; !ok {
-			volumeMount, volume := generateVolumeAndVolumeMount(service.Name, config.Name)
+			volumeMount, volume := generateVmAndMount(service.Name, config.Name)
 			service.VolumeMounts = append(service.VolumeMounts, volumeMount)
 			app.Volumes = append(app.Volumes, volume)
 
-			volumeMountPrpgram, volumeProgram := generateProgramConfigurationVolumeAndVolumeMount(service.Name, programConfig.Name)
+			volumeMountPrpgram, volumeProgram := genProgramVmAndMount(service.Name, programConfig.Name)
 			service.VolumeMounts = append(service.VolumeMounts, volumeMountPrpgram)
 			app.Volumes = append(app.Volumes, volumeProgram)
 		}
@@ -494,7 +494,7 @@ func (api *API) isAppCanDelete(namesapce, name string) (bool, error) {
 	return true, nil
 }
 
-func (api *API) updateGeneratedConfigsOfFunctionApp(namespace string, configs []specV1.Configuration) error {
+func (api *API) updateGenConfigsOfFunctionApp(namespace string, configs []specV1.Configuration) error {
 	for _, config := range configs {
 		_, err := api.Config.Upsert(namespace, &config)
 		if err != nil {
@@ -504,7 +504,7 @@ func (api *API) updateGeneratedConfigsOfFunctionApp(namespace string, configs []
 	return nil
 }
 
-func (api *API) cleanGeneratedConfigsOfFunctionApp(configs []specV1.Configuration, oldApp *specV1.Application) {
+func (api *API) cleanGenConfigsOfFunctionApp(configs []specV1.Configuration, oldApp *specV1.Application) {
 	m := map[string]bool{}
 	for _, config := range configs {
 		m[config.Name] = true
@@ -527,7 +527,7 @@ func (api *API) cleanGeneratedConfigsOfFunctionApp(configs []specV1.Configuratio
 	}
 }
 
-func getGeneratedConfigNameOfFunctionService(app *specV1.Application, serviceName string) (string, error) {
+func getGenConfigNameOfFunctionService(app *specV1.Application, serviceName string) (string, error) {
 	volumeMountName := getNameOfFunctionConfigVolumeMount(serviceName)
 	for _, v := range app.Volumes {
 		if v.Name == volumeMountName {
@@ -540,15 +540,16 @@ func getGeneratedConfigNameOfFunctionService(app *specV1.Application, serviceNam
 	return strings.ToLower(fmt.Sprintf("%s-%s-%s-%s", FunctionConfigPrefix, app.Name, serviceName, common.RandString(9))), nil
 }
 
-func getGeneratedProgramConfigNameOfFunctionService(app *specV1.Application, serviceName string) (string, error) {
-	volumeMountName := getNameOfFunctionProgramConfigVolumeMount(serviceName)
+func getGenProgramNameOfFunctionService(app *specV1.Application, serviceName string) (string, error) {
+	volumeMountName := getNameOfFunctionProgramVmMount(serviceName)
 	for _, v := range app.Volumes {
-		if v.Name == volumeMountName {
-			if v.VolumeSource.Config == nil {
-				return "", common.Error(common.ErrVolumeType, common.Field("name", v.Name), common.Field("type", common.Config))
-			}
-			return v.VolumeSource.Config.Name, nil
+		if v.Name != volumeMountName {
+			continue
 		}
+		if v.VolumeSource.Config == nil {
+			return "", common.Error(common.ErrVolumeType, common.Field("name", v.Name), common.Field("type", common.Config))
+		}
+		return v.VolumeSource.Config.Name, nil
 	}
 	return strings.ToLower(fmt.Sprintf("%s-%s-%s-%s", FunctionProgramConfigPrefix, app.Name, serviceName, common.RandString(9))), nil
 }
@@ -563,7 +564,7 @@ func generateConfigOfFunctionService(service *specV1.Service, app *specV1.Applic
 		return nil, err
 	}
 
-	generatedConfigName, err := getGeneratedConfigNameOfFunctionService(app, service.Name)
+	generatedConfigName, err := getGenConfigNameOfFunctionService(app, service.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -581,8 +582,8 @@ func generateConfigOfFunctionService(service *specV1.Service, app *specV1.Applic
 	return config, nil
 }
 
-func generateProgramConfigOfFunctionService(api *API, service *specV1.Service, app *specV1.Application) (*specV1.Configuration, error) {
-	generatedConfigName, err := getGeneratedProgramConfigNameOfFunctionService(app, service.Name)
+func generateProgramOfFunctionService(api *API, service *specV1.Service, app *specV1.Application) (*specV1.Configuration, error) {
+	generatedConfigName, err := getGenProgramNameOfFunctionService(app, service.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -601,7 +602,7 @@ func generateProgramConfigOfFunctionService(api *API, service *specV1.Service, a
 	return config, nil
 }
 
-func generateVolumeAndVolumeMount(serviceName, configName string) (specV1.VolumeMount, specV1.Volume) {
+func generateVmAndMount(serviceName, configName string) (specV1.VolumeMount, specV1.Volume) {
 	volumeMount := specV1.VolumeMount{
 		Name:      getNameOfFunctionConfigVolumeMount(serviceName),
 		MountPath: ConfigDir,
@@ -619,9 +620,9 @@ func generateVolumeAndVolumeMount(serviceName, configName string) (specV1.Volume
 	return volumeMount, generatedConfigVolume
 }
 
-func generateProgramConfigurationVolumeAndVolumeMount(serviceName, configName string) (specV1.VolumeMount, specV1.Volume) {
+func genProgramVmAndMount(serviceName, configName string) (specV1.VolumeMount, specV1.Volume) {
 	volumeMount := specV1.VolumeMount{
-		Name:      getNameOfFunctionProgramConfigVolumeMount(serviceName),
+		Name:      getNameOfFunctionProgramVmMount(serviceName),
 		MountPath: ProgramConfigDir,
 		ReadOnly:  true,
 	}
@@ -640,7 +641,7 @@ func generateProgramConfigurationVolumeAndVolumeMount(serviceName, configName st
 func populateFunctionVolumeMount(service *specV1.Service) {
 	codeVm := getNameOfFunctionCodeVolumeMount(service.Name)
 	confVm := getNameOfFunctionConfigVolumeMount(service.Name)
-	programConfVm := getNameOfFunctionProgramConfigVolumeMount(service.Name)
+	programConfVm := getNameOfFunctionProgramVmMount(service.Name)
 
 	for i := range service.VolumeMounts {
 		mount := &service.VolumeMounts[i]
@@ -654,7 +655,7 @@ func getNameOfFunctionConfigVolumeMount(serviceName string) string {
 	return fmt.Sprintf("%s-%s", FunctionConfigPrefix, serviceName)
 }
 
-func getNameOfFunctionProgramConfigVolumeMount(serviceName string) string {
+func getNameOfFunctionProgramVmMount(serviceName string) string {
 	return fmt.Sprintf("%s-%s", FunctionProgramConfigPrefix, serviceName)
 }
 
