@@ -29,6 +29,7 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	c.Plugin.Configuration = common.RandString(9)
 	c.Plugin.Secret = common.RandString(9)
 	c.Plugin.Application = common.RandString(9)
+	c.Plugin.Index = common.RandString(9)
 	c.Plugin.Objects = []string{common.RandString(9)}
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9)}
@@ -39,10 +40,6 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	c.InitServer.Certificate.Key = "../scripts/demo/native/certs/server.key"
 	mockCtl := gomock.NewController(t)
 
-	mockDBStorage := mockPlugin.NewMockDBStorage(mockCtl)
-	plugin.RegisterFactory(c.Plugin.DatabaseStorage, func() (plugin.Plugin, error) {
-		return mockDBStorage, nil
-	})
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
 	for _, v := range c.Plugin.Objects {
 		plugin.RegisterFactory(v, func() (plugin.Plugin, error) {
@@ -93,6 +90,11 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	mockApplication := mockPlugin.NewMockApplication(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Application, func() (plugin.Plugin, error) {
 		return mockApplication, nil
+	})
+
+	mockIndex := mockPlugin.NewMockIndex(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Index, func() (plugin.Plugin, error) {
+		return mockIndex, nil
 	})
 
 	mockInitAPI, err := api.NewInitAPI(c)

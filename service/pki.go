@@ -34,7 +34,6 @@ const (
 
 type pkiService struct {
 	pki plugin.PKI
-	db  plugin.DBStorage
 }
 
 // NewPKIService create a certificate service
@@ -44,14 +43,8 @@ func NewPKIService(config *config.CloudConfig) (PKIService, error) {
 		return nil, err
 	}
 
-	ds, err := plugin.GetPlugin(config.Plugin.DatabaseStorage)
-	if err != nil {
-		return nil, err
-	}
-
 	p := &pkiService{
 		pki: pk.(plugin.PKI),
-		db:  ds.(plugin.DBStorage),
 	}
 
 	return p, nil
