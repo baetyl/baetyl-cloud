@@ -128,6 +128,9 @@ func (s *AdminServer) InitRoute() {
 		nodes.GET("", common.Wrapper(s.api.ListNode))
 		nodes.GET("/:name/deploys", common.Wrapper(s.api.GetNodeDeployHistory))
 		nodes.GET("/:name/init", common.Wrapper(s.api.GenInitCmdFromNode))
+		nodes.PUT("/:name/mode", common.Wrapper(s.api.UpdateNodeMode))
+		nodes.PUT("/:name/properties", common.Wrapper(s.api.UpdateNodeProperties))
+		nodes.GET("/:name/properties", common.Wrapper(s.api.GetNodeProperties))
 	}
 	{
 		apps := v1.Group("/apps")

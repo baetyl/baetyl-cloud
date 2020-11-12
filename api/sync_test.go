@@ -44,7 +44,7 @@ func TestSyncAPIImpl_Report(t *testing.T) {
 	assert.NoError(t, err)
 	err = msg.Content.UnmarshalJSON(bt)
 	assert.NoError(t, err)
-	resp := specV1.Desire{}
+	resp := specV1.Delta{}
 	expMsg := &specV1.Message{
 		Kind:     msg.Kind,
 		Metadata: msg.Metadata,
