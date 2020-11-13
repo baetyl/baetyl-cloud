@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -12,7 +13,10 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
-const OfflineDuration = 40 * time.Second
+const (
+	OfflineDuration = 40 * time.Second
+	NodeNumber      = 1
+)
 
 // GetNode get a node
 func (api *API) GetNode(c *common.Context) (interface{}, error) {
@@ -131,8 +135,13 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
 
+	err = api.License.AcquireQuota(ns, plugin.QuotaNode, NodeNumber)
+	if err != nil {
+		return nil, err
+	}
 	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
+		_ = api.realseNodeQuota(ns, NodeNumber)
 		return nil, err
 	}
 
@@ -204,7 +213,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	if err := api.Node.Delete(c.GetNamespace(), c.GetNameFromParam()); err != nil {
 		return nil, err
 	}
-
+	_ = api.realseNodeQuota(ns, NodeNumber)
 	sysAppInfos := node.Desire.AppInfos(true)
 	for _, ai := range sysAppInfos {
 		// Clean APP
