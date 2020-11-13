@@ -237,7 +237,7 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 		}
 	}
 	diff, err := specV1.Desire(newPropsReport).DiffWithNil(oldPropsReport)
-	now := time.Now().UTC().String()
+	now := time.Now().UTC()
 	for key, val := range diff {
 		meta.ReportMeta[key] = now
 		if val == nil {
@@ -554,7 +554,7 @@ func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models
 	if err != nil {
 		return nil, err
 	}
-	now := time.Now().UTC().String()
+	now := time.Now().UTC()
 	for key, val := range diff {
 		meta.DesireMeta[key] = now
 		if val == nil {
