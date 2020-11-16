@@ -569,10 +569,12 @@ func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models
 		}
 	}
 	props.State.Report = report
-	props.State.Desire = newDesire
+	// cast to map[string]interface{} should not omit
+	props.State.Desire = map[string]interface{}(newDesire)
 	props.Meta.ReportMeta = meta.ReportMeta
 	props.Meta.DesireMeta = meta.DesireMeta
-	shadow.Desire[common.NodeProps] = newDesire
+	// cast to map[string]interface{} should not omit
+	shadow.Desire[common.NodeProps] = map[string]interface{}(newDesire)
 	_, err = n.shadow.UpdateDesire(shadow)
 	if err != nil {
 		return nil, err
