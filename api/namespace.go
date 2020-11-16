@@ -28,6 +28,6 @@ func (api *API) GetNamespace(c *common.Context) (interface{}, error) {
 func (api *API) DeleteNamespace(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
 	err := api.NS.Delete(&models.Namespace{Name: ns})
-	_ = api.DeleteAllQuotas(ns)
+	_ = api.DeleteQuotaByNamespace(ns)
 	return nil, err
 }

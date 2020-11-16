@@ -533,29 +533,6 @@ func (mr *MockDBStorageMockRecorder) DeleteTaskTx(arg0, arg1 interface{}) *gomoc
 
 // Exec mocks base method
 func (m *MockDBStorage) Exec(arg0 *sqlx.Tx, arg1 string, arg2 ...interface{}) (sql.Result, error) {
-<<<<<<< HEAD
-=======
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1}
-	for _, a := range arg2 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Exec", varargs...)
-	ret0, _ := ret[0].(sql.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Exec indicates an expected call of Exec
-func (mr *MockDBStorageMockRecorder) Exec(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockDBStorage)(nil).Exec), varargs...)
-}
-
-// Get mocks base method
-func (m *MockDBStorage) Get(arg0, arg1 string) (*models.Shadow, error) {
->>>>>>> 4932925b967390ab416c330d1a76d82578d39a75
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {

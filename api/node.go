@@ -141,7 +141,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	}
 	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
-		_ = api.realseNodeQuota(ns, NodeNumber)
+		_ = api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber)
 		return nil, err
 	}
 
@@ -213,7 +213,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	if err := api.Node.Delete(c.GetNamespace(), c.GetNameFromParam()); err != nil {
 		return nil, err
 	}
-	_ = api.realseNodeQuota(ns, NodeNumber)
+	_ = api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber)
 	sysAppInfos := node.Desire.AppInfos(true)
 	for _, ai := range sysAppInfos {
 		// Clean APP
