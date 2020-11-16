@@ -53,6 +53,9 @@ func initNodeAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		configs.POST("", mockIM, common.Wrapper(api.CreateNode))
 		configs.GET("", mockIM, common.Wrapper(api.ListNode))
 		configs.GET("/:name/deploys", mockIM, common.Wrapper(api.GetNodeDeployHistory))
+		configs.GET("/:name/properties", mockIM, common.Wrapper(api.GetNodeProperties))
+		configs.PUT("/:name/properties", mockIM, common.Wrapper(api.UpdateNodeProperties))
+		configs.PUT("/:name/mode", mockIM, common.Wrapper(api.UpdateNodeMode))
 	}
 	return api, router, mockCtl
 }
@@ -1080,4 +1083,117 @@ func TestAPI_NodeNumberCollector(t *testing.T) {
 	res, err := api.NodeNumberCollector(namespace)
 	assert.NoError(t, err)
 	assert.Equal(t, 12, res[plugin.QuotaNode])
+}
+
+func TestGetNodeProperties(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Node = sNode
+
+	nodeProps := &models.NodeProperties{
+		State: models.NodePropertiesState{
+			Report: map[string]interface{}{"a": "1"},
+			Desire: map[string]interface{}{"b": "2"},
+		},
+	}
+	sNode.EXPECT().GetNodeProperties(gomock.Any(), gomock.Any()).Return(nodeProps, nil).AnyTimes()
+
+	w4 := httptest.NewRecorder()
+	req4, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/properties", nil)
+	router.ServeHTTP(w4, req4)
+	assert.Equal(t, http.StatusOK, w4.Code)
+
+	var res models.NodeProperties
+	err := json.Unmarshal(w4.Body.Bytes(), &res)
+	assert.NoError(t, err)
+	expect := models.NodeProperties{
+		State: models.NodePropertiesState{
+			Report: map[string]interface{}{"a": "1"},
+			Desire: map[string]interface{}{"b": "2"},
+		},
+	}
+	assert.Equal(t, expect, res)
+}
+
+func TestUpdateNodeProperties(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Node = sNode
+
+	nodeProps := &models.NodeProperties{
+		State: models.NodePropertiesState{
+			Report: map[string]interface{}{"a": "1"},
+			Desire: map[string]interface{}{"b": "2"},
+		},
+	}
+	sNode.EXPECT().UpdateNodeProperties(gomock.Any(), gomock.Any(), gomock.Any()).Return(nodeProps, nil).AnyTimes()
+
+	reqNodeProps := &models.NodeProperties{}
+	data, err := json.Marshal(reqNodeProps)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodPut, "/v1/nodes/abc/properties", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var res models.NodeProperties
+	err = json.Unmarshal(w.Body.Bytes(), &res)
+	assert.NoError(t, err)
+	expect := models.NodeProperties{
+		State: models.NodePropertiesState{
+			Report: map[string]interface{}{"a": "1"},
+			Desire: map[string]interface{}{"b": "2"},
+		},
+	}
+	assert.Equal(t, expect, res)
+
+	// invalid request params
+	reqNodeProps = &models.NodeProperties{
+		State: models.NodePropertiesState{
+			Desire: map[string]interface{}{"a": 1},
+		},
+	}
+	data, err = json.Marshal(reqNodeProps)
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc/properties", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestUpdateNodeMode(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Node = sNode
+
+	sNode.EXPECT().UpdateNodeMode(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+
+	mode := models.NodeMode{Mode: "cloud"}
+	data, err := json.Marshal(mode)
+	assert.NoError(t, err)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodPut, "/v1/nodes/abc/mode", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// update node mode failed
+	sNode.EXPECT().UpdateNodeMode(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("failed to update mode"))
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc/mode", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	// invalid request param
+	mode = models.NodeMode{Mode: "invalid"}
+	data, err = json.Marshal(mode)
+	assert.NoError(t, err)
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc/mode", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
