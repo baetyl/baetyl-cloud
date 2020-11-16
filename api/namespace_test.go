@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -91,6 +92,23 @@ func TestCreateNamespace(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
+	err := fmt.Errorf("error")
+	mkNamespaceService.EXPECT().Create(nsa).Return(nil, err)
+
+	// 500
+	req, _ = http.NewRequest(http.MethodPost, "/testA/namespace", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	mkNamespaceService.EXPECT().Create(nsa).Return(nsa, nil)
+	mLicense.EXPECT().GetDefaultQuotas(nsa.Name).Return(quotas, nil)
+	mLicense.EXPECT().CreateQuota(nsa.Name, quotas).Return(err)
+	// 200
+	req, _ = http.NewRequest(http.MethodPost, "/testA/namespace", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestAPI_DeleteNamespace(t *testing.T) {
@@ -111,4 +129,21 @@ func TestAPI_DeleteNamespace(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
+	err := fmt.Errorf("error")
+
+	mkNamespaceService.EXPECT().Delete(nsa).Return(err)
+
+	// 500
+	req, _ = http.NewRequest(http.MethodDelete, "/testA/namespace", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	mkNamespaceService.EXPECT().Delete(nsa).Return(nil)
+	mLicense.EXPECT().DeleteQuotaByNamespace(nsa.Name).Return(err)
+	// 200
+	req, _ = http.NewRequest(http.MethodDelete, "/testA/namespace", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
