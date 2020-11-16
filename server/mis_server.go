@@ -77,6 +77,14 @@ func (s *MisServer) InitRoute() {
 		cache.GET("", common.WrapperMis(s.api.ListProperty))
 		cache.PUT("/:name", common.WrapperMis(s.api.UpdateProperty))
 	}
+	{
+		quota := v1.Group("/quotas")
+
+		quota.POST("", common.WrapperMis(s.api.CreateQuota))
+		quota.DELETE("", common.WrapperMis(s.api.DeleteQuota))
+		quota.GET("", common.WrapperMis(s.api.GetQuotaForMis))
+		quota.PUT("", common.WrapperMis(s.api.UpdateQuota))
+	}
 }
 
 // auth handler
