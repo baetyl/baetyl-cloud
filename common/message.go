@@ -81,7 +81,9 @@ const (
 	// * nonBaetyl
 	ErrInvalidName = "nonBaetyl"
 	// * license
-	ErrLicenseQuota = "ErrLicenseQuota"
+	ErrLicenseQuota        = "ErrLicenseQuota"
+	ErrLicenseQuotaAcquire = "ErrLicenseQuotaAcquire"
+	ErrLicenseQuotaRelease = "ErrLicenseQuotaRelease"
 	// * third server error
 	ErrThirdServer = "ErrThirdServer"
 	// * object error
@@ -148,7 +150,9 @@ var templates = map[Code]string{
 	ErrInvalidToken: "The token is invalid",
 
 	// * License
-	ErrLicenseQuota: "Check {{if .name}}({{.name}}){{end}} quota failed, the limited number is {{if .limit}}({{.limit}}){{end}}",
+	ErrLicenseQuota:        "Check {{if .name}}({{.name}}){{end}} quota failed, the limited number is {{if .limit}}({{.limit}}){{end}}",
+	ErrLicenseQuotaAcquire: "Check {{if .name}}({{.name}}){{end}} quota acquire failed, the acquire number is {{if .number}}({{.number}}){{end}}",
+	ErrLicenseQuotaRelease: "Check {{if .name}}({{.name}}){{end}} quota release failed, the acquire number is {{if .number}}({{.number}}){{end}}",
 
 	// * third server error
 	ErrThirdServer: "Third server {{if .name}}({{.name}}){{end}} error.{{if .error}} ({{.error}}){{end}}",

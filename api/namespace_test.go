@@ -74,8 +74,15 @@ func TestCreateNamespace(t *testing.T) {
 	mkNamespaceService := ms.NewMockNamespaceService(mockCtl)
 	api.NS = mkNamespaceService
 
+	mLicense := ms.NewMockLicenseService(mockCtl)
+	api.License = mLicense
+
 	nsa := getMockNS("testA")
 
+	quotas := map[string]int{"maxNodeCount": 10}
+
+	mLicense.EXPECT().GetDefaultQuotas(nsa.Name).Return(quotas, nil)
+	mLicense.EXPECT().CreateQuota(nsa.Name, quotas).Return(nil)
 	mkNamespaceService.EXPECT().Create(nsa).Return(nsa, nil)
 
 	// 200
@@ -91,11 +98,13 @@ func TestAPI_DeleteNamespace(t *testing.T) {
 	defer mockCtl.Finish()
 	mkNamespaceService := ms.NewMockNamespaceService(mockCtl)
 	api.NS = mkNamespaceService
+	mLicense := ms.NewMockLicenseService(mockCtl)
+	api.License = mLicense
 
 	nsa := getMockNS("testA")
 
 	mkNamespaceService.EXPECT().Delete(nsa).Return(nil)
-
+	mLicense.EXPECT().DeleteQuotaByNamespace(nsa.Name).Return(nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/testA/namespace", nil)
 	w := httptest.NewRecorder()

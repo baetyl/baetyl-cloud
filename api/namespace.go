@@ -7,9 +7,11 @@ import (
 
 // CreateNamespace create one namespace
 func (api *API) CreateNamespace(c *common.Context) (interface{}, error) {
-	return api.NS.Create(&models.Namespace{
+	ns, err := api.NS.Create(&models.Namespace{
 		Name: c.GetNamespace(),
 	})
+	_ = api.InitQuotas(ns.Name)
+	return ns, err
 }
 
 // GetNamespace get one namespace
@@ -25,6 +27,7 @@ func (api *API) GetNamespace(c *common.Context) (interface{}, error) {
 
 func (api *API) DeleteNamespace(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	return nil, api.NS.Delete(&models.Namespace{Name: ns})
-
+	err := api.NS.Delete(&models.Namespace{Name: ns})
+	_ = api.DeleteQuotaByNamespace(ns)
+	return nil, err
 }

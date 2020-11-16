@@ -36,6 +36,10 @@ func New() (plugin.Plugin, error) {
 	if err := common.LoadConfig(&cfg); err != nil {
 		return nil, err
 	}
+	return NewDB(cfg)
+}
+
+func NewDB(cfg CloudConfig) (*DB, error) {
 	db, err := sqlx.Open(cfg.Database.Type, cfg.Database.URL)
 	if err != nil {
 		return nil, err
