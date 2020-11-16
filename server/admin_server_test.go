@@ -36,17 +36,14 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	c.Plugin.Configuration = common.RandString(9)
 	c.Plugin.Secret = common.RandString(9)
 	c.Plugin.Application = common.RandString(9)
+	c.Plugin.Index = common.RandString(9)
+	c.Plugin.AppHistory = common.RandString(9)
 	c.Plugin.Objects = []string{common.RandString(9)}
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9)}
 	c.Plugin.License = common.RandString(9)
 	c.Plugin.Property = common.RandString(9)
 	mockCtl := gomock.NewController(t)
-
-	mockDBStorage := mockPlugin.NewMockDBStorage(mockCtl)
-	plugin.RegisterFactory(c.Plugin.DatabaseStorage, func() (plugin.Plugin, error) {
-		return mockDBStorage, nil
-	})
 
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
 	for _, v := range c.Plugin.Objects {
@@ -107,6 +104,16 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	mockApplication := mockPlugin.NewMockApplication(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Application, func() (plugin.Plugin, error) {
 		return mockApplication, nil
+	})
+
+	mockIndex := mockPlugin.NewMockIndex(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Index, func() (plugin.Plugin, error) {
+		return mockIndex, nil
+	})
+
+	mockAppHis := mockPlugin.NewMockAppHistory(mockCtl)
+	plugin.RegisterFactory(c.Plugin.AppHistory, func() (plugin.Plugin, error) {
+		return mockAppHis, nil
 	})
 
 	mockAPI, err := api.NewAPI(c)

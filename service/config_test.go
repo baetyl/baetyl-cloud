@@ -131,7 +131,7 @@ func TestDefaultConfigService_Delete(t *testing.T) {
 	name := "ConfigService-update"
 
 	mockObject.configuration.EXPECT().DeleteConfig(namespace, name).Return(nil)
-	mockObject.dbStorage.EXPECT().ListIndex(namespace, common.Application, common.Config, name).Return([]string{}, nil).AnyTimes()
+	mockObject.index.EXPECT().ListIndex(namespace, common.Application, common.Config, name).Return([]string{}, nil).AnyTimes()
 
 	cs, err := NewConfigService(mockObject.conf)
 	assert.NoError(t, err)

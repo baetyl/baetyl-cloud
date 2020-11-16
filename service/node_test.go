@@ -584,7 +584,8 @@ func TestUpdateReport(t *testing.T) {
 
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil)
 	//mockObject.dbStorage.EXPECT().Create(gomock.Any()).Return(shadow, nil)
-	//mockObject.modelStorage.EXPECT().GetNode(node.Namespace, node.Name).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(node, nil)
+	mockObject.node.EXPECT().UpdateNode(node.Namespace, gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().UpdateReport(gomock.Any()).Return(shadow, nil)
 	shad, err := ss.UpdateReport(node.Namespace, node.Name, report)
 	assert.NoError(t, err)

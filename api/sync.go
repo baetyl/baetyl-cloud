@@ -37,14 +37,14 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 	}
 
 	setNodeAddressIfExist(msg, &report)
-	desire, err := s.Sync.Report(msg.Metadata["namespace"], msg.Metadata["name"], report)
+	delta, err := s.Sync.Report(msg.Metadata["namespace"], msg.Metadata["name"], report)
 	if err != nil {
 		return nil, err
 	}
 	return &specV1.Message{
 		Kind:     specV1.MessageReport,
 		Metadata: msg.Metadata,
-		Content:  specV1.LazyValue{Value: desire},
+		Content:  specV1.LazyValue{Value: delta},
 	}, nil
 }
 

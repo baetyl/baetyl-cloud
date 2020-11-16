@@ -25,7 +25,7 @@ type NodeList struct {
 }
 
 type NodeSpec struct {
-	Attributes map[string]string        `json:"attributes,omitempty"`
+	Attributes map[string]interface{}   `json:"attributes,omitempty"`
 	DesireRef  *v1.LocalObjectReference `json:"desireRef,omitempty"`
 	ReportRef  *v1.LocalObjectReference `json:"reportRef,omitempty"`
 }

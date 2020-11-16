@@ -68,10 +68,6 @@ func TestNewAPI(t *testing.T) {
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
 
-	mockDBStorage := mockPlugin.NewMockDBStorage(mockCtl)
-	plugin.RegisterFactory(c.Plugin.DatabaseStorage, func() (plugin.Plugin, error) {
-		return mockDBStorage, nil
-	})
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
 	for _, v := range c.Plugin.Objects {
 		plugin.RegisterFactory(v, func() (plugin.Plugin, error) {

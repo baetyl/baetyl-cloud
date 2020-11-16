@@ -10,30 +10,30 @@ import (
 	reflect "reflect"
 )
 
-// MockSyncService is a mock of SyncService interface
+// MockSyncService is a mock of SyncService interface.
 type MockSyncService struct {
 	ctrl     *gomock.Controller
 	recorder *MockSyncServiceMockRecorder
 }
 
-// MockSyncServiceMockRecorder is the mock recorder for MockSyncService
+// MockSyncServiceMockRecorder is the mock recorder for MockSyncService.
 type MockSyncServiceMockRecorder struct {
 	mock *MockSyncService
 }
 
-// NewMockSyncService creates a new mock instance
+// NewMockSyncService creates a new mock instance.
 func NewMockSyncService(ctrl *gomock.Controller) *MockSyncService {
 	mock := &MockSyncService{ctrl: ctrl}
 	mock.recorder = &MockSyncServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockSyncService) EXPECT() *MockSyncServiceMockRecorder {
 	return m.recorder
 }
 
-// Desire mocks base method
+// Desire mocks base method.
 func (m *MockSyncService) Desire(arg0 string, arg1 []v1.ResourceInfo, arg2 map[string]string) ([]v1.ResourceValue, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Desire", arg0, arg1, arg2)
@@ -42,22 +42,22 @@ func (m *MockSyncService) Desire(arg0 string, arg1 []v1.ResourceInfo, arg2 map[s
 	return ret0, ret1
 }
 
-// Desire indicates an expected call of Desire
+// Desire indicates an expected call of Desire.
 func (mr *MockSyncServiceMockRecorder) Desire(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Desire", reflect.TypeOf((*MockSyncService)(nil).Desire), arg0, arg1, arg2)
 }
 
-// Report mocks base method
-func (m *MockSyncService) Report(arg0, arg1 string, arg2 v1.Report) (v1.Desire, error) {
+// Report mocks base method.
+func (m *MockSyncService) Report(arg0, arg1 string, arg2 v1.Report) (v1.Delta, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Report", arg0, arg1, arg2)
-	ret0, _ := ret[0].(v1.Desire)
+	ret0, _ := ret[0].(v1.Delta)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Report indicates an expected call of Report
+// Report indicates an expected call of Report.
 func (mr *MockSyncServiceMockRecorder) Report(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Report", reflect.TypeOf((*MockSyncService)(nil).Report), arg0, arg1, arg2)

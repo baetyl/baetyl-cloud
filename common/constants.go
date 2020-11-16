@@ -7,6 +7,7 @@ type Security string
 type Event string
 type SystemApplication string
 type CertType string
+type SyncMode string
 
 const (
 	// TimeFormat
@@ -188,4 +189,10 @@ var (
 		0x10: "systemUUID",
 		0x20: "machineID",
 	}
+)
+
+const (
+	ReportMeta = "reportMeta"
+	DesireMeta = "desireMeta"
+	NodeProps  = "nodeprops"
 )

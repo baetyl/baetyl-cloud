@@ -4,6 +4,7 @@ INSERT INTO `baetyl_property` (`name`, `value`) VALUES
 
 ('baetyl-image', 'hub.baidubce.com/baetyl/baetyl:v2.1.0'),
 ('baetyl-function-image', 'hub.baidubce.com/baetyl/function:v2.1.0'),
+('baetyl-broker-image', 'hub.baidubce.com/baetyl/broker:v2.1.0'),
 ('baetyl-function-runtime-python3','hub.baidubce.com/baetyl/function-python:3.6-v2.1.0'),
 ('baetyl-function-runtime-nodejs10','hub.baidubce.com/baetyl/function-node:10.19-v2.1.0'),
 ('baetyl-function-runtime-sql','hub.baidubce.com/baetyl/function-sql:v2.1.0'),
