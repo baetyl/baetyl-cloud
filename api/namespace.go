@@ -11,10 +11,13 @@ func (api *API) CreateNamespace(c *common.Context) (interface{}, error) {
 	ns, err := api.NS.Create(&models.Namespace{
 		Name: c.GetNamespace(),
 	})
+	if err != nil {
+		return ns, err
+	}
 	if e := api.InitQuotas(ns.Name); e != nil {
 		log.L().Error("InitQuotas error", log.Error(e))
 	}
-	return ns, err
+	return ns, nil
 }
 
 // GetNamespace get one namespace
@@ -31,8 +34,11 @@ func (api *API) GetNamespace(c *common.Context) (interface{}, error) {
 func (api *API) DeleteNamespace(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
 	err := api.NS.Delete(&models.Namespace{Name: ns})
+	if err != nil {
+		return nil, err
+	}
 	if e := api.DeleteQuotaByNamespace(ns); e != nil {
 		log.L().Error("DeleteQuotaByNamespace error", log.Error(e))
 	}
-	return nil, err
+	return nil, nil
 }
