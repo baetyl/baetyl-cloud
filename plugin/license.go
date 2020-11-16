@@ -15,5 +15,12 @@ type License interface {
 	ProtectCode() error
 	CheckLicense() error
 	GetQuota(namespace string) (map[string]int, error)
+	GetDefaultQuotas(namespace string) (map[string]int, error)
+	CreateQuota(namespace string, quotas map[string]int) error
+	UpdateQuota(namespace, quotaName string, quota int) error
+	AcquireQuota(namespace, quotaName string, number int) error
+	ReleaseQuota(namespace, quotaName string, number int) error
+	DeleteQuota(namespace, quotaName string) error
+	DeleteQuotaByNamespace(namespace string) error
 	io.Closer
 }
