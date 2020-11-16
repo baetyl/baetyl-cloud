@@ -33,6 +33,20 @@ func (m *MockLicenseService) EXPECT() *MockLicenseServiceMockRecorder {
 	return m.recorder
 }
 
+// AcquireQuota mocks base method
+func (m *MockLicenseService) AcquireQuota(arg0, arg1 string, arg2 int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AcquireQuota", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AcquireQuota indicates an expected call of AcquireQuota
+func (mr *MockLicenseServiceMockRecorder) AcquireQuota(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AcquireQuota", reflect.TypeOf((*MockLicenseService)(nil).AcquireQuota), arg0, arg1, arg2)
+}
+
 // CheckLicense mocks base method
 func (m *MockLicenseService) CheckLicense() error {
 	m.ctrl.T.Helper()
@@ -59,6 +73,63 @@ func (m *MockLicenseService) CheckQuota(arg0 string, arg1 plugin.QuotaCollector)
 func (mr *MockLicenseServiceMockRecorder) CheckQuota(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckQuota", reflect.TypeOf((*MockLicenseService)(nil).CheckQuota), arg0, arg1)
+}
+
+// CreateQuota mocks base method
+func (m *MockLicenseService) CreateQuota(arg0 string, arg1 map[string]int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateQuota", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateQuota indicates an expected call of CreateQuota
+func (mr *MockLicenseServiceMockRecorder) CreateQuota(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateQuota", reflect.TypeOf((*MockLicenseService)(nil).CreateQuota), arg0, arg1)
+}
+
+// DeleteQuota mocks base method
+func (m *MockLicenseService) DeleteQuota(arg0, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteQuota", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteQuota indicates an expected call of DeleteQuota
+func (mr *MockLicenseServiceMockRecorder) DeleteQuota(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteQuota", reflect.TypeOf((*MockLicenseService)(nil).DeleteQuota), arg0, arg1)
+}
+
+// DeleteQuotaByNamespace mocks base method
+func (m *MockLicenseService) DeleteQuotaByNamespace(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteQuotaByNamespace", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteQuotaByNamespace indicates an expected call of DeleteQuotaByNamespace
+func (mr *MockLicenseServiceMockRecorder) DeleteQuotaByNamespace(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteQuotaByNamespace", reflect.TypeOf((*MockLicenseService)(nil).DeleteQuotaByNamespace), arg0)
+}
+
+// GetDefaultQuotas mocks base method
+func (m *MockLicenseService) GetDefaultQuotas(arg0 string) (map[string]int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDefaultQuotas", arg0)
+	ret0, _ := ret[0].(map[string]int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDefaultQuotas indicates an expected call of GetDefaultQuotas
+func (mr *MockLicenseServiceMockRecorder) GetDefaultQuotas(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDefaultQuotas", reflect.TypeOf((*MockLicenseService)(nil).GetDefaultQuotas), arg0)
 }
 
 // GetQuota mocks base method
@@ -88,4 +159,32 @@ func (m *MockLicenseService) ProtectCode() error {
 func (mr *MockLicenseServiceMockRecorder) ProtectCode() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProtectCode", reflect.TypeOf((*MockLicenseService)(nil).ProtectCode))
+}
+
+// ReleaseQuota mocks base method
+func (m *MockLicenseService) ReleaseQuota(arg0, arg1 string, arg2 int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReleaseQuota", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReleaseQuota indicates an expected call of ReleaseQuota
+func (mr *MockLicenseServiceMockRecorder) ReleaseQuota(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReleaseQuota", reflect.TypeOf((*MockLicenseService)(nil).ReleaseQuota), arg0, arg1, arg2)
+}
+
+// UpdateQuota mocks base method
+func (m *MockLicenseService) UpdateQuota(arg0, arg1 string, arg2 int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateQuota", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateQuota indicates an expected call of UpdateQuota
+func (mr *MockLicenseServiceMockRecorder) UpdateQuota(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateQuota", reflect.TypeOf((*MockLicenseService)(nil).UpdateQuota), arg0, arg1, arg2)
 }

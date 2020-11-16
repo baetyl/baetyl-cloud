@@ -10,7 +10,6 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/mock v1.2.0
 	github.com/google/uuid v1.1.1
-	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/mattn/go-sqlite3 v1.14.0
@@ -24,5 +23,4 @@ require (
 	k8s.io/api v0.0.0-20190819141258-3544db3b9e44
 	k8s.io/apimachinery v0.0.0-20190817020851-f2f3a405f61d
 	k8s.io/client-go v0.0.0-20190819141724-e14f31a72a77
-	k8s.io/utils v0.0.0-20200619165400-6e3d28b6ed19 // indirect
 )
