@@ -141,7 +141,9 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	}
 	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
-		_ = api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber)
+		if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
+			log.L().Error("ReleaseQuota error", log.Error(e))
+		}
 		return nil, err
 	}
 
@@ -213,7 +215,9 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	if err := api.Node.Delete(c.GetNamespace(), c.GetNameFromParam()); err != nil {
 		return nil, err
 	}
-	_ = api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber)
+	if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
+		log.L().Error("ReleaseQuota error", log.Error(e))
+	}
 	sysAppInfos := node.Desire.AppInfos(true)
 	for _, ai := range sysAppInfos {
 		// Clean APP

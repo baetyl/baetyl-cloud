@@ -80,7 +80,7 @@ func (api *API) InitQuotas(namespace string) error {
 func (api *API) DeleteQuotaByNamespace(namespace string) error {
 	if err := api.License.DeleteQuotaByNamespace(namespace); err != nil {
 		common.LogDirtyData(err,
-			log.Any("type", "DeleteAllQuotas"),
+			log.Any("type", "DeleteQuotaByNamespace"),
 			log.Any(common.KeyContextNamespace, namespace))
 		return err
 	}
