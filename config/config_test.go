@@ -46,9 +46,9 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Secret = "kube"
 	expect.Plugin.Application = "kube"
 	expect.Plugin.Index = "database"
-	expect.Plugin.Batch = "database"
-	expect.Plugin.Record = "database"
-	expect.Plugin.Callback = "database"
+	expect.Plugin.Batch = "databaseext"
+	expect.Plugin.Record = "databaseext"
+	expect.Plugin.Callback = "databaseext"
 	expect.Plugin.AppHistory = "database"
 	expect.Plugin.Functions = []string{}
 	expect.Plugin.Objects = []string{}
