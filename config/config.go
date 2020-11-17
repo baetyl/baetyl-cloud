@@ -31,9 +31,9 @@ type CloudConfig struct {
 		Secret        string   `yaml:"secret" json:"secret" default:"kube"`
 		Application   string   `yaml:"application" json:"application" default:"kube"`
 		Index         string   `yaml:"index" json:"index" default:"database"`
-		Batch         string   `yaml:"batch" json:"batch" default:"database"`
-		Record        string   `yaml:"record" json:"record" default:"database"`
-		Callback      string   `yaml:"callback" json:"callback" default:"database"`
+		Batch         string   `yaml:"batch" json:"batch" default:"databaseext"`
+		Record        string   `yaml:"record" json:"record" default:"databaseext"`
+		Callback      string   `yaml:"callback" json:"callback" default:"databaseext"`
 		AppHistory    string   `yaml:"appHistory" json:"appHistory" default:"database"`
 		Objects       []string `yaml:"objects" json:"objects" default:"[]"`
 		Functions     []string `yaml:"functions" json:"functions" default:"[]"`
