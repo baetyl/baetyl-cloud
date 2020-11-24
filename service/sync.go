@@ -119,6 +119,10 @@ func (t *SyncServiceImpl) Report(namespace, name string, report specV1.Report) (
 			return nil, err
 		}
 	}
+	// TODO remove in the future
+	if delta != nil && delta[common.NodeProps] != nil {
+		delta[common.NodeProps] = shadow.Desire[common.NodeProps]
+	}
 
 	return delta, nil
 }
