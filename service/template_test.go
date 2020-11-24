@@ -117,6 +117,9 @@ data:
       ca: var/lib/baetyl/node/ca.pem
       key: var/lib/baetyl/node/client.key
       cert: var/lib/baetyl/node/client.pem
+    server:
+      key: var/lib/baetyl/system/certs/key.pem
+      cert: var/lib/baetyl/system/certs/crt.pem
     httplink:
       address: "out-sync-server-address"
       insecureSkipVerify: true
