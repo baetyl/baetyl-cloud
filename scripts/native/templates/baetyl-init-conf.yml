@@ -1,0 +1,22 @@
+name: "{{.InitConfName}}"
+namespace: "{{.Namespace}}"
+system: true
+labels:
+  baetyl-app-name: "{{.InitAppName}}"
+  baetyl-node-name: "{{.NodeName}}"
+  baetyl-cloud-system: "true"
+data:
+  conf.yml: |-
+    node:
+      ca: var/lib/baetyl/node/ca.pem
+      key: var/lib/baetyl/node/client.key
+      cert: var/lib/baetyl/node/client.pem
+    sync:
+      download:
+        timeout: 30m
+    httplink:
+      address: "{{GetProperty "sync-server-address"}}"
+      insecureSkipVerify: true
+    logger:
+      level: debug
+      encoding: console

@@ -1,0 +1,45 @@
+name: "{{.InitAppName}}"
+namespace: "{{.Namespace}}"
+selector: "baetyl-node-name={{.NodeName}}"
+labels:
+  baetyl-cloud-system: "true"
+type: "container"
+system: true
+services:
+  - name: "baetyl-init"
+    image: "{{GetProperty "baetyl-image"}}"
+    replica: 1
+    args:
+      - "init"
+    volumeMounts:
+      - name: "init-conf"
+        mountPath: "/etc/baetyl"
+        readOnly: true
+      - name: "node-cert"
+        mountPath: "/var/lib/baetyl/node"
+      - name: "init-store-path"
+        mountPath: "/var/lib/baetyl/store"
+      - name: "object-download-path"
+        mountPath: "/var/lib/baetyl/object"
+      - name: "host-root-path"
+        mountPath: "/var/lib/baetyl/host"
+    security:
+      privileged: true
+volumes:
+  - name: "init-conf"
+    config:
+      name: "{{.InitConfName}}"
+      version: "{{.InitConfVersion}}"
+  - name: "node-cert"
+    secret:
+      name: "{{.NodeCertName}}"
+      version: "{{.NodeCertVersion}}"
+  - name: "init-store-path"
+    hostPath:
+      path: "{{.BAETYL_HOST_PATH_LIB}}/init/store"
+  - name: "object-download-path"
+    hostPath:
+      path: "{{.BAETYL_HOST_PATH_LIB}}/object"
+  - name: "host-root-path"
+    hostPath:
+      path: "{{.BAETYL_HOST_PATH_LIB}}/host"
