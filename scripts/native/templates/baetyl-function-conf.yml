@@ -9,3 +9,4 @@ data:
   conf.yml: |-
     logger:
       level: debug
+      encoding: console

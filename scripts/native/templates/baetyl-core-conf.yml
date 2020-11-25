@@ -14,8 +14,12 @@ data:
     server:
       key: var/lib/baetyl/system/certs/key.pem
       cert: var/lib/baetyl/system/certs/crt.pem
+    sync:
+      download:
+        timeout: 30m
     httplink:
       address: "{{GetProperty "sync-server-address"}}"
       insecureSkipVerify: true
     logger:
       level: debug
+      encoding: console

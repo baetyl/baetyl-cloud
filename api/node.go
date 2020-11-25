@@ -1,8 +1,10 @@
 package api
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"strings"
 	"time"
+
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
@@ -14,8 +16,9 @@ import (
 )
 
 const (
-	OfflineDuration = 40 * time.Second
-	NodeNumber      = 1
+	BaetylCoreOldImage = "BaetylCoreOldImage"
+	OfflineDuration    = 40 * time.Second
+	NodeNumber         = 1
 )
 
 // GetNode get a node
@@ -31,7 +34,6 @@ func (api *API) GetNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view.Desire = nil
 	return view, nil
 }
 
@@ -80,7 +82,6 @@ func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 
 	view.Desire = nil
 	return view, nil
-
 }
 
 // ListNode list node
@@ -426,4 +427,124 @@ func (api *API) ParseAndCheckProperties(c *common.Context) (*models.NodeProperti
 		}
 	}
 	return props, nil
+}
+
+func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
+	// get node
+	ns, n := c.GetNamespace(), c.GetNameFromParam()
+	node, err := api.Node.Get(ns, n)
+	if err != nil {
+		return nil, err
+	}
+
+	// get core app
+	app, err := api.getCoreFromNode(ns, n)
+	if err != nil {
+		return nil, err
+	}
+
+	// update core and node
+	prop, err := api.Prop.GetProperty("baetyl-image")
+	if err != nil {
+		return nil, err
+	}
+
+	for i, svr := range app.Services {
+		if svr.Name != v1.BaetylCore {
+			continue
+		}
+		api.log.Debug("update core app", log.Any("core", app.Services[i].Image), log.Any("prop", prop.Value))
+		if app.Services[i].Image == prop.Value {
+			return node.View(OfflineDuration)
+		}
+		if node.Attributes == nil {
+			node.Attributes = map[string]interface{}{}
+		}
+		node.Attributes[BaetylCoreOldImage] = svr.Image
+		app.Services[i].Image = prop.Value
+		break
+	}
+
+	res, err := api.App.Update(ns, app)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = api.Node.UpdateNodeAppVersion(ns, res)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = api.Node.Update(ns, node)
+	if err != nil {
+		return nil, err
+	}
+
+	return api.ToApplicationView(res)
+}
+
+func (api *API) RollbackCoreApp(c *common.Context) (interface{}, error) {
+	ns, n := c.GetNamespace(), c.GetNameFromParam()
+	node, err := api.Node.Get(ns, n)
+	if err != nil {
+		return nil, err
+	}
+
+	if node.Attributes == nil {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", ns))
+	}
+
+	oldImage, ok := node.Attributes[BaetylCoreOldImage]
+	if !ok {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "oldImage"), common.Field("name", v1.BaetylCore), common.Field("namespace", ns))
+	}
+
+	// get core app
+	app, err := api.getCoreFromNode(ns, n)
+	if err != nil {
+		return nil, err
+	}
+
+	// update core
+	for i, svr := range app.Services {
+		if svr.Name != v1.BaetylCore {
+			continue
+		}
+
+		api.log.Debug("rollback core app", log.Any("core", app.Services[i].Image), log.Any("oldImage", oldImage))
+		if app.Services[i].Image == oldImage.(string) {
+			return node.View(OfflineDuration)
+		}
+		app.Services[i].Image = oldImage.(string)
+	}
+
+	res, err := api.App.Update(ns, app)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = api.Node.UpdateNodeAppVersion(ns, res)
+	if err != nil {
+		return nil, err
+	}
+
+	return api.ToApplicationView(res)
+}
+
+func (api *API) getCoreFromNode(ns, node string) (*v1.Application, error) {
+	appList, err := api.Index.ListAppsByNode(ns, node)
+	if err != nil {
+		return nil, err
+	}
+	var core string
+	for _, item := range appList {
+		if strings.Contains(item, v1.BaetylCore) {
+			core = item
+			break
+		}
+	}
+	if core == "" {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"), common.Field("name", v1.BaetylCore), common.Field("namespace", ns))
+	}
+	return api.App.Get(ns, core, "")
 }

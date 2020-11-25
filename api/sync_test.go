@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -25,6 +26,7 @@ func TestSyncAPIImpl_Report(t *testing.T) {
 	sync := &SyncAPIImpl{}
 	mSync := ms.NewMockSyncService(mockCtl)
 	sync.Sync = mSync
+	sync.log = log.L().With(log.Any("test", "sync"))
 
 	// good case 0
 	info := specV1.Report{

@@ -27,6 +27,8 @@ services:
       - containerPort: 80
         hostPort: 30050
         protocol: "TCP"
+    security:
+      privileged: true
 volumes:
   - name: "core-conf"
     config:
@@ -38,7 +40,7 @@ volumes:
       version: "{{.NodeCertVersion}}"
   - name: "core-store-path"
     hostPath:
-      path: "{{.BAETYL_HOST_PATH_LIB}}/store"
+      path: "{{.BAETYL_HOST_PATH_LIB}}/core/store"
   - name: "object-download-path"
     hostPath:
       path: "{{.BAETYL_HOST_PATH_LIB}}/object"

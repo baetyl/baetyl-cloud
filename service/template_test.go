@@ -13,6 +13,8 @@ import (
 var params = map[string]interface{}{
 	"Namespace":                  "ns-1",
 	"NodeName":                   "node-name-1",
+	"InitAppName":                "init-app-1",
+	"InitVersion":                "init-version-1",
 	"CoreAppName":                "core-app-1",
 	"CoreConfName":               "core-conf-name-1",
 	"CoreConfVersion":            "core-conf-version-1",
@@ -81,6 +83,8 @@ services:
     protocol: TCP
   args:
   - core
+  security:
+    privileged: true
 volumes:
 - name: core-conf
   config:
@@ -92,7 +96,7 @@ volumes:
     version: node-cert-version-1
 - name: core-store-path
   hostPath:
-    path: '{{.BAETYL_HOST_PATH_LIB}}/store'
+    path: '{{.BAETYL_HOST_PATH_LIB}}/core/store'
 - name: object-download-path
   hostPath:
     path: '{{.BAETYL_HOST_PATH_LIB}}/object'
@@ -120,11 +124,15 @@ data:
     server:
       key: var/lib/baetyl/system/certs/key.pem
       cert: var/lib/baetyl/system/certs/crt.pem
+    sync:
+      download:
+        timeout: 30m
     httplink:
       address: "out-sync-server-address"
       insecureSkipVerify: true
     logger:
       level: debug
+      encoding: console
 system: true
 `,
 		},
@@ -169,6 +177,7 @@ data:
   conf.yml: |-
     logger:
       level: debug
+      encoding: console
 system: true
 `,
 		},
@@ -344,6 +353,7 @@ subjects:
   - kind: ServiceAccount
     name: metrics-server
     namespace: kube-system
+
 ---
 apiVersion: v1
 kind: Namespace
@@ -448,6 +458,7 @@ data:
                     "paths":["/opt/local-path-provisioner"]
             }]
     }
+
 ---
 apiVersion: v1
 kind: Namespace
@@ -515,8 +526,11 @@ data:
       ca: var/lib/baetyl/node/ca.pem
       key: var/lib/baetyl/node/client.key
       cert: var/lib/baetyl/node/client.pem
+    sync:
+      download:
+        timeout: 30m
     httplink:
-      address: out-sync-server-address
+      address: "out-sync-server-address"
       insecureSkipVerify: true
     logger:
       level: debug
@@ -530,7 +544,8 @@ metadata:
   name: baetyl-init
   namespace: baetyl-edge-system
   labels:
-    baetyl-app-name: baetyl-init
+    baetyl-app-name: "init-app-1"
+    baetyl-app-version: "init-version-1"
     baetyl-service-name: baetyl-init
 spec:
   selector:
@@ -543,7 +558,18 @@ spec:
         baetyl-app-name: baetyl-init
         baetyl-service-name: baetyl-init
     spec:
-      nodeName: kube-node-1
+      # nodeName: kube-node-1
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/master
+                    operator: Exists
       serviceAccountName: baetyl-edge-system-service-account
       containers:
         - name: baetyl-init
@@ -552,10 +578,22 @@ spec:
           args:
             - init
           env:
+            - name: BAETYL_APP_NAME
+              value: "init-app-1"
+            - name: BAETYL_APP_VERSION
+              value: "init-version-1"
+            - name: BAETYL_NODE_NAME
+              value: "node-name-1"
+            - name: BAETYL_SERVICE_NAME
+              value: "baetyl-init"
+            - name: BAETYL_RUN_MODE
+              value: "kube"
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+          securityContext:
+            privileged: true
           volumeMounts:
             - name: init-conf
               mountPath: /etc/baetyl
@@ -566,7 +604,7 @@ spec:
             - name: host-root-path
               mountPath: /var/lib/baetyl/host
             - name: node-cert
-              mountPath: /var/lib/baetyl/node
+              mountPath: var/lib/baetyl/node
       volumes:
         - name: init-conf
           configMap:
@@ -582,7 +620,8 @@ spec:
             path: /var/lib/baetyl/host
         - name: node-cert
           secret:
-            secretName: node-cert-name-1`,
+            secretName: node-cert-name-1
+`,
 		},
 	}
 	for _, tt := range tests {
