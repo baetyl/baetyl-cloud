@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/config"
@@ -16,6 +17,7 @@ type SyncAPI interface {
 
 type SyncAPIImpl struct {
 	Sync service.SyncService
+	log  *log.Logger
 }
 
 func NewSyncAPI(cfg *config.CloudConfig) (SyncAPI, error) {
@@ -25,6 +27,7 @@ func NewSyncAPI(cfg *config.CloudConfig) (SyncAPI, error) {
 	}
 	return &SyncAPIImpl{
 		Sync: syncService,
+		log:  log.L().With(log.Any("api", "sync")),
 	}, nil
 }
 
@@ -41,6 +44,9 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	s.log.Debug("api sync", log.Any("delta", delta), log.Any("report", report))
+
 	return &specV1.Message{
 		Kind:     specV1.MessageReport,
 		Metadata: msg.Metadata,

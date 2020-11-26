@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -37,25 +38,29 @@ func getMockNode() *specV1.Node {
 
 func initNodeAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 	api := &API{}
+	api.log = log.L().With(log.Any("test", "api"))
+	api.AppCombinedService = &service.AppCombinedService{}
 	router := gin.Default()
 	mockCtl := gomock.NewController(t)
 	mockIM := func(c *gin.Context) { common.NewContext(c).SetNamespace("default") }
 	v1 := router.Group("v1")
 	{
-		configs := v1.Group("/nodes")
-		configs.GET("/:name", mockIM, common.Wrapper(api.GetNode))
-		configs.PUT("", mockIM, common.Wrapper(api.GetNodes))
-		configs.GET("/:name/stats", mockIM, common.Wrapper(api.GetNodeStats))
-		configs.GET("/:name/apps", mockIM, common.Wrapper(api.GetAppByNode))
-		configs.PUT("/:name", mockIM, common.Wrapper(api.UpdateNode))
-		configs.DELETE("/:name", mockIM, common.Wrapper(api.DeleteNode))
-		configs.GET("/:name/init", mockIM, common.Wrapper(api.GenInitCmdFromNode))
-		configs.POST("", mockIM, common.Wrapper(api.CreateNode))
-		configs.GET("", mockIM, common.Wrapper(api.ListNode))
-		configs.GET("/:name/deploys", mockIM, common.Wrapper(api.GetNodeDeployHistory))
-		configs.GET("/:name/properties", mockIM, common.Wrapper(api.GetNodeProperties))
-		configs.PUT("/:name/properties", mockIM, common.Wrapper(api.UpdateNodeProperties))
-		configs.PUT("/:name/mode", mockIM, common.Wrapper(api.UpdateNodeMode))
+		nodes := v1.Group("/nodes")
+		nodes.GET("/:name", mockIM, common.Wrapper(api.GetNode))
+		nodes.PUT("", mockIM, common.Wrapper(api.GetNodes))
+		nodes.GET("/:name/stats", mockIM, common.Wrapper(api.GetNodeStats))
+		nodes.GET("/:name/apps", mockIM, common.Wrapper(api.GetAppByNode))
+		nodes.PUT("/:name", mockIM, common.Wrapper(api.UpdateNode))
+		nodes.DELETE("/:name", mockIM, common.Wrapper(api.DeleteNode))
+		nodes.GET("/:name/init", mockIM, common.Wrapper(api.GenInitCmdFromNode))
+		nodes.POST("", mockIM, common.Wrapper(api.CreateNode))
+		nodes.GET("", mockIM, common.Wrapper(api.ListNode))
+		nodes.GET("/:name/deploys", mockIM, common.Wrapper(api.GetNodeDeployHistory))
+		nodes.GET("/:name/properties", mockIM, common.Wrapper(api.GetNodeProperties))
+		nodes.PUT("/:name/properties", mockIM, common.Wrapper(api.UpdateNodeProperties))
+		nodes.PUT("/:name/mode", mockIM, common.Wrapper(api.UpdateNodeMode))
+		nodes.PUT("/:name/update", mockIM, common.Wrapper(api.UpdateCoreApp))
+		nodes.PUT("/:name/rollback", mockIM, common.Wrapper(api.RollbackCoreApp))
 	}
 	return api, router, mockCtl
 }
@@ -1224,4 +1229,141 @@ func TestUpdateNodeMode(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc/mode", bytes.NewReader(data))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestAPI_UpdateCoreApp(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	n := "test"
+	ns := "default"
+
+	mockNode := ms.NewMockNodeService(mockCtl)
+	mockIndex := ms.NewMockIndexService(mockCtl)
+	mockApp := ms.NewMockApplicationService(mockCtl)
+	mockProp := ms.NewMockPropertyService(mockCtl)
+	mockConfig := ms.NewMockConfigService(mockCtl)
+	api.Node = mockNode
+	api.Index = mockIndex
+	api.App = mockApp
+	api.Prop = mockProp
+	api.Config = mockConfig
+
+	node := &specV1.Node{
+		Namespace:  ns,
+		Name:       n,
+		Version:    "0",
+		Attributes: map[string]interface{}{},
+		Report:     map[string]interface{}{"1": "1"},
+		Desire:     map[string]interface{}{"2": "2"},
+	}
+
+	coreApp := &specV1.Application{
+		Name:      "baetyl-core-1",
+		Type:      "kube",
+		Namespace: ns,
+		Version:   "0",
+		Services: []specV1.Service{
+			{
+				Name:  "baetyl-core",
+				Image: "baetyl-core:old",
+			},
+		},
+		Volumes: []specV1.Volume{},
+		System:  true,
+	}
+
+	appList := []string{
+		"baetyl-core-1",
+		"baetyl-function-2",
+	}
+
+	prop := &models.Property{
+		Name:  "baetyl-image",
+		Value: "baetyl-core:new",
+	}
+
+	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
+	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
+	mockProp.EXPECT().GetProperty("baetyl-image").Return(prop, nil).Times(1)
+	mockApp.EXPECT().Update(ns, coreApp).Return(coreApp, nil).Times(1)
+	mockNode.EXPECT().UpdateNodeAppVersion(ns, coreApp).Return(appList, nil).Times(1)
+	mockNode.EXPECT().Update(ns, node).Return(node, nil).Times(1)
+	mockConfig.EXPECT().Get(ns, gomock.Any(), "").Return(&specV1.Configuration{}, nil).AnyTimes()
+
+	data := []byte("{}")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodPut, "/v1/nodes/test/update", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	res := specV1.Application{}
+	err := json.Unmarshal(w.Body.Bytes(), &res)
+	assert.NoError(t, err)
+	assert.EqualValues(t, prop.Value, res.Services[0].Image)
+}
+
+func TestAPI_RollbackCoreApp(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	n := "test"
+	ns := "default"
+
+	mockNode := ms.NewMockNodeService(mockCtl)
+	mockIndex := ms.NewMockIndexService(mockCtl)
+	mockApp := ms.NewMockApplicationService(mockCtl)
+	mockConfig := ms.NewMockConfigService(mockCtl)
+	api.Node = mockNode
+	api.Index = mockIndex
+	api.App = mockApp
+	api.Config = mockConfig
+
+	node := &specV1.Node{
+		Namespace:  ns,
+		Name:       n,
+		Version:    "0",
+		Attributes: map[string]interface{}{BaetylCoreOldImage: "baetyl-core:old"},
+		Report:     map[string]interface{}{"1": "1"},
+		Desire:     map[string]interface{}{"2": "2"},
+	}
+
+	coreApp := &specV1.Application{
+		Name:      "baetyl-core-1",
+		Type:      "kube",
+		Namespace: ns,
+		Version:   "0",
+		Services: []specV1.Service{
+			{
+				Name:  "baetyl-core",
+				Image: "baetyl-core:new",
+			},
+		},
+		Volumes: []specV1.Volume{},
+		System:  true,
+	}
+
+	appList := []string{
+		"baetyl-core-1",
+		"baetyl-function-2",
+	}
+
+	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
+	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
+	mockApp.EXPECT().Update(ns, coreApp).Return(coreApp, nil).Times(1)
+	mockNode.EXPECT().UpdateNodeAppVersion(ns, coreApp).Return(appList, nil).Times(1)
+	mockConfig.EXPECT().Get(ns, gomock.Any(), "").Return(&specV1.Configuration{}, nil).AnyTimes()
+
+	data := []byte("{}")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodPut, "/v1/nodes/test/rollback", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	res := specV1.Application{}
+	err := json.Unmarshal(w.Body.Bytes(), &res)
+	assert.NoError(t, err)
+	assert.EqualValues(t, "baetyl-core:old", res.Services[0].Image)
 }

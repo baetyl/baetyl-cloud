@@ -1,6 +1,8 @@
 package api
 
 import (
+	"github.com/baetyl/baetyl-go/v2/log"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/service"
@@ -20,6 +22,7 @@ type API struct {
 	License  service.LicenseService
 	Template service.TemplateService
 	*service.AppCombinedService
+	log *log.Logger
 }
 
 // NewAPI NewAPI
@@ -88,5 +91,6 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		License:            licenseService,
 		Template:           templateService,
 		AppCombinedService: acs,
+		log:                log.L().With(log.Any("api", "admin")),
 	}, nil
 }

@@ -24,6 +24,8 @@ const (
 )
 
 const (
+	templateInitConfYaml       = "baetyl-init-conf.yml"
+	templateInitAppYaml        = "baetyl-init-app.yml"
 	templateCoreConfYaml       = "baetyl-core-conf.yml"
 	templateCoreAppYaml        = "baetyl-core-app.yml"
 	templateFuncConfYaml       = "baetyl-function-conf.yml"
@@ -122,11 +124,11 @@ func (s *InitServiceImpl) GetResource(ns, nodeName, resourceName string, params 
 }
 
 func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
-	app, err := s.GetCoreAppFromDesire(ns, nodeName)
+	init, err := s.GetAppFromDesire(ns, nodeName, specV1.BaetylInit, true)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	cert, err := s.GetNodeCert(app)
+	cert, err := s.GetNodeCert(init)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -140,6 +142,8 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["NodeCertCa"] = base64.StdEncoding.EncodeToString(cert.Data["ca.pem"])
 	params["EdgeNamespace"] = context.EdgeNamespace()
 	params["EdgeSystemNamespace"] = context.EdgeSystemNamespace()
+	params["InitAppName"] = init.Name
+	params["InitVersion"] = init.Version
 	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
 }
 
@@ -189,28 +193,20 @@ func (s *InitServiceImpl) GetInitCommand(ns, nodeName string, params map[string]
 	return data, nil
 }
 
-func (s *InitServiceImpl) GetCoreAppFromDesire(ns, nodeName string) (*specV1.Application, error) {
+func (s *InitServiceImpl) GetAppFromDesire(ns, nodeName, moduleName string, isSys bool) (*specV1.Application, error) {
 	shadowDesire, err := s.NodeService.GetDesire(ns, nodeName)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	apps := shadowDesire.AppInfos(true)
+	apps := shadowDesire.AppInfos(isSys)
 	for _, appInfo := range apps {
-		if strings.Contains(appInfo.Name, "baetyl-core") {
-			app, _ := s.App.Get(ns, appInfo.Name, "")
-			if app == nil {
-				return nil, common.Error(
-					common.ErrResourceNotFound,
-					common.Field("type", "application"),
-					common.Field("name", appInfo.Name),
-					common.Field("namespace", ns))
-			}
-			return app, nil
+		if strings.Contains(appInfo.Name, moduleName) {
+			return s.App.Get(ns, appInfo.Name, "")
 		}
 	}
 	return nil, common.Error(
 		common.ErrResourceNotFound,
-		common.Field("type", "sysapp"),
+		common.Field("type", "app"),
 		common.Field("name", nodeName),
 		common.Field("namespace", ns))
 }
@@ -233,6 +229,10 @@ func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, e
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+	ia, err := s.genInitApp(ns, nodeName, params)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 	fa, err := s.genFunctionApp(ns, nodeName, params)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -241,7 +241,7 @@ func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, e
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	apps = append(apps, ca, fa, ba)
+	apps = append(apps, ca, ia, fa, ba)
 	return apps, nil
 }
 
@@ -269,6 +269,23 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]inte
 
 	// create application
 	return s.genApp(ns, templateCoreAppYaml, params)
+}
+
+func (s *InitServiceImpl) genInitApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
+	appName := fmt.Sprintf("baetyl-init-%s", common.RandString(9))
+	confName := fmt.Sprintf("baetyl-init-conf-%s", common.RandString(9))
+	params["InitAppName"] = appName
+	params["InitConfName"] = confName
+
+	// create config
+	conf, err := s.genConfig(ns, templateInitConfYaml, params)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	params["InitConfVersion"] = conf.Version
+	// create application
+	return s.genApp(ns, templateInitAppYaml, params)
 }
 
 func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {

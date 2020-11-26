@@ -137,6 +137,7 @@ subjects:
   - kind: ServiceAccount
     name: metrics-server
     namespace: kube-system
+
 ---
 apiVersion: v1
 kind: Namespace
@@ -241,6 +242,7 @@ data:
                     "paths":["/opt/local-path-provisioner"]
             }]
     }
+
 ---
 apiVersion: v1
 kind: Namespace
@@ -308,8 +310,11 @@ data:
       ca: var/lib/baetyl/node/ca.pem
       key: var/lib/baetyl/node/client.key
       cert: var/lib/baetyl/node/client.pem
+    sync:
+      download:
+        timeout: 30m
     httplink:
-      address: {{GetProperty "sync-server-address"}}
+      address: "{{GetProperty "sync-server-address"}}"
       insecureSkipVerify: true
     logger:
       level: debug
@@ -323,7 +328,8 @@ metadata:
   name: baetyl-init
   namespace: {{.EdgeSystemNamespace}}
   labels:
-    baetyl-app-name: baetyl-init
+    baetyl-app-name: "{{.InitAppName}}"
+    baetyl-app-version: "{{.InitVersion}}"
     baetyl-service-name: baetyl-init
 spec:
   selector:
@@ -336,7 +342,18 @@ spec:
         baetyl-app-name: baetyl-init
         baetyl-service-name: baetyl-init
     spec:
-      nodeName: {{.KubeNodeName}}
+      # nodeName: {{.KubeNodeName}}
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/master
+                    operator: Exists
       serviceAccountName: baetyl-edge-system-service-account
       containers:
         - name: baetyl-init
@@ -345,10 +362,22 @@ spec:
           args:
             - init
           env:
+            - name: BAETYL_APP_NAME
+              value: "{{.InitAppName}}"
+            - name: BAETYL_APP_VERSION
+              value: "{{.InitVersion}}"
+            - name: BAETYL_NODE_NAME
+              value: "{{.NodeName}}"
+            - name: BAETYL_SERVICE_NAME
+              value: "baetyl-init"
+            - name: BAETYL_RUN_MODE
+              value: "kube"
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+          securityContext:
+            privileged: true
           volumeMounts:
             - name: init-conf
               mountPath: /etc/baetyl
@@ -359,7 +388,7 @@ spec:
             - name: host-root-path
               mountPath: /var/lib/baetyl/host
             - name: node-cert
-              mountPath: /var/lib/baetyl/node
+              mountPath: var/lib/baetyl/node
       volumes:
         - name: init-conf
           configMap:

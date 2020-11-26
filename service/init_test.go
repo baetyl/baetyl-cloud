@@ -36,13 +36,13 @@ func TestInitService_GetResource(t *testing.T) {
 	as.ResourceMapFunc[templateInitDeploymentYaml] = as.getInitDeploymentYaml
 	desire := &v1.Desire{
 		"sysapps": []specV1.AppInfo{{
-			Name:    "baetyl-core-node01",
+			Name:    "baetyl-init-node01",
 			Version: "123",
 		}},
 	}
 	app := &specV1.Application{
 		Namespace: "default",
-		Name:      "baetyl-core-node01",
+		Name:      "baetyl-init-node01",
 		Selector:  "test",
 		Version:   "1",
 		Services:  []specV1.Service{},
@@ -61,10 +61,10 @@ func TestInitService_GetResource(t *testing.T) {
 		Namespace: "default",
 		Name:      "abc",
 	}
-	// good case : setup
+	//good case : setup
 	tp.EXPECT().ParseTemplate(templateInitDeploymentYaml, gomock.Any()).Return([]byte("init"), nil).Times(1)
 	ns.EXPECT().GetDesire("default", "node1").Return(desire, nil)
-	sApp.EXPECT().Get("default", "baetyl-core-node01", "").Return(app, nil)
+	sApp.EXPECT().Get("default", "baetyl-init-node01", "").Return(app, nil)
 	sc.EXPECT().Get("default", "agent-conf", "").Return(sec, nil)
 
 	res, _ := as.GetResource("default", "node1", templateInitDeploymentYaml, nil)
@@ -167,7 +167,7 @@ func TestInitService_getDesireAppInfo(t *testing.T) {
 	node.EXPECT().GetDesire("default", "node01").Return(Desire, nil).Times(1)
 	app.EXPECT().Get("default", "baetyl-core-node01", "").Return(app1, nil).Times(1)
 
-	res, err := as.GetCoreAppFromDesire("default", "node01")
+	res, err := as.GetAppFromDesire("default", "node01", "baetyl-core", true)
 	assert.NoError(t, err)
 	assert.Equal(t, res, app1)
 }
@@ -222,13 +222,15 @@ func TestInitService_GenApps(t *testing.T) {
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-broker-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-broker-app.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-init-app.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-init-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sPKI.EXPECT().SignClientCertificate("ns.abc", gomock.Any()).Return(cert, nil)
 	sPKI.EXPECT().GetCA().Return([]byte("RootCA"), nil)
-	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(3)
+	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(4)
 	sSecret.EXPECT().Create("ns", gomock.Any()).Return(secret, nil).Times(1)
-	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(3)
+	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(4)
 
 	out, err := is.GenApps("ns", "abc")
 	assert.NoError(t, err)
-	assert.Equal(t, 3, len(out))
+	assert.Equal(t, 4, len(out))
 }

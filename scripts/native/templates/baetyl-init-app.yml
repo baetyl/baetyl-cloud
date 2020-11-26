@@ -1,4 +1,4 @@
-name: "{{.CoreAppName}}"
+name: "{{.InitAppName}}"
 namespace: "{{.Namespace}}"
 selector: "baetyl-node-name={{.NodeName}}"
 labels:
@@ -6,41 +6,37 @@ labels:
 type: "container"
 system: true
 services:
-  - name: "baetyl-core"
+  - name: "baetyl-init"
     image: "{{GetProperty "baetyl-image"}}"
     replica: 1
     args:
-      - "core"
+      - "init"
     volumeMounts:
-      - name: "core-conf"
+      - name: "init-conf"
         mountPath: "/etc/baetyl"
         readOnly: true
       - name: "node-cert"
         mountPath: "/var/lib/baetyl/node"
-      - name: "core-store-path"
+      - name: "init-store-path"
         mountPath: "/var/lib/baetyl/store"
       - name: "object-download-path"
         mountPath: "/var/lib/baetyl/object"
       - name: "host-root-path"
         mountPath: "/var/lib/baetyl/host"
-    ports:
-      - containerPort: 80
-        hostPort: 30050
-        protocol: "TCP"
     security:
       privileged: true
 volumes:
-  - name: "core-conf"
+  - name: "init-conf"
     config:
-      name: "{{.CoreConfName}}"
-      version: "{{.CoreConfVersion}}"
+      name: "{{.InitConfName}}"
+      version: "{{.InitConfVersion}}"
   - name: "node-cert"
     secret:
       name: "{{.NodeCertName}}"
       version: "{{.NodeCertVersion}}"
-  - name: "core-store-path"
+  - name: "init-store-path"
     hostPath:
-      path: "{{.BAETYL_HOST_PATH_LIB}}/core/store"
+      path: "{{.BAETYL_HOST_PATH_LIB}}/init/store"
   - name: "object-download-path"
     hostPath:
       path: "{{.BAETYL_HOST_PATH_LIB}}/object"
