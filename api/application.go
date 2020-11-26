@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -32,6 +33,10 @@ func (api *API) GetApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	// sys app: core、init、function is not visible
+	if common.ValidIsInvisible(app.Labels) {
+		return nil, common.Error(common.ErrResourceInvisible, common.Field("type", common.APP), common.Field("name", app.Name))
+	}
 	return api.ToApplicationView(app)
 }
 
@@ -118,6 +123,17 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	oldApp, err := api.App.Get(ns, name, "")
 	if err != nil {
 		return nil, err
+	}
+
+	// sys app: core、init、function is not visible
+	if common.ValidIsInvisible(oldApp.Labels) {
+		return nil, common.Error(common.ErrResourceInvisible, common.Field("type", common.APP), common.Field("name", oldApp.Name))
+	}
+
+	// labels and Selector can't be modified of sys apps
+	if v, ok := oldApp.Labels[common.LabelSystem]; ok && v == "true" &&
+		(oldApp.Selector != appView.Selector || !reflect.DeepEqual(oldApp.Labels, appView.Labels)) {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "selector or labels can't be modified of sys apps"))
 	}
 
 	appView.Version = oldApp.Version
@@ -421,7 +437,7 @@ func (api *API) translateSecretsToSecretLikedModels(appView *models.ApplicationV
 			}
 
 			if label, ok := secret.Labels[specV1.SecretLabel]; ok && label == specV1.SecretRegistry {
-				registry := models.FromSecretToRegistry(secret)
+				registry := models.FromSecretToRegistry(secret, false)
 				appView.Registries = append(appView.Registries, models.RegistryView{
 					Name:     registry.Name,
 					Address:  registry.Address,
@@ -430,7 +446,7 @@ func (api *API) translateSecretsToSecretLikedModels(appView *models.ApplicationV
 				continue
 			}
 
-			if label, ok := secret.Labels[specV1.SecretLabel]; ok && label == specV1.SecretCustomCertificate {
+			if label, ok := secret.Labels[specV1.SecretLabel]; ok && label == specV1.SecretCertificate {
 				volume = models.VolumeView{
 					Name: volume.Name,
 					Certificate: &specV1.ObjectReference{

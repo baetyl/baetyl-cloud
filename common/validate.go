@@ -99,3 +99,14 @@ func validMaxLengthFunc() validator.Func {
 		return true
 	}
 }
+
+func ValidNonBaetyl(name string) bool {
+	return !strings.Contains(name, "baetyl")
+}
+
+func ValidIsInvisible(labels map[string]string) bool {
+	if v, ok := labels[ResourceInvisible]; ok {
+		return v == "true"
+	}
+	return false
+}

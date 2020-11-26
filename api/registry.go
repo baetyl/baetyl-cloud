@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -17,24 +16,24 @@ import (
 // GetRegistry get a Registry
 func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapRegistry(api.Secret.Get(ns, n, ""))
-	if err != nil {
+	secret, err := api.Secret.Get(ns, n, "")
+	if secret != nil {
 		return nil, wrapRegistryNotFoundError(n, err)
 	}
-	return hidePwd(res), nil
+
+	return hidePwd(api.ToRegistryView(secret, false)), nil
 }
 
 // ListRegistry list Registry
 func (api *API) ListRegistry(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	res, err := wrapRegistryList(api.Secret.List(ns, wrapRegistryListOption(api.parseListOptions(c))))
+
+	secrets, err := api.Secret.List(ns, api.parseListOptionsAppendSystemLabel(c))
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
-	for i := range res.Items {
-		hidePwd(&res.Items[i])
-	}
-	return res, err
+
+	return api.ToRegistryViewList(secrets, true), nil
 }
 
 // CreateRegistry create one Registry
@@ -57,21 +56,30 @@ func (api *API) CreateRegistry(c *common.Context) (interface{}, error) {
 	if err = api.validateRegistryModel(cfg); err != nil {
 		return nil, err
 	}
-	res, err := wrapRegistry(api.Secret.Create(ns, cfg.ToSecret()))
-	return hidePwd(res), err
+
+	secret, err := api.Secret.Create(ns, cfg.ToSecret())
+	if err != nil {
+		return nil, err
+	}
+	return hidePwd(api.ToRegistryView(secret, true)), nil
 }
 
 // UpdateRegistry update the Registry
 func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
+	var needToFilter bool
+
 	cfg, err := api.parseAndCheckRegistryModel(c)
 	if err != nil {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	sd, err := wrapRegistry(api.Secret.Get(ns, n, ""))
+
+	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
 		return nil, wrapRegistryNotFoundError(n, err)
 	}
+
+	sd := api.ToRegistryView(secret, needToFilter)
 	// only edit description by design
 	if cfg.Description == sd.Description {
 		return hidePwd(sd), nil
@@ -81,33 +89,39 @@ func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
 	if err = api.validateRegistryModel(sd); err != nil {
 		return nil, err
 	}
-	res, err := wrapRegistry(api.Secret.Update(ns, sd.ToSecret()))
+	secret, err = api.Secret.Update(ns, sd.ToSecret())
 	if err != nil {
 		return nil, err
 	}
-	return hidePwd(res), nil
+	return hidePwd(api.ToRegistryView(secret, needToFilter)), nil
 }
 
 func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) {
+	var needToFilter bool
+
 	cfg, err := api.parseAndCheckRegistryModel(c)
 	if err != nil {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	sd, err := wrapRegistry(api.Secret.Get(ns, n, ""))
+	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
 		return nil, wrapRegistryNotFoundError(n, err)
 	}
+
+	sd := api.ToRegistryView(secret, needToFilter)
 	sd.UpdateTimestamp = time.Now()
 	sd.Password = cfg.Password
-	res, err := wrapRegistry(api.Secret.Update(ns, sd.ToSecret()))
+
+	secret, err = api.Secret.Update(ns, sd.ToSecret())
 	if err != nil {
 		return nil, err
 	}
+	res := api.ToRegistryView(secret, needToFilter)
 	if err = api.validateRegistryModel(res); err != nil {
 		return nil, err
 	}
-	err = api.updateAppSecret(ns, res.ToSecret())
+	err = api.updateAppSecret(ns, secret)
 	if err != nil {
 		return nil, err
 	}
@@ -117,21 +131,17 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 // DeleteRegistry delete the Registry
 func (api *API) DeleteRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	_, err := wrapRegistry(api.Secret.Get(ns, n, ""))
-	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
-	}
 	return api.deleteSecret(ns, n, "registry")
 }
 
 // GetAppByRegistry list app
 func (api *API) GetAppByRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapRegistry(api.Secret.Get(ns, n, ""))
+	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
 		return nil, wrapRegistryNotFoundError(n, err)
 	}
-	return api.listAppBySecret(ns, res.Name)
+	return api.listAppBySecret(ns, secret.Name)
 }
 
 // parseAndCheckRegistryModel parse and check the config model
@@ -158,24 +168,16 @@ func hidePwd(r *models.Registry) *models.Registry {
 	return r
 }
 
-func wrapRegistry(s *specV1.Secret, e error) (*models.Registry, error) {
-	if s != nil {
-		return models.FromSecretToRegistry(s), e
-	}
-	return nil, e
+func (api *API) ToRegistryView(s *specV1.Secret, needToFilter bool) *models.Registry {
+	return models.FromSecretToRegistry(s, needToFilter)
 }
 
-func wrapRegistryList(s *models.SecretList, e error) (*models.RegistryList, error) {
-	if s != nil {
-		return models.FromSecretListToRegistryList(s), e
+func (api *API) ToRegistryViewList(s *models.SecretList, needToFilter bool) *models.RegistryList {
+	res := models.FromSecretListToRegistryList(s, needToFilter)
+	for i := range res.Items {
+		hidePwd(&res.Items[i])
 	}
-	return nil, e
-}
-
-func wrapRegistryListOption(lo *models.ListOptions) *models.ListOptions {
-	// TODO 增加type字段代替label标签
-	lo.LabelSelector = fmt.Sprintf("%s=%s", specV1.SecretLabel, specV1.SecretRegistry)
-	return lo
+	return res
 }
 
 // validateRegistryModel validate the registry model

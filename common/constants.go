@@ -19,6 +19,8 @@ const (
 	ResourceName = "resourceName"
 	// ResourceVersion resource version
 	ResourceVersion = "resourceVersion"
+	// ResourceInvisible resource invisible
+	ResourceInvisible = "resourceInvisible"
 	// Application application resource
 	Application Resource = "application"
 	// App alias of application resource
@@ -29,6 +31,10 @@ const (
 	Config Resource = "config"
 	// Secret secret resource
 	Secret Resource = "secret"
+	// Certificate certificate resource
+	Certificate Resource = "certificate"
+	// Registry registry resource
+	Registry Resource = "registry"
 	// Deprecated
 	// Deployment deployment resource
 	Deployment Resource = "deployment"

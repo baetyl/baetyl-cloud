@@ -15,8 +15,8 @@ type SecretList struct {
 	Items       []specV1.Secret `json:"items"`
 }
 
-func FromSecretToRegistry(s *specV1.Secret) *Registry {
-	if v, ok := s.Labels[specV1.SecretLabel]; !ok || v != specV1.SecretRegistry {
+func FromSecretToRegistry(s *specV1.Secret, needToFilter bool) *Registry {
+	if v, ok := s.Labels[specV1.SecretLabel]; needToFilter && (!ok || v != specV1.SecretRegistry) {
 		return nil
 	}
 	res := &Registry{}
@@ -36,14 +36,14 @@ func FromSecretToRegistry(s *specV1.Secret) *Registry {
 	return res
 }
 
-func FromSecretListToRegistryList(s *SecretList) *RegistryList {
+func FromSecretListToRegistryList(s *SecretList, needToFilter bool) *RegistryList {
 	res := &RegistryList{
 		Total:       s.Total,
 		ListOptions: s.ListOptions,
 		Items:       []Registry{},
 	}
 	for _, sd := range s.Items {
-		r := FromSecretToRegistry(&sd)
+		r := FromSecretToRegistry(&sd, needToFilter)
 		if r == nil {
 			res.Total--
 		} else {
@@ -53,8 +53,10 @@ func FromSecretListToRegistryList(s *SecretList) *RegistryList {
 	return res
 }
 
-func FromSecretToCertificate(s *specV1.Secret) *Certificate {
-	if v, ok := s.Labels[specV1.SecretLabel]; !ok || v != specV1.SecretCustomCertificate {
+func FromSecretToCertificate(s *specV1.Secret, needToFilter bool) *Certificate {
+	// SecretCustomCertificate is deprecated, using "baetyl-cloud-system: true" to distinguish whether the secret is system's secret
+	// For compatibility, still keep SecretCustomCertificate here
+	if v, ok := s.Labels[specV1.SecretLabel]; needToFilter && (!ok || (v != specV1.SecretCertificate && v != specV1.SecretCustomCertificate)) {
 		return nil
 	}
 	res := &Certificate{}
@@ -89,14 +91,14 @@ func FromSecretToCertificate(s *specV1.Secret) *Certificate {
 	return res
 }
 
-func FromSecretListToCertificateList(s *SecretList) *CertificateList {
+func FromSecretListToCertificateList(s *SecretList, needToFilter bool) *CertificateList {
 	res := &CertificateList{
 		Total:       s.Total,
 		ListOptions: s.ListOptions,
 		Items:       []Certificate{},
 	}
 	for _, sd := range s.Items {
-		r := FromSecretToCertificate(&sd)
+		r := FromSecretToCertificate(&sd, needToFilter)
 		if r == nil {
 			res.Total--
 		} else {
@@ -144,8 +146,8 @@ func (s *SecretView) ToSecret() *specV1.Secret {
 	return res
 }
 
-func FromSecretToView(s *specV1.Secret) *SecretView {
-	if v, ok := s.Labels[specV1.SecretLabel]; !ok || v != specV1.SecretConfig {
+func FromSecretToView(s *specV1.Secret, needToFilter bool) *SecretView {
+	if v, ok := s.Labels[specV1.SecretLabel]; needToFilter && (!ok || v != specV1.SecretConfig) {
 		return nil
 	}
 	res := &SecretView{}
@@ -160,14 +162,14 @@ func FromSecretToView(s *specV1.Secret) *SecretView {
 	return res
 }
 
-func FromSecretListToView(s *SecretList) *SecretViewList {
+func FromSecretListToView(s *SecretList, needToFilter bool) *SecretViewList {
 	res := &SecretViewList{
 		Total:       s.Total,
 		ListOptions: s.ListOptions,
 		Items:       []SecretView{},
 	}
 	for _, sd := range s.Items {
-		r := FromSecretToView(&sd)
+		r := FromSecretToView(&sd, needToFilter)
 
 		if r == nil {
 			res.Total--

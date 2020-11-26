@@ -1,7 +1,7 @@
 package api
 
 import (
-	"fmt"
+	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -14,24 +14,23 @@ import (
 // GetCertificate get a Certificate
 func (api *API) GetCertificate(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapCertificate(api.Secret.Get(ns, n, ""))
+
+	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, err
+		return nil, wrapCertificateNotFoundError(n, err)
 	}
-	return hideCertKey(res), nil
+	return hideCertKey(api.ToCertificateView(secret, false)), nil
 }
 
 // ListCertificate list Certificate
 func (api *API) ListCertificate(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	res, err := wrapCertificateList(api.Secret.List(ns, wrapCertificateListOption(api.parseListOptions(c))))
+	secrets, err := api.Secret.List(ns, api.parseListOptionsAppendSystemLabel(c))
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
-	for i := range res.Items {
-		hideCertKey(&res.Items[i])
-	}
-	return res, err
+
+	return api.ToCertificateViewList(secrets, true), nil
 }
 
 // CreateCertificate create one Certificate
@@ -55,22 +54,30 @@ func (api *API) CreateCertificate(c *common.Context) (interface{}, error) {
 	if err = cfg.ParseCertInfo(); err != nil {
 		return nil, err
 	}
-	res, err := wrapCertificate(api.Secret.Create(ns, cfg.ToSecret()))
-	return hideCertKey(res), err
+	res, err := api.Secret.Create(ns, cfg.ToSecret())
+	if err != nil {
+		return nil, err
+	}
+
+	return hideCertKey(api.ToCertificateView(res, true)), err
 }
 
 // UpdateCertificate update the Certificate
 func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
+	var needToFilter bool
+
 	cfg, err := parseAndCheckCertificateModelWhenUpdate(c)
 	if err != nil {
 		return nil, err
 	}
 
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	sd, err := wrapCertificate(api.Secret.Get(ns, n, ""))
+	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, err
+		return nil, wrapCertificateNotFoundError(n, err)
 	}
+
+	sd := api.ToCertificateView(secret, needToFilter)
 	if cfg.Data.Key == "" {
 		cfg.Data = sd.Data
 	}
@@ -84,11 +91,11 @@ func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
 	if err = sd.ParseCertInfo(); err != nil {
 		return nil, err
 	}
-	res, err := wrapCertificate(api.Secret.Update(ns, sd.ToSecret()))
+	secret, err = api.Secret.Update(ns, sd.ToSecret())
 	if err != nil {
 		return nil, err
 	}
-	return hideCertKey(res), nil
+	return hideCertKey(api.ToCertificateView(secret, needToFilter)), nil
 }
 
 // DeleteCertificate delete the Certificate
@@ -100,9 +107,9 @@ func (api *API) DeleteCertificate(c *common.Context) (interface{}, error) {
 // GetAppByCertificate list app
 func (api *API) GetAppByCertificate(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapCertificate(api.Secret.Get(ns, n, ""))
+	res, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, err
+		return nil, wrapCertificateNotFoundError(n, err)
 	}
 	return api.listAppBySecret(ns, res.Name)
 }
@@ -152,22 +159,25 @@ func hideCertKey(r *models.Certificate) *models.Certificate {
 	return r
 }
 
-func wrapCertificate(s *specV1.Secret, e error) (*models.Certificate, error) {
-	if s != nil {
-		return models.FromSecretToCertificate(s), e
-	}
-	return nil, e
+func (api *API) ToCertificateView(s *specV1.Secret, needToFilter bool) *models.Certificate {
+	return models.FromSecretToCertificate(s, needToFilter)
 }
 
-func wrapCertificateList(s *models.SecretList, e error) (*models.CertificateList, error) {
-	if s != nil {
-		return models.FromSecretListToCertificateList(s), e
+func (api *API) ToCertificateViewList(s *models.SecretList, needToFilter bool) *models.CertificateList {
+	res := models.FromSecretListToCertificateList(s, needToFilter)
+	for i := range res.Items {
+		hideCertKey(&res.Items[i])
 	}
-	return nil, e
+	return res
 }
 
-func wrapCertificateListOption(lo *models.ListOptions) *models.ListOptions {
-	// TODO 增加type字段代替label标签
-	lo.LabelSelector = fmt.Sprintf("%s=%s", specV1.SecretLabel, specV1.SecretCustomCertificate)
-	return lo
+func wrapCertificateNotFoundError(name string, err error) error {
+	if err != nil {
+		e, ok := err.(errors.Coder)
+		if (ok && e.Code() == common.ErrResourceNotFound) || (!ok && strings.Contains(err.Error(), "not found")) {
+			return common.Error(common.ErrResourceNotFound, common.Field("type", common.Certificate),
+				common.Field("name", name))
+		}
+	}
+	return err
 }

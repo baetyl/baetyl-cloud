@@ -88,6 +88,8 @@ const (
 	ErrThirdServer = "ErrThirdServer"
 	// * object error
 	ErrObjectOperationException = "ErrObjectOperationException"
+
+	ErrResourceInvisible = "ErrResourceInvisible"
 )
 
 var templates = map[Code]string{
@@ -160,6 +162,8 @@ var templates = map[Code]string{
 	ErrObjectOperationException: "Problem with {{if .source}}({{.source}}){{end}} object operation.{{if .error}} ({{.error}}){{end}}",
 
 	ErrInvalidArrayLength: "The length of the array exceeds the limit",
+
+	ErrResourceInvisible: "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} is not visible.",
 }
 
 func getHTTPStatus(c Code) int {
