@@ -487,7 +487,11 @@ func toShadowMap(shadowList *models.ShadowList) map[string]*models.Shadow {
 
 func (n *nodeService) GetNodeProperties(namespace, name string) (*models.NodeProperties, error) {
 	node, err := n.node.GetNode(namespace, name)
-	if err != nil {
+	if err != nil && strings.Contains(err.Error(), "not found") {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
+			common.Field("name", name))
+	} else if err != nil {
+		log.L().Error("get node failed", log.Error(err))
 		return nil, err
 	}
 	shadow, err := n.shadow.Get(namespace, name)
@@ -496,7 +500,7 @@ func (n *nodeService) GetNodeProperties(namespace, name string) (*models.NodePro
 	}
 	meta, err := getNodePropertiesMeta(node)
 	if err != nil {
-		return nil, common.Error(common.ErrResourceNotFound, common.Field("node", node.Name), common.Field("meta", "node properties meta"))
+		return nil, err
 	}
 	report := map[string]interface{}{}
 	props, ok := shadow.Report[common.NodeProps]
@@ -531,7 +535,11 @@ func (n *nodeService) GetNodeProperties(namespace, name string) (*models.NodePro
 // and can not update report of node properties
 func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models.NodeProperties) (*models.NodeProperties, error) {
 	node, err := n.node.GetNode(namespace, name)
-	if err != nil {
+	if err != nil && strings.Contains(err.Error(), "not found") {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
+			common.Field("name", name))
+	} else if err != nil {
+		log.L().Error("get node failed", log.Error(err))
 		return nil, err
 	}
 	shadow, err := n.shadow.Get(namespace, name)
@@ -588,7 +596,11 @@ func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models
 
 func (n *nodeService) UpdateNodeMode(ns, name, mode string) error {
 	node, err := n.node.GetNode(ns, name)
-	if err != nil {
+	if err != nil && strings.Contains(err.Error(), "not found") {
+		return common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
+			common.Field("name", name))
+	} else if err != nil {
+		log.L().Error("get node failed", log.Error(err))
 		return err
 	}
 	if node.Attributes == nil {
