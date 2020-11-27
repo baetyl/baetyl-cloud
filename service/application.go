@@ -93,7 +93,7 @@ func (a *applicationService) Create(namespace string, app *specV1.Application) (
 
 	// TODO: is it necessary ?
 	// store application history to db
-	if _, err := a.appHis.CreateApplication(app); err != nil {
+	if _, err := a.appHis.CreateApplicationHis(app); err != nil {
 		log.L().Error("store application to db error",
 			log.Any("name", app.Name),
 			log.Any("namespace", app.Namespace),
@@ -130,7 +130,7 @@ func (a *applicationService) Update(namespace string, app *specV1.Application) (
 
 	// store app history to db
 	if app.Version != newApp.Version {
-		if _, err := a.appHis.CreateApplication(newApp); err != nil {
+		if _, err := a.appHis.CreateApplicationHis(newApp); err != nil {
 			log.L().Error("store application to db error",
 				log.Any("name", newApp.Name),
 				log.Any("namespace", newApp.Namespace),
@@ -156,7 +156,7 @@ func (a *applicationService) Delete(namespace, name, version string) error {
 	}
 
 	// mark the application was deleted. err can ignore
-	if _, err := a.appHis.DeleteApplication(namespace, name, version); err != nil {
+	if _, err := a.appHis.DeleteApplicationHis(namespace, name, version); err != nil {
 		log.L().Error("delete application history error",
 			log.Any("name", name),
 			log.Any("namespace", namespace),

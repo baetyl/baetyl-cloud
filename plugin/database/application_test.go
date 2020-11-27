@@ -56,7 +56,7 @@ func TestDB_CreateApplication(t *testing.T) {
 		Version:     "1",
 	}
 	db := mockDb(t)
-	res, err := db.CreateApplication(app)
+	res, err := db.CreateApplicationHis(app)
 	assert.NoError(t, err)
 	num, err := res.RowsAffected()
 	assert.NoError(t, err)
@@ -80,20 +80,20 @@ func TestDB_UpdateApplication(t *testing.T) {
 		Version:     "1",
 	}
 
-	res, err := db.CreateApplication(app2)
+	res, err := db.CreateApplicationHis(app2)
 	assert.NoError(t, err)
 
-	res, err = db.UpdateApplication(app, "1")
+	res, err = db.UpdateApplicationHis(app, "1")
 	assert.NoError(t, err)
 	num, err := res.RowsAffected()
 	assert.NoError(t, err)
 	assert.Equal(t, int64(1), num)
 
-	newApp, err := db.GetApplication(app.Name, app.Namespace, app.Version)
+	newApp, err := db.GetApplicationHis(app.Name, app.Namespace, app.Version)
 	assert.NoError(t, err)
 	checkApplication(t, app, newApp)
 
-	res, err = db.DeleteApplication(newApp.Name, newApp.Namespace, newApp.Version)
+	res, err = db.DeleteApplicationHis(newApp.Name, newApp.Namespace, newApp.Version)
 	assert.NoError(t, err)
 	num, err = res.RowsAffected()
 	assert.NoError(t, err)
@@ -109,14 +109,14 @@ func TestDB_GetApplication(t *testing.T) {
 		Version:     "1",
 	}
 
-	_, err := db.CreateApplication(app)
+	_, err := db.CreateApplicationHis(app)
 	assert.NoError(t, err)
 
-	res, err := db.GetApplication(app.Name, app.Namespace, app.Version)
+	res, err := db.GetApplicationHis(app.Name, app.Namespace, app.Version)
 	assert.NoError(t, err)
 	checkApplication(t, app, res)
 
-	num, err := db.CountApplication(nil, app.Name, app.Namespace)
+	num, err := db.CountApplicationHis(nil, app.Name, app.Namespace)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, num)
 
@@ -126,7 +126,7 @@ func TestDB_GetApplication(t *testing.T) {
 		Name:     app.Name,
 	}
 
-	apps, err := db.ListApplication(app.Namespace, filter)
+	apps, err := db.ListApplicationHis(app.Namespace, filter)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(apps))
 	assert.Equal(t, app.Name, apps[0].Name)

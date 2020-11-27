@@ -5,11 +5,11 @@ import (
 	"io"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-go/v2/errors"
+	"github.com/baetyl/baetyl-go/v2/log"
+	"github.com/jmoiron/sqlx"
 )
 
 // DBStorage
@@ -25,6 +25,7 @@ type DBStorage interface {
 type DB struct {
 	db  *sqlx.DB
 	cfg CloudConfig
+	Log *log.Logger
 }
 
 func init() {
@@ -55,6 +56,7 @@ func NewDB(cfg CloudConfig) (*DB, error) {
 	return &DB{
 		db:  db,
 		cfg: cfg,
+		Log: log.With(log.Any("plugin", "database")),
 	}, nil
 }
 
