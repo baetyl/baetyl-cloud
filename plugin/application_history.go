@@ -13,14 +13,14 @@ import (
 //go:generate mockgen -destination=../mock/plugin/application_history.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin AppHistory
 
 type AppHistory interface {
-	CreateApplication(app *v1.Application) (sql.Result, error)
-	UpdateApplication(app *v1.Application, oldVersion string) (sql.Result, error)
-	DeleteApplication(name, namespace, version string) (sql.Result, error)
-	GetApplication(name, namespace, version string) (*v1.Application, error)
-	ListApplication(namespace string, filter *models.Filter) ([]v1.Application, error)
-	CreateApplicationWithTx(tx *sqlx.Tx, app *v1.Application) (sql.Result, error)
-	UpdateApplicationWithTx(tx *sqlx.Tx, app *v1.Application, oldVersion string) (sql.Result, error)
-	DeleteApplicationWithTx(tx *sqlx.Tx, name, namespace, version string) (sql.Result, error)
-	CountApplication(tx *sqlx.Tx, name, namespace string) (int, error)
+	CreateApplicationHis(app *v1.Application) (sql.Result, error)
+	UpdateApplicationHis(app *v1.Application, oldVersion string) (sql.Result, error)
+	DeleteApplicationHis(name, namespace, version string) (sql.Result, error)
+	GetApplicationHis(name, namespace, version string) (*v1.Application, error)
+	ListApplicationHis(namespace string, filter *models.Filter) ([]v1.Application, error)
+	CreateApplicationHisWithTx(tx *sqlx.Tx, app *v1.Application) (sql.Result, error)
+	UpdateApplicationHisWithTx(tx *sqlx.Tx, app *v1.Application, oldVersion string) (sql.Result, error)
+	DeleteApplicationHisWithTx(tx *sqlx.Tx, name, namespace, version string) (sql.Result, error)
+	CountApplicationHis(tx *sqlx.Tx, name, namespace string) (int, error)
 	io.Closer
 }

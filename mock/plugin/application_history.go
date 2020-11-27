@@ -50,137 +50,137 @@ func (mr *MockAppHistoryMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockAppHistory)(nil).Close))
 }
 
-// CountApplication mocks base method
-func (m *MockAppHistory) CountApplication(arg0 *sqlx.Tx, arg1, arg2 string) (int, error) {
+// CountApplicationHis mocks base method
+func (m *MockAppHistory) CountApplicationHis(arg0 *sqlx.Tx, arg1, arg2 string) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountApplication", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "CountApplicationHis", arg0, arg1, arg2)
 	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CountApplication indicates an expected call of CountApplication
-func (mr *MockAppHistoryMockRecorder) CountApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
+// CountApplicationHis indicates an expected call of CountApplicationHis
+func (mr *MockAppHistoryMockRecorder) CountApplicationHis(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountApplication", reflect.TypeOf((*MockAppHistory)(nil).CountApplication), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountApplicationHis", reflect.TypeOf((*MockAppHistory)(nil).CountApplicationHis), arg0, arg1, arg2)
 }
 
-// CreateApplication mocks base method
-func (m *MockAppHistory) CreateApplication(arg0 *v1.Application) (sql.Result, error) {
+// CreateApplicationHis mocks base method
+func (m *MockAppHistory) CreateApplicationHis(arg0 *v1.Application) (sql.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateApplication", arg0)
+	ret := m.ctrl.Call(m, "CreateApplicationHis", arg0)
 	ret0, _ := ret[0].(sql.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateApplication indicates an expected call of CreateApplication
-func (mr *MockAppHistoryMockRecorder) CreateApplication(arg0 interface{}) *gomock.Call {
+// CreateApplicationHis indicates an expected call of CreateApplicationHis
+func (mr *MockAppHistoryMockRecorder) CreateApplicationHis(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApplication", reflect.TypeOf((*MockAppHistory)(nil).CreateApplication), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApplicationHis", reflect.TypeOf((*MockAppHistory)(nil).CreateApplicationHis), arg0)
 }
 
-// CreateApplicationWithTx mocks base method
-func (m *MockAppHistory) CreateApplicationWithTx(arg0 *sqlx.Tx, arg1 *v1.Application) (sql.Result, error) {
+// CreateApplicationHisWithTx mocks base method
+func (m *MockAppHistory) CreateApplicationHisWithTx(arg0 *sqlx.Tx, arg1 *v1.Application) (sql.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateApplicationWithTx", arg0, arg1)
+	ret := m.ctrl.Call(m, "CreateApplicationHisWithTx", arg0, arg1)
 	ret0, _ := ret[0].(sql.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateApplicationWithTx indicates an expected call of CreateApplicationWithTx
-func (mr *MockAppHistoryMockRecorder) CreateApplicationWithTx(arg0, arg1 interface{}) *gomock.Call {
+// CreateApplicationHisWithTx indicates an expected call of CreateApplicationHisWithTx
+func (mr *MockAppHistoryMockRecorder) CreateApplicationHisWithTx(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApplicationWithTx", reflect.TypeOf((*MockAppHistory)(nil).CreateApplicationWithTx), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApplicationHisWithTx", reflect.TypeOf((*MockAppHistory)(nil).CreateApplicationHisWithTx), arg0, arg1)
 }
 
-// DeleteApplication mocks base method
-func (m *MockAppHistory) DeleteApplication(arg0, arg1, arg2 string) (sql.Result, error) {
+// DeleteApplicationHis mocks base method
+func (m *MockAppHistory) DeleteApplicationHis(arg0, arg1, arg2 string) (sql.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteApplication", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "DeleteApplicationHis", arg0, arg1, arg2)
 	ret0, _ := ret[0].(sql.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// DeleteApplication indicates an expected call of DeleteApplication
-func (mr *MockAppHistoryMockRecorder) DeleteApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
+// DeleteApplicationHis indicates an expected call of DeleteApplicationHis
+func (mr *MockAppHistoryMockRecorder) DeleteApplicationHis(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplication", reflect.TypeOf((*MockAppHistory)(nil).DeleteApplication), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplicationHis", reflect.TypeOf((*MockAppHistory)(nil).DeleteApplicationHis), arg0, arg1, arg2)
 }
 
-// DeleteApplicationWithTx mocks base method
-func (m *MockAppHistory) DeleteApplicationWithTx(arg0 *sqlx.Tx, arg1, arg2, arg3 string) (sql.Result, error) {
+// DeleteApplicationHisWithTx mocks base method
+func (m *MockAppHistory) DeleteApplicationHisWithTx(arg0 *sqlx.Tx, arg1, arg2, arg3 string) (sql.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteApplicationWithTx", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "DeleteApplicationHisWithTx", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(sql.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// DeleteApplicationWithTx indicates an expected call of DeleteApplicationWithTx
-func (mr *MockAppHistoryMockRecorder) DeleteApplicationWithTx(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+// DeleteApplicationHisWithTx indicates an expected call of DeleteApplicationHisWithTx
+func (mr *MockAppHistoryMockRecorder) DeleteApplicationHisWithTx(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplicationWithTx", reflect.TypeOf((*MockAppHistory)(nil).DeleteApplicationWithTx), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplicationHisWithTx", reflect.TypeOf((*MockAppHistory)(nil).DeleteApplicationHisWithTx), arg0, arg1, arg2, arg3)
 }
 
-// GetApplication mocks base method
-func (m *MockAppHistory) GetApplication(arg0, arg1, arg2 string) (*v1.Application, error) {
+// GetApplicationHis mocks base method
+func (m *MockAppHistory) GetApplicationHis(arg0, arg1, arg2 string) (*v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetApplication", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetApplicationHis", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetApplication indicates an expected call of GetApplication
-func (mr *MockAppHistoryMockRecorder) GetApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
+// GetApplicationHis indicates an expected call of GetApplicationHis
+func (mr *MockAppHistoryMockRecorder) GetApplicationHis(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetApplication", reflect.TypeOf((*MockAppHistory)(nil).GetApplication), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetApplicationHis", reflect.TypeOf((*MockAppHistory)(nil).GetApplicationHis), arg0, arg1, arg2)
 }
 
-// ListApplication mocks base method
-func (m *MockAppHistory) ListApplication(arg0 string, arg1 *models.Filter) ([]v1.Application, error) {
+// ListApplicationHis mocks base method
+func (m *MockAppHistory) ListApplicationHis(arg0 string, arg1 *models.Filter) ([]v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListApplication", arg0, arg1)
+	ret := m.ctrl.Call(m, "ListApplicationHis", arg0, arg1)
 	ret0, _ := ret[0].([]v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListApplication indicates an expected call of ListApplication
-func (mr *MockAppHistoryMockRecorder) ListApplication(arg0, arg1 interface{}) *gomock.Call {
+// ListApplicationHis indicates an expected call of ListApplicationHis
+func (mr *MockAppHistoryMockRecorder) ListApplicationHis(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListApplication", reflect.TypeOf((*MockAppHistory)(nil).ListApplication), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListApplicationHis", reflect.TypeOf((*MockAppHistory)(nil).ListApplicationHis), arg0, arg1)
 }
 
-// UpdateApplication mocks base method
-func (m *MockAppHistory) UpdateApplication(arg0 *v1.Application, arg1 string) (sql.Result, error) {
+// UpdateApplicationHis mocks base method
+func (m *MockAppHistory) UpdateApplicationHis(arg0 *v1.Application, arg1 string) (sql.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateApplication", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateApplicationHis", arg0, arg1)
 	ret0, _ := ret[0].(sql.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UpdateApplication indicates an expected call of UpdateApplication
-func (mr *MockAppHistoryMockRecorder) UpdateApplication(arg0, arg1 interface{}) *gomock.Call {
+// UpdateApplicationHis indicates an expected call of UpdateApplicationHis
+func (mr *MockAppHistoryMockRecorder) UpdateApplicationHis(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplication", reflect.TypeOf((*MockAppHistory)(nil).UpdateApplication), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplicationHis", reflect.TypeOf((*MockAppHistory)(nil).UpdateApplicationHis), arg0, arg1)
 }
 
-// UpdateApplicationWithTx mocks base method
-func (m *MockAppHistory) UpdateApplicationWithTx(arg0 *sqlx.Tx, arg1 *v1.Application, arg2 string) (sql.Result, error) {
+// UpdateApplicationHisWithTx mocks base method
+func (m *MockAppHistory) UpdateApplicationHisWithTx(arg0 *sqlx.Tx, arg1 *v1.Application, arg2 string) (sql.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateApplicationWithTx", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "UpdateApplicationHisWithTx", arg0, arg1, arg2)
 	ret0, _ := ret[0].(sql.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UpdateApplicationWithTx indicates an expected call of UpdateApplicationWithTx
-func (mr *MockAppHistoryMockRecorder) UpdateApplicationWithTx(arg0, arg1, arg2 interface{}) *gomock.Call {
+// UpdateApplicationHisWithTx indicates an expected call of UpdateApplicationHisWithTx
+func (mr *MockAppHistoryMockRecorder) UpdateApplicationHisWithTx(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplicationWithTx", reflect.TypeOf((*MockAppHistory)(nil).UpdateApplicationWithTx), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplicationHisWithTx", reflect.TypeOf((*MockAppHistory)(nil).UpdateApplicationHisWithTx), arg0, arg1, arg2)
 }
