@@ -119,7 +119,7 @@ func (api *API) DeleteRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	_, err := wrapRegistry(api.Secret.Get(ns, n, ""))
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, ignoreNotFoundError(err)
 	}
 	return api.deleteSecret(ns, n, "registry")
 }
@@ -192,6 +192,16 @@ func wrapRegistryNotFoundError(name string, err error) error {
 		if (ok && e.Code() == common.ErrResourceNotFound) || (!ok && strings.Contains(err.Error(), "not found")) {
 			return common.Error(common.ErrResourceNotFound, common.Field("type", common.SecretRegistry),
 				common.Field("name", name))
+		}
+	}
+	return err
+}
+
+func ignoreNotFoundError(err error) error {
+	if err != nil {
+		e, ok := err.(errors.Coder)
+		if (ok && e.Code() == common.ErrResourceNotFound) || (!ok && strings.Contains(err.Error(), "not found")) {
+			return nil
 		}
 	}
 	return err

@@ -315,6 +315,24 @@ func TestDeleteRegistry(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
+		fmt.Errorf("the secret not found"))
+
+	// 200
+	req, _ = http.NewRequest(http.MethodDelete, "/v1/registries/abc", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
+		fmt.Errorf("unexpected error"))
+
+	// 500
+	req, _ = http.NewRequest(http.MethodDelete, "/v1/registries/abc", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestGetAppByRegistry(t *testing.T) {
