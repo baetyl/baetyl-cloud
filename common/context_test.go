@@ -93,13 +93,13 @@ func TestWrapperRaw(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.GET("/200", WrapperRaw(test200))
-	router.GET("/200Byte", WrapperRaw(test200Byte))
-	router.GET("/500", WrapperRaw(test500))
-	router.GET("/404", WrapperRaw(test404))
-	router.GET("/400", WrapperRaw(test400))
-	router.GET("/401", WrapperRaw(test401))
-	router.GET("/panic", WrapperRaw(testPanic))
+	router.GET("/200", WrapperRaw(test200, true))
+	router.GET("/200Byte", WrapperRaw(test200Byte, true))
+	router.GET("/500", WrapperRaw(test500, true))
+	router.GET("/404", WrapperRaw(test404, true))
+	router.GET("/400", WrapperRaw(test400, true))
+	router.GET("/401", WrapperRaw(test401, true))
+	router.GET("/panic", WrapperRaw(testPanic, true))
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/200", nil)

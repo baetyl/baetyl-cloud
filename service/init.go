@@ -50,7 +50,6 @@ type GetInitResource func(ns, nodeName string, params map[string]interface{}) ([
 type InitService interface {
 	GetResource(ns, nodeName, resourceName string, params map[string]interface{}) (interface{}, error)
 	GenApps(ns, nodeName string) ([]*specV1.Application, error)
-	GetCoreAppFromDesire(ns, nodeName string) (*specV1.Application, error)
 }
 
 type InitServiceImpl struct {

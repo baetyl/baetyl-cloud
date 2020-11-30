@@ -27,7 +27,7 @@ func initInitAPI(t *testing.T) (*InitAPI, *gin.Engine, *gomock.Controller) {
 	v1 := router.Group("v1")
 	{
 		init := v1.Group("/init")
-		init.GET("/:resource", mockIM, common.WrapperRaw(api.GetResource))
+		init.GET("/:resource", mockIM, common.WrapperRaw(api.GetResource, true))
 	}
 	return api, router, mockCtl
 }

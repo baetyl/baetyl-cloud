@@ -83,8 +83,8 @@ func (s *AdminServer) InitRoute() {
 		configs := v1.Group("/configs")
 		configs.GET("/:name", common.Wrapper(s.api.GetConfig))
 		configs.PUT("/:name", common.Wrapper(s.api.UpdateConfig))
-		configs.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceDelete), common.Wrapper(s.api.DeleteConfig))
-		configs.POST("", common.WrapperRaw(s.api.ValidateResourceCreate), common.Wrapper(s.api.CreateConfig))
+		configs.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceDelete, true), common.Wrapper(s.api.DeleteConfig))
+		configs.POST("", common.WrapperRaw(s.api.ValidateResourceCreate, true), common.Wrapper(s.api.CreateConfig))
 		configs.GET("", common.Wrapper(s.api.ListConfig))
 		configs.GET("/:name/apps", common.Wrapper(s.api.GetAppByConfig))
 	}
@@ -93,8 +93,8 @@ func (s *AdminServer) InitRoute() {
 		registry.GET("/:name", common.Wrapper(s.api.GetRegistry))
 		registry.PUT("/:name", common.Wrapper(s.api.UpdateRegistry))
 		registry.POST("/:name/refresh", common.Wrapper(s.api.RefreshRegistryPassword))
-		registry.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceDelete), common.Wrapper(s.api.DeleteRegistry))
-		registry.POST("", common.WrapperRaw(s.api.ValidateResourceCreate), common.Wrapper(s.api.CreateRegistry))
+		registry.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceDelete, true), common.Wrapper(s.api.DeleteRegistry))
+		registry.POST("", common.WrapperRaw(s.api.ValidateResourceCreate, true), common.Wrapper(s.api.CreateRegistry))
 		registry.GET("", common.Wrapper(s.api.ListRegistry))
 		registry.GET("/:name/apps", common.Wrapper(s.api.GetAppByRegistry))
 	}
@@ -102,8 +102,8 @@ func (s *AdminServer) InitRoute() {
 		certificate := v1.Group("/certificates")
 		certificate.GET("/:name", common.Wrapper(s.api.GetCertificate))
 		certificate.PUT("/:name", common.Wrapper(s.api.UpdateCertificate))
-		certificate.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceDelete), common.Wrapper(s.api.DeleteCertificate))
-		certificate.POST("", common.WrapperRaw(s.api.ValidateResourceCreate), common.Wrapper(s.api.CreateCertificate))
+		certificate.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceDelete, true), common.Wrapper(s.api.DeleteCertificate))
+		certificate.POST("", common.WrapperRaw(s.api.ValidateResourceCreate, true), common.Wrapper(s.api.CreateCertificate))
 		certificate.GET("", common.Wrapper(s.api.ListCertificate))
 		certificate.GET("/:name/apps", common.Wrapper(s.api.GetAppByCertificate))
 	}
@@ -111,8 +111,8 @@ func (s *AdminServer) InitRoute() {
 		configs := v1.Group("/secrets")
 		configs.GET("/:name", common.Wrapper(s.api.GetSecret))
 		configs.PUT("/:name", common.Wrapper(s.api.UpdateSecret))
-		configs.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceDelete), common.Wrapper(s.api.DeleteSecret))
-		configs.POST("", common.WrapperRaw(s.api.ValidateResourceCreate), common.Wrapper(s.api.CreateSecret))
+		configs.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceDelete, true), common.Wrapper(s.api.DeleteSecret))
+		configs.POST("", common.WrapperRaw(s.api.ValidateResourceCreate, true), common.Wrapper(s.api.CreateSecret))
 		configs.GET("", common.Wrapper(s.api.ListSecret))
 		configs.GET("/:name/apps", common.Wrapper(s.api.GetAppBySecret))
 	}
@@ -144,8 +144,8 @@ func (s *AdminServer) InitRoute() {
 		apps := v1.Group("/apps")
 		apps.GET("/:name", common.Wrapper(s.api.GetApplication))
 		apps.PUT("/:name", common.Wrapper(s.api.UpdateApplication))
-		apps.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceDelete), common.Wrapper(s.api.DeleteApplication))
-		apps.POST("", common.WrapperRaw(s.api.ValidateResourceCreate), common.Wrapper(s.api.CreateApplication))
+		apps.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceDelete, true), common.Wrapper(s.api.DeleteApplication))
+		apps.POST("", common.WrapperRaw(s.api.ValidateResourceCreate, true), common.Wrapper(s.api.CreateApplication))
 		apps.GET("", common.Wrapper(s.api.ListApplication))
 	}
 	{

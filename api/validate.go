@@ -1,6 +1,10 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
@@ -9,7 +13,14 @@ func (api *API) ValidateResourceCreate(c *common.Context) (interface{}, error) {
 	resource := struct {
 		Name string `json:"name,omitempty"`
 	}{}
-	err := c.LoadBody(resource)
+
+	buf, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		return nil, err
+	}
+	c.Request.Body = ioutil.NopCloser(bytes.NewReader(buf[:]))
+
+	err = json.Unmarshal(buf, &resource)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}

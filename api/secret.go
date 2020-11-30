@@ -131,8 +131,8 @@ func (api *API) ToSecretViewList(s *models.SecretList, needToFilter bool) *model
 }
 
 func (api *API) deleteSecret(namespace, secret, secretType string) (interface{}, error) {
-	res, err := api.Secret.Get(namespace, secret, "")
-	if res != nil {
+	_, err := api.Secret.Get(namespace, secret, "")
+	if err != nil {
 		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 			return nil, nil
 		}

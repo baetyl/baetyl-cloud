@@ -169,6 +169,84 @@ func initApplicationAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 	return api, router, mockCtl
 }
 
+func TestGetInvisibleApplication(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	mApp := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.ContainerApp,
+		Labels: map[string]string{
+			common.ResourceInvisible: "true",
+		},
+		Services: []specV1.Service{
+			{
+				Name:     "agent",
+				Hostname: "test-agent",
+				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "name",
+						MountPath: "mountPath",
+					},
+				},
+				Ports: []specV1.ContainerPort{
+					{
+						HostPort:      8080,
+						ContainerPort: 8080,
+					},
+				},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
+					},
+				},
+				Args: []string{"test"},
+				Env: []specV1.Environment{
+					{
+						Name:  "name",
+						Value: "value",
+					},
+				},
+			},
+		},
+		Volumes: []specV1.Volume{
+			{
+				Name: "name",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "agent-conf",
+					},
+				},
+			},
+			{
+				Name: "secret",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name: "secret01",
+					},
+				},
+			},
+		},
+	}
+	sApp.EXPECT().Get(mApp.Namespace, "cba", "").Return(mApp, nil).Times(1)
+	req, _ := http.NewRequest(http.MethodGet, "/v1/apps/cba", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
 func TestGetContainerApplication(t *testing.T) {
 	api, router, mockCtl := initApplicationAPI(t)
 	defer mockCtl.Finish()
@@ -624,7 +702,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 	secretCertificate := &specV1.Secret{
 		Name: "certificate01",
 		Labels: map[string]string{
-			specV1.SecretLabel: specV1.SecretCustomCertificate,
+			specV1.SecretLabel: specV1.SecretCertificate,
 		},
 	}
 	app := &specV1.Application{
@@ -806,6 +884,124 @@ func TestUpdateContainerApplication(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPut, "/v1/apps/abc", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestUpdateInvisibleApplication(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+
+	mApp := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.ContainerApp,
+		Labels: map[string]string{
+			common.ResourceInvisible: "true",
+		},
+		Services: []specV1.Service{},
+		Volumes:  []specV1.Volume{},
+	}
+
+	sApp.EXPECT().Get(mApp.Namespace, "abc", gomock.Any()).Return(mApp, nil).Times(1)
+
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(mApp)
+	req, _ := http.NewRequest(http.MethodPut, "/v1/apps/abc", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestUpdateSysApplication(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+
+	mOldApp := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.ContainerApp,
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
+		Services: []specV1.Service{},
+		Volumes:  []specV1.Volume{},
+	}
+
+	mApp := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.ContainerApp,
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+			"extra":            "true",
+		},
+		Services: []specV1.Service{},
+		Volumes:  []specV1.Volume{},
+	}
+	sApp.EXPECT().Get(mApp.Namespace, "abc", "").Return(mOldApp, nil).Times(1)
+
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(mApp)
+	req, _ := http.NewRequest(http.MethodPut, "/v1/apps/abc", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mOldApp2 := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abcd",
+		Type:      common.ContainerApp,
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
+		Services: []specV1.Service{},
+		Volumes:  []specV1.Volume{},
+		Selector: "a=a",
+	}
+
+	mApp2 := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abcd",
+		Type:      common.ContainerApp,
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
+		Services: []specV1.Service{},
+		Volumes:  []specV1.Volume{},
+		Selector: "b=b",
+	}
+	sApp.EXPECT().Get(mApp.Namespace, "abcd", "").Return(mOldApp2, nil).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mApp2)
+	req, _ = http.NewRequest(http.MethodPut, "/v1/apps/abcd", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 func TestCreateFunctionApplication(t *testing.T) {

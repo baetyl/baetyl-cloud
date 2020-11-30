@@ -180,6 +180,97 @@ func TestAdminServer_Handler(t *testing.T) {
 	s.GetRoute().ServeHTTP(w4, req)
 	assert.Equal(t, http.StatusInternalServerError, w4.Code)
 
+	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
+
+	mconf := &models.ConfigurationView{
+		Name:      "baetyl-abc",
+		Namespace: "default",
+	}
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mconf)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
+	s.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
+	req, _ = http.NewRequest(http.MethodDelete, "/v1/configs/baetyl-abc", nil)
+	w = httptest.NewRecorder()
+	s.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	msecret := &models.SecretView{
+		Name:      "baetyl-abc",
+		Namespace: "default",
+	}
+
+	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(msecret)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/secrets", bytes.NewReader(body))
+	s.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
+	req, _ = http.NewRequest(http.MethodDelete, "/v1/secrets/baetyl-abc", nil)
+	w = httptest.NewRecorder()
+	s.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mregistry := &models.Registry{
+		Name:      "baetyl-abc",
+		Namespace: "default",
+	}
+
+	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mregistry)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/registries", bytes.NewReader(body))
+	s.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
+	req, _ = http.NewRequest(http.MethodDelete, "/v1/registries/baetyl-abc", nil)
+	w = httptest.NewRecorder()
+	s.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mcertificate := &models.Registry{
+		Name:      "baetyl-abc",
+		Namespace: "default",
+	}
+
+	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mcertificate)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/certificates", bytes.NewReader(body))
+	s.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
+	req, _ = http.NewRequest(http.MethodDelete, "/v1/certificates/baetyl-abc", nil)
+	w = httptest.NewRecorder()
+	s.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mapp := &models.ApplicationView{
+		Name:      "baetyl-abc",
+		Namespace: "default",
+	}
+
+	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mapp)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
+	s.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
+	req, _ = http.NewRequest(http.MethodDelete, "/v1/apps/baetyl-abc", nil)
+	w = httptest.NewRecorder()
+	s.GetRoute().ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
 	go s.Run()
 	defer s.Close()
 }

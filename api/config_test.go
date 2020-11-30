@@ -674,6 +674,77 @@ func TestUpdateConfig(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestUpdateSysConfig(t *testing.T) {
+	api, router, mockCtl := initConfigAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.Node, api.Index = sNode, sIndex
+
+	namespace, name := "default", "abc"
+	mOldConf := &specV1.Configuration{
+		Name:      name,
+		Namespace: namespace,
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
+		Data: map[string]string{
+			common.ConfigObjectPrefix + "function": `{"metadata":{"bucket":"baetyl","function":"process","handler":"index.handler","object":"a.zip","runtime":"python36","type":"function","userID":"default","version":"1"}}`,
+		},
+	}
+
+	mConf := &models.ConfigurationView{
+		Name:      name,
+		Namespace: namespace,
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+			"extra":            "true",
+		},
+		Data: []models.ConfigDataItem{
+			{
+				Key: "function",
+				Value: map[string]string{
+					"type":     ConfigTypeFunction,
+					"function": "process",
+					"version":  "1",
+					"runtime":  "python36",
+					"handler":  "index.handler",
+					"bucket":   "baetyl",
+					"object":   "a.zip",
+				},
+			},
+			{
+				Key: "function",
+				Value: map[string]string{
+					"type":     ConfigTypeFunction,
+					"function": "process",
+					"version":  "1",
+					"runtime":  "python36",
+					"handler":  "index.handler",
+					"bucket":   "baetyl",
+					"object":   "a.zip",
+				},
+			},
+		},
+	}
+
+	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(mOldConf, nil).Times(1)
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(mConf)
+	req, _ := http.NewRequest(http.MethodPut, "/v1/configs/"+name, bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
 func TestDeleteConfig(t *testing.T) {
 	api, router, mockCtl := initConfigAPI(t)
 	defer mockCtl.Finish()

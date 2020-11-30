@@ -1,8 +1,8 @@
 package api
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
@@ -20,8 +20,8 @@ const (
 	OfflineDuration    = 40 * time.Second
 	NodeNumber         = 1
 	BaetylCoreOldImage = "BaetylCoreOldImage"
-	BaetylNodeNameKey = "baetyl-node-name"
-	BaetylAppNameKey  = "baetyl-app-name"
+	BaetylNodeNameKey  = "baetyl-node-name"
+	BaetylAppNameKey   = "baetyl-app-name"
 )
 
 // GetNode get a node
@@ -406,7 +406,7 @@ func (api *API) GetNodeProperties(c *common.Context) (interface{}, error) {
 func (api *API) GetNodeEnvs(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 
-	coreApp, err := api.Init.GetCoreAppFromDesire(ns, n)
+	coreApp, err := api.getCoreFromNode(ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -498,7 +498,7 @@ func (api *API) UpdateNodeEnvs(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	coreApp, err := api.Init.GetCoreAppFromDesire(ns, n)
+	coreApp, err := api.getCoreFromNode(ns, n)
 	if err != nil {
 		return nil, err
 	}

@@ -616,6 +616,15 @@ func TestDeleteCertificate(t *testing.T) {
 	ns := "default"
 	name := "cert"
 
+	mConfSecret := &specV1.Secret{
+		Namespace:   "default",
+		Name:        "abc",
+		Description: "haha",
+		Labels: map[string]string{
+			specV1.SecretLabel: specV1.SecretConfig,
+		},
+	}
+	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil).AnyTimes()
 	mkSecretService.EXPECT().Delete(ns, name).Return(nil)
 	mkIndexService.EXPECT().ListAppIndexBySecret(gomock.Any(), gomock.Any()).Return(nil, nil)
 	// 200
