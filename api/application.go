@@ -131,7 +131,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	}
 
 	// labels and Selector can't be modified of sys apps
-	if v, ok := oldApp.Labels[common.LabelSystem]; ok && v == "true" &&
+	if checkIsSysResources(oldApp.Labels) &&
 		(oldApp.Selector != appView.Selector || !reflect.DeepEqual(oldApp.Labels, appView.Labels)) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "selector or labels can't be modified of sys apps"))
 	}

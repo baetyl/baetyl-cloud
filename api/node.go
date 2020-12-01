@@ -249,8 +249,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 						continue
 					}
 
-					if v, ok := config.Labels[common.LabelSystem]; !ok || v != "true" {
-						// don't delete resource which doesn't belong to system
+					if res := checkIsSysResources(config.Labels); !res {
 						continue
 					}
 

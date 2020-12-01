@@ -105,8 +105,12 @@ func ValidNonBaetyl(name string) bool {
 }
 
 func ValidIsInvisible(labels map[string]string) bool {
-	if v, ok := labels[ResourceInvisible]; ok {
-		return v == "true"
+	v, ok := labels[ResourceInvisible]
+	if !ok {
+		return false
 	}
-	return false
+	if res, _ := strconv.ParseBool(v); !res {
+		return false
+	}
+	return true
 }
