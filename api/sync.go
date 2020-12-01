@@ -4,6 +4,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
@@ -17,6 +18,7 @@ type SyncAPI interface {
 
 type SyncAPIImpl struct {
 	Sync service.SyncService
+	Node service.NodeService
 	log  *log.Logger
 }
 
@@ -25,8 +27,13 @@ func NewSyncAPI(cfg *config.CloudConfig) (SyncAPI, error) {
 	if err != nil {
 		return nil, err
 	}
+	nodeService, err := service.NewNodeService(cfg)
+	if err != nil {
+		return nil, err
+	}
 	return &SyncAPIImpl{
 		Sync: syncService,
+		Node: nodeService,
 		log:  log.L().With(log.Any("api", "sync")),
 	}, nil
 }
@@ -40,7 +47,19 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 	}
 
 	setNodeAddressIfExist(msg, &report)
-	delta, err := s.Sync.Report(msg.Metadata["namespace"], msg.Metadata["name"], report)
+
+	// TODO remove the trick. set node prop if source=baetyl-init
+	ns, n := msg.Metadata["namespace"], msg.Metadata["name"]
+	if msg.Metadata != nil && msg.Metadata["source"] == specV1.BaetylInit {
+		props, err := s.Node.GetNodeProperties(ns, n)
+		if err != nil {
+			s.log.Warn("failed to get node properties", log.Any("source", specV1.BaetylInit))
+		} else {
+			s.log.Debug("set init node properties", log.Any("source", specV1.BaetylInit))
+			report[common.NodeProps] = props.State.Report
+		}
+	}
+	delta, err := s.Sync.Report(ns, n, report)
 	if err != nil {
 		return nil, err
 	}
