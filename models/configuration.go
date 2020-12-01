@@ -15,7 +15,7 @@ type ConfigurationList struct {
 }
 
 type ConfigurationView struct {
-	Name              string            `json:"name,omitempty" validate:"resourceName,nonBaetyl"`
+	Name              string            `json:"name,omitempty" validate:"resourceName"`
 	Namespace         string            `json:"namespace,omitempty"`
 	Labels            map[string]string `json:"labels,omitempty"`
 	Data              []ConfigDataItem  `json:"data,omitempty" default:"[]" validate:"dive"`

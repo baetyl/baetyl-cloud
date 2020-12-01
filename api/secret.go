@@ -1,10 +1,10 @@
 package api
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
+	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -20,7 +20,7 @@ func (api *API) GetSecret(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return api.ToSecretView(res)
+	return api.ToSecretView(res), nil
 }
 
 // ListSecret list secret
@@ -30,7 +30,7 @@ func (api *API) ListSecret(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return api.ToSecretViewList(res)
+	return api.ToFilteredSecretViewList(res), nil
 }
 
 // CreateSecret create one secret
@@ -53,7 +53,7 @@ func (api *API) CreateSecret(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return api.ToSecretView(res)
+	return api.ToFilteredSecretView(res), nil
 }
 
 // UpdateSecret update the secret
@@ -67,28 +67,23 @@ func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	sd, err := api.ToSecretView(oldSecret)
-	if err != nil {
-		return nil, err
-	}
+
+	sd := api.ToSecretView(oldSecret)
 	if sd.Equal(cfg) {
 		return sd, nil
 	}
+
 	cfg.Version = sd.Version
 	cfg.UpdateTimestamp = time.Now()
 	secret, err := api.Secret.Update(ns, cfg.ToSecret())
 	if err != nil {
 		return nil, err
 	}
-	res, err := api.ToSecretView(secret)
+	err = api.updateAppSecret(ns, secret)
 	if err != nil {
 		return nil, err
 	}
-	err = api.updateAppSecret(ns, res.ToSecret())
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	return api.ToSecretView(secret), nil
 }
 
 // DeleteSecret delete the secret
@@ -104,11 +99,7 @@ func (api *API) GetAppBySecret(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	res, err := api.ToSecretView(secret)
-	if err != nil {
-		return nil, err
-	}
-	return api.listAppBySecret(ns, res.Name)
+	return api.listAppBySecret(ns, secret.Name)
 }
 
 // parseAndCheckSecretModel parse and check the config model
@@ -129,28 +120,35 @@ func (api *API) parseAndCheckSecretModel(c *common.Context) (*models.SecretView,
 	return secret, err
 }
 
-func (api *API) ToSecretView(s *specV1.Secret) (*models.SecretView, error) {
-	if s != nil {
-		return models.FromSecretToView(s), nil
-	}
-	return nil, nil
+func (api *API) ToFilteredSecretView(s *specV1.Secret) *models.SecretView {
+	return models.FromSecretToView(s, true)
 }
 
-func (api *API) ToSecretViewList(s *models.SecretList) (*models.SecretViewList, error) {
-	if s != nil {
-		return models.FromSecretListToView(s), nil
-	}
-	return nil, nil
+func (api *API) ToSecretView(s *specV1.Secret) *models.SecretView {
+	return models.FromSecretToView(s, false)
 }
 
-func wrapSecretListOption(lo *models.ListOptions) *models.ListOptions {
-	lo.LabelSelector = fmt.Sprintf("%s=%s", specV1.SecretLabel, specV1.SecretConfig)
-	return lo
+func (api *API) ToFilteredSecretViewList(s *models.SecretList) *models.SecretViewList {
+	return models.FromSecretListToView(s, true)
+}
+
+func (api *API) ToSecretViewList(s *models.SecretList) *models.SecretViewList {
+	return models.FromSecretListToView(s, false)
 }
 
 func (api *API) deleteSecret(namespace, secret, secretType string) (interface{}, error) {
+	_, err := api.Secret.Get(namespace, secret, "")
+	if err != nil {
+		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
+			return nil, nil
+		}
+		log.L().Error("get secret failed", log.Error(err), log.Any("type", secretType), log.Any("name", secret), log.Any("namespace", namespace))
+		return nil, err
+	}
+
 	appNames, err := api.Index.ListAppIndexBySecret(namespace, secret)
 	if err != nil {
+		log.L().Error("list app index by secret failed", log.Any("type", secretType), log.Error(err), log.Any("name", secret), log.Any("namespace", namespace))
 		return nil, err
 	}
 	if len(appNames) > 0 {

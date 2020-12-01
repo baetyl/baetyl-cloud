@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 	"time"
 
@@ -56,6 +57,7 @@ func (api *API) CreateConfig(c *common.Context) (interface{}, error) {
 	}
 
 	ns, name := c.GetNamespace(), config.Name
+
 	// TODO: remove get method, return error inside service instead
 	oldConfig, err := api.Config.Get(ns, name, "")
 	if err != nil {
@@ -84,10 +86,15 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := api.Config.Get(ns, n, "")
 
+	res, err := api.Config.Get(ns, n, "")
 	if err != nil {
 		return nil, err
+	}
+
+	// labels can't be modified of sys apps
+	if checkIsSysResources(res.Labels) && !reflect.DeepEqual(res.Labels, config.Labels) {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "labels can't be modified of sys apps"))
 	}
 
 	if models.EqualConfig(res, config) {
@@ -124,13 +131,13 @@ func (api *API) DeleteConfig(c *common.Context) (interface{}, error) {
 		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 			return nil, nil
 		}
-		log.L().Error("get config failed", log.Error(err))
+		log.L().Error("get config failed", log.Error(err), log.Any("name", n), log.Any("namespace", ns))
 		return nil, err
 	}
 
 	appNames, err := api.Index.ListAppIndexByConfig(ns, res.Name)
 	if err != nil {
-		log.L().Error("list app index by config failed", log.Error(err))
+		log.L().Error("list app index by config failed", log.Error(err), log.Any("name", n), log.Any("namespace", ns))
 		return nil, err
 	}
 

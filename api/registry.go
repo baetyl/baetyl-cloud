@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -17,24 +16,24 @@ import (
 // GetRegistry get a Registry
 func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapRegistry(api.Secret.Get(ns, n, ""))
-	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+	secret, err := api.Secret.Get(ns, n, "")
+	if secret != nil {
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
-	return hidePwd(res), nil
+
+	return hidePwd(api.ToRegistryView(secret)), nil
 }
 
 // ListRegistry list Registry
 func (api *API) ListRegistry(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	res, err := wrapRegistryList(api.Secret.List(ns, wrapRegistryListOption(api.parseListOptions(c))))
+
+	secrets, err := api.Secret.List(ns, api.parseListOptionsAppendSystemLabel(c))
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
-	for i := range res.Items {
-		hidePwd(&res.Items[i])
-	}
-	return res, err
+
+	return api.ToFilteredRegistryViewList(secrets), nil
 }
 
 // CreateRegistry create one Registry
@@ -57,8 +56,12 @@ func (api *API) CreateRegistry(c *common.Context) (interface{}, error) {
 	if err = api.validateRegistryModel(cfg); err != nil {
 		return nil, err
 	}
-	res, err := wrapRegistry(api.Secret.Create(ns, cfg.ToSecret()))
-	return hidePwd(res), err
+
+	secret, err := api.Secret.Create(ns, cfg.ToSecret())
+	if err != nil {
+		return nil, err
+	}
+	return hidePwd(api.ToFilteredRegistryView(secret)), nil
 }
 
 // UpdateRegistry update the Registry
@@ -68,10 +71,13 @@ func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	sd, err := wrapRegistry(api.Secret.Get(ns, n, ""))
+
+	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
+
+	sd := api.ToRegistryView(secret)
 	// only edit description by design
 	if cfg.Description == sd.Description {
 		return hidePwd(sd), nil
@@ -81,11 +87,11 @@ func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
 	if err = api.validateRegistryModel(sd); err != nil {
 		return nil, err
 	}
-	res, err := wrapRegistry(api.Secret.Update(ns, sd.ToSecret()))
+	secret, err = api.Secret.Update(ns, sd.ToSecret())
 	if err != nil {
 		return nil, err
 	}
-	return hidePwd(res), nil
+	return hidePwd(api.ToRegistryView(secret)), nil
 }
 
 func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) {
@@ -94,20 +100,24 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	sd, err := wrapRegistry(api.Secret.Get(ns, n, ""))
+	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
+
+	sd := api.ToRegistryView(secret)
 	sd.UpdateTimestamp = time.Now()
 	sd.Password = cfg.Password
-	res, err := wrapRegistry(api.Secret.Update(ns, sd.ToSecret()))
+
+	secret, err = api.Secret.Update(ns, sd.ToSecret())
 	if err != nil {
 		return nil, err
 	}
+	res := api.ToRegistryView(secret)
 	if err = api.validateRegistryModel(res); err != nil {
 		return nil, err
 	}
-	err = api.updateAppSecret(ns, res.ToSecret())
+	err = api.updateAppSecret(ns, secret)
 	if err != nil {
 		return nil, err
 	}
@@ -117,21 +127,17 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 // DeleteRegistry delete the Registry
 func (api *API) DeleteRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	_, err := wrapRegistry(api.Secret.Get(ns, n, ""))
-	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
-	}
 	return api.deleteSecret(ns, n, "registry")
 }
 
 // GetAppByRegistry list app
 func (api *API) GetAppByRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := wrapRegistry(api.Secret.Get(ns, n, ""))
+	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
-	return api.listAppBySecret(ns, res.Name)
+	return api.listAppBySecret(ns, secret.Name)
 }
 
 // parseAndCheckRegistryModel parse and check the config model
@@ -158,24 +164,28 @@ func hidePwd(r *models.Registry) *models.Registry {
 	return r
 }
 
-func wrapRegistry(s *specV1.Secret, e error) (*models.Registry, error) {
-	if s != nil {
-		return models.FromSecretToRegistry(s), e
-	}
-	return nil, e
+func (api *API) ToFilteredRegistryView(s *specV1.Secret) *models.Registry {
+	return models.FromSecretToRegistry(s, true)
 }
 
-func wrapRegistryList(s *models.SecretList, e error) (*models.RegistryList, error) {
-	if s != nil {
-		return models.FromSecretListToRegistryList(s), e
-	}
-	return nil, e
+func (api *API) ToRegistryView(s *specV1.Secret) *models.Registry {
+	return models.FromSecretToRegistry(s, false)
 }
 
-func wrapRegistryListOption(lo *models.ListOptions) *models.ListOptions {
-	// TODO 增加type字段代替label标签
-	lo.LabelSelector = fmt.Sprintf("%s=%s", specV1.SecretLabel, specV1.SecretRegistry)
-	return lo
+func (api *API) ToFilteredRegistryViewList(s *models.SecretList) *models.RegistryList {
+	res := models.FromSecretListToRegistryList(s, true)
+	for i := range res.Items {
+		hidePwd(&res.Items[i])
+	}
+	return res
+}
+
+func (api *API) ToRegistryViewList(s *models.SecretList) *models.RegistryList {
+	res := models.FromSecretListToRegistryList(s, false)
+	for i := range res.Items {
+		hidePwd(&res.Items[i])
+	}
+	return res
 }
 
 // validateRegistryModel validate the registry model
@@ -186,11 +196,11 @@ func (api *API) validateRegistryModel(r *models.Registry) error {
 	return nil
 }
 
-func wrapRegistryNotFoundError(name string, err error) error {
+func wrapSecretLikedResourceNotFoundError(name string, secretType common.Resource, err error) error {
 	if err != nil {
 		e, ok := err.(errors.Coder)
 		if (ok && e.Code() == common.ErrResourceNotFound) || (!ok && strings.Contains(err.Error(), "not found")) {
-			return common.Error(common.ErrResourceNotFound, common.Field("type", common.SecretRegistry),
+			return common.Error(common.ErrResourceNotFound, common.Field("type", secretType),
 				common.Field("name", name))
 		}
 	}

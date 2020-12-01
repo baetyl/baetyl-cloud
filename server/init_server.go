@@ -88,10 +88,10 @@ func (s *InitServer) InitRoute() {
 	{
 		// TODO: deprecated
 		active := v1.Group("/active")
-		active.GET("/:resource", common.WrapperRaw(s.api.GetResource))
+		active.GET("/:resource", common.WrapperRaw(s.api.GetResource, true))
 	}
 	{
 		initz := v1.Group("/init")
-		initz.GET("/:resource", common.WrapperRaw(s.api.GetResource))
+		initz.GET("/:resource", common.WrapperRaw(s.api.GetResource, true))
 	}
 }

@@ -11,7 +11,7 @@ import (
 
 // Registry Registry
 type Registry struct {
-	Name              string    `json:"name,omitempty" validate:"omitempty,resourceName,nonBaetyl"`
+	Name              string    `json:"name,omitempty" validate:"omitempty,resourceName"`
 	Namespace         string    `json:"namespace,omitempty"`
 	Address           string    `json:"address"`
 	Username          string    `json:"username"`
