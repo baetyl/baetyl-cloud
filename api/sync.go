@@ -56,7 +56,9 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 			s.log.Warn("failed to get node properties", log.Any("source", specV1.BaetylInit))
 		} else {
 			s.log.Debug("set init node properties", log.Any("source", specV1.BaetylInit))
-			report[common.NodeProps] = props.State.Report
+			if props != nil {
+				report[common.NodeProps] = props.State.Report
+			}
 		}
 	}
 	delta, err := s.Sync.Report(ns, n, report)
