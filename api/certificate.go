@@ -18,7 +18,7 @@ func (api *API) GetCertificate(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, wrapSecretLikedResourceNotFoundError(n, common.Certificate, err)
 	}
-	return hideCertKey(api.ToCertificateView(secret, false)), nil
+	return hideCertKey(api.ToCertificateView(secret)), nil
 }
 
 // ListCertificate list Certificate
@@ -29,7 +29,7 @@ func (api *API) ListCertificate(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
 
-	return api.ToCertificateViewList(secrets, true), nil
+	return api.ToFilteredCertificateViewList(secrets), nil
 }
 
 // CreateCertificate create one Certificate
@@ -58,13 +58,11 @@ func (api *API) CreateCertificate(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return hideCertKey(api.ToCertificateView(res, true)), err
+	return hideCertKey(api.ToFilteredCertificateView(res)), err
 }
 
 // UpdateCertificate update the Certificate
 func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
-	var needToFilter bool
-
 	cfg, err := parseAndCheckCertificateModelWhenUpdate(c)
 	if err != nil {
 		return nil, err
@@ -76,7 +74,7 @@ func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
 		return nil, wrapSecretLikedResourceNotFoundError(n, common.Certificate, err)
 	}
 
-	sd := api.ToCertificateView(secret, needToFilter)
+	sd := api.ToCertificateView(secret)
 	if cfg.Data.Key == "" {
 		cfg.Data = sd.Data
 	}
@@ -94,7 +92,7 @@ func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return hideCertKey(api.ToCertificateView(secret, needToFilter)), nil
+	return hideCertKey(api.ToCertificateView(secret)), nil
 }
 
 // DeleteCertificate delete the Certificate
@@ -158,12 +156,24 @@ func hideCertKey(r *models.Certificate) *models.Certificate {
 	return r
 }
 
-func (api *API) ToCertificateView(s *specV1.Secret, needToFilter bool) *models.Certificate {
-	return models.FromSecretToCertificate(s, needToFilter)
+func (api *API) ToFilteredCertificateView(s *specV1.Secret) *models.Certificate {
+	return models.FromSecretToCertificate(s, true)
 }
 
-func (api *API) ToCertificateViewList(s *models.SecretList, needToFilter bool) *models.CertificateList {
-	res := models.FromSecretListToCertificateList(s, needToFilter)
+func (api *API) ToCertificateView(s *specV1.Secret) *models.Certificate {
+	return models.FromSecretToCertificate(s, false)
+}
+
+func (api *API) ToFilteredCertificateViewList(s *models.SecretList) *models.CertificateList {
+	res := models.FromSecretListToCertificateList(s, true)
+	for i := range res.Items {
+		hideCertKey(&res.Items[i])
+	}
+	return res
+}
+
+func (api *API) ToCertificateViewList(s *models.SecretList) *models.CertificateList {
+	res := models.FromSecretListToCertificateList(s, false)
 	for i := range res.Items {
 		hideCertKey(&res.Items[i])
 	}

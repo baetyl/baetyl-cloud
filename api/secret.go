@@ -20,7 +20,7 @@ func (api *API) GetSecret(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return api.ToSecretView(res, false), nil
+	return api.ToSecretView(res), nil
 }
 
 // ListSecret list secret
@@ -30,7 +30,7 @@ func (api *API) ListSecret(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return api.ToSecretViewList(res, true), nil
+	return api.ToFilteredSecretViewList(res), nil
 }
 
 // CreateSecret create one secret
@@ -53,13 +53,11 @@ func (api *API) CreateSecret(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return api.ToSecretView(res, true), nil
+	return api.ToFilteredSecretView(res), nil
 }
 
 // UpdateSecret update the secret
 func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
-	var needToFilter bool
-
 	cfg, err := api.parseAndCheckSecretModel(c)
 	if err != nil {
 		return nil, err
@@ -70,7 +68,7 @@ func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	sd := api.ToSecretView(oldSecret, needToFilter)
+	sd := api.ToSecretView(oldSecret)
 	if sd.Equal(cfg) {
 		return sd, nil
 	}
@@ -85,7 +83,7 @@ func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return api.ToSecretView(secret, needToFilter), nil
+	return api.ToSecretView(secret), nil
 }
 
 // DeleteSecret delete the secret
@@ -122,12 +120,20 @@ func (api *API) parseAndCheckSecretModel(c *common.Context) (*models.SecretView,
 	return secret, err
 }
 
-func (api *API) ToSecretView(s *specV1.Secret, needToFilter bool) *models.SecretView {
-	return models.FromSecretToView(s, needToFilter)
+func (api *API) ToFilteredSecretView(s *specV1.Secret) *models.SecretView {
+	return models.FromSecretToView(s, true)
 }
 
-func (api *API) ToSecretViewList(s *models.SecretList, needToFilter bool) *models.SecretViewList {
-	return models.FromSecretListToView(s, needToFilter)
+func (api *API) ToSecretView(s *specV1.Secret) *models.SecretView {
+	return models.FromSecretToView(s, false)
+}
+
+func (api *API) ToFilteredSecretViewList(s *models.SecretList) *models.SecretViewList {
+	return models.FromSecretListToView(s, true)
+}
+
+func (api *API) ToSecretViewList(s *models.SecretList) *models.SecretViewList {
+	return models.FromSecretListToView(s, false)
 }
 
 func (api *API) deleteSecret(namespace, secret, secretType string) (interface{}, error) {

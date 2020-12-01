@@ -441,7 +441,7 @@ func (api *API) GetNodeSysAppSecrets(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return api.ToSecretViewList(res, false), nil
+	return api.ToSecretViewList(res), nil
 }
 
 func (api *API) GetNodeSysAppCertificates(c *common.Context) (interface{}, error) {
@@ -450,7 +450,7 @@ func (api *API) GetNodeSysAppCertificates(c *common.Context) (interface{}, error
 		return nil, err
 	}
 
-	return api.ToCertificateViewList(res, false), nil
+	return api.ToCertificateViewList(res), nil
 }
 
 func (api *API) GetNodeSysAppRegistries(c *common.Context) (interface{}, error) {
@@ -458,7 +458,7 @@ func (api *API) GetNodeSysAppRegistries(c *common.Context) (interface{}, error) 
 	if err != nil {
 		return nil, err
 	}
-	return api.ToRegistryViewList(res, false), nil
+	return api.ToRegistryViewList(res), nil
 }
 
 func (api *API) getNodeSysAppSecretLikedResources(c *common.Context) (*models.SecretList, error) {

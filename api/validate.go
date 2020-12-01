@@ -8,8 +8,8 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
-// ValidateResourceCreate validate when resource create
-func (api *API) ValidateResourceCreate(c *common.Context) (interface{}, error) {
+// ValidateResourceForCreating validate when resource create
+func (api *API) ValidateResourceForCreating(c *common.Context) (interface{}, error) {
 	resource := struct {
 		Name string `json:"name,omitempty"`
 	}{}
@@ -31,8 +31,8 @@ func (api *API) ValidateResourceCreate(c *common.Context) (interface{}, error) {
 	return nil, nil
 }
 
-// ValidateResourceDelete validate when resource delete
-func (api *API) ValidateResourceDelete(c *common.Context) (interface{}, error) {
+// ValidateResourceForDeleting validate when resource delete
+func (api *API) ValidateResourceForDeleting(c *common.Context) (interface{}, error) {
 	name := c.GetNameFromParam()
 	if !common.ValidNonBaetyl(name) {
 		return nil, common.Error(common.ErrInvalidName, common.Field("nonBaetyl", "Name"))

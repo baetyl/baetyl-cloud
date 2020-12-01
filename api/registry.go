@@ -21,7 +21,7 @@ func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
 
-	return hidePwd(api.ToRegistryView(secret, false)), nil
+	return hidePwd(api.ToRegistryView(secret)), nil
 }
 
 // ListRegistry list Registry
@@ -33,7 +33,7 @@ func (api *API) ListRegistry(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
 
-	return api.ToRegistryViewList(secrets, true), nil
+	return api.ToFilteredRegistryViewList(secrets), nil
 }
 
 // CreateRegistry create one Registry
@@ -61,13 +61,11 @@ func (api *API) CreateRegistry(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return hidePwd(api.ToRegistryView(secret, true)), nil
+	return hidePwd(api.ToFilteredRegistryView(secret)), nil
 }
 
 // UpdateRegistry update the Registry
 func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
-	var needToFilter bool
-
 	cfg, err := api.parseAndCheckRegistryModel(c)
 	if err != nil {
 		return nil, err
@@ -79,7 +77,7 @@ func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
 		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
 
-	sd := api.ToRegistryView(secret, needToFilter)
+	sd := api.ToRegistryView(secret)
 	// only edit description by design
 	if cfg.Description == sd.Description {
 		return hidePwd(sd), nil
@@ -93,12 +91,10 @@ func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return hidePwd(api.ToRegistryView(secret, needToFilter)), nil
+	return hidePwd(api.ToRegistryView(secret)), nil
 }
 
 func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) {
-	var needToFilter bool
-
 	cfg, err := api.parseAndCheckRegistryModel(c)
 	if err != nil {
 		return nil, err
@@ -109,7 +105,7 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
 
-	sd := api.ToRegistryView(secret, needToFilter)
+	sd := api.ToRegistryView(secret)
 	sd.UpdateTimestamp = time.Now()
 	sd.Password = cfg.Password
 
@@ -117,7 +113,7 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 	if err != nil {
 		return nil, err
 	}
-	res := api.ToRegistryView(secret, needToFilter)
+	res := api.ToRegistryView(secret)
 	if err = api.validateRegistryModel(res); err != nil {
 		return nil, err
 	}
@@ -168,12 +164,24 @@ func hidePwd(r *models.Registry) *models.Registry {
 	return r
 }
 
-func (api *API) ToRegistryView(s *specV1.Secret, needToFilter bool) *models.Registry {
-	return models.FromSecretToRegistry(s, needToFilter)
+func (api *API) ToFilteredRegistryView(s *specV1.Secret) *models.Registry {
+	return models.FromSecretToRegistry(s, true)
 }
 
-func (api *API) ToRegistryViewList(s *models.SecretList, needToFilter bool) *models.RegistryList {
-	res := models.FromSecretListToRegistryList(s, needToFilter)
+func (api *API) ToRegistryView(s *specV1.Secret) *models.Registry {
+	return models.FromSecretToRegistry(s, false)
+}
+
+func (api *API) ToFilteredRegistryViewList(s *models.SecretList) *models.RegistryList {
+	res := models.FromSecretListToRegistryList(s, true)
+	for i := range res.Items {
+		hidePwd(&res.Items[i])
+	}
+	return res
+}
+
+func (api *API) ToRegistryViewList(s *models.SecretList) *models.RegistryList {
+	res := models.FromSecretListToRegistryList(s, false)
 	for i := range res.Items {
 		hidePwd(&res.Items[i])
 	}
