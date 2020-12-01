@@ -45,7 +45,7 @@ type CertStorage struct {
 
 // Certificate Certificate
 type Certificate struct {
-	Name               string              `json:"name,omitempty" validate:"omitempty,resourceName,nonBaetyl"`
+	Name               string              `json:"name,omitempty" validate:"omitempty,resourceName"`
 	Namespace          string              `json:"namespace,omitempty"`
 	SignatureAlgorithm string              `json:"signatureAlgorithm,omitempty"`
 	EffectiveTime      string              `json:"effectiveTime,omitempty"`
@@ -80,7 +80,7 @@ func (r *Certificate) Equal(target *Certificate) bool {
 func (r *Certificate) ToSecret() *specV1.Secret {
 	res := &specV1.Secret{
 		Labels: map[string]string{
-			specV1.SecretLabel: specV1.SecretCustomCertificate,
+			specV1.SecretLabel: specV1.SecretCertificate,
 		},
 	}
 	err := copier.Copy(res, r)

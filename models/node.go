@@ -34,6 +34,10 @@ type NodeProperties struct {
 	Meta  NodePropertiesMetadata `yaml:"metadata,omitempty" json:"metadata,omitempty"`
 }
 
+type NodeEnvs struct {
+	Envs []specV1.Environment `json:"envs,omitempty" yaml:"envs,omitempty"`
+}
+
 type NodePropertiesState struct {
 	Report map[string]interface{} `yaml:"report,omitempty" json:"report,omitempty"`
 	Desire map[string]interface{} `yaml:"desire,omitempty" json:"desire,omitempty"`

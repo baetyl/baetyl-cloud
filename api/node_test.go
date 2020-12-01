@@ -61,6 +61,12 @@ func initNodeAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		nodes.PUT("/:name/mode", mockIM, common.Wrapper(api.UpdateNodeMode))
 		nodes.PUT("/:name/update", mockIM, common.Wrapper(api.UpdateCoreApp))
 		nodes.PUT("/:name/rollback", mockIM, common.Wrapper(api.RollbackCoreApp))
+		nodes.PUT("/:name/envs", mockIM, common.Wrapper(api.UpdateNodeEnvs))
+		nodes.GET("/:name/envs", mockIM, common.Wrapper(api.GetNodeEnvs))
+		nodes.GET("/:name/configs/:app", mockIM, common.Wrapper(api.GetNodeSysAppConfigs))
+		nodes.GET("/:name/secrets/:app", mockIM, common.Wrapper(api.GetNodeSysAppSecrets))
+		nodes.GET("/:name/certificates/:app", mockIM, common.Wrapper(api.GetNodeSysAppCertificates))
+		nodes.GET("/:name/registries/:app", mockIM, common.Wrapper(api.GetNodeSysAppRegistries))
 	}
 	return api, router, mockCtl
 }
@@ -637,6 +643,9 @@ func TestDeleteNode(t *testing.T) {
 		Name:      "core-node12",
 		Namespace: mNode.Namespace,
 		Version:   "12",
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
 		Volumes: []specV1.Volume{
 			{
 				Name: "config",
@@ -663,6 +672,9 @@ func TestDeleteNode(t *testing.T) {
 		Name:      "function-node12",
 		Namespace: mNode.Namespace,
 		Version:   "13",
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
 		Volumes: []specV1.Volume{
 			{
 				Name: "configf",
@@ -689,7 +701,8 @@ func TestDeleteNode(t *testing.T) {
 		Name:      "secret1",
 		Namespace: mNode.Namespace,
 		Labels: map[string]string{
-			specV1.SecretLabel: specV1.SecretCertificate,
+			common.LabelSystem: "true",
+			specV1.SecretLabel: specV1.SecretConfig,
 		},
 		Annotations: map[string]string{
 			common.AnnotationPkiCertID: "certId1",
@@ -699,7 +712,8 @@ func TestDeleteNode(t *testing.T) {
 		Name:      "secret1f",
 		Namespace: mNode.Namespace,
 		Labels: map[string]string{
-			specV1.SecretLabel: specV1.SecretCertificate,
+			common.LabelSystem: "true",
+			specV1.SecretLabel: specV1.SecretConfig,
 		},
 		Annotations: map[string]string{
 			common.AnnotationPkiCertID: "certId1f",
@@ -725,6 +739,16 @@ func TestDeleteNode(t *testing.T) {
 	sSecret.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[1].Secret.Name).Times(1)
 
 	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil).AnyTimes()
+
+	res := &specV1.Configuration{
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
+	}
+	sConfig.EXPECT().Get(mNode.Namespace, "config1", "").Return(res, nil).Times(1)
+
+	sConfig.EXPECT().Get(mNode.Namespace, "config1f", "").Return(res, nil).Times(1)
+
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
 	w := httptest.NewRecorder()
@@ -781,6 +805,9 @@ func TestDeleteNodeError(t *testing.T) {
 		Name:      "core-node12",
 		Namespace: mNode.Namespace,
 		Version:   "12",
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
 		Volumes: []specV1.Volume{
 			{
 				Name: "config",
@@ -807,6 +834,9 @@ func TestDeleteNodeError(t *testing.T) {
 		Name:      "function-node12",
 		Namespace: mNode.Namespace,
 		Version:   "13",
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
 		Volumes: []specV1.Volume{
 			{
 				Name: "configf",
@@ -829,17 +859,6 @@ func TestDeleteNodeError(t *testing.T) {
 		},
 	}
 
-	secret1 := &specV1.Secret{
-		Name:      "secret1",
-		Namespace: mNode.Namespace,
-		Labels: map[string]string{
-			specV1.SecretLabel: specV1.SecretCertificate,
-		},
-		Annotations: map[string]string{
-			common.AnnotationPkiCertID: "certId1",
-		},
-	}
-
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
@@ -851,6 +870,18 @@ func TestDeleteNodeError(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	secret1 := &specV1.Secret{
+		Name:      "secret1",
+		Namespace: mNode.Namespace,
+		Labels: map[string]string{
+			specV1.SecretLabel: specV1.SecretConfig,
+			common.LabelSystem: "true",
+		},
+		Annotations: map[string]string{
+			common.AnnotationPkiCertID: "certId1",
+		},
+	}
 
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
@@ -867,6 +898,15 @@ func TestDeleteNodeError(t *testing.T) {
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 	sConfig.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(nil, errors.New("error")).Times(1)
+
+	res := &specV1.Configuration{
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
+	}
+	sConfig.EXPECT().Get(mNode.Namespace, "config1", "").Return(res, nil).Times(1)
+
+	sConfig.EXPECT().Get(mNode.Namespace, "config1f", "").Return(res, nil).Times(1)
 
 	// 200
 	req2, _ := http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
@@ -885,6 +925,8 @@ func TestDeleteNodeError(t *testing.T) {
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 	sConfig.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(nil, errors.New("error")).Times(1)
+
+	sConfig.EXPECT().Get(mNode.Namespace, "config1f", "").Return(res, nil).Times(1)
 
 	// 200
 	req3, _ := http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
@@ -1366,4 +1408,289 @@ func TestAPI_RollbackCoreApp(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &res)
 	assert.NoError(t, err)
 	assert.EqualValues(t, "baetyl-core:old", res.Services[0].Image)
+}
+
+func TestAPI_GetNodeEnvs(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	n := "test"
+	ns := "default"
+
+	mockNode := ms.NewMockNodeService(mockCtl)
+	mockIndex := ms.NewMockIndexService(mockCtl)
+	mockApp := ms.NewMockApplicationService(mockCtl)
+	mockProp := ms.NewMockPropertyService(mockCtl)
+	mockConfig := ms.NewMockConfigService(mockCtl)
+	api.Node = mockNode
+	api.Index = mockIndex
+	api.App = mockApp
+	api.Prop = mockProp
+	api.Config = mockConfig
+
+	coreApp := &specV1.Application{
+		Name:      "baetyl-core-1",
+		Type:      "kube",
+		Namespace: ns,
+		Version:   "0",
+		Services: []specV1.Service{
+			{
+				Name:  "baetyl-core",
+				Image: "baetyl-core:old",
+				Env: []specV1.Environment{
+					{
+						Name:  "k1",
+						Value: "v1",
+					},
+				},
+			},
+		},
+		Volumes: []specV1.Volume{},
+		System:  true,
+	}
+
+	appList := []string{
+		"baetyl-core-1",
+		"baetyl-function-2",
+	}
+
+	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
+	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
+
+	// 200
+	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/test/envs", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	coreApp = &specV1.Application{
+		Name:      "baetyl-core-1",
+		Type:      "kube",
+		Namespace: ns,
+		Version:   "0",
+		Services:  []specV1.Service{},
+		Volumes:   []specV1.Volume{},
+		System:    true,
+	}
+
+	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
+	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
+
+	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/test/envs", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func TestAPI_UpdateNodeEnvs(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	n := "test"
+	ns := "default"
+
+	mockNode := ms.NewMockNodeService(mockCtl)
+	mockIndex := ms.NewMockIndexService(mockCtl)
+	mockApp := ms.NewMockApplicationService(mockCtl)
+	mockProp := ms.NewMockPropertyService(mockCtl)
+	mockConfig := ms.NewMockConfigService(mockCtl)
+	api.Node = mockNode
+	api.Index = mockIndex
+	api.App = mockApp
+	api.Prop = mockProp
+	api.Config = mockConfig
+
+	coreApp := &specV1.Application{
+		Name:      "baetyl-core-1",
+		Type:      "kube",
+		Namespace: ns,
+		Version:   "0",
+		Services: []specV1.Service{
+			{
+				Name:  "baetyl-core",
+				Image: "baetyl-core:old",
+				Env: []specV1.Environment{
+					{
+						Name:  "k1",
+						Value: "v1",
+					},
+				},
+			},
+		},
+		Volumes: []specV1.Volume{},
+		System:  true,
+	}
+
+	appList := []string{
+		"baetyl-core-1",
+		"baetyl-function-2",
+	}
+
+	envs := models.NodeEnvs{Envs: []specV1.Environment{
+		{
+			Name:  "k1",
+			Value: "v1",
+		},
+	}}
+
+	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
+	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
+	mockApp.EXPECT().Update(ns, coreApp).Return(coreApp, nil).Times(1)
+	mockNode.EXPECT().UpdateNodeAppVersion(ns, coreApp).Return(appList, nil).Times(1)
+
+	data, err := json.Marshal(envs)
+	assert.NoError(t, err)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodPut, "/v1/nodes/test/envs", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
+	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
+	mockApp.EXPECT().Update(ns, coreApp).Return(nil, fmt.Errorf("err")).Times(1)
+
+	data, err = json.Marshal(envs)
+	assert.NoError(t, err)
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/test/envs", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
+	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
+	mockApp.EXPECT().Update(ns, coreApp).Return(coreApp, nil).Times(1)
+	mockNode.EXPECT().UpdateNodeAppVersion(ns, coreApp).Return(nil, fmt.Errorf("error")).Times(1)
+
+	data, err = json.Marshal(envs)
+	assert.NoError(t, err)
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/test/envs", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	coreApp = &specV1.Application{
+		Name:      "baetyl-core-1",
+		Type:      "kube",
+		Namespace: ns,
+		Version:   "0",
+		Services:  []specV1.Service{},
+		Volumes:   []specV1.Volume{},
+		System:    true,
+	}
+
+	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
+	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
+
+	data, err = json.Marshal(envs)
+	assert.NoError(t, err)
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/test/envs", bytes.NewReader(data))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func TestAPI_GetNodeSysAppConfigs(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	mockNode := ms.NewMockNodeService(mockCtl)
+	mockIndex := ms.NewMockIndexService(mockCtl)
+	mockApp := ms.NewMockApplicationService(mockCtl)
+	mockProp := ms.NewMockPropertyService(mockCtl)
+	mockConfig := ms.NewMockConfigService(mockCtl)
+	api.Node = mockNode
+	api.Index = mockIndex
+	api.App = mockApp
+	api.Prop = mockProp
+	api.Config = mockConfig
+
+	mClist := &models.ConfigurationList{}
+	mockConfig.EXPECT().List(namespace, gomock.Any()).Return(mClist, nil).Times(1)
+
+	// 200
+	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/test/configs/baetyl-core", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestAPI_GetNodeSysAppSecrets(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	mockNode := ms.NewMockNodeService(mockCtl)
+	mockIndex := ms.NewMockIndexService(mockCtl)
+	mockApp := ms.NewMockApplicationService(mockCtl)
+	mockProp := ms.NewMockPropertyService(mockCtl)
+	mockConfig := ms.NewMockConfigService(mockCtl)
+	mockSecret := ms.NewMockSecretService(mockCtl)
+	api.Node = mockNode
+	api.Index = mockIndex
+	api.App = mockApp
+	api.Prop = mockProp
+	api.Config = mockConfig
+	api.Secret = mockSecret
+
+	mClist := &models.SecretList{}
+	mockSecret.EXPECT().List(namespace, gomock.Any()).Return(mClist, nil).Times(1)
+
+	// 200
+	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/test/secrets/baetyl-core", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestAPI_GetNodeSysAppCertificates(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	mockNode := ms.NewMockNodeService(mockCtl)
+	mockIndex := ms.NewMockIndexService(mockCtl)
+	mockApp := ms.NewMockApplicationService(mockCtl)
+	mockProp := ms.NewMockPropertyService(mockCtl)
+	mockConfig := ms.NewMockConfigService(mockCtl)
+	mockSecret := ms.NewMockSecretService(mockCtl)
+	api.Node = mockNode
+	api.Index = mockIndex
+	api.App = mockApp
+	api.Prop = mockProp
+	api.Config = mockConfig
+	api.Secret = mockSecret
+
+	mClist := &models.SecretList{}
+	mockSecret.EXPECT().List(namespace, gomock.Any()).Return(mClist, nil).Times(1)
+
+	// 200
+	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/test/certificates/baetyl-core", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestAPI_GetNodeSysAppRegistries(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	mockNode := ms.NewMockNodeService(mockCtl)
+	mockIndex := ms.NewMockIndexService(mockCtl)
+	mockApp := ms.NewMockApplicationService(mockCtl)
+	mockProp := ms.NewMockPropertyService(mockCtl)
+	mockConfig := ms.NewMockConfigService(mockCtl)
+	mockSecret := ms.NewMockSecretService(mockCtl)
+	api.Node = mockNode
+	api.Index = mockIndex
+	api.App = mockApp
+	api.Prop = mockProp
+	api.Config = mockConfig
+	api.Secret = mockSecret
+
+	mClist := &models.SecretList{}
+	mockSecret.EXPECT().List(namespace, gomock.Any()).Return(mClist, nil).Times(1)
+
+	// 200
+	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/test/registries/baetyl-core", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -32,6 +33,10 @@ func (api *API) GetApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	// sys app: core、init、function is not visible
+	if common.ValidIsInvisible(app.Labels) {
+		return nil, common.Error(common.ErrResourceInvisible, common.Field("type", common.APP), common.Field("name", app.Name))
+	}
 	return api.ToApplicationView(app)
 }
 
@@ -118,6 +123,17 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	oldApp, err := api.App.Get(ns, name, "")
 	if err != nil {
 		return nil, err
+	}
+
+	// sys app: core、init、function is not visible
+	if common.ValidIsInvisible(oldApp.Labels) {
+		return nil, common.Error(common.ErrResourceInvisible, common.Field("type", common.APP), common.Field("name", oldApp.Name))
+	}
+
+	// labels and Selector can't be modified of sys apps
+	if checkIsSysResources(oldApp.Labels) &&
+		(oldApp.Selector != appView.Selector || !reflect.DeepEqual(oldApp.Labels, appView.Labels)) {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "selector or labels can't be modified of sys apps"))
 	}
 
 	appView.Version = oldApp.Version
@@ -280,7 +296,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 	appView := &models.ApplicationView{}
 	copier.Copy(appView, app)
 
-	err := api.translateSecretsToSecretLikedModels(appView)
+	err := api.translateSecretsToSecretLikedResources(appView)
 	if err != nil {
 		return nil, err
 	}
@@ -407,7 +423,7 @@ func translateSecretLikedModelsToSecrets(appView *models.ApplicationView, app *s
 	}
 }
 
-func (api *API) translateSecretsToSecretLikedModels(appView *models.ApplicationView) error {
+func (api *API) translateSecretsToSecretLikedResources(appView *models.ApplicationView) error {
 	appView.Registries = make([]models.RegistryView, 0)
 	volumes := make([]models.VolumeView, 0)
 	for _, volume := range appView.Volumes {
@@ -421,7 +437,7 @@ func (api *API) translateSecretsToSecretLikedModels(appView *models.ApplicationV
 			}
 
 			if label, ok := secret.Labels[specV1.SecretLabel]; ok && label == specV1.SecretRegistry {
-				registry := models.FromSecretToRegistry(secret)
+				registry := models.FromSecretToRegistry(secret, false)
 				appView.Registries = append(appView.Registries, models.RegistryView{
 					Name:     registry.Name,
 					Address:  registry.Address,
@@ -430,7 +446,7 @@ func (api *API) translateSecretsToSecretLikedModels(appView *models.ApplicationV
 				continue
 			}
 
-			if label, ok := secret.Labels[specV1.SecretLabel]; ok && label == specV1.SecretCustomCertificate {
+			if label, ok := secret.Labels[specV1.SecretLabel]; ok && label == specV1.SecretCertificate {
 				volume = models.VolumeView{
 					Name: volume.Name,
 					Certificate: &specV1.ObjectReference{

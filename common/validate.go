@@ -99,3 +99,18 @@ func validMaxLengthFunc() validator.Func {
 		return true
 	}
 }
+
+func ValidNonBaetyl(name string) bool {
+	return !strings.Contains(name, "baetyl")
+}
+
+func ValidIsInvisible(labels map[string]string) bool {
+	v, ok := labels[ResourceInvisible]
+	if !ok {
+		return false
+	}
+	if res, _ := strconv.ParseBool(v); !res {
+		return false
+	}
+	return true
+}

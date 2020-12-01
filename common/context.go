@@ -176,7 +176,7 @@ func Wrapper(handler HandlerFunc) func(c *gin.Context) {
 	}
 }
 
-func WrapperRaw(handler HandlerFunc) func(c *gin.Context) {
+func WrapperRaw(handler HandlerFunc, abort bool) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		cc := NewContext(c)
 		defer func() {
@@ -186,13 +186,13 @@ func WrapperRaw(handler HandlerFunc) func(c *gin.Context) {
 					err = Error(ErrUnknown, Field("error", r))
 				}
 				log.L().Info("handle a panic", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
-				PopulateFailedResponse(cc, err, false)
+				PopulateFailedResponse(cc, err, abort)
 			}
 		}()
 		res, err := handler(cc)
 		if err != nil {
 			log.L().Error("failed to handler request", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
-			PopulateFailedResponse(cc, err, false)
+			PopulateFailedResponse(cc, err, abort)
 			return
 		}
 		if res == nil {
@@ -202,7 +202,7 @@ func WrapperRaw(handler HandlerFunc) func(c *gin.Context) {
 			cc.Data(http.StatusOK, "application/octet-stream", data)
 		} else {
 			log.L().Error("failed to convert data to []byte", log.Any(cc.GetTrace()))
-			PopulateFailedResponse(cc, Error(ErrUnknown), false)
+			PopulateFailedResponse(cc, Error(ErrUnknown), abort)
 		}
 	}
 }

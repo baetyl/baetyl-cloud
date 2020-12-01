@@ -368,10 +368,11 @@ func (s *InitServiceImpl) genNodeCerts(ns, nodeName, appName string) (*specV1.Se
 		Name:      confName,
 		Namespace: ns,
 		Labels: map[string]string{
-			common.LabelAppName:  appName,
-			common.LabelNodeName: nodeName,
-			specV1.SecretLabel:   specV1.SecretCertificate,
-			common.LabelSystem:   "true",
+			common.LabelAppName:      appName,
+			common.LabelNodeName:     nodeName,
+			specV1.SecretLabel:       specV1.SecretConfig,
+			common.LabelSystem:       "true",
+			common.ResourceInvisible: "true",
 		},
 		Data: map[string][]byte{
 			"client.pem": certPEM.CertPEM,
