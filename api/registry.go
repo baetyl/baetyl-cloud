@@ -18,7 +18,7 @@ func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	secret, err := api.Secret.Get(ns, n, "")
 	if secret != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
 
 	return hidePwd(api.ToRegistryView(secret, false)), nil
@@ -76,7 +76,7 @@ func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
 
 	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
 
 	sd := api.ToRegistryView(secret, needToFilter)
@@ -106,7 +106,7 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
 
 	sd := api.ToRegistryView(secret, needToFilter)
@@ -139,7 +139,7 @@ func (api *API) GetAppByRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, wrapRegistryNotFoundError(n, err)
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
 	return api.listAppBySecret(ns, secret.Name)
 }
@@ -188,11 +188,11 @@ func (api *API) validateRegistryModel(r *models.Registry) error {
 	return nil
 }
 
-func wrapRegistryNotFoundError(name string, err error) error {
+func wrapSecretLikedResourceNotFoundError(name string, secretType common.Resource, err error) error {
 	if err != nil {
 		e, ok := err.(errors.Coder)
 		if (ok && e.Code() == common.ErrResourceNotFound) || (!ok && strings.Contains(err.Error(), "not found")) {
-			return common.Error(common.ErrResourceNotFound, common.Field("type", common.SecretRegistry),
+			return common.Error(common.ErrResourceNotFound, common.Field("type", secretType),
 				common.Field("name", name))
 		}
 	}

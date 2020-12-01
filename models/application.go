@@ -7,7 +7,7 @@ import (
 )
 
 type ApplicationView struct {
-	Name              string            `json:"name,omitempty" validate:"resourceName,nonBaetyl"`
+	Name              string            `json:"name,omitempty" validate:"resourceName"`
 	Type              string            `json:"type,omitempty" default:"container"`
 	Labels            map[string]string `json:"labels,omitempty"`
 	Namespace         string            `json:"namespace,omitempty"`

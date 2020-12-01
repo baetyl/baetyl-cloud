@@ -1,7 +1,6 @@
 package api
 
 import (
-	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -17,7 +16,7 @@ func (api *API) GetCertificate(c *common.Context) (interface{}, error) {
 
 	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, wrapCertificateNotFoundError(n, err)
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Certificate, err)
 	}
 	return hideCertKey(api.ToCertificateView(secret, false)), nil
 }
@@ -74,7 +73,7 @@ func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	secret, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, wrapCertificateNotFoundError(n, err)
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Certificate, err)
 	}
 
 	sd := api.ToCertificateView(secret, needToFilter)
@@ -109,7 +108,7 @@ func (api *API) GetAppByCertificate(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	res, err := api.Secret.Get(ns, n, "")
 	if err != nil {
-		return nil, wrapCertificateNotFoundError(n, err)
+		return nil, wrapSecretLikedResourceNotFoundError(n, common.Certificate, err)
 	}
 	return api.listAppBySecret(ns, res.Name)
 }
@@ -169,15 +168,4 @@ func (api *API) ToCertificateViewList(s *models.SecretList, needToFilter bool) *
 		hideCertKey(&res.Items[i])
 	}
 	return res
-}
-
-func wrapCertificateNotFoundError(name string, err error) error {
-	if err != nil {
-		e, ok := err.(errors.Coder)
-		if (ok && e.Code() == common.ErrResourceNotFound) || (!ok && strings.Contains(err.Error(), "not found")) {
-			return common.Error(common.ErrResourceNotFound, common.Field("type", common.Certificate),
-				common.Field("name", name))
-		}
-	}
-	return err
 }

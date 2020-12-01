@@ -296,7 +296,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 	appView := &models.ApplicationView{}
 	copier.Copy(appView, app)
 
-	err := api.translateSecretsToSecretLikedModels(appView)
+	err := api.translateSecretsToSecretLikedResources(appView)
 	if err != nil {
 		return nil, err
 	}
@@ -423,7 +423,7 @@ func translateSecretLikedModelsToSecrets(appView *models.ApplicationView, app *s
 	}
 }
 
-func (api *API) translateSecretsToSecretLikedModels(appView *models.ApplicationView) error {
+func (api *API) translateSecretsToSecretLikedResources(appView *models.ApplicationView) error {
 	appView.Registries = make([]models.RegistryView, 0)
 	volumes := make([]models.VolumeView, 0)
 	for _, volume := range appView.Volumes {

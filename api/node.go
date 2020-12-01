@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -271,8 +272,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 						continue
 					}
 
-					if v, ok := secret.Labels[common.LabelSystem]; !ok || v != "true" {
-						// don't delete resource which doesn't belong to system
+					if res := checkIsSysResources(secret.Labels); !res {
 						continue
 					}
 
@@ -406,7 +406,7 @@ func (api *API) GetNodeProperties(c *common.Context) (interface{}, error) {
 func (api *API) GetNodeEnvs(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 
-	coreApp, err := api.getCoreFromNode(ns, n)
+	coreApp, err := api.getCoreAppByNodeName(ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -437,49 +437,38 @@ func (api *API) GetNodeSysAppConfigs(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) GetNodeSysAppSecrets(c *common.Context) (interface{}, error) {
-	ns, node, app := c.GetNamespace(), c.GetNameFromParam(), c.Param("app")
-
-	ops := &models.ListOptions{
-		LabelSelector: fmt.Sprintf("%s=%s,%s=%s", BaetylNodeNameKey, node, BaetylAppNameKey, app),
-	}
-
-	res, err := api.Secret.List(ns, ops)
+	res, err := api.getNodeSysAppSecretLikedResources(c)
 	if err != nil {
-		log.L().Error("list secrets error", log.Error(err))
 		return nil, err
 	}
 	return api.ToSecretViewList(res, false), nil
 }
 
 func (api *API) GetNodeSysAppCertificates(c *common.Context) (interface{}, error) {
-	ns, node, app := c.GetNamespace(), c.GetNameFromParam(), c.Param("app")
-
-	ops := &models.ListOptions{
-		LabelSelector: fmt.Sprintf("%s=%s,%s=%s", BaetylNodeNameKey, node, BaetylAppNameKey, app),
-	}
-
-	secrets, err := api.Secret.List(ns, ops)
+	res, err := api.getNodeSysAppSecretLikedResources(c)
 	if err != nil {
-		log.L().Error("list certificates error", log.Error(err))
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+		return nil, err
 	}
 
-	return api.ToCertificateViewList(secrets, false), nil
+	return api.ToCertificateViewList(res, false), nil
 }
 
 func (api *API) GetNodeSysAppRegistries(c *common.Context) (interface{}, error) {
+	res, err := api.getNodeSysAppSecretLikedResources(c)
+	if err != nil {
+		return nil, err
+	}
+	return api.ToRegistryViewList(res, false), nil
+}
+
+func (api *API) getNodeSysAppSecretLikedResources(c *common.Context) (*models.SecretList, error) {
 	ns, node, app := c.GetNamespace(), c.GetNameFromParam(), c.Param("app")
 
 	ops := &models.ListOptions{
 		LabelSelector: fmt.Sprintf("%s=%s,%s=%s", BaetylNodeNameKey, node, BaetylAppNameKey, app),
 	}
 
-	secrets, err := api.Secret.List(ns, ops)
-	if err != nil {
-		log.L().Error("list registry error", log.Error(err))
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
-	}
-	return api.ToRegistryViewList(secrets, false), nil
+	return api.Secret.List(ns, ops)
 }
 
 func (api *API) UpdateNodeProperties(c *common.Context) (interface{}, error) {
@@ -498,7 +487,7 @@ func (api *API) UpdateNodeEnvs(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	coreApp, err := api.getCoreFromNode(ns, n)
+	coreApp, err := api.getCoreAppByNodeName(ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -570,7 +559,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 
 	// get core app
-	app, err := api.getCoreFromNode(ns, n)
+	app, err := api.getCoreAppByNodeName(ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -632,7 +621,7 @@ func (api *API) RollbackCoreApp(c *common.Context) (interface{}, error) {
 	}
 
 	// get core app
-	app, err := api.getCoreFromNode(ns, n)
+	app, err := api.getCoreAppByNodeName(ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -663,7 +652,7 @@ func (api *API) RollbackCoreApp(c *common.Context) (interface{}, error) {
 	return api.ToApplicationView(res)
 }
 
-func (api *API) getCoreFromNode(ns, node string) (*v1.Application, error) {
+func (api *API) getCoreAppByNodeName(ns, node string) (*v1.Application, error) {
 	appList, err := api.Index.ListAppsByNode(ns, node)
 	if err != nil {
 		return nil, err
@@ -688,4 +677,16 @@ func (api *API) ParseAndCheckEnvs(c *common.Context) (*models.NodeEnvs, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
 	return envs, nil
+}
+
+// don't delete resource which doesn't belong to system
+func checkIsSysResources(labels map[string]string) bool {
+	v, ok := labels[common.LabelSystem]
+	if !ok {
+		return false
+	}
+	if res, _ := strconv.ParseBool(v); !res {
+		return false
+	}
+	return true
 }
