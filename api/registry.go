@@ -17,7 +17,7 @@ import (
 func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 	secret, err := api.Secret.Get(ns, n, "")
-	if secret != nil {
+	if err != nil {
 		return nil, wrapSecretLikedResourceNotFoundError(n, common.Registry, err)
 	}
 

@@ -507,7 +507,7 @@ func (api *API) UpdateNodeEnvs(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return app, nil
+	return envs, nil
 }
 
 func (api *API) UpdateNodeMode(c *common.Context) (interface{}, error) {
