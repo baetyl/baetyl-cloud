@@ -20,7 +20,7 @@ const (
 	// ResourceVersion resource version
 	ResourceVersion = "resourceVersion"
 	// ResourceInvisible resource invisible
-	ResourceInvisible = "resourceInvisible"
+	ResourceInvisible = "resource-invisible"
 	// Application application resource
 	Application Resource = "application"
 	// App alias of application resource

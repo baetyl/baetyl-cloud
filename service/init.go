@@ -32,6 +32,8 @@ const (
 	templateFuncAppYaml        = "baetyl-function-app.yml"
 	templateBrokerConfYaml     = "baetyl-broker-conf.yml"
 	templateBrokerAppYaml      = "baetyl-broker-app.yml"
+	templateRuleConfYaml       = "baetyl-rule-conf.yml"
+	templateRuleAppYaml        = "baetyl-rule-app.yml"
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
 	TemplateBaetylInitCommand  = "baetyl-init-command"
 	TemplateKubeInitCommand    = "baetyl-kube-init-command"
@@ -241,7 +243,11 @@ func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, e
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	apps = append(apps, ca, ia, fa, ba)
+	ra, err := s.genRuleApp(ns, nodeName, params)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	apps = append(apps, ca, ia, fa, ba, ra)
 	return apps, nil
 }
 
@@ -350,6 +356,38 @@ func (s *InitServiceImpl) genBrokerApp(ns, nodeName string, params map[string]in
 		appMap[k] = v
 	}
 	return s.genApp(ns, templateBrokerAppYaml, appMap)
+}
+
+func (s *InitServiceImpl) genRuleApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
+	appName := fmt.Sprintf("baetyl-rule-%s", common.RandString(9))
+	confName := fmt.Sprintf("baetyl-rule-conf-%s", common.RandString(9))
+	// create config
+	confMap := map[string]interface{}{
+		"Namespace":    ns,
+		"NodeName":     nodeName,
+		"RuleAppName":  appName,
+		"RuleConfName": confName,
+	}
+	for k, v := range params {
+		confMap[k] = v
+	}
+	conf, err := s.genConfig(ns, templateRuleConfYaml, confMap)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	// create application
+	appMap := map[string]interface{}{
+		"Namespace":       ns,
+		"NodeName":        nodeName,
+		"RuleAppName":     appName,
+		"RuleConfName":    conf.Name,
+		"RuleConfVersion": conf.Version,
+	}
+	for k, v := range params {
+		appMap[k] = v
+	}
+	return s.genApp(ns, templateRuleAppYaml, appMap)
 }
 
 func (s *InitServiceImpl) genNodeCerts(ns, nodeName, appName string) (*specV1.Secret, error) {

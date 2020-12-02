@@ -1,0 +1,35 @@
+name: "{{.RuleAppName}}"
+namespace: "{{.Namespace}}"
+selector: "baetyl-node-name={{.NodeName}}"
+labels:
+  baetyl-cloud-system: "true"
+type: "container"
+system: true
+services:
+  - name: "baetyl-rule"
+    image: "{{GetProperty "baetyl-rule-image"}}"
+    replica: 1
+    volumeMounts:
+      - name: "rule-conf"
+        mountPath: "/etc/baetyl"
+        readOnly: true
+      - name: "native-app-run-path"
+        mountPath: "/var/lib/baetyl/run"
+      - name: "native-rule-program"
+        mountPath: "/var/lib/baetyl/bin"
+        readOnly: true
+    ports:
+      - containerPort: 50010
+        protocol: "TCP"
+volumes:
+  - name: "rule-conf"
+    config:
+      name: "{{.RuleConfName}}"
+      version: "{{.RuleConfVersion}}"
+  - name: "native-rule-program"
+    config:
+      name: "{{.RuleProgramName}}"
+      version: "{{.RuleProgramVersion}}"
+  - name: "native-app-run-path"
+    hostPath:
+      path: "{{.BAETYL_HOST_PATH_LIB}}/run"
