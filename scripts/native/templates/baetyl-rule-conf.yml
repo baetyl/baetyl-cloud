@@ -7,8 +7,6 @@ labels:
   baetyl-cloud-system: "true"
 data:
   conf.yml: |-
-    session:
-      sysTopics: ["$link", "$baetyl"]
     logger:
       level: debug
       encoding: console
