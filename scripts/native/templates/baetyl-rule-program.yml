@@ -1,0 +1,15 @@
+name: "baetyl-rule-program-{{.NodeName}}-{{RandString 9}}"
+namespace: "{{.Namespace}}"
+system: true
+labels:
+  baetyl-cloud-system: "true"
+  baetyl-config-type: "baetyl-program"
+data:
+  _object_baetyl-rule_darwin-amd64.zip: |-
+    {"url":"{{GetProperty "baetyl-rule-program-darwin-amd64"}}","unpack":"zip"}
+  _object_baetyl-rule_linux-amd64.zip: |-
+    {"url":"{{GetProperty "baetyl-rule-program-linux-amd64"}}","unpack":"zip"}
+  _object_baetyl-rule_linux-arm64-v8.zip: |-
+    {"url":"{{GetProperty "baetyl-rule-program-linux-arm64-v8"}}","unpack":"zip"}
+  _object_baetyl-rule_linux-arm-v7.zip: |-
+    {"url":"{{GetProperty "baetyl-rule-program-linux-arm-v7"}}","unpack":"zip"}
