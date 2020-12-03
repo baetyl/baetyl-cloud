@@ -106,6 +106,7 @@ func (api *API) GetAppBySecret(c *common.Context) (interface{}, error) {
 func (api *API) parseAndCheckSecretModel(c *common.Context) (*models.SecretView, error) {
 	secret := new(models.SecretView)
 	secret.Name = c.GetNameFromParam()
+	secret.Namespace = c.GetNamespace()
 	err := c.LoadBody(secret)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
