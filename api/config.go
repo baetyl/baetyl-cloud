@@ -165,6 +165,7 @@ func (api *API) GetAppByConfig(c *common.Context) (interface{}, error) {
 func (api *API) parseAndCheckConfigView(c *common.Context) (*specV1.Configuration, error) {
 	configView := new(models.ConfigurationView)
 	configView.Name = c.GetNameFromParam()
+	configView.Namespace = c.GetNamespace()
 	err := c.LoadBody(configView)
 	if err != nil {
 		log.L().Error("parse config failed", log.Error(err))

@@ -202,6 +202,7 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, error) {
 	app := new(models.ApplicationView)
 	app.Name = c.GetNameFromParam()
+	app.Namespace = c.GetNamespace()
 	err := c.LoadBody(app)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
