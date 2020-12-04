@@ -24,7 +24,7 @@ type namespaceService struct {
 
 // NewNamespaceService NewNamespaceService
 func NewNamespaceService(config *config.CloudConfig) (NamespaceService, error) {
-	ms, err := plugin.GetPlugin(config.Plugin.Namespace)
+	ms, err := plugin.GetPlugin(config.Plugin.Resource)
 	if err != nil {
 		return nil, err
 	}

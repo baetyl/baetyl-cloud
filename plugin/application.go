@@ -1,8 +1,6 @@
 package plugin
 
 import (
-	"io"
-
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
@@ -15,5 +13,4 @@ type Application interface {
 	UpdateApplication(namespace string, application *v1.Application) (*v1.Application, error)
 	DeleteApplication(namespace, name string) error
 	ListApplication(namespace string, listOptions *models.ListOptions) (*models.ApplicationList, error)
-	io.Closer
 }

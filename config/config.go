@@ -20,29 +20,21 @@ type CloudConfig struct {
 		Path string `yaml:"path" json:"path" default:"/etc/baetyl/templates"`
 	} `yaml:"template" json:"template"`
 	Plugin struct {
-		Pubsub        string   `yaml:"pubsub" json:"pubsub" default:"defaultpubsub"`
-		PKI           string   `yaml:"pki" json:"pki" default:"defaultpki"`
-		Auth          string   `yaml:"auth" json:"auth" default:"defaultauth"`
-		License       string   `yaml:"license" json:"license" default:"defaultlicense"`
-		Node          string   `yaml:"node" json:"node" default:"kube"`
-		Shadow        string   `yaml:"shadow" json:"shadow" default:"database"`
-		Namespace     string   `yaml:"namespace" json:"namespace" default:"kube"`
-		Configuration string   `yaml:"configuration" json:"configuration" default:"kube"`
-		Secret        string   `yaml:"secret" json:"secret" default:"kube"`
-		Application   string   `yaml:"application" json:"application" default:"kube"`
-		Index         string   `yaml:"index" json:"index" default:"database"`
-		Batch         string   `yaml:"batch" json:"batch" default:"databaseext"`
-		Record        string   `yaml:"record" json:"record" default:"databaseext"`
-		Callback      string   `yaml:"callback" json:"callback" default:"databaseext"`
-		AppHistory    string   `yaml:"appHistory" json:"appHistory" default:"database"`
-		Objects       []string `yaml:"objects" json:"objects" default:"[]"`
-		Functions     []string `yaml:"functions" json:"functions" default:"[]"`
-		Property      string   `yaml:"property" json:"property" default:"database"`
-		SyncLinks     []string `yaml:"synclinks" json:"synclinks" default:"[\"httplink\"]"`
-		// TODO: deprecated
-
-		ModelStorage    string `yaml:"modelStorage" json:"modelStorage" default:"kube"`
-		DatabaseStorage string `yaml:"databaseStorage" json:"databaseStorage" default:"database"`
+		Pubsub     string   `yaml:"pubsub" json:"pubsub" default:"defaultpubsub"`
+		PKI        string   `yaml:"pki" json:"pki" default:"defaultpki"`
+		Auth       string   `yaml:"auth" json:"auth" default:"defaultauth"`
+		License    string   `yaml:"license" json:"license" default:"defaultlicense"`
+		Resource   string   `yaml:"resource" json:"resource" default:"kube"`
+		Shadow     string   `yaml:"shadow" json:"shadow" default:"database"`
+		Index      string   `yaml:"index" json:"index" default:"database"`
+		Batch      string   `yaml:"batch" json:"batch" default:"databaseext"`
+		Record     string   `yaml:"record" json:"record" default:"databaseext"`
+		Callback   string   `yaml:"callback" json:"callback" default:"databaseext"`
+		AppHistory string   `yaml:"appHistory" json:"appHistory" default:"database"`
+		Objects    []string `yaml:"objects" json:"objects" default:"[]"`
+		Functions  []string `yaml:"functions" json:"functions" default:"[]"`
+		Property   string   `yaml:"property" json:"property" default:"database"`
+		SyncLinks  []string `yaml:"synclinks" json:"synclinks" default:"[\"httplink\"]"`
 	} `yaml:"plugin" json:"plugin"`
 }
 

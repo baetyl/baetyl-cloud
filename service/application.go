@@ -34,15 +34,15 @@ type applicationService struct {
 
 // NewApplicationService NewApplicationService
 func NewApplicationService(config *config.CloudConfig) (ApplicationService, error) {
-	cfg, err := plugin.GetPlugin(config.Plugin.Configuration)
+	cfg, err := plugin.GetPlugin(config.Plugin.Resource)
 	if err != nil {
 		return nil, err
 	}
-	secret, err := plugin.GetPlugin(config.Plugin.Secret)
+	secret, err := plugin.GetPlugin(config.Plugin.Resource)
 	if err != nil {
 		return nil, err
 	}
-	app, err := plugin.GetPlugin(config.Plugin.Application)
+	app, err := plugin.GetPlugin(config.Plugin.Resource)
 	if err != nil {
 		return nil, err
 	}

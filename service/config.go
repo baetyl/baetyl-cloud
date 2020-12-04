@@ -30,7 +30,7 @@ type configService struct {
 
 // NewConfigService NewConfigService
 func NewConfigService(config *config.CloudConfig) (ConfigService, error) {
-	cfg, err := plugin.GetPlugin(config.Plugin.Configuration)
+	cfg, err := plugin.GetPlugin(config.Plugin.Resource)
 	if err != nil {
 		return nil, err
 	}
