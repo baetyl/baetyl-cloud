@@ -252,8 +252,8 @@ func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, e
 }
 
 func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-core-%s", common.RandString(9))
-	confName := fmt.Sprintf("baetyl-core-conf-%s", common.RandString(9))
+	appName := fmt.Sprintf("baetyl-core-%s-%s", nodeName, common.RandString(9))
+	confName := fmt.Sprintf("baetyl-core-conf-%s-%s", nodeName, common.RandString(9))
 	params["CoreAppName"] = appName
 	params["CoreConfName"] = confName
 
@@ -278,8 +278,8 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]inte
 }
 
 func (s *InitServiceImpl) genInitApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-init-%s", common.RandString(9))
-	confName := fmt.Sprintf("baetyl-init-conf-%s", common.RandString(9))
+	appName := fmt.Sprintf("baetyl-init-%s-%s", nodeName, common.RandString(9))
+	confName := fmt.Sprintf("baetyl-init-conf-%s-%s", nodeName, common.RandString(9))
 	params["InitAppName"] = appName
 	params["InitConfName"] = confName
 
@@ -295,8 +295,8 @@ func (s *InitServiceImpl) genInitApp(ns, nodeName string, params map[string]inte
 }
 
 func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-function-%s", common.RandString(9))
-	confName := fmt.Sprintf("baetyl-function-conf-%s", common.RandString(9))
+	appName := fmt.Sprintf("baetyl-function-%s-%s", nodeName, common.RandString(9))
+	confName := fmt.Sprintf("baetyl-function-conf-%s-%s", nodeName, common.RandString(9))
 	// create config
 	confMap := map[string]interface{}{
 		"Namespace":        ns,
@@ -327,8 +327,8 @@ func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]
 }
 
 func (s *InitServiceImpl) genBrokerApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-broker-%s", common.RandString(9))
-	confName := fmt.Sprintf("baetyl-broker-conf-%s", common.RandString(9))
+	appName := fmt.Sprintf("baetyl-broker-%s-%s", nodeName, common.RandString(9))
+	confName := fmt.Sprintf("baetyl-broker-conf-%s-%s", nodeName, common.RandString(9))
 	// create config
 	confMap := map[string]interface{}{
 		"Namespace":      ns,
@@ -359,8 +359,8 @@ func (s *InitServiceImpl) genBrokerApp(ns, nodeName string, params map[string]in
 }
 
 func (s *InitServiceImpl) genRuleApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-rule-%s", common.RandString(9))
-	confName := fmt.Sprintf("baetyl-rule-conf-%s", common.RandString(9))
+	appName := fmt.Sprintf("baetyl-rule-%s-%s", nodeName, common.RandString(9))
+	confName := fmt.Sprintf("baetyl-rule-conf-%s-%s", nodeName, common.RandString(9))
 	// create config
 	confMap := map[string]interface{}{
 		"Namespace":    ns,
