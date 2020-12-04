@@ -1,0 +1,15 @@
+name: "baetyl-core-program-{{RandString 9}}"
+namespace: "{{.Namespace}}"
+system: true
+labels:
+  baetyl-cloud-system: "true"
+  baetyl-config-type: "baetyl-program"
+data:
+  _object_baetyl_darwin-amd64.zip: |-
+    {"url":"{{GetProperty "baetyl-program-darwin-amd64"}}","unpack":"zip"}
+  _object_baetyl_linux-amd64.zip: |-
+    {"url":"{{GetProperty "baetyl-program-linux-amd64"}}","unpack":"zip"}
+  _object_baetyl_linux-arm64-v8.zip: |-
+    {"url":"{{GetProperty "baetyl-program-linux-arm64-v8"}}","unpack":"zip"}
+  _object_baetyl_linux-arm-v7.zip: |-
+    {"url":"{{GetProperty "baetyl-program-linux-arm-v7"}}","unpack":"zip"}

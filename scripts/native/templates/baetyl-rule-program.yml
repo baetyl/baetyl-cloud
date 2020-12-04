@@ -1,4 +1,4 @@
-name: "baetyl-rule-program-{{.NodeName}}-{{RandString 9}}"
+name: "baetyl-rule-program-{{RandString 9}}"
 namespace: "{{.Namespace}}"
 system: true
 labels:
