@@ -27,7 +27,7 @@ type secretService struct {
 
 // NewSecretService NewSecretService
 func NewSecretService(config *config.CloudConfig) (SecretService, error) {
-	secret, err := plugin.GetPlugin(config.Plugin.Secret)
+	secret, err := plugin.GetPlugin(config.Plugin.Resource)
 	if err != nil {
 		return nil, err
 	}

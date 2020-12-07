@@ -74,11 +74,9 @@ func initNodeAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 func TestNewAPI(t *testing.T) {
 	c := &config.CloudConfig{}
 	c.Plugin.Auth = common.RandString(9)
-	c.Plugin.ModelStorage = common.RandString(9)
-	c.Plugin.DatabaseStorage = common.RandString(9)
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9), common.RandString(9)}
-	c.Plugin.Shadow = c.Plugin.ModelStorage
+	c.Plugin.Shadow = common.RandString(9)
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
 

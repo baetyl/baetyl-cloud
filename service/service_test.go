@@ -15,11 +15,11 @@ import (
 type MockServices struct {
 	conf           *config.CloudConfig
 	ctl            *gomock.Controller
-	node           *mockPlugin.MockNode
-	namespace      *mockPlugin.MockNamespace
-	configuration  *mockPlugin.MockConfiguration
-	secret         *mockPlugin.MockSecret
-	app            *mockPlugin.MockApplication
+	node           *mockPlugin.MockResource
+	namespace      *mockPlugin.MockResource
+	configuration  *mockPlugin.MockResource
+	secret         *mockPlugin.MockResource
+	app            *mockPlugin.MockResource
 	index          *mockPlugin.MockIndex
 	appHis         *mockPlugin.MockAppHistory
 	objectStorage  *mockPlugin.MockObject
@@ -86,35 +86,7 @@ func mockProperty(mock plugin.Property) plugin.Factory {
 	return factory
 }
 
-func mockNode(mock plugin.Node) plugin.Factory {
-	factory := func() (plugin.Plugin, error) {
-		return mock, nil
-	}
-	return factory
-}
-
-func mockNamespace(mock plugin.Namespace) plugin.Factory {
-	factory := func() (plugin.Plugin, error) {
-		return mock, nil
-	}
-	return factory
-}
-
-func mockConfig(mock plugin.Configuration) plugin.Factory {
-	factory := func() (plugin.Plugin, error) {
-		return mock, nil
-	}
-	return factory
-}
-
-func mockSecret(mock plugin.Secret) plugin.Factory {
-	factory := func() (plugin.Plugin, error) {
-		return mock, nil
-	}
-	return factory
-}
-
-func mockApplication(mock plugin.Application) plugin.Factory {
+func mockResource(mock plugin.Resource) plugin.Factory {
 	factory := func() (plugin.Plugin, error) {
 		return mock, nil
 	}
@@ -137,19 +109,14 @@ func mockAppHis(mock plugin.AppHistory) plugin.Factory {
 
 func mockTestConfig() *config.CloudConfig {
 	conf := &config.CloudConfig{}
-	conf.Plugin.ModelStorage = common.RandString(9)
+	conf.Plugin.Resource = common.RandString(9)
 	conf.Plugin.Objects = []string{common.RandString(9)}
 	conf.Plugin.PKI = common.RandString(9)
 	conf.Plugin.Auth = common.RandString(9)
 	conf.Plugin.Functions = []string{common.RandString(9)}
 	conf.Plugin.Shadow = common.RandString(9)
-	conf.Plugin.Node = common.RandString(9)
-	conf.Plugin.Namespace = common.RandString(9)
-	conf.Plugin.Configuration = common.RandString(9)
-	conf.Plugin.Application = common.RandString(9)
 	conf.Plugin.Index = common.RandString(9)
 	conf.Plugin.AppHistory = common.RandString(9)
-	conf.Plugin.Secret = common.RandString(9)
 	conf.Plugin.License = common.RandString(9)
 	conf.Plugin.Property = common.RandString(9)
 	conf.Template.Path = "../scripts/native/templates"
@@ -186,23 +153,11 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 	mProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Property, mockProperty(mProperty))
 
-	mNode := mockPlugin.NewMockNode(mockCtl)
-	plugin.RegisterFactory(conf.Plugin.Node, mockNode(mNode))
+	mResource := mockPlugin.NewMockResource(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Resource, mockResource(mResource))
 
 	mShadow := mockPlugin.NewMockShadow(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Shadow, mockShadowStorage(mShadow))
-
-	mNamespace := mockPlugin.NewMockNamespace(mockCtl)
-	plugin.RegisterFactory(conf.Plugin.Namespace, mockNamespace(mNamespace))
-
-	mConfig := mockPlugin.NewMockConfiguration(mockCtl)
-	plugin.RegisterFactory(conf.Plugin.Configuration, mockConfig(mConfig))
-
-	mSecret := mockPlugin.NewMockSecret(mockCtl)
-	plugin.RegisterFactory(conf.Plugin.Secret, mockSecret(mSecret))
-
-	mApp := mockPlugin.NewMockApplication(mockCtl)
-	plugin.RegisterFactory(conf.Plugin.Application, mockApplication(mApp))
 
 	mIndex := mockPlugin.NewMockIndex(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Index, mockIndex(mIndex))
@@ -216,12 +171,12 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 	return &MockServices{
 		conf:           conf,
 		ctl:            mockCtl,
-		node:           mNode,
+		node:           mResource,
 		shadow:         mShadow,
-		namespace:      mNamespace,
-		configuration:  mConfig,
-		secret:         mSecret,
-		app:            mApp,
+		namespace:      mResource,
+		configuration:  mResource,
+		secret:         mResource,
+		app:            mResource,
 		index:          mIndex,
 		appHis:         mAppHis,
 		objectStorage:  mockObjectStorage,

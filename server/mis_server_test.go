@@ -20,14 +20,8 @@ import (
 func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	c := &config.CloudConfig{}
 	c.Plugin.Auth = common.RandString(9)
-	c.Plugin.ModelStorage = common.RandString(9)
-	c.Plugin.DatabaseStorage = common.RandString(9)
+	c.Plugin.Resource = common.RandString(9)
 	c.Plugin.Shadow = common.RandString(9)
-	c.Plugin.Node = common.RandString(9)
-	c.Plugin.Namespace = common.RandString(9)
-	c.Plugin.Configuration = common.RandString(9)
-	c.Plugin.Secret = common.RandString(9)
-	c.Plugin.Application = common.RandString(9)
 	c.Plugin.Index = common.RandString(9)
 	c.Plugin.AppHistory = common.RandString(9)
 	c.Plugin.Objects = []string{common.RandString(9)}
@@ -49,7 +43,6 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 			return mockFunction, nil
 		})
 	}
-
 	mockAuth := mockPlugin.NewMockAuth(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Auth, func() (plugin.Plugin, error) {
 		return mockAuth, nil
@@ -68,33 +61,29 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
 		return mockProperty, nil
 	})
-	mockNode := mockPlugin.NewMockNode(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Node, func() (plugin.Plugin, error) {
-		return mockNode, nil
+	mockResource := mockPlugin.NewMockResource(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Resource, func() (plugin.Plugin, error) {
+		return mockResource, nil
 	})
 	mockShadow := mockPlugin.NewMockShadow(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Shadow, func() (plugin.Plugin, error) {
 		return mockShadow, nil
 	})
-	mockNamespace := mockPlugin.NewMockNamespace(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Namespace, func() (plugin.Plugin, error) {
-		return mockNamespace, nil
+	plugin.RegisterFactory(c.Plugin.Resource, func() (plugin.Plugin, error) {
+		return mockResource, nil
 	})
-	mockConfig := mockPlugin.NewMockConfiguration(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Configuration, func() (plugin.Plugin, error) {
-		return mockConfig, nil
+	plugin.RegisterFactory(c.Plugin.Resource, func() (plugin.Plugin, error) {
+		return mockResource, nil
 	})
 	res := &models.ConfigurationList{}
-	mockConfig.EXPECT().ListConfig(gomock.Any(), gomock.Any()).Return(res, nil).AnyTimes()
+	mockResource.EXPECT().ListConfig(gomock.Any(), gomock.Any()).Return(res, nil).AnyTimes()
 
-	mockSecret := mockPlugin.NewMockSecret(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Secret, func() (plugin.Plugin, error) {
-		return mockSecret, nil
+	plugin.RegisterFactory(c.Plugin.Resource, func() (plugin.Plugin, error) {
+		return mockResource, nil
 	})
 
-	mockApplication := mockPlugin.NewMockApplication(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Application, func() (plugin.Plugin, error) {
-		return mockApplication, nil
+	plugin.RegisterFactory(c.Plugin.Resource, func() (plugin.Plugin, error) {
+		return mockResource, nil
 	})
 
 	mockIndex := mockPlugin.NewMockIndex(mockCtl)

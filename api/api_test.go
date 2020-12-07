@@ -3,13 +3,12 @@ package api
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewAdminAPI(t *testing.T) {
@@ -18,12 +17,8 @@ func TestNewAdminAPI(t *testing.T) {
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Auth = common.RandString(9)
 	c.Plugin.License = common.RandString(9)
-	c.Plugin.Node = common.RandString(9)
+	c.Plugin.Resource = common.RandString(9)
 	c.Plugin.Shadow = common.RandString(9)
-	c.Plugin.Namespace = common.RandString(9)
-	c.Plugin.Configuration = common.RandString(9)
-	c.Plugin.Secret = common.RandString(9)
-	c.Plugin.Application = common.RandString(9)
 	c.Plugin.Index = common.RandString(9)
 	c.Plugin.Batch = common.RandString(9)
 	c.Plugin.Record = common.RandString(9)
@@ -33,8 +28,6 @@ func TestNewAdminAPI(t *testing.T) {
 	c.Plugin.Functions = []string{common.RandString(9), common.RandString(9)}
 	c.Plugin.Property = common.RandString(9)
 	c.Plugin.SyncLinks = []string{common.RandString(9), common.RandString(9)}
-	c.Plugin.ModelStorage = common.RandString(9)
-	c.Plugin.DatabaseStorage = common.RandString(9)
 
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
@@ -55,30 +48,15 @@ func TestNewAdminAPI(t *testing.T) {
 	plugin.RegisterFactory(c.Plugin.License, func() (plugin.Plugin, error) {
 		return mockLicense, nil
 	})
-	mockNode := mockPlugin.NewMockNode(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Node, func() (plugin.Plugin, error) {
-		return mockNode, nil
+	mockResource := mockPlugin.NewMockResource(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Resource, func() (plugin.Plugin, error) {
+		return mockResource, nil
 	})
 	mockShadow := mockPlugin.NewMockShadow(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Shadow, func() (plugin.Plugin, error) {
 		return mockShadow, nil
 	})
-	mockNamespace := mockPlugin.NewMockNamespace(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Namespace, func() (plugin.Plugin, error) {
-		return mockNamespace, nil
-	})
-	mockConfiguration := mockPlugin.NewMockConfiguration(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Configuration, func() (plugin.Plugin, error) {
-		return mockConfiguration, nil
-	})
-	mockSecret := mockPlugin.NewMockSecret(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Secret, func() (plugin.Plugin, error) {
-		return mockSecret, nil
-	})
-	mockApplication := mockPlugin.NewMockApplication(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Application, func() (plugin.Plugin, error) {
-		return mockApplication, nil
-	})
+
 	mockIndex := mockPlugin.NewMockIndex(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Index, func() (plugin.Plugin, error) {
 		return mockIndex, nil

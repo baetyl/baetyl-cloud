@@ -21,14 +21,8 @@ import (
 func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.CloudConfig) {
 	c := &config.CloudConfig{}
 	c.Plugin.Auth = common.RandString(9)
-	c.Plugin.ModelStorage = common.RandString(9)
-	c.Plugin.DatabaseStorage = common.RandString(9)
+	c.Plugin.Resource = common.RandString(9)
 	c.Plugin.Shadow = common.RandString(9)
-	c.Plugin.Node = common.RandString(9)
-	c.Plugin.Namespace = common.RandString(9)
-	c.Plugin.Configuration = common.RandString(9)
-	c.Plugin.Secret = common.RandString(9)
-	c.Plugin.Application = common.RandString(9)
 	c.Plugin.Index = common.RandString(9)
 	c.Plugin.Objects = []string{common.RandString(9)}
 	c.Plugin.PKI = common.RandString(9)
@@ -71,26 +65,13 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
 		return mockProperty, nil
 	})
-	mockNamespace := mockPlugin.NewMockNamespace(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Namespace, func() (plugin.Plugin, error) {
-		return mockNamespace, nil
+	mockResource := mockPlugin.NewMockResource(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Resource, func() (plugin.Plugin, error) {
+		return mockResource, nil
 	})
-	mockConfig := mockPlugin.NewMockConfiguration(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Configuration, func() (plugin.Plugin, error) {
-		return mockConfig, nil
-	})
+
 	res := &models.ConfigurationList{}
-	mockConfig.EXPECT().ListConfig(gomock.Any(), gomock.Any()).Return(res, nil).AnyTimes()
-
-	mockSecret := mockPlugin.NewMockSecret(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Secret, func() (plugin.Plugin, error) {
-		return mockSecret, nil
-	})
-
-	mockApplication := mockPlugin.NewMockApplication(mockCtl)
-	plugin.RegisterFactory(c.Plugin.Application, func() (plugin.Plugin, error) {
-		return mockApplication, nil
-	})
+	mockResource.EXPECT().ListConfig(gomock.Any(), gomock.Any()).Return(res, nil).AnyTimes()
 
 	mockIndex := mockPlugin.NewMockIndex(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Index, func() (plugin.Plugin, error) {

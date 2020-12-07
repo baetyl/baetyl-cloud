@@ -48,7 +48,7 @@ type nodeService struct {
 
 // NewNodeService NewNodeService
 func NewNodeService(config *config.CloudConfig) (NodeService, error) {
-	node, err := plugin.GetPlugin(config.Plugin.Node)
+	node, err := plugin.GetPlugin(config.Plugin.Resource)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func NewNodeService(config *config.CloudConfig) (NodeService, error) {
 		return nil, err
 	}
 
-	app, err := plugin.GetPlugin(config.Plugin.Application)
+	app, err := plugin.GetPlugin(config.Plugin.Resource)
 	if err != nil {
 		return nil, err
 	}

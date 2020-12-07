@@ -1,8 +1,6 @@
 package plugin
 
 import (
-	"io"
-
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
@@ -15,5 +13,4 @@ type Configuration interface {
 	UpdateConfig(namespace string, configurationModel *v1.Configuration) (*v1.Configuration, error)
 	DeleteConfig(namespace, name string) error
 	ListConfig(namespace string, listOptions *models.ListOptions) (*models.ConfigurationList, error)
-	io.Closer
 }
