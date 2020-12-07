@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
@@ -82,14 +83,48 @@ func TestInitService_getInitYaml(t *testing.T) {
 	sNode := service.NewMockNodeService(mockCtl)
 	as := InitServiceImpl{}
 	as.NodeService = sNode
+	sApp := service.NewMockApplicationService(mockCtl)
+	sSecret := service.NewMockSecretService(mockCtl)
+	as.AppCombinedService = &AppCombinedService{
+		App:    sApp,
+		Secret: sSecret,
+	}
+	as.log = log.L().With(log.Any("test", "service init"))
 
-	sNode.EXPECT().GetDesire("default", "n0").Return(nil, common.Error(common.ErrResourceNotFound))
+	coreDesire := &specV1.Desire{
+		"sysapps": []specV1.AppInfo{{
+			Name:    "baetyl-core-1",
+			Version: "123",
+		}},
+	}
+
+	coreApp := &specV1.Application{
+		Name:      "baetyl-core-1",
+		Namespace: "default",
+		Version:   "123",
+		Volumes: []specV1.Volume{
+			{
+				Name: "node-cert",
+				VolumeSource: v1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name:    "sync-cert",
+						Version: "2",
+					},
+				},
+			},
+		},
+	}
+
+	sNode.EXPECT().GetDesire("default", "n0").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sNode.EXPECT().GetDesire("default", "n0").Return(coreDesire, nil).Times(1)
+	sApp.EXPECT().Get("default", "baetyl-core-1", "").Return(coreApp, nil).Times(1)
+	sSecret.EXPECT().Get("default", "sync-cert", "").Return(nil, nil).Times(1)
 	res, err := as.getInitDeploymentYaml("default", "n0", nil)
-	assert.EqualError(t, err, "The resource is not found.")
+	assert.EqualError(t, err, "The (secret) resource (sync-cert) is not found in namespace(default).")
 	assert.Nil(t, res)
 }
 
-func TestInitService_getSyncCert(t *testing.T) {
+func TestInitService_GetNodeCert(t *testing.T) {
 	as := InitServiceImpl{}
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()

@@ -8,6 +8,7 @@ import (
 
 	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/errors"
+	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -64,6 +65,7 @@ type InitServiceImpl struct {
 	PKI             PKIService
 	Hooks           map[string]interface{}
 	ResourceMapFunc map[string]GetInitResource
+	log             *log.Logger
 }
 
 // NewSyncService new SyncService
@@ -105,6 +107,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		PKI:                pki,
 		Hooks:              map[string]interface{}{},
 		ResourceMapFunc:    map[string]GetInitResource{},
+		log:                log.L().With(log.Any("service", "init")),
 	}
 	initService.ResourceMapFunc[templateInitDeploymentYaml] = initService.getInitDeploymentYaml
 	initService.ResourceMapFunc[TemplateBaetylInitCommand] = initService.GetInitCommand
@@ -128,7 +131,21 @@ func (s *InitServiceImpl) GetResource(ns, nodeName, resourceName string, params 
 func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
 	init, err := s.GetAppFromDesire(ns, nodeName, specV1.BaetylInit, true)
 	if err != nil {
-		return nil, errors.Trace(err)
+		s.log.Warn("failed to get init app from desire, the init module will use the default name and version",
+			log.Any("InitAppName", "baetyl-init"), log.Any("InitVersion", "1"), log.Error(err))
+
+		core, err := s.GetAppFromDesire(ns, nodeName, specV1.BaetylCore, true)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		// for node cert
+		init = &specV1.Application{
+			Name:      specV1.BaetylInit,
+			Namespace: core.Namespace,
+			Version:   "1",
+			Volumes:   core.Volumes,
+		}
 	}
 	cert, err := s.GetNodeCert(init)
 	if err != nil {
