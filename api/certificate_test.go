@@ -94,6 +94,7 @@ tu5nww5RdjCz4Uks08P2GNmZjLO81MgYkhR7B9wi3KDNxg==
 
 	cert1 := &models.Certificate{
 		Name:        "cert1",
+		Namespace:   ns,
 		Description: "desp1",
 		Data: models.CertificateDataItem{
 			Key:         keyData1,
@@ -160,6 +161,7 @@ RcKyjhh1
 
 	cert2 := &models.Certificate{
 		Name:        "cert2",
+		Namespace:   ns,
 		Description: "desp2",
 		Data: models.CertificateDataItem{
 			Key:         keyData2,
@@ -341,6 +343,7 @@ RcKyjhh1
 
 	cert8 := &models.Certificate{
 		Name:        "cert8",
+		Namespace:   ns,
 		Description: "desp8",
 		Data: models.CertificateDataItem{
 			Key:         keyData2,
