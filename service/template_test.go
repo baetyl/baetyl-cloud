@@ -59,6 +59,7 @@ func TestTemplateServiceImpl_UnmarshalTemplate(t *testing.T) {
 type: container
 labels:
   baetyl-cloud-system: "true"
+  resource-invisible: "true"
 namespace: ns-1
 selector: baetyl-node-name=node-name-1
 services:
@@ -143,6 +144,7 @@ system: true
 type: container
 labels:
   baetyl-cloud-system: "true"
+  resource-invisible: "true"
 namespace: ns-1
 selector: baetyl-node-name=node-name-1
 services:

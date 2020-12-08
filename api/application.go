@@ -199,6 +199,49 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 	return nil, nil
 }
 
+func (api *API) GetSysAppConfigs(c *common.Context) (interface{}, error) {
+	ns, n := c.GetNamespace(), c.GetNameFromParam()
+
+	ops := &models.ListOptions{
+		LabelSelector: fmt.Sprintf("%s=%s", BaetylAppNameKey, n),
+	}
+
+	list, err := api.Config.List(ns, ops)
+	if err != nil {
+		log.L().Error("failed to list configs", log.Error(err))
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+	}
+	for i := range list.Items {
+		list.Items[i].Data = nil
+	}
+	return list, err
+}
+
+func (api *API) GetSysAppSecrets(c *common.Context) (interface{}, error) {
+	res, err := api.getNodeSysAppSecretLikedResources(c)
+	if err != nil {
+		return nil, err
+	}
+	return api.ToSecretViewList(res), nil
+}
+
+func (api *API) GetSysAppCertificates(c *common.Context) (interface{}, error) {
+	res, err := api.getNodeSysAppSecretLikedResources(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return api.ToCertificateViewList(res), nil
+}
+
+func (api *API) GetSysAppRegistries(c *common.Context) (interface{}, error) {
+	res, err := api.getNodeSysAppSecretLikedResources(c)
+	if err != nil {
+		return nil, err
+	}
+	return api.ToRegistryViewList(res), nil
+}
+
 func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, error) {
 	app := new(models.ApplicationView)
 	app.Name = c.GetNameFromParam()
