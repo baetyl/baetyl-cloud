@@ -1,6 +1,7 @@
 package models
 
 import (
+	"reflect"
 	"time"
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
@@ -52,4 +53,12 @@ type ApplicationList struct {
 
 type ServiceFunction struct {
 	Functions []specV1.ServiceFunction `json:"functions,omitempty"`
+}
+
+func EqualApp(app1, app2 *specV1.Application) bool {
+	return reflect.DeepEqual(app1.Labels, app2.Labels) &&
+		reflect.DeepEqual(app1.Selector, app2.Selector) &&
+		reflect.DeepEqual(app1.Description, app2.Description) &&
+		reflect.DeepEqual(app1.Services, app2.Services) &&
+		reflect.DeepEqual(app1.Volumes, app2.Volumes)
 }
