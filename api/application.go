@@ -208,7 +208,7 @@ func (api *API) GetSysAppConfigs(c *common.Context) (interface{}, error) {
 
 	list, err := api.Config.List(ns, ops)
 	if err != nil {
-		log.L().Error("list configs error", log.Error(err))
+		log.L().Error("failed to list configs", log.Error(err))
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
 	for i := range list.Items {
