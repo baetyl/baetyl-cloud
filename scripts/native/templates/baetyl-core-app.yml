@@ -3,6 +3,7 @@ namespace: "{{.Namespace}}"
 selector: "baetyl-node-name={{.NodeName}}"
 labels:
   baetyl-cloud-system: "true"
+  resource-invisible: "true"
 type: "container"
 system: true
 services:

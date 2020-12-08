@@ -165,6 +165,10 @@ func initApplicationAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		configs.DELETE("/:name", mockIM, common.Wrapper(api.DeleteApplication))
 		configs.POST("", mockIM, common.Wrapper(api.CreateApplication))
 		configs.GET("", mockIM, common.Wrapper(api.ListApplication))
+		configs.GET("/:name/configs", mockIM, common.Wrapper(api.GetSysAppConfigs))
+		configs.GET("/:name/secrets", mockIM, common.Wrapper(api.GetSysAppSecrets))
+		configs.GET("/:name/certificates", mockIM, common.Wrapper(api.GetSysAppCertificates))
+		configs.GET("/:name/registries", mockIM, common.Wrapper(api.GetSysAppRegistries))
 	}
 	return api, router, mockCtl
 }
@@ -1959,6 +1963,118 @@ func TestDeleteApplication(t *testing.T) {
 
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/apps/abc", nil)
 	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestAPI_GetSysAppConfigs(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+
+	mClist := &models.ConfigurationList{}
+	sConfig.EXPECT().List("baetyl-cloud", gomock.Any()).Return(mClist, nil).Times(1)
+
+	// 200
+	req, _ := http.NewRequest(http.MethodGet, "/v1/apps/test/configs", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestAPI_GetNodeSysAppSecrets(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+
+	mClist := &models.SecretList{}
+	sSecret.EXPECT().List("baetyl-cloud", gomock.Any()).Return(mClist, nil).Times(1)
+
+	// 200
+	req, _ := http.NewRequest(http.MethodGet, "/v1/apps/test/secrets", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestAPI_GetNodeSysAppCertificates(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+
+	mClist := &models.SecretList{}
+	sSecret.EXPECT().List("baetyl-cloud", gomock.Any()).Return(mClist, nil).Times(1)
+
+	// 200
+	req, _ := http.NewRequest(http.MethodGet, "/v1/apps/test/certificates", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestAPI_GetNodeSysAppRegistries(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+
+	mClist := &models.SecretList{}
+	sSecret.EXPECT().List("baetyl-cloud", gomock.Any()).Return(mClist, nil).Times(1)
+
+	// 200
+	req, _ := http.NewRequest(http.MethodGet, "/v1/apps/test/registries", nil)
+	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 }

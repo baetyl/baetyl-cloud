@@ -402,69 +402,11 @@ func (api *API) GetNodeProperties(c *common.Context) (interface{}, error) {
 	return api.Node.GetNodeProperties(ns, n)
 }
 
-func (api *API) GetNodeEnvs(c *common.Context) (interface{}, error) {
+func (api *API) getNodeSysAppSecretLikedResources(c *common.Context) (*models.SecretList, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 
-	coreApp, err := api.getCoreAppByNodeName(ns, n)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(coreApp.Services) < 1 {
-		return nil, common.Error(common.ErrResourceNotFound, common.Field("error", "service of baetyl-core app didn't find"))
-	}
-
-	return models.NodeEnvs{Envs: coreApp.Services[0].Env}, nil
-}
-
-func (api *API) GetNodeSysAppConfigs(c *common.Context) (interface{}, error) {
-	ns, node, app := c.GetNamespace(), c.GetNameFromParam(), c.Param("app")
-
 	ops := &models.ListOptions{
-		LabelSelector: fmt.Sprintf("%s=%s,%s=%s", BaetylNodeNameKey, node, BaetylAppNameKey, app),
-	}
-
-	list, err := api.Config.List(ns, ops)
-	if err != nil {
-		log.L().Error("list configs error", log.Error(err))
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
-	}
-	for i := range list.Items {
-		list.Items[i].Data = nil
-	}
-	return list, err
-}
-
-func (api *API) GetNodeSysAppSecrets(c *common.Context) (interface{}, error) {
-	res, err := api.getNodeSysAppSecretLikedResources(c)
-	if err != nil {
-		return nil, err
-	}
-	return api.ToSecretViewList(res), nil
-}
-
-func (api *API) GetNodeSysAppCertificates(c *common.Context) (interface{}, error) {
-	res, err := api.getNodeSysAppSecretLikedResources(c)
-	if err != nil {
-		return nil, err
-	}
-
-	return api.ToCertificateViewList(res), nil
-}
-
-func (api *API) GetNodeSysAppRegistries(c *common.Context) (interface{}, error) {
-	res, err := api.getNodeSysAppSecretLikedResources(c)
-	if err != nil {
-		return nil, err
-	}
-	return api.ToRegistryViewList(res), nil
-}
-
-func (api *API) getNodeSysAppSecretLikedResources(c *common.Context) (*models.SecretList, error) {
-	ns, node, app := c.GetNamespace(), c.GetNameFromParam(), c.Param("app")
-
-	ops := &models.ListOptions{
-		LabelSelector: fmt.Sprintf("%s=%s,%s=%s", BaetylNodeNameKey, node, BaetylAppNameKey, app),
+		LabelSelector: fmt.Sprintf("%s=%s", BaetylAppNameKey, n),
 	}
 
 	return api.Secret.List(ns, ops)
@@ -477,37 +419,6 @@ func (api *API) UpdateNodeProperties(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	return api.Node.UpdateNodeProperties(ns, n, props)
-}
-
-func (api *API) UpdateNodeEnvs(c *common.Context) (interface{}, error) {
-	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	envs, err := api.ParseAndCheckEnvs(c)
-	if err != nil {
-		return nil, err
-	}
-
-	coreApp, err := api.getCoreAppByNodeName(ns, n)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(coreApp.Services) < 1 {
-		return nil, common.Error(common.ErrResourceNotFound, common.Field("error", "service of baetyl-core app didn't find"))
-	}
-
-	coreApp.Services[0].Env = envs.Envs
-
-	app, err := api.App.Update(ns, coreApp)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = api.Node.UpdateNodeAppVersion(ns, app)
-	if err != nil {
-		return nil, err
-	}
-
-	return envs, nil
 }
 
 func (api *API) UpdateNodeMode(c *common.Context) (interface{}, error) {
@@ -667,15 +578,6 @@ func (api *API) getCoreAppByNodeName(ns, node string) (*v1.Application, error) {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"), common.Field("name", v1.BaetylCore), common.Field("namespace", ns))
 	}
 	return api.App.Get(ns, core, "")
-}
-
-func (api *API) ParseAndCheckEnvs(c *common.Context) (*models.NodeEnvs, error) {
-	envs := new(models.NodeEnvs)
-	err := c.LoadBody(envs)
-	if err != nil {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
-	}
-	return envs, nil
 }
 
 // don't delete resource which doesn't belong to system
