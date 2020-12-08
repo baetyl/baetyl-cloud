@@ -144,6 +144,7 @@ func (api *API) GetAppByRegistry(c *common.Context) (interface{}, error) {
 func (api *API) parseAndCheckRegistryModel(c *common.Context) (*models.Registry, error) {
 	registry := new(models.Registry)
 	registry.Name = c.GetNameFromParam()
+	registry.Namespace = c.GetNamespace()
 	err := c.LoadBody(registry)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))

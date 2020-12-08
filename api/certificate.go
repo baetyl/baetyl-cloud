@@ -136,6 +136,7 @@ func parseAndCheckCertificateModelWhenUpdate(c *common.Context) (*models.Certifi
 func parseAndCheckCertificateModel(c *common.Context) (*models.Certificate, error) {
 	certificate := new(models.Certificate)
 	certificate.Name = c.GetNameFromParam()
+	certificate.Namespace = c.GetNamespace()
 	err := c.LoadBody(certificate)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
