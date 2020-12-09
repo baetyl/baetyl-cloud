@@ -190,6 +190,11 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		common.LabelNodeName: node.Name,
 	})
 	node.Version = oldNode.Version
+
+	if models.EqualNode(node, oldNode) {
+		return oldNode.View(OfflineDuration)
+	}
+
 	node, err = api.Node.Update(c.GetNamespace(), node)
 
 	if err != nil {
