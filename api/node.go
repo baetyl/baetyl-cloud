@@ -617,7 +617,7 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 	if v, ok := node.Attributes[BaetylCorePrevVersion]; ok {
 		res, ok := v.(string)
 		if !ok {
-			return nil, errors.New(`failed to convert "BaetylCoreFrequency" attributes to string`)
+			return nil, common.Error(common.ErrConvertConflict, common.Field("name", "BaetylCorePrevVersion"), common.Field("error", "failed to convert to string`"))
 		}
 		coreVersions.Versions = append(coreVersions.Versions, res)
 	}
@@ -740,6 +740,9 @@ func (api *API) updateCoreVersions(node *v1.Node, currentVersion, updateVersion 
 		delete(node.Attributes, BaetylCorePrevVersion)
 		return
 	}
+	if currentVersion == updateVersion {
+		return
+	}
 	node.Attributes[BaetylCorePrevVersion] = currentVersion
 }
 
@@ -816,7 +819,7 @@ func (api *API) getCoreAppFrequency(node *v1.Node) (int, error) {
 	}
 	freq, ok := node.Attributes[BaetylCoreFrequency].(string)
 	if !ok {
-		return 0, errors.New(`failed to convert "BaetylCoreFrequency" attributes to string`)
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", "BaetylCoreFrequency"), common.Field("error", "failed to convert to string`"))
 	}
 	res, err := strconv.Atoi(freq)
 	if err != nil {
