@@ -539,6 +539,8 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	node.Attributes[BaetylCoreFrequency] = fmt.Sprintf("%d", coreConfig.Frequency)
+
 	err = api.updateCoreAppAPIPort(ns, coreService, coreConfig.APIPort)
 	if err != nil {
 		return nil, err
@@ -615,7 +617,7 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 	if v, ok := node.Attributes[BaetylCorePrevVersion]; ok {
 		res, ok := v.(string)
 		if !ok {
-			return nil, errors.New("value is not string")
+			return nil, errors.New(`failed to convert "BaetylCoreFrequency" attributes to string`)
 		}
 		coreVersions.Versions = append(coreVersions.Versions, res)
 	}
@@ -750,7 +752,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, nodeName string, freq i
 	params := map[string]interface{}{
 		"CoreConfName":  config.Name,
 		"CoreAppName":   app.Name,
-		"CoreFrequency": freq,
+		"CoreFrequency": fmt.Sprintf("%ds", freq),
 	}
 	data, err := api.Init.GetResource(config.Namespace, nodeName, service.TemplateCoreConfYaml, params)
 	if err != nil {
@@ -814,7 +816,7 @@ func (api *API) getCoreAppFrequency(node *v1.Node) (int, error) {
 	}
 	freq, ok := node.Attributes[BaetylCoreFrequency].(string)
 	if !ok {
-		return 0, errors.New("value is not string")
+		return 0, errors.New(`failed to convert "BaetylCoreFrequency" attributes to string`)
 	}
 	res, err := strconv.Atoi(freq)
 	if err != nil {

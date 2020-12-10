@@ -27,7 +27,6 @@ const (
 const (
 	templateInitConfYaml       = "baetyl-init-conf.yml"
 	templateInitAppYaml        = "baetyl-init-app.yml"
-	TemplateCoreConfYaml       = "baetyl-core-conf.yml"
 	templateCoreAppYaml        = "baetyl-core-app.yml"
 	templateFuncConfYaml       = "baetyl-function-conf.yml"
 	templateFuncAppYaml        = "baetyl-function-app.yml"
@@ -36,9 +35,11 @@ const (
 	templateRuleConfYaml       = "baetyl-rule-conf.yml"
 	templateRuleAppYaml        = "baetyl-rule-app.yml"
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
-	TemplateBaetylInitCommand  = "baetyl-init-command"
-	TemplateKubeInitCommand    = "baetyl-kube-init-command"
-	TemplateNativeInitCommand  = "baetyl-native-init-command"
+
+	TemplateCoreConfYaml      = "baetyl-core-conf.yml"
+	TemplateBaetylInitCommand = "baetyl-init-command"
+	TemplateKubeInitCommand   = "baetyl-kube-init-command"
+	TemplateNativeInitCommand = "baetyl-native-init-command"
 )
 
 var (
@@ -274,7 +275,7 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]inte
 	confName := fmt.Sprintf("baetyl-core-conf-%s", common.RandString(9))
 	params["CoreAppName"] = appName
 	params["CoreConfName"] = confName
-	params["CoreFrequency"] = common.DefaultCoreFrequency
+	params["CoreFrequency"] = fmt.Sprintf("%ss", common.DefaultCoreFrequency)
 	params["CoreAPIPort"] = common.DefaultCoreAPIPort
 
 	// create config
