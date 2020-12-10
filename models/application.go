@@ -56,13 +56,11 @@ type ServiceFunction struct {
 }
 
 func EqualApp(app1, app2 *specV1.Application) bool {
-	flag := equalVolume(app1.Volumes, app2.Volumes)
-	if !flag {
+	if !equalVolume(app1.Volumes, app2.Volumes) {
 		return false
 	}
 
-	flag = equalServices(app1.Services, app2.Services)
-	if !flag {
+	if !equalServices(app1.Services, app2.Services) {
 		return false
 	}
 
@@ -74,15 +72,15 @@ func EqualApp(app1, app2 *specV1.Application) bool {
 		reflect.DeepEqual(app1.Description, app2.Description)
 }
 
-func equalVolume(v1, v2 []specV1.Volume) bool {
-	if len(v1) != len(v2) {
+func equalVolume(vol1, vol2 []specV1.Volume) bool {
+	if len(vol1) != len(vol2) {
 		return false
 	}
 
-	if len(v1) != 0 {
-		for i := range v1 {
-			v1 := v1[i]
-			v2 := v2[i]
+	if len(vol1) != 0 {
+		for i := range vol1 {
+			v1 := vol1[i]
+			v2 := vol2[i]
 			flag := (v1.Name == v2.Name) &&
 				((v1.Secret != nil && v2.Secret != nil && v1.Secret.Name == v2.Secret.Name) || (v1.Secret == nil && v2.Secret == nil)) &&
 				((v1.Config != nil && v2.Config != nil && v1.Config.Name == v2.Config.Name) || (v1.Config == nil && v2.Config == nil)) &&
@@ -95,15 +93,15 @@ func equalVolume(v1, v2 []specV1.Volume) bool {
 	return true
 }
 
-func equalServices(s1, s2 []specV1.Service) bool {
-	if len(s1) != len(s2) {
+func equalServices(svc1, svc2 []specV1.Service) bool {
+	if len(svc1) != len(svc2) {
 		return false
 	}
 
-	if len(s1) != 0 {
-		for i := range s1 {
-			s1 := s1[i]
-			s2 := s2[i]
+	if len(svc1) != 0 {
+		for i := range svc1 {
+			s1 := svc1[i]
+			s2 := svc2[i]
 			if flag := (s1.Name == s2.Name) && (s1.Hostname == s2.Hostname) && (s1.Image == s2.Image) && (s1.Replica == s2.Replica) && (s1.HostNetwork == s2.HostNetwork) &&
 				(s1.Runtime == s2.Runtime) && reflect.DeepEqual(s1.SecurityContext, s2.SecurityContext) && reflect.DeepEqual(s1.FunctionConfig, s2.FunctionConfig); !flag {
 				return false
