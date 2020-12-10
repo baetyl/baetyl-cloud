@@ -71,6 +71,7 @@ func EqualNode(node1, node2 *specV1.Node) bool {
 
 type NodeCoreConfigs struct {
 	Version   string `yaml:"version,omitempty" json:"version,omitempty"`
+	// unit: seconds
 	Frequency int    `yaml:"frequency,omitempty" json:"frequency,omitempty"`
 	APIPort   int    `yaml:"apiport,omitempty" json:"apiport,omitempty"`
 }

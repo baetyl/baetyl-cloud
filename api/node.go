@@ -6,9 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/baetyl/baetyl-go/v2/utils"
-	"gopkg.in/yaml.v2"
-
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -18,22 +15,18 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/service"
-
-	baetylconfig "github.com/baetyl/baetyl/v2/config"
 )
 
 const (
-	OfflineDuration          = 40 * time.Second
-	NodeNumber               = 1
-	BaetylCoreOriginVersion  = "BaetylCoreOriginVersion"
-	BaetylCoreCurrentVersion = "BaetylCoreCurrentVersion"
-	BaetylCoreFrequency      = "BaetylCoreFrequency"
-	BaetylCoreAPIPort        = "BaetylCoreAPIPort"
-	BaetylNodeNameKey        = "baetyl-node-name"
-	BaetylAppNameKey         = "baetyl-app-name"
-	BaetylCoreConfPrefix     = "baetyl-core-conf"
-	BaetylCoreContainerPort  = 80
-	BaetylVersionPrefix      = "baetyl-version-"
+	OfflineDuration         = 40 * time.Second
+	NodeNumber              = 1
+	BaetylCorePrevVersion   = "BaetylCorePrevVersion"
+	BaetylCoreFrequency     = "BaetylCoreFrequency"
+	BaetylNodeNameKey       = "baetyl-node-name"
+	BaetylAppNameKey        = "baetyl-app-name"
+	BaetylCoreConfPrefix    = "baetyl-core-conf"
+	BaetylCoreContainerPort = 80
+	BaetylVersionPrefix     = "baetyl-version-"
 )
 
 // GetNode get a node
@@ -155,6 +148,13 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// set default frequency here
+	if n.Attributes == nil {
+		n.Attributes = map[string]interface{}{}
+	}
+	n.Attributes[BaetylCoreFrequency] = common.DefaultCoreFrequency
+
 	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
 		if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
@@ -505,47 +505,41 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	config, baetylConfig, err := api.getCoreAppConfig(app)
-	if err != nil {
-		return nil, err
-	}
-
 	port, err := api.getCoreAppAPIPort(ns, coreService)
 	if err != nil {
 		return nil, err
 	}
 
-	image, err := api.getCoreImageByVersion(coreConfig.Version)
+	version, err := api.getCoreCurrentVersionByImage(coreService.Image)
 	if err != nil {
 		return nil, err
 	}
 
-	if image == coreService.Image &&
-		int(baetylConfig.Sync.Report.Interval.Seconds()) == coreConfig.Frequency &&
-		port == coreConfig.APIPort {
+	// get frequency
+	freq, err := api.getCoreAppFrequency(node)
+	if err != nil {
+		return nil, err
+	}
+
+	if coreConfig.Version == version &&
+		coreConfig.Frequency == freq &&
+		coreConfig.APIPort == port {
 		return node.View(OfflineDuration)
 	}
 
-	if node.Attributes == nil {
-		node.Attributes = map[string]interface{}{}
-	}
-	if _, ok := node.Attributes[BaetylCoreOriginVersion]; !ok {
-		version, err := api.filterCoreVersionByImage(coreService.Image)
-		if err != nil {
-			return nil, err
-		}
-		node.Attributes[BaetylCoreOriginVersion] = version
-	}
+	api.updateCoreVersions(node, version, coreConfig.Version)
 
-	coreService.Image = image
-	if int(baetylConfig.Sync.Report.Interval.Seconds()) != coreConfig.Frequency {
-		baetylConfig.Sync.Report.Interval = time.Second * time.Duration(coreConfig.Frequency)
-		err := api.updateCoreAppConfig(config, baetylConfig)
-		if err != nil {
-			return nil, err
-		}
+	image, err := api.getCoreImageByVersion(coreConfig.Version)
+	if err != nil {
+		return nil, err
 	}
-	err = api.setCoreAppAPIPort(ns, coreService, coreConfig.APIPort)
+	coreService.Image = image
+
+	err = api.updateCoreAppConfig(app, node.Name, coreConfig.Frequency)
+	if err != nil {
+		return nil, err
+	}
+	err = api.updateCoreAppAPIPort(ns, coreService, coreConfig.APIPort)
 	if err != nil {
 		return nil, err
 	}
@@ -570,24 +564,18 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 
 func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	_, err := api.Node.Get(ns, n)
+	node, err := api.Node.Get(ns, n)
 	if err != nil {
 		return nil, err
 	}
 
 	var coreInfo models.NodeCoreConfigs
-
 	app, err := api.getCoreAppByNodeName(ns, n)
 	if err != nil {
 		return nil, err
 	}
 
 	coreService, err := api.getCoreAppService(app)
-	if err != nil {
-		return nil, err
-	}
-
-	_, baetylConfig, err := api.getCoreAppConfig(app)
 	if err != nil {
 		return nil, err
 	}
@@ -599,7 +587,10 @@ func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
 	coreInfo.Version = coreVersion
 
 	// get frequency
-	coreInfo.Frequency = int(baetylConfig.Sync.Report.Interval.Seconds())
+	coreInfo.Frequency, err = api.getCoreAppFrequency(node)
+	if err != nil {
+		return nil, err
+	}
 
 	// get api port
 	coreInfo.APIPort, err = api.getCoreAppAPIPort(ns, coreService)
@@ -616,11 +607,17 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	if node.Attributes == nil {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", ns))
+	}
+
 	var coreVersions models.NodeCoreVersions
-	var originVersion string
-	if node.Attributes != nil && node.Attributes[BaetylCoreOriginVersion] != "" {
-		originVersion = node.Attributes[BaetylCoreOriginVersion].(string)
-		coreVersions.Versions = append(coreVersions.Versions, originVersion)
+	if v, ok := node.Attributes[BaetylCorePrevVersion]; ok {
+		res, ok := v.(string)
+		if !ok {
+			return nil, errors.New("value is not string")
+		}
+		coreVersions.Versions = append(coreVersions.Versions, res)
 	}
 
 	app, err := api.getCoreAppByNodeName(ns, n)
@@ -637,15 +634,13 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	if currentVersion != "" && currentVersion != originVersion {
-		coreVersions.Versions = append(coreVersions.Versions, currentVersion)
-	}
+	coreVersions.Versions = append(coreVersions.Versions, currentVersion)
 
 	latestVersion, err := api.Prop.GetPropertyValue(BaetylVersionPrefix + "latest")
 	if err != nil {
 		return nil, err
 	}
-	if latestVersion != "" && latestVersion != originVersion && latestVersion != currentVersion {
+	if latestVersion != "" && latestVersion != currentVersion {
 		coreVersions.Versions = append(coreVersions.Versions, latestVersion)
 	}
 	return coreVersions, nil
@@ -723,43 +718,49 @@ func (api *API) getCoreAppService(app *v1.Application) (*v1.Service, error) {
 	return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "service"), common.Field("name", v1.BaetylCore), common.Field("namespace", app.Namespace))
 }
 
-func (api *API) getCoreAppConfig(app *v1.Application) (*v1.Configuration, *baetylconfig.Config, error) {
+func (api *API) getCoreAppConfig(app *v1.Application) (*v1.Configuration, error) {
 	for _, volume := range app.Volumes {
 		if volume.Config == nil || !strings.Contains(volume.Config.Name, BaetylCoreConfPrefix) {
 			continue
 		}
 		conf, err := api.Config.Get(app.Namespace, volume.Config.Name, "")
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 
-		for k, v := range conf.Data {
-			if k != common.DefaultMasterConfFile {
-				continue
-			}
-			coreConfig := new(baetylconfig.Config)
-			err := yaml.Unmarshal([]byte(v), coreConfig)
-			if err != nil {
-				return nil, nil, err
-			}
-			if err := utils.SetDefaults(coreConfig); err != nil {
-				return nil, nil, err
-			}
-			return conf, coreConfig, nil
-		}
+		return conf, nil
 	}
-	return nil, nil, common.Error(common.ErrResourceNotFound, common.Field("type", "config"), common.Field("name", v1.BaetylCore), common.Field("namespace", app.Namespace))
+	return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "config"), common.Field("name", v1.BaetylCore), common.Field("namespace", app.Namespace))
 }
 
-func (api *API) updateCoreAppConfig(config *v1.Configuration, baetylConfig *baetylconfig.Config) error {
-	data, err := yaml.Marshal(baetylConfig)
+func (api *API) updateCoreVersions(node *v1.Node, currentVersion, updateVersion string) {
+	if v, ok := node.Attributes[BaetylCorePrevVersion]; ok && v.(string) == updateVersion {
+		delete(node.Attributes, BaetylCorePrevVersion)
+		return
+	}
+	node.Attributes[BaetylCorePrevVersion] = currentVersion
+}
+
+func (api *API) updateCoreAppConfig(app *v1.Application, nodeName string, freq int) error {
+	config, err := api.getCoreAppConfig(app)
 	if err != nil {
 		return err
 	}
+
+	params := map[string]interface{}{
+		"CoreConfName":  config.Name,
+		"CoreAppName":   app.Name,
+		"CoreFrequency": freq,
+	}
+	data, err := api.Init.GetResource(config.Namespace, nodeName, service.TemplateCoreConfYaml, params)
+	if err != nil {
+		return err
+	}
+
 	if _, ok := config.Data[common.DefaultMasterConfFile]; !ok {
 		return common.Error(common.ErrResourceNotFound, common.Field("type", "conf.yml"), common.Field("name", v1.BaetylCore))
 	}
-	config.Data[common.DefaultMasterConfFile] = string(data)
+	config.Data[common.DefaultMasterConfFile] = string(data.([]byte))
 	_, err = api.Config.Update(config.Namespace, config)
 	if err != nil {
 		return err
@@ -776,7 +777,7 @@ func (api *API) getCoreAppAPIPort(ns string, service *v1.Service) (int, error) {
 	return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "APIPort"), common.Field("name", v1.BaetylCore), common.Field("namespace", ns))
 }
 
-func (api *API) setCoreAppAPIPort(ns string, service *v1.Service, port int) error {
+func (api *API) updateCoreAppAPIPort(ns string, service *v1.Service, port int) error {
 	for i, v := range service.Ports {
 		if v.ContainerPort == int32(BaetylCoreContainerPort) {
 			service.Ports[i].HostPort = int32(port)
@@ -802,4 +803,22 @@ func (api *API) getCoreAppByNodeName(ns, node string) (*v1.Application, error) {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"), common.Field("name", v1.BaetylCore), common.Field("namespace", ns))
 	}
 	return api.App.Get(ns, core, "")
+}
+
+func (api *API) getCoreAppFrequency(node *v1.Node) (int, error) {
+	if node.Attributes == nil {
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
+	}
+	if _, ok := node.Attributes[BaetylCoreFrequency]; !ok {
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", BaetylCoreFrequency), common.Field("namespace", node.Namespace))
+	}
+	freq, ok := node.Attributes[BaetylCoreFrequency].(string)
+	if !ok {
+		return 0, errors.New("value is not string")
+	}
+	res, err := strconv.Atoi(freq)
+	if err != nil {
+		return 0, errors.Trace(err)
+	}
+	return res, nil
 }
