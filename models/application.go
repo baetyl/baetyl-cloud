@@ -56,14 +56,33 @@ type ServiceFunction struct {
 }
 
 func EqualApp(app1, app2 *specV1.Application) bool {
-	if len(app1.Volumes) != len(app2.Volumes) {
+	flag := equalVolume(app1.Volumes, app2.Volumes)
+	if !flag {
 		return false
 	}
 
-	if len(app1.Volumes) != 0 {
-		for i := range app1.Volumes {
-			v1 := app1.Volumes[i]
-			v2 := app2.Volumes[i]
+	flag = equalServices(app1.Services, app2.Services)
+	if !flag {
+		return false
+	}
+
+	if len(app1.Labels) != len(app2.Labels) || (len(app1.Labels) != 0 && !reflect.DeepEqual(app1.Labels, app2.Labels)) {
+		return false
+	}
+
+	return reflect.DeepEqual(app1.Selector, app2.Selector) &&
+		reflect.DeepEqual(app1.Description, app2.Description)
+}
+
+func equalVolume(v1, v2 []specV1.Volume) bool {
+	if len(v1) != len(v2) {
+		return false
+	}
+
+	if len(v1) != 0 {
+		for i := range v1 {
+			v1 := v1[i]
+			v2 := v2[i]
 			flag := (v1.Name == v2.Name) &&
 				((v1.Secret != nil && v2.Secret != nil && v1.Secret.Name == v2.Secret.Name) || (v1.Secret == nil && v2.Secret == nil)) &&
 				((v1.Config != nil && v2.Config != nil && v1.Config.Name == v2.Config.Name) || (v1.Config == nil && v2.Config == nil)) &&
@@ -73,15 +92,18 @@ func EqualApp(app1, app2 *specV1.Application) bool {
 			}
 		}
 	}
+	return true
+}
 
-	if len(app1.Services) != len(app2.Services) {
+func equalServices(s1, s2 []specV1.Service) bool {
+	if len(s1) != len(s2) {
 		return false
 	}
 
-	if len(app1.Services) != 0 {
-		for j := range app1.Services {
-			s1 := app1.Services[j]
-			s2 := app2.Services[j]
+	if len(s1) != 0 {
+		for i := range s1 {
+			s1 := s1[i]
+			s2 := s2[i]
 			if flag := (s1.Name == s2.Name) && (s1.Hostname == s2.Hostname) && (s1.Image == s2.Image) && (s1.Replica == s2.Replica) && (s1.HostNetwork == s2.HostNetwork) &&
 				(s1.Runtime == s2.Runtime) && reflect.DeepEqual(s1.SecurityContext, s2.SecurityContext) && reflect.DeepEqual(s1.FunctionConfig, s2.FunctionConfig); !flag {
 				return false
@@ -129,11 +151,5 @@ func EqualApp(app1, app2 *specV1.Application) bool {
 			}
 		}
 	}
-
-	if len(app1.Labels) != len(app2.Labels) || (len(app1.Labels) != 0 && !reflect.DeepEqual(app1.Labels, app2.Labels)) {
-		return false
-	}
-
-	return reflect.DeepEqual(app1.Selector, app2.Selector) &&
-		reflect.DeepEqual(app1.Description, app2.Description)
+	return true
 }
