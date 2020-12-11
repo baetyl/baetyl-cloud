@@ -1986,6 +1986,8 @@ func TestAPI_GetSysAppConfigs(t *testing.T) {
 	api.Node = sNode
 
 	mClist := &models.ConfigurationList{}
+	mApp := &specV1.Application{}
+	sApp.EXPECT().Get("baetyl-cloud", gomock.Any(), "").Return(mApp, nil)
 	sConfig.EXPECT().List("baetyl-cloud", gomock.Any()).Return(mClist, nil).Times(1)
 
 	// 200
@@ -2014,6 +2016,8 @@ func TestAPI_GetNodeSysAppSecrets(t *testing.T) {
 	api.Node = sNode
 
 	mClist := &models.SecretList{}
+	mApp := &specV1.Application{}
+	sApp.EXPECT().Get("baetyl-cloud", gomock.Any(), "").Return(mApp, nil)
 	sSecret.EXPECT().List("baetyl-cloud", gomock.Any()).Return(mClist, nil).Times(1)
 
 	// 200
@@ -2042,6 +2046,8 @@ func TestAPI_GetNodeSysAppCertificates(t *testing.T) {
 	api.Node = sNode
 
 	mClist := &models.SecretList{}
+	mApp := &specV1.Application{}
+	sApp.EXPECT().Get("baetyl-cloud", gomock.Any(), "").Return(mApp, nil)
 	sSecret.EXPECT().List("baetyl-cloud", gomock.Any()).Return(mClist, nil).Times(1)
 
 	// 200
@@ -2070,6 +2076,8 @@ func TestAPI_GetNodeSysAppRegistries(t *testing.T) {
 	api.Node = sNode
 
 	mClist := &models.SecretList{}
+	mApp := &specV1.Application{}
+	sApp.EXPECT().Get("baetyl-cloud", gomock.Any(), "").Return(mApp, nil)
 	sSecret.EXPECT().List("baetyl-cloud", gomock.Any()).Return(mClist, nil).Times(1)
 
 	// 200
