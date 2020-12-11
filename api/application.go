@@ -205,6 +205,10 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 
 func (api *API) GetSysAppConfigs(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
+	_, err := api.App.Get(ns, n, "")
+	if err != nil {
+		return nil, err
+	}
 
 	ops := &models.ListOptions{
 		LabelSelector: fmt.Sprintf("%s=%s", BaetylAppNameKey, n),
