@@ -56,9 +56,98 @@ type ServiceFunction struct {
 }
 
 func EqualApp(app1, app2 *specV1.Application) bool {
-	return reflect.DeepEqual(app1.Labels, app2.Labels) &&
-		reflect.DeepEqual(app1.Selector, app2.Selector) &&
-		reflect.DeepEqual(app1.Description, app2.Description) &&
-		reflect.DeepEqual(app1.Services, app2.Services) &&
-		reflect.DeepEqual(app1.Volumes, app2.Volumes)
+	if !equalVolume(app1.Volumes, app2.Volumes) {
+		return false
+	}
+
+	if !equalServices(app1.Services, app2.Services) {
+		return false
+	}
+
+	if len(app1.Labels) != len(app2.Labels) || (len(app1.Labels) != 0 && !reflect.DeepEqual(app1.Labels, app2.Labels)) {
+		return false
+	}
+
+	return reflect.DeepEqual(app1.Selector, app2.Selector) &&
+		reflect.DeepEqual(app1.Description, app2.Description)
+}
+
+func equalVolume(vol1, vol2 []specV1.Volume) bool {
+	if len(vol1) != len(vol2) {
+		return false
+	}
+
+	if len(vol1) != 0 {
+		for i := range vol1 {
+			v1 := vol1[i]
+			v2 := vol2[i]
+			flag := (v1.Name == v2.Name) &&
+				((v1.Secret != nil && v2.Secret != nil && v1.Secret.Name == v2.Secret.Name) || (v1.Secret == nil && v2.Secret == nil)) &&
+				((v1.Config != nil && v2.Config != nil && v1.Config.Name == v2.Config.Name) || (v1.Config == nil && v2.Config == nil)) &&
+				((v1.HostPath != nil && v2.HostPath != nil && v1.HostPath.Path == v2.HostPath.Path) || (v1.HostPath == nil && v2.HostPath == nil))
+			if !flag {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func equalServices(svc1, svc2 []specV1.Service) bool {
+	if len(svc1) != len(svc2) {
+		return false
+	}
+
+	if len(svc1) != 0 {
+		for i := range svc1 {
+			s1 := svc1[i]
+			s2 := svc2[i]
+			if flag := (s1.Name == s2.Name) && (s1.Hostname == s2.Hostname) && (s1.Image == s2.Image) && (s1.Replica == s2.Replica) && (s1.HostNetwork == s2.HostNetwork) &&
+				(s1.Runtime == s2.Runtime) && reflect.DeepEqual(s1.SecurityContext, s2.SecurityContext) && reflect.DeepEqual(s1.FunctionConfig, s2.FunctionConfig); !flag {
+				return false
+			}
+
+			if len(s1.VolumeMounts) != len(s2.VolumeMounts) || (len(s1.VolumeMounts) != 0 && !reflect.DeepEqual(s1.VolumeMounts, s2.VolumeMounts)) {
+				return false
+			}
+
+			if len(s1.Ports) != len(s2.Ports) || (len(s1.Ports) != 0 && !reflect.DeepEqual(s1.Ports, s2.Ports)) {
+				return false
+			}
+
+			if len(s1.Devices) != len(s2.Devices) || (len(s1.Devices) != 0 && !reflect.DeepEqual(s1.Devices, s2.Devices)) {
+				return false
+			}
+
+			if len(s1.Args) != len(s2.Args) || (len(s1.Args) != 0 && !reflect.DeepEqual(s1.Args, s2.Args)) {
+				return false
+			}
+
+			if len(s1.Env) != len(s2.Env) || (len(s1.Env) != 0 && !reflect.DeepEqual(s1.Env, s2.Env)) {
+				return false
+			}
+
+			if len(s1.Labels) != len(s2.Labels) || (len(s1.Labels) != 0 && !reflect.DeepEqual(s1.Labels, s2.Labels)) {
+				return false
+			}
+
+			if len(s1.Functions) != len(s2.Functions) || (len(s1.Functions) != 0 && !reflect.DeepEqual(s1.Functions, s2.Functions)) {
+				return false
+			}
+			if s1.Resources != nil && s2.Resources != nil {
+				if len(s1.Resources.Limits) != len(s2.Resources.Limits) || (len(s1.Resources.Limits) != 0 && !reflect.DeepEqual(s1.Resources.Limits, s2.Resources.Limits)) {
+					return false
+				}
+
+				if len(s1.Resources.Requests) != len(s2.Resources.Requests) || (len(s1.Resources.Requests) != 0 && !reflect.DeepEqual(s1.Resources.Requests, s2.Resources.Requests)) {
+					return false
+				}
+			} else if s1.Resources == nil && s2.Resources == nil {
+
+			} else {
+				return false
+			}
+		}
+	}
+	return true
 }
