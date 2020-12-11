@@ -371,6 +371,7 @@ func (api *API) GetNodeDeployHistory(c *common.Context) (interface{}, error) {
 func (api *API) ParseAndCheckNode(c *common.Context) (*v1.Node, error) {
 	node := new(v1.Node)
 	node.Name = c.GetNameFromParam()
+	node.Namespace = c.GetNamespace()
 	err := c.LoadBody(node)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
