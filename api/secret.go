@@ -1,6 +1,7 @@
 package api
 
 import (
+	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -192,7 +193,7 @@ func needUpdateAppSecret(secret *specV1.Secret, app *specV1.Application) bool {
 		if volume.Secret != nil &&
 			volume.Secret.Name == secret.Name &&
 			// secret's version must increment
-			common.CompareNumericalString(secret.Version, volume.Secret.Version) > 0 {
+			strings.Compare(secret.Version, volume.Secret.Version) > 0 {
 			volume.Secret.Version = secret.Version
 			appNeedUpdate = true
 		}

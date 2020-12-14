@@ -250,7 +250,7 @@ func needUpdateApp(config *specV1.Configuration, app *specV1.Application) bool {
 		if volume.Config != nil &&
 			volume.Config.Name == config.Name &&
 			// config's version must increment
-			common.CompareNumericalString(config.Version, volume.Config.Version) > 0 {
+			strings.Compare(config.Version, volume.Config.Version) > 0 {
 			volume.Config.Version = config.Version
 			appNeedUpdate = true
 		}
