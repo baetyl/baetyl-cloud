@@ -68,3 +68,14 @@ func EqualNode(node1, node2 *specV1.Node) bool {
 		reflect.DeepEqual(node1.Annotations, node2.Annotations) &&
 		reflect.DeepEqual(node1.Attributes, node2.Attributes)
 }
+
+type NodeCoreConfigs struct {
+	Version string `yaml:"version,omitempty" json:"version,omitempty"`
+	// unit: seconds
+	Frequency int `yaml:"frequency,omitempty" json:"frequency,omitempty"`
+	APIPort   int `yaml:"apiport,omitempty" json:"apiport,omitempty"`
+}
+
+type NodeCoreVersions struct {
+	Versions []string `yaml:"versions,omitempty" json:"versions,omitempty"`
+}

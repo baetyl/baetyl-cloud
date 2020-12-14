@@ -131,8 +131,9 @@ func (s *AdminServer) InitRoute() {
 		nodes.PUT("/:name/mode", common.Wrapper(s.api.UpdateNodeMode))
 		nodes.PUT("/:name/properties", common.Wrapper(s.api.UpdateNodeProperties))
 		nodes.GET("/:name/properties", common.Wrapper(s.api.GetNodeProperties))
-		nodes.PUT("/:name/update", common.Wrapper(s.api.UpdateCoreApp))
-		nodes.PUT("/:name/rollback", common.Wrapper(s.api.RollbackCoreApp))
+		nodes.PUT("/:name/core/configs", common.Wrapper(s.api.UpdateCoreApp))
+		nodes.GET("/:name/core/configs", common.Wrapper(s.api.GetCoreAppConfigs))
+		nodes.GET("/:name/core/versions", common.Wrapper(s.api.GetCoreAppVersions))
 	}
 	{
 		apps := v1.Group("/apps")

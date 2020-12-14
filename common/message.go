@@ -90,6 +90,7 @@ const (
 	ErrObjectOperationException = "ErrObjectOperationException"
 
 	ErrResourceInvisible = "ErrResourceInvisible"
+	ErrConvertConflict   = "ErrConvertConflict"
 )
 
 var templates = map[Code]string{
@@ -164,6 +165,7 @@ var templates = map[Code]string{
 	ErrInvalidArrayLength: "The length of the array exceeds the limit",
 
 	ErrResourceInvisible: "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} is not visible.",
+	ErrConvertConflict:   "Problem with converting {{if .name}} ({{.name}}){{end}}.{{if .error}} ({{.error}}){{end}}",
 }
 
 func getHTTPStatus(c Code) int {

@@ -77,6 +77,10 @@ const (
 	DefaultMasterPlistFile = "baetyl.plist"
 	// DefaultMasterDaemonFile
 	DefaultMasterDaemonFile = "baetyl.service"
+	// DefaultCoreFrequency
+	DefaultCoreFrequency = "20"
+	// DefaultCoreAPIPort
+	DefaultCoreAPIPort = "30050"
 	// ComposeVersion compose version
 	ComposeVersion = "3"
 	// Bind bind

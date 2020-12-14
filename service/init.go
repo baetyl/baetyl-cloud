@@ -27,7 +27,6 @@ const (
 const (
 	templateInitConfYaml       = "baetyl-init-conf.yml"
 	templateInitAppYaml        = "baetyl-init-app.yml"
-	templateCoreConfYaml       = "baetyl-core-conf.yml"
 	templateCoreAppYaml        = "baetyl-core-app.yml"
 	templateFuncConfYaml       = "baetyl-function-conf.yml"
 	templateFuncAppYaml        = "baetyl-function-app.yml"
@@ -36,9 +35,11 @@ const (
 	templateRuleConfYaml       = "baetyl-rule-conf.yml"
 	templateRuleAppYaml        = "baetyl-rule-app.yml"
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
-	TemplateBaetylInitCommand  = "baetyl-init-command"
-	TemplateKubeInitCommand    = "baetyl-kube-init-command"
-	TemplateNativeInitCommand  = "baetyl-native-init-command"
+
+	TemplateCoreConfYaml      = "baetyl-core-conf.yml"
+	TemplateBaetylInitCommand = "baetyl-init-command"
+	TemplateKubeInitCommand   = "baetyl-kube-init-command"
+	TemplateNativeInitCommand = "baetyl-native-init-command"
 )
 
 var (
@@ -111,6 +112,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	}
 	initService.ResourceMapFunc[templateInitDeploymentYaml] = initService.getInitDeploymentYaml
 	initService.ResourceMapFunc[TemplateBaetylInitCommand] = initService.GetInitCommand
+	initService.ResourceMapFunc[TemplateCoreConfYaml] = initService.getCoreConfig
 
 	return initService, nil
 }
@@ -273,9 +275,11 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]inte
 	confName := fmt.Sprintf("baetyl-core-conf-%s", common.RandString(9))
 	params["CoreAppName"] = appName
 	params["CoreConfName"] = confName
+	params["CoreFrequency"] = fmt.Sprintf("%ss", common.DefaultCoreFrequency)
+	params["CoreAPIPort"] = common.DefaultCoreAPIPort
 
 	// create config
-	conf, err := s.genConfig(ns, templateCoreConfYaml, params)
+	conf, err := s.genConfig(ns, TemplateCoreConfYaml, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -440,6 +444,12 @@ func (s *InitServiceImpl) genNodeCerts(ns, nodeName, appName string) (*specV1.Se
 		System: true,
 	}
 	return s.Secret.Create(ns, srt)
+}
+
+func (s *InitServiceImpl) getCoreConfig(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
+	params["Namespace"] = ns
+	params["NodeName"] = nodeName
+	return s.TemplateService.ParseTemplate(TemplateCoreConfYaml, params)
 }
 
 func (s *InitServiceImpl) genConfig(ns, template string, params map[string]interface{}) (*specV1.Configuration, error) {
