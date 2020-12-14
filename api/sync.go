@@ -100,10 +100,17 @@ func setNodeAddressIfExist(msg specV1.Message, report *specV1.Report) {
 	} else {
 		nodeVal, ok := (*report)["node"]
 		if ok {
-			node, ok := nodeVal.(map[string]interface{})
-			if ok {
+			nodes, ok := nodeVal.(map[string]interface{})
+			if !ok {
+				return
+			}
+			for k, info := range nodes {
+				node, ok := info.(map[string]interface{})
+				if !ok {
+					continue
+				}
 				node["address"] = addr
-				(*report)["node"] = node
+				(*report)["node"].(map[string]interface{})[k] = node
 			}
 		}
 	}
