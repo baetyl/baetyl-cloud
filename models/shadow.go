@@ -10,11 +10,13 @@ import (
 )
 
 type Shadow struct {
-	Namespace         string    `json:"namespace,omitempty"`
-	Name              string    `json:"name,omitempty"`
-	Report            v1.Report `json:"report,omitempty"`
-	Desire            v1.Desire `json:"desire,omitempty"`
-	CreationTimestamp time.Time `json:"createTime,omitempty"`
+	Namespace         string                 `json:"namespace,omitempty"`
+	Name              string                 `json:"name,omitempty"`
+	Report            v1.Report              `json:"report,omitempty"`
+	Desire            v1.Desire              `json:"desire,omitempty"`
+	ReportMeta        map[string]interface{} `json:"reportMeta,omitempty"`
+	DesireMeta        map[string]interface{} `json:"desireMeta,omitempty"`
+	CreationTimestamp time.Time              `json:"createTime,omitempty"`
 }
 
 // NodeViewList node view list
@@ -26,10 +28,12 @@ type ShadowList struct {
 
 func NewShadow(namespace, name string) *Shadow {
 	return &Shadow{
-		Name:      name,
-		Namespace: namespace,
-		Report:    BuildEmptyApps(),
-		Desire:    BuildEmptyApps(),
+		Name:       name,
+		Namespace:  namespace,
+		Report:     BuildEmptyApps(),
+		Desire:     BuildEmptyApps(),
+		ReportMeta: make(map[string]interface{}),
+		DesireMeta: make(map[string]interface{}),
 	}
 }
 
@@ -39,6 +43,8 @@ func NewShadowFromNode(node *v1.Node) *Shadow {
 		Namespace:         node.Namespace,
 		Report:            node.Report,
 		Desire:            node.Desire,
+		ReportMeta:        make(map[string]interface{}),
+		DesireMeta:        make(map[string]interface{}),
 		CreationTimestamp: node.CreationTimestamp.UTC(),
 	}
 
