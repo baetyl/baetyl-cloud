@@ -28,10 +28,10 @@ type ShadowList struct {
 
 func NewShadow(namespace, name string) *Shadow {
 	return &Shadow{
-		Name:      name,
-		Namespace: namespace,
-		Report:    BuildEmptyApps(),
-		Desire:    BuildEmptyApps(),
+		Name:       name,
+		Namespace:  namespace,
+		Report:     BuildEmptyApps(),
+		Desire:     BuildEmptyApps(),
 		ReportMeta: make(map[string]interface{}),
 		DesireMeta: make(map[string]interface{}),
 	}
@@ -43,8 +43,8 @@ func NewShadowFromNode(node *v1.Node) *Shadow {
 		Namespace:         node.Namespace,
 		Report:            node.Report,
 		Desire:            node.Desire,
-		ReportMeta: make(map[string]interface{}),
-		DesireMeta: make(map[string]interface{}),
+		ReportMeta:        make(map[string]interface{}),
+		DesireMeta:        make(map[string]interface{}),
 		CreationTimestamp: node.CreationTimestamp.UTC(),
 	}
 
