@@ -27,8 +27,11 @@ func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 // ListRegistry list Registry
 func (api *API) ListRegistry(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-
-	secrets, err := api.Secret.List(ns, api.parseListOptionsAppendSystemLabel(c))
+	params, err := api.parseListOptionsAppendSystemLabel(c)
+	if err != nil {
+		return nil, err
+	}
+	secrets, err := api.Secret.List(ns, params)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}

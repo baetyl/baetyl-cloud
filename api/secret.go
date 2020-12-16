@@ -27,7 +27,11 @@ func (api *API) GetSecret(c *common.Context) (interface{}, error) {
 // ListSecret list secret
 func (api *API) ListSecret(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	res, err := api.Secret.List(ns, api.parseListOptionsAppendSystemLabel(c))
+	params, err := api.parseListOptionsAppendSystemLabel(c)
+	if err != nil {
+		return nil, err
+	}
+	res, err := api.Secret.List(ns, params)
 	if err != nil {
 		return nil, err
 	}
