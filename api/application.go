@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -43,7 +42,11 @@ func (api *API) GetApplication(c *common.Context) (interface{}, error) {
 // ListApplication list application
 func (api *API) ListApplication(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	apps, err := api.App.List(ns, api.parseListOptionsAppendSystemLabel(c))
+	params, err := api.parseListOptionsAppendSystemLabel(c)
+	if err != nil {
+		return nil, err
+	}
+	apps, err := api.App.List(ns, params)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
@@ -301,19 +304,19 @@ func (api *API) getBaseAppIfSet(c *common.Context) (*specV1.Application, error) 
 	return nil, nil
 }
 
-func (api *API) parseListOptions(c *common.Context) *models.ListOptions {
-	limit, _ := strconv.ParseInt(c.Query("limit"), 10, 64)
-	lp := &models.ListOptions{
-		LabelSelector: c.Query("selector"),
-		FieldSelector: c.Query("fieldSelector"),
-		Limit:         limit,
-		Continue:      c.Query("continue"),
+func (api *API) parseListOptions(c *common.Context) (*models.ListOptions, error) {
+	params := &models.ListOptions{}
+	if err := c.Bind(params); err != nil {
+		return nil, err
 	}
-	return lp
+	return params, nil
 }
 
-func (api *API) parseListOptionsAppendSystemLabel(c *common.Context) *models.ListOptions {
-	opt := api.parseListOptions(c)
+func (api *API) parseListOptionsAppendSystemLabel(c *common.Context) (*models.ListOptions, error) {
+	opt, err := api.parseListOptions(c)
+	if err != nil {
+		return nil, err
+	}
 
 	ls := opt.LabelSelector
 	if !strings.Contains(ls, common.LabelSystem) {
@@ -324,7 +327,7 @@ func (api *API) parseListOptionsAppendSystemLabel(c *common.Context) *models.Lis
 	}
 
 	opt.LabelSelector = ls
-	return opt
+	return opt, nil
 }
 
 func (api *API) UpdateNodeAndAppIndex(namespace string, app *specV1.Application) error {

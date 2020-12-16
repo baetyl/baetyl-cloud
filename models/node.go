@@ -20,13 +20,6 @@ type NodeList struct {
 	Items       []specV1.Node `json:"items"`
 }
 
-type ListOptions struct {
-	LabelSelector string `json:"selector,omitempty"`
-	FieldSelector string `json:"fieldSelector,omitempty"`
-	Limit         int64  `json:"limit,omitempty"`
-	Continue      string `json:"continue,omitempty"`
-}
-
 type NodeNames struct {
 	Names []string `json:"names,"validate:"maxLength=20"`
 }

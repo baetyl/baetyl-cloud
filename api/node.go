@@ -95,7 +95,11 @@ func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 // ListNode list node
 func (api *API) ListNode(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	nodeList, err := api.Node.List(ns, api.parseListOptions(c))
+	params, err := api.parseListOptions(c)
+	if err != nil {
+		return nil, err
+	}
+	nodeList, err := api.Node.List(ns, params)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
