@@ -17,6 +17,8 @@ data:
     sync:
       download:
         timeout: 30m
+      report:
+        interval: {{.CoreFrequency}}
     httplink:
       address: "{{GetProperty "sync-server-address"}}"
       insecureSkipVerify: true
