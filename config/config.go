@@ -35,9 +35,6 @@ type CloudConfig struct {
 		Functions   []string `yaml:"functions" json:"functions" default:"[]"`
 		Property    string   `yaml:"property" json:"property" default:"database"`
 		SyncLinks   []string `yaml:"synclinks" json:"synclinks" default:"[\"httplink\"]"`
-		Device      string   `yaml:"device" json:"device" default:"databaseext"`
-		DeviceModel string   `yaml:"devicemodel" json:"devicemodel" default:"databaseext"`
-		Driver      string   `yaml:"driver" json:"driver" default:"databaseext"`
 	} `yaml:"plugin" json:"plugin"`
 }
 
