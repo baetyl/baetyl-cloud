@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -31,6 +32,7 @@ func (api *API) ListRegistry(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	params.LabelSelector += "," + fmt.Sprintf("%s=%s", specV1.SecretLabel, specV1.SecretRegistry)
 	secrets, err := api.Secret.List(ns, params)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
