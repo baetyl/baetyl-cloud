@@ -367,12 +367,21 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	mode := c.Query("mode")
-	params := map[string]interface{}{
-		"InitApplyYaml": "baetyl-init-deployment.yml",
-		"mode":          mode,
+	if mode == "" {
+		mode = "kube"
 	}
+	params := map[string]interface{}{
+		"mode": mode,
+	}
+	if mode == "kube" {
+		params["InitApplyYaml"] = "baetyl-init-deployment.yml"
+	} else if mode == "native" {
+		params["InitApplyYaml"] = "baetyl-init-apply.json"
+	} else {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("mode", mode))
+	}
+
 	cmd, err := api.Init.GetResource(ns, name, service.TemplateBaetylInitCommand, params)
 	if err != nil {
 		return nil, err

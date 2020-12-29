@@ -170,7 +170,7 @@ func TestInitService_GenCmd(t *testing.T) {
 		"mode":          "",
 	}
 	sAuth.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)
-	sProp.EXPECT().GetPropertyValue(TemplateKubeInitCommand).Return(TemplateBaetylInitCommand, nil)
+	sProp.EXPECT().GetPropertyValue(TemplateBaetylInitCommand).Return(TemplateBaetylInitCommand, nil)
 	sTemplate.EXPECT().Execute("setup-command", TemplateBaetylInitCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
 
 	res, err := as.GetInitCommand("ns", "name", params)
