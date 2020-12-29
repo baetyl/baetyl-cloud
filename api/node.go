@@ -29,6 +29,7 @@ const (
 	BaetylCoreConfPrefix    = "baetyl-core-conf"
 	BaetylCoreContainerPort = 80
 	BaetylVersionPrefix     = "baetyl-version-"
+	DefaultMode             = "kube"
 )
 
 // GetNode get a node
@@ -369,7 +370,7 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	}
 	mode := c.Query("mode")
 	if mode == "" {
-		mode = "kube"
+		mode = DefaultMode
 	}
 	params := map[string]interface{}{
 		"mode": mode,
