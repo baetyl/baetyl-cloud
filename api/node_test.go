@@ -1396,9 +1396,10 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		"CoreConfName":  "baetyl-core-conf-ialplsycd",
 		"CoreFrequency": "40s",
 	}
-	var expect interface{} = []byte("config")
-	mockInit.EXPECT().GetResource(ns, node.Name, service.TemplateCoreConfYaml, pparams).Return(expect, nil).Times(1)
-	cconfig.Data[common.DefaultMasterConfFile] = string(expect.([]byte))
+
+	confData, err := json.Marshal(cconfig)
+	assert.NoError(t, err)
+	mockInit.EXPECT().GetResource(ns, node.Name, service.TemplateCoreConfYaml, pparams).Return(confData, nil).Times(1)
 	mockConfig.EXPECT().Update(ns, cconfig).Return(cconfig, nil).Times(1)
 
 	mockApp.EXPECT().Update(ns, coreApp).Return(coreApp, nil).Times(1)

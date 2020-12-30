@@ -26,7 +26,7 @@ services:
         mountPath: "/var/lib/baetyl/host"
     ports:
       - containerPort: 80
-        hostPort: 30050
+        hostPort: {{.CoreAPIPort}}
         protocol: "TCP"
     security:
       privileged: true

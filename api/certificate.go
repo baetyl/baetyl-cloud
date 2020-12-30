@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -24,7 +25,12 @@ func (api *API) GetCertificate(c *common.Context) (interface{}, error) {
 // ListCertificate list Certificate
 func (api *API) ListCertificate(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	secrets, err := api.Secret.List(ns, api.parseListOptionsAppendSystemLabel(c))
+	params, err := api.parseListOptionsAppendSystemLabel(c)
+	if err != nil {
+		return nil, err
+	}
+	params.LabelSelector += "," + fmt.Sprintf("%s=%s", specV1.SecretLabel, specV1.SecretCertificate)
+	secrets, err := api.Secret.List(ns, params)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}

@@ -15,6 +15,14 @@ type Filter struct {
 	Name     string `form:"name,omitempty"`
 }
 
+type ListOptions struct {
+	LabelSelector string `form:"selector,omitempty"`
+	FieldSelector string `form:"fieldSelector,omitempty"`
+	Limit         int64  `form:"limit,omitempty"`
+	Continue      string `form:"continue,omitempty"`
+	Filter
+}
+
 func (f *Filter) GetLimitOffset() int {
 	if f.PageNo <= 0 {
 		f.PageNo = 1

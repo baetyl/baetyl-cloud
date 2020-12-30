@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -95,7 +97,11 @@ func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 // ListNode list node
 func (api *API) ListNode(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	nodeList, err := api.Node.List(ns, api.parseListOptions(c))
+	params, err := api.parseListOptions(c)
+	if err != nil {
+		return nil, err
+	}
+	nodeList, err := api.Node.List(ns, params)
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
@@ -757,16 +763,26 @@ func (api *API) updateCoreAppConfig(app *v1.Application, nodeName string, freq i
 		"CoreAppName":   app.Name,
 		"CoreFrequency": fmt.Sprintf("%ds", freq),
 	}
-	data, err := api.Init.GetResource(config.Namespace, nodeName, service.TemplateCoreConfYaml, params)
+	res, err := api.Init.GetResource(config.Namespace, nodeName, service.TemplateCoreConfYaml, params)
 	if err != nil {
 		return err
 	}
 
-	if _, ok := config.Data[common.DefaultMasterConfFile]; !ok {
-		return common.Error(common.ErrResourceNotFound, common.Field("type", "conf.yml"), common.Field("name", v1.BaetylCore))
+	var data []byte
+	var ok bool
+	if data, ok = res.([]byte); !ok {
+		return common.Error(common.ErrConvertConflict, common.Field("name", "BaetylCoreConfig"), common.Field("error", "failed to convert to []byte`"))
 	}
-	config.Data[common.DefaultMasterConfFile] = string(data.([]byte))
-	_, err = api.Config.Update(config.Namespace, config)
+
+	var newConf v1.Configuration
+	err = yaml.Unmarshal(data, &newConf)
+	if err != nil {
+		return common.Error(common.ErrTemplate, common.Field("error", err))
+	}
+
+	newConf.Name = config.Name
+	newConf.Version = config.Version
+	_, err = api.Config.Update(config.Namespace, &newConf)
 	if err != nil {
 		return err
 	}
