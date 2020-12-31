@@ -124,11 +124,13 @@ const (
 	UpdateTimestamp  = "updateTimestamp"
 	Metadata         = "matadata"
 	PkiCertID        = "pkiCertID"
+	NodeSelector     = "nodeSelector"
 
 	AnnotationDescription     = BaetylCloudGroup + "/" + Description
 	AnnotationUpdateTimestamp = BaetylCloudGroup + "/" + UpdateTimestamp
 	AnnotationMetadata        = BaetylCloudGroup + "/" + Metadata
 	AnnotationPkiCertID       = BaetylCloudGroup + "/" + PkiCertID
+	AnnotationNodeSelector    = BaetylCloudGroup + "/" + NodeSelector
 )
 
 const (

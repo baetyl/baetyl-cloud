@@ -15,6 +15,7 @@ type ApplicationView struct {
 	CreationTimestamp time.Time         `json:"createTime,omitempty"`
 	Version           string            `json:"version,omitempty"`
 	Selector          string            `json:"selector,omitempty"`
+	NodeSelector      string            `json:"nodeSelector,omitempty"`
 	Services          []specV1.Service  `json:"services,omitempty" validate:"dive"`
 	Volumes           []VolumeView      `json:"volumes,omitempty" validate:"dive"`
 	Description       string            `json:"description,omitempty"`
@@ -37,6 +38,7 @@ type AppItem struct {
 	Type              string            `json:"type,omitempty" default:"container"`
 	Labels            map[string]string `json:"labels,omitempty"`
 	Selector          string            `json:"selector"`
+	NodeSelector      string            `json:"nodeSelector"`
 	Version           string            `json:"version,omitempty"`
 	Namespace         string            `json:"namespace,omitempty"`
 	CreationTimestamp time.Time         `json:"createTime,omitempty"`

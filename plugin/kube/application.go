@@ -15,12 +15,14 @@ import (
 
 func toAppModel(app *v1alpha1.Application) *specV1.Application {
 	description, _ := app.Annotations[common.AnnotationDescription]
+	nodeSelector, _ := app.Annotations[common.AnnotationNodeSelector]
 	res := &specV1.Application{
-		Name:        app.ObjectMeta.Name,
-		Namespace:   app.ObjectMeta.Namespace,
-		Version:     app.ObjectMeta.ResourceVersion,
-		Description: description,
-		Labels:      app.ObjectMeta.Labels,
+		Name:         app.ObjectMeta.Name,
+		Namespace:    app.ObjectMeta.Namespace,
+		Version:      app.ObjectMeta.ResourceVersion,
+		Description:  description,
+		NodeSelector: nodeSelector,
+		Labels:       app.ObjectMeta.Labels,
 	}
 
 	err := copier.Copy(res, &app.Spec)
@@ -37,6 +39,7 @@ func toAppListModel(list *v1alpha1.ApplicationList) *models.ApplicationList {
 	}
 	for _, item := range list.Items {
 		description, _ := item.Annotations[common.AnnotationDescription]
+		nodeSelector, _ := item.Annotations[common.AnnotationNodeSelector]
 		res.Items = append(res.Items, models.AppItem{
 			Name:              item.ObjectMeta.Name,
 			Type:              item.Spec.Type,
@@ -46,6 +49,7 @@ func toAppListModel(list *v1alpha1.ApplicationList) *models.ApplicationList {
 			Selector:          item.Spec.Selector,
 			CreationTimestamp: item.CreationTimestamp.Time.UTC(),
 			Description:       description,
+			NodeSelector:      nodeSelector,
 			System:            item.Spec.System,
 		})
 	}
@@ -71,6 +75,10 @@ func fromAppModel(namespace string, app *specV1.Application) *v1alpha1.Applicati
 
 	if app.Description != "" {
 		res.Annotations[common.AnnotationDescription] = app.Description
+	}
+
+	if app.NodeSelector != "" {
+		res.Annotations[common.AnnotationNodeSelector] = app.NodeSelector
 	}
 
 	err := copier.Copy(&res.Spec, app)
