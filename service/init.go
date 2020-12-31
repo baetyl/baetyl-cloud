@@ -35,11 +35,10 @@ const (
 	templateRuleConfYaml       = "baetyl-rule-conf.yml"
 	templateRuleAppYaml        = "baetyl-rule-app.yml"
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
+	templateBaetylInstallShell = "baetyl-install.sh"
 
 	TemplateCoreConfYaml      = "baetyl-core-conf.yml"
 	TemplateBaetylInitCommand = "baetyl-init-command"
-	TemplateKubeInitCommand   = "baetyl-kube-init-command"
-	TemplateNativeInitCommand = "baetyl-native-init-command"
 )
 
 var (
@@ -113,6 +112,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	initService.ResourceMapFunc[templateInitDeploymentYaml] = initService.getInitDeploymentYaml
 	initService.ResourceMapFunc[TemplateBaetylInitCommand] = initService.GetInitCommand
 	initService.ResourceMapFunc[TemplateCoreConfYaml] = initService.getCoreConfig
+	initService.ResourceMapFunc[templateBaetylInstallShell] = initService.getInstallShell
 
 	return initService, nil
 }
@@ -187,18 +187,22 @@ func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, 
 	return cert, nil
 }
 
+func (s *InitServiceImpl) getInstallShell(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
+	params["DBPath"] = "/var/lib/baetyl"
+	data, err := s.TemplateService.ParseTemplate(templateBaetylInstallShell, params)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return data, nil
+}
+
 func (s *InitServiceImpl) GetInitCommand(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
 	info := map[string]interface{}{
 		InfoNamespace: ns,
 		InfoName:      nodeName,
 		InfoExpiry:    time.Now().Unix() + CmdExpirationInSeconds,
 	}
-	kindMap := map[string]string{
-		"":       TemplateKubeInitCommand,
-		"kube":   TemplateKubeInitCommand,
-		"native": TemplateNativeInitCommand,
-	}
-	initCommand, err := s.Property.GetPropertyValue(kindMap[params["mode"].(string)])
+	initCommand, err := s.Property.GetPropertyValue(TemplateBaetylInitCommand)
 	if err != nil {
 		return nil, err
 	}
