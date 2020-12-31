@@ -238,13 +238,15 @@ func TestGetNodeStats(t *testing.T) {
 
 	mNode.Report = map[string]interface{}{
 		"nodestats": map[string]interface{}{
-			"usage": map[string]string{
-				"cpu":    "1",
-				"memory": "512Mi",
-			},
-			"capacity": map[string]string{
-				"cpu":    "2",
-				"memory": "1024Mi",
+			"master": map[string]interface{}{
+				"usage": map[string]string{
+					"cpu":    "1",
+					"memory": "512Mi",
+				},
+				"capacity": map[string]string{
+					"cpu":    "2",
+					"memory": "1024Mi",
+				},
 			},
 		},
 		"time": "2020-04-13T10:07:12.267728Z",
@@ -258,13 +260,15 @@ func TestGetNodeStats(t *testing.T) {
 
 	mNode.Report = map[string]interface{}{
 		"nodestats": map[string]interface{}{
-			"usage": map[string]string{
-				"cpu":    "0.5",
-				"memory": "512Mi",
-			},
-			"capacity": map[string]string{
-				"cpu":    "2.5",
-				"memory": "1024Mi",
+			"master": map[string]interface{}{
+				"usage": map[string]string{
+					"cpu":    "0.5",
+					"memory": "512Mi",
+				},
+				"capacity": map[string]string{
+					"cpu":    "2.5",
+					"memory": "1024Mi",
+				},
 			},
 		},
 	}
@@ -277,32 +281,15 @@ func TestGetNodeStats(t *testing.T) {
 
 	mNode.Report = map[string]interface{}{
 		"nodestats": map[string]interface{}{
-			"usage": map[string]string{
-				"cpu":    "0.5a",
-				"memory": "512M",
-			},
-			"capacity": map[string]string{
-				"cpu":    "2.5a",
-				"memory": "1024M",
-			},
-		},
-	}
-	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
-	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
-	w = httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
-	assert.Contains(t, w.Body.String(), "quantities must match the regular expression '^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$'")
-
-	mNode.Report = map[string]interface{}{
-		"nodestats": map[string]interface{}{
-			"usage": map[string]string{
-				"cpu":    "0.5",
-				"memory": "512a",
-			},
-			"capacity": map[string]string{
-				"cpu":    "2.5",
-				"memory": "1024a",
+			"master": map[string]interface{}{
+				"usage": map[string]string{
+					"cpu":    "0.5a",
+					"memory": "512M",
+				},
+				"capacity": map[string]string{
+					"cpu":    "2.5a",
+					"memory": "1024M",
+				},
 			},
 		},
 	}
@@ -315,13 +302,36 @@ func TestGetNodeStats(t *testing.T) {
 
 	mNode.Report = map[string]interface{}{
 		"nodestats": map[string]interface{}{
-			"usage": map[string]string{
-				"cpu":    "0.5a",
-				"memory": "512a",
+			"master": map[string]interface{}{
+				"usage": map[string]string{
+					"cpu":    "0.5",
+					"memory": "512a",
+				},
+				"capacity": map[string]string{
+					"cpu":    "2.5",
+					"memory": "1024a",
+				},
 			},
-			"capacity": map[string]string{
-				"cpu":    "2.5",
-				"memory": "1024Mi",
+		},
+	}
+	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Contains(t, w.Body.String(), "quantities must match the regular expression '^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$'")
+
+	mNode.Report = map[string]interface{}{
+		"nodestats": map[string]interface{}{
+			"master": map[string]interface{}{
+				"usage": map[string]string{
+					"cpu":    "0.5a",
+					"memory": "512a",
+				},
+				"capacity": map[string]string{
+					"cpu":    "2.5",
+					"memory": "1024Mi",
+				},
 			},
 		},
 	}

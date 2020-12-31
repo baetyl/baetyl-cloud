@@ -67,29 +67,6 @@ func NewSyncService(config *config.CloudConfig) (SyncService, error) {
 }
 
 func (t *SyncServiceImpl) Report(namespace, name string, report specV1.Report) (specV1.Delta, error) {
-	// TODO : Distribute report to corresponding nodes
-	master := ""
-	if report["node"] != nil {
-		if infos, ok := report["node"].(map[string]interface{}); ok {
-			for k, info := range infos {
-				if node, ok := info.(map[string]interface{}); ok {
-					if node["role"] == "master" {
-						master = k
-						break
-					}
-				}
-			}
-			if master != "" {
-				report["node"] = infos[master]
-			}
-			if report["nodestats"] != nil {
-				if stats, ok := report["nodestats"].(map[string]interface{}); ok {
-					report["nodestats"] = stats[master]
-				}
-			}
-		}
-	}
-
 	shadow, err := t.NodeService.UpdateReport(namespace, name, report)
 	if err != nil {
 		log.L().Error("failed to update node reported status",
