@@ -101,44 +101,44 @@ func (n *nodeService) Get(namespace, name string) (*specV1.Node, error) {
 
 // Create create a node
 func (n *nodeService) Create(namespace string, node *specV1.Node) (*specV1.Node, error) {
-	_node, err := n.node.CreateNode(namespace, node)
+	res, err := n.node.CreateNode(namespace, node)
 	if err != nil {
 		log.L().Error("create node failed", log.Error(err))
 		return nil, err
 	}
 
-	_shadow, err := n.shadow.Create(models.NewShadowFromNode(_node))
+	shadow, err := n.shadow.Create(models.NewShadowFromNode(res))
 	if err != nil {
 		return nil, err
 	}
 
-	if err = n.updateNodeAndAppIndex(namespace, _node, _shadow); err != nil {
+	if err = n.updateNodeAndAppIndex(namespace, res, shadow); err != nil {
 		return nil, err
 	}
-	return _node, err
+	return res, err
 }
 
 // Update update node
 func (n *nodeService) Update(namespace string, node *specV1.Node) (*specV1.Node, error) {
-	_node, err := n.node.UpdateNode(namespace, node)
+	res, err := n.node.UpdateNode(namespace, node)
 	if err != nil {
 		return nil, err
 	}
 
-	_shadow, err := n.shadow.Get(namespace, node.Name)
+	shadow, err := n.shadow.Get(namespace, node.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	// delete indexes for node and apps
-	if err := n.indexService.RefreshAppsIndexByNode(namespace, _node.Name, []string{}); err != nil {
+	if err := n.indexService.RefreshAppsIndexByNode(namespace, res.Name, []string{}); err != nil {
 		return nil, err
 	}
 
-	if err = n.updateNodeAndAppIndex(namespace, _node, _shadow); err != nil {
+	if err = n.updateNodeAndAppIndex(namespace, res, shadow); err != nil {
 		return nil, err
 	}
-	return _node, nil
+	return res, nil
 }
 
 // List get list node
