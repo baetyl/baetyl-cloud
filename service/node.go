@@ -107,12 +107,12 @@ func (n *nodeService) Create(namespace string, node *specV1.Node) (*specV1.Node,
 		return nil, err
 	}
 
-	_, err = n.shadow.Create(models.NewShadowFromNode(res))
+	shadow, err := n.shadow.Create(models.NewShadowFromNode(res))
 	if err != nil {
 		return nil, err
 	}
 
-	if err = n.updateNodeAndAppIndex(namespace, res); err != nil {
+	if err = n.updateNodeAndAppIndex(namespace, res, shadow); err != nil {
 		return nil, err
 	}
 	return res, err
@@ -125,12 +125,17 @@ func (n *nodeService) Update(namespace string, node *specV1.Node) (*specV1.Node,
 		return nil, err
 	}
 
+	shadow, err := n.shadow.Get(namespace, node.Name)
+	if err != nil {
+		return nil, err
+	}
+
 	// delete indexes for node and apps
 	if err := n.indexService.RefreshAppsIndexByNode(namespace, res.Name, []string{}); err != nil {
 		return nil, err
 	}
 
-	if err = n.updateNodeAndAppIndex(namespace, res); err != nil {
+	if err = n.updateNodeAndAppIndex(namespace, res, shadow); err != nil {
 		return nil, err
 	}
 	return res, nil
@@ -278,10 +283,14 @@ func (n *nodeService) UpdateDesire(namespace, name string, desire specV1.Desire)
 		return n.createShadow(namespace, name, desire, nil)
 	}
 
+	return n.updateDesire(shadow, desire)
+}
+
+func (n *nodeService) updateDesire(shadow *models.Shadow, desire specV1.Desire) (*models.Shadow, error) {
 	if shadow.Desire == nil {
 		shadow.Desire = desire
 	} else {
-		err = shadow.Desire.Merge(desire)
+		err := shadow.Desire.Merge(desire)
 		if err != nil {
 			return nil, err
 		}
@@ -302,7 +311,7 @@ func (n *nodeService) GetDesire(namespace, name string) (*specV1.Desire, error) 
 	return &shadow.Desire, nil
 }
 
-func (n *nodeService) updateNodeAndAppIndex(namespace string, node *specV1.Node) error {
+func (n *nodeService) updateNodeAndAppIndex(namespace string, node *specV1.Node, shadow *models.Shadow) error {
 	apps, err := n.app.ListApplication(namespace, &models.ListOptions{})
 	if err != nil {
 		log.L().Error("list application error", log.Error(err))
@@ -313,7 +322,7 @@ func (n *nodeService) updateNodeAndAppIndex(namespace string, node *specV1.Node)
 
 	node.Desire = desire
 
-	if _, err = n.UpdateDesire(node.Namespace, node.Name, desire); err != nil {
+	if _, err = n.updateDesire(shadow, desire); err != nil {
 		log.L().Error("update node desired node failed", log.Error(err))
 		return err
 	}
