@@ -540,7 +540,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	if coreConfig.Version == version &&
 		coreConfig.Frequency == freq &&
 		coreConfig.APIPort == port {
-		return node.View(OfflineDuration)
+		return api.ToApplicationView(app)
 	}
 
 	api.updateCoreVersions(node, version, coreConfig.Version)
