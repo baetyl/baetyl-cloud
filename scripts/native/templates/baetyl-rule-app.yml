@@ -13,20 +13,8 @@ services:
       - name: "rule-conf"
         mountPath: "/etc/baetyl"
         readOnly: true
-      - name: "native-app-run-path"
-        mountPath: "/var/lib/baetyl/run"
-      - name: "native-rule-program"
-        mountPath: "/var/lib/baetyl/bin"
-        readOnly: true
 volumes:
   - name: "rule-conf"
     config:
       name: "{{.RuleConfName}}"
       version: "{{.RuleConfVersion}}"
-  - name: "native-rule-program"
-    config:
-      name: "{{.RuleProgramName}}"
-      version: "{{.RuleProgramVersion}}"
-  - name: "native-app-run-path"
-    hostPath:
-      path: "{{.BAETYL_HOST_PATH_LIB}}/run"
