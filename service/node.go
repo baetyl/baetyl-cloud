@@ -101,39 +101,44 @@ func (n *nodeService) Get(namespace, name string) (*specV1.Node, error) {
 
 // Create create a node
 func (n *nodeService) Create(namespace string, node *specV1.Node) (*specV1.Node, error) {
-	res, err := n.node.CreateNode(namespace, node)
+	_node, err := n.node.CreateNode(namespace, node)
 	if err != nil {
 		log.L().Error("create node failed", log.Error(err))
 		return nil, err
 	}
 
-	_, err = n.shadow.Create(models.NewShadowFromNode(res))
+	_shadow, err := n.shadow.Create(models.NewShadowFromNode(_node))
 	if err != nil {
 		return nil, err
 	}
 
-	if err = n.updateNodeAndAppIndex(namespace, res); err != nil {
+	if err = n.updateNodeAndAppIndex(namespace, _node, _shadow); err != nil {
 		return nil, err
 	}
-	return res, err
+	return _node, err
 }
 
 // Update update node
 func (n *nodeService) Update(namespace string, node *specV1.Node) (*specV1.Node, error) {
-	res, err := n.node.UpdateNode(namespace, node)
+	_node, err := n.node.UpdateNode(namespace, node)
+	if err != nil {
+		return nil, err
+	}
+
+	_shadow, err := n.shadow.Get(namespace, node.Name)
 	if err != nil {
 		return nil, err
 	}
 
 	// delete indexes for node and apps
-	if err := n.indexService.RefreshAppsIndexByNode(namespace, res.Name, []string{}); err != nil {
+	if err := n.indexService.RefreshAppsIndexByNode(namespace, _node.Name, []string{}); err != nil {
 		return nil, err
 	}
 
-	if err = n.updateNodeAndAppIndex(namespace, res); err != nil {
+	if err = n.updateNodeAndAppIndex(namespace, _node, _shadow); err != nil {
 		return nil, err
 	}
-	return res, nil
+	return _node, nil
 }
 
 // List get list node
@@ -278,10 +283,14 @@ func (n *nodeService) UpdateDesire(namespace, name string, desire specV1.Desire)
 		return n.createShadow(namespace, name, desire, nil)
 	}
 
+	return n.updateDesire(shadow, desire)
+}
+
+func (n *nodeService) updateDesire(shadow *models.Shadow, desire specV1.Desire) (*models.Shadow, error) {
 	if shadow.Desire == nil {
 		shadow.Desire = desire
 	} else {
-		err = shadow.Desire.Merge(desire)
+		err := shadow.Desire.Merge(desire)
 		if err != nil {
 			return nil, err
 		}
@@ -302,7 +311,7 @@ func (n *nodeService) GetDesire(namespace, name string) (*specV1.Desire, error) 
 	return &shadow.Desire, nil
 }
 
-func (n *nodeService) updateNodeAndAppIndex(namespace string, node *specV1.Node) error {
+func (n *nodeService) updateNodeAndAppIndex(namespace string, node *specV1.Node, shadow *models.Shadow) error {
 	apps, err := n.app.ListApplication(namespace, &models.ListOptions{})
 	if err != nil {
 		log.L().Error("list application error", log.Error(err))
@@ -313,7 +322,7 @@ func (n *nodeService) updateNodeAndAppIndex(namespace string, node *specV1.Node)
 
 	node.Desire = desire
 
-	if _, err = n.UpdateDesire(node.Namespace, node.Name, desire); err != nil {
+	if _, err = n.updateDesire(shadow, desire); err != nil {
 		log.L().Error("update node desired node failed", log.Error(err))
 		return err
 	}
