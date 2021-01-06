@@ -90,7 +90,7 @@ func (d *DB) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
 func (d *DB) GetShadowTx(tx *sqlx.Tx, namespace, name string) (*models.Shadow, error) {
 	selectSQL := `
 SELECT 
-id, name, namespace, report, desire, create_time, update_time 
+id, name, namespace, report, desire, report_meta, desire_meta, create_time, update_time 
 FROM baetyl_node_shadow WHERE namespace=? AND name=?
 `
 	var shadows []entities.Shadow
@@ -105,8 +105,8 @@ FROM baetyl_node_shadow WHERE namespace=? AND name=?
 
 func (d *DB) CreateShadowTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
 	insertSQL := `
-INSERT INTO baetyl_node_shadow (namespace, name, report, desire)
-VALUES (?, ?, ?, ?)
+INSERT INTO baetyl_node_shadow (namespace, name, report, desire, report_meta, desire_meta)
+VALUES (?, ?, ?, ?, ?, ?)
 `
 
 	shd, err := entities.NewShadowFromShadowModel(shadow)
@@ -114,7 +114,7 @@ VALUES (?, ?, ?, ?)
 		return nil, err
 	}
 
-	return d.Exec(tx, insertSQL, shd.Namespace, shd.Name, shd.Report, shd.Desire)
+	return d.Exec(tx, insertSQL, shd.Namespace, shd.Name, shd.Report, shd.Desire, shd.ReportMeta, shd.DesireMeta)
 }
 
 func (d *DB) DeleteShadowTx(tx *sqlx.Tx, namespace, name string) (sql.Result, error) {
@@ -127,34 +127,42 @@ DELETE FROM baetyl_node_shadow WHERE namespace=? AND name=?
 func (d *DB) UpdateShadowDesireTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
 	updateSQL := `
 UPDATE baetyl_node_shadow
-SET desire=?
+SET desire=?, desire_meta=?
 WHERE namespace=? AND name=?
 `
 	desire, err := shadow.GetDesireString()
 	if err != nil {
 		return nil, err
 	}
-	return d.Exec(tx, updateSQL, desire, shadow.Namespace, shadow.Name)
+	desireMeta, err := shadow.GetDesireMetaString()
+	if err != nil {
+		return nil, err
+	}
+	return d.Exec(tx, updateSQL, desire, desireMeta, shadow.Namespace, shadow.Name)
 }
 
 func (d *DB) UpdateShadowReportTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
 	updateSQL := `
 UPDATE baetyl_node_shadow
-SET report=?
+SET report=?, report_meta=?
 WHERE namespace=? AND name=?
 `
 	report, err := shadow.GetReportString()
 	if err != nil {
 		return nil, err
 	}
+	reportMeta, err := shadow.GetReportMetaString()
+	if err != nil {
+		return nil, err
+	}
 
-	return d.Exec(tx, updateSQL, report, shadow.Namespace, shadow.Name)
+	return d.Exec(tx, updateSQL, report, reportMeta, shadow.Namespace, shadow.Name)
 }
 
 func (d *DB) ListShadowByNamesTx(tx *sqlx.Tx, namespace string, names []string) ([]entities.Shadow, error) {
 	selectSQL := `
 SELECT 
-id, name, namespace, report, desire, create_time, update_time 
+id, name, namespace, report, desire, report_meta, desire_meta, create_time, update_time 
 FROM baetyl_node_shadow WHERE namespace=? AND name in (?)
 `
 	result := make([]entities.Shadow, 0)

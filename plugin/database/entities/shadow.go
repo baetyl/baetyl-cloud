@@ -17,6 +17,8 @@ type Shadow struct {
 	UpdateTime time.Time `db:"update_time"`
 	Report     string    `db:"report"`
 	Desire     string    `db:"desire"`
+	ReportMeta string    `db:"report_meta"`
+	DesireMeta string    `db:"desire_meta"`
 }
 
 func (s *Shadow) ToShadowModel() (*models.Shadow, error) {
@@ -42,6 +44,14 @@ func (s *Shadow) ToShadowModel() (*models.Shadow, error) {
 	}
 	shadow.Desire = desire
 
+	reportMeta := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(s.ReportMeta), &reportMeta); err != nil {
+		return nil, err
+	}
+	desireMeta := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(s.DesireMeta), &desireMeta); err != nil {
+		return nil, err
+	}
 	return shadow, nil
 }
 
@@ -62,5 +72,16 @@ func NewShadowFromShadowModel(shadow *models.Shadow) (*Shadow, error) {
 	}
 	shd.Desire = string(desire)
 
+	reportMeta, err := json.Marshal(shadow.ReportMeta)
+	if err != nil {
+		return nil, err
+	}
+	shd.ReportMeta = string(reportMeta)
+
+	desireMeta, err := json.Marshal(shadow.DesireMeta)
+	if err != nil {
+		return nil, err
+	}
+	shd.DesireMeta = string(desireMeta)
 	return shd, nil
 }

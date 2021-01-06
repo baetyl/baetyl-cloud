@@ -37,10 +37,12 @@ func TestNewShadowFromShadowModel(t *testing.T) {
 
 func TestShadow_ToShadowModel(t *testing.T) {
 	shadow := &Shadow{
-		Namespace: "default",
-		Name:      "node01",
-		Desire:    `{"apps":[],"sysapps":[{"name":"baetyl-core-node-test-2-qcfpywxuh","version":"211430"},{"name":"baetyl-function-node-test-2-hb8ibamcv","version":"211434"}]}`,
-		Report:    `{"apps":[],"sysapps":[{"name":"baetyl-core-node-test-2-qcfpywxuh","version":"211430"},{"name":"baetyl-function-node-test-2-hb8ibamcv","version":"211434"}]}`,
+		Namespace:  "default",
+		Name:       "node01",
+		Desire:     `{"apps":[],"sysapps":[{"name":"baetyl-core-node-test-2-qcfpywxuh","version":"211430"},{"name":"baetyl-function-node-test-2-hb8ibamcv","version":"211434"}]}`,
+		Report:     `{"apps":[],"sysapps":[{"name":"baetyl-core-node-test-2-qcfpywxuh","version":"211430"},{"name":"baetyl-function-node-test-2-hb8ibamcv","version":"211434"}]}`,
+		DesireMeta: `{}`,
+		ReportMeta: `{}`,
 	}
 
 	shd, err := shadow.ToShadowModel()

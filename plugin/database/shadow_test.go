@@ -20,7 +20,9 @@ CREATE TABLE baetyl_node_shadow(
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     report      BLOB,
-    desire      BLOB 
+    desire      BLOB,
+	report_meta BLOB,
+	desire_meta BLOB
 );
 `,
 	}
@@ -65,6 +67,8 @@ func TestShadow(t *testing.T) {
 				},
 			},
 		},
+		ReportMeta: map[string]interface{}{},
+		DesireMeta: map[string]interface{}{},
 	}
 	result, err := db.Create(shadow)
 	assert.NoError(t, err)

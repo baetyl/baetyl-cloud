@@ -68,6 +68,14 @@ func (s *Shadow) GetDesireString() (string, error) {
 	return string(desire), nil
 }
 
+func (s *Shadow) GetDesireMetaString() (string, error) {
+	desireMeta, err := json.Marshal(s.DesireMeta)
+	if err != nil {
+		return "", err
+	}
+	return string(desireMeta), nil
+}
+
 func (s *Shadow) GetReportString() (string, error) {
 	report, err := json.Marshal(s.Report)
 	if err != nil {
@@ -75,6 +83,14 @@ func (s *Shadow) GetReportString() (string, error) {
 	}
 
 	return string(report), nil
+}
+
+func (s *Shadow) GetReportMetaString() (string, error) {
+	reportMeta, err := json.Marshal(s.ReportMeta)
+	if err != nil {
+		return "", err
+	}
+	return string(reportMeta), nil
 }
 
 func BuildEmptyApps() map[string]interface{} {
