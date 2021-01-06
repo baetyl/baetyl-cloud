@@ -48,10 +48,12 @@ func (s *Shadow) ToShadowModel() (*models.Shadow, error) {
 	if err := json.Unmarshal([]byte(s.ReportMeta), &reportMeta); err != nil {
 		return nil, err
 	}
+	shadow.ReportMeta = reportMeta
 	desireMeta := map[string]interface{}{}
 	if err := json.Unmarshal([]byte(s.DesireMeta), &desireMeta); err != nil {
 		return nil, err
 	}
+	shadow.DesireMeta = desireMeta
 	return shadow, nil
 }
 
