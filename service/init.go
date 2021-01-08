@@ -250,6 +250,9 @@ func (s *InitServiceImpl) GenApps(ns string, node *specV1.Node) ([]*specV1.Appli
 			return nil, errors.Trace(err)
 		}
 	}
+	if node.Accelerator == specV1.KeyAccelerator {
+		params["GPUStats"] = true
+	}
 
 	var apps []*specV1.Application
 	ca, err := s.genCoreApp(ns, node.Name, params)
