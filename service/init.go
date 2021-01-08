@@ -42,14 +42,14 @@ const (
 )
 
 var (
-	CmdExpirationInSeconds = int64(60 * 60)
-	HookNamePopulateParams = "populateParams"
-	HookNameGenExtApps     = "genExtApps"
+	CmdExpirationInSeconds  = int64(60 * 60)
+	HookNamePopulateParams  = "populateParams"
+	HookNameGenAppsByOption = "genAppsByOption"
 )
 
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
 type GetInitResource func(ns, nodeName string, params map[string]interface{}) ([]byte, error)
-type GenExtApps func(ns string, node *specV1.Node, params map[string]interface{}) ([]*specV1.Application, error)
+type GenAppsByOption func(ns string, node *specV1.Node, params map[string]interface{}) ([]*specV1.Application, error)
 
 // InitService
 type InitService interface {
@@ -274,8 +274,8 @@ func (s *InitServiceImpl) GenApps(ns string, node *specV1.Node) ([]*specV1.Appli
 	}
 	apps = append(apps, ca, ia, fa, ba, ra)
 
-	if gen, ok := s.Hooks[HookNameGenExtApps]; ok {
-		extApps, err := gen.(GenExtApps)(ns, node, params)
+	if gen, ok := s.Hooks[HookNameGenAppsByOption]; ok {
+		extApps, err := gen.(GenAppsByOption)(ns, node, params)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
