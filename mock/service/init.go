@@ -10,31 +10,31 @@ import (
 	reflect "reflect"
 )
 
-// MockInitService is a mock of InitService interface
+// MockInitService is a mock of InitService interface.
 type MockInitService struct {
 	ctrl     *gomock.Controller
 	recorder *MockInitServiceMockRecorder
 }
 
-// MockInitServiceMockRecorder is the mock recorder for MockInitService
+// MockInitServiceMockRecorder is the mock recorder for MockInitService.
 type MockInitServiceMockRecorder struct {
 	mock *MockInitService
 }
 
-// NewMockInitService creates a new mock instance
+// NewMockInitService creates a new mock instance.
 func NewMockInitService(ctrl *gomock.Controller) *MockInitService {
 	mock := &MockInitService{ctrl: ctrl}
 	mock.recorder = &MockInitServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockInitService) EXPECT() *MockInitServiceMockRecorder {
 	return m.recorder
 }
 
-// GenApps mocks base method
-func (m *MockInitService) GenApps(arg0, arg1 string) ([]*v1.Application, error) {
+// GenApps mocks base method.
+func (m *MockInitService) GenApps(arg0 string, arg1 *v1.Node) ([]*v1.Application, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenApps", arg0, arg1)
 	ret0, _ := ret[0].([]*v1.Application)
@@ -42,13 +42,13 @@ func (m *MockInitService) GenApps(arg0, arg1 string) ([]*v1.Application, error) 
 	return ret0, ret1
 }
 
-// GenApps indicates an expected call of GenApps
+// GenApps indicates an expected call of GenApps.
 func (mr *MockInitServiceMockRecorder) GenApps(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenApps", reflect.TypeOf((*MockInitService)(nil).GenApps), arg0, arg1)
 }
 
-// GetResource mocks base method
+// GetResource mocks base method.
 func (m *MockInitService) GetResource(arg0, arg1, arg2 string, arg3 map[string]interface{}) (interface{}, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetResource", arg0, arg1, arg2, arg3)
@@ -57,7 +57,7 @@ func (m *MockInitService) GetResource(arg0, arg1, arg2 string, arg3 map[string]i
 	return ret0, ret1
 }
 
-// GetResource indicates an expected call of GetResource
+// GetResource indicates an expected call of GetResource.
 func (mr *MockInitServiceMockRecorder) GetResource(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResource", reflect.TypeOf((*MockInitService)(nil).GetResource), arg0, arg1, arg2, arg3)

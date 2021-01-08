@@ -42,17 +42,19 @@ const (
 )
 
 var (
-	CmdExpirationInSeconds = int64(60 * 60)
-	HookNamePopulateParams = "populateParams"
+	CmdExpirationInSeconds  = int64(60 * 60)
+	HookNamePopulateParams  = "populateParams"
+	HookNameGenAppsByOption = "genAppsByOption"
 )
 
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
 type GetInitResource func(ns, nodeName string, params map[string]interface{}) ([]byte, error)
+type GenAppsByOption func(ns string, node *specV1.Node, params map[string]interface{}) ([]*specV1.Application, error)
 
 // InitService
 type InitService interface {
 	GetResource(ns, nodeName, resourceName string, params map[string]interface{}) (interface{}, error)
-	GenApps(ns, nodeName string) ([]*specV1.Application, error)
+	GenApps(ns string, nodeName *specV1.Node) ([]*specV1.Application, error)
 }
 
 type InitServiceImpl struct {
@@ -236,10 +238,10 @@ func (s *InitServiceImpl) GetAppFromDesire(ns, nodeName, moduleName string, isSy
 		common.Field("namespace", ns))
 }
 
-func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, error) {
+func (s *InitServiceImpl) GenApps(ns string, node *specV1.Node) ([]*specV1.Application, error) {
 	params := map[string]interface{}{
 		"Namespace":                  ns,
-		"NodeName":                   nodeName,
+		"NodeName":                   node.Name,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
 	}
 	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
@@ -250,27 +252,35 @@ func (s *InitServiceImpl) GenApps(ns, nodeName string) ([]*specV1.Application, e
 	}
 
 	var apps []*specV1.Application
-	ca, err := s.genCoreApp(ns, nodeName, params)
+	ca, err := s.genCoreApp(ns, node.Name, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	ia, err := s.genInitApp(ns, nodeName, params)
+	ia, err := s.genInitApp(ns, node.Name, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	fa, err := s.genFunctionApp(ns, nodeName, params)
+	fa, err := s.genFunctionApp(ns, node.Name, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	ba, err := s.genBrokerApp(ns, nodeName, params)
+	ba, err := s.genBrokerApp(ns, node.Name, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	ra, err := s.genRuleApp(ns, nodeName, params)
+	ra, err := s.genRuleApp(ns, node.Name, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	apps = append(apps, ca, ia, fa, ba, ra)
+
+	if gen, ok := s.Hooks[HookNameGenAppsByOption]; ok {
+		extApps, err := gen.(GenAppsByOption)(ns, node, params)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		apps = append(apps, extApps...)
+	}
 	return apps, nil
 }
 
@@ -283,7 +293,7 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]inte
 	params["CoreAPIPort"] = common.DefaultCoreAPIPort
 
 	// create config
-	conf, err := s.genConfig(ns, TemplateCoreConfYaml, params)
+	conf, err := s.GenConfig(ns, TemplateCoreConfYaml, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -299,7 +309,7 @@ func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]inte
 	params["NodeCertVersion"] = cert.Version
 
 	// create application
-	return s.genApp(ns, templateCoreAppYaml, params)
+	return s.GenApp(ns, templateCoreAppYaml, params)
 }
 
 func (s *InitServiceImpl) genInitApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
@@ -309,14 +319,14 @@ func (s *InitServiceImpl) genInitApp(ns, nodeName string, params map[string]inte
 	params["InitConfName"] = confName
 
 	// create config
-	conf, err := s.genConfig(ns, templateInitConfYaml, params)
+	conf, err := s.GenConfig(ns, templateInitConfYaml, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	params["InitConfVersion"] = conf.Version
 	// create application
-	return s.genApp(ns, templateInitAppYaml, params)
+	return s.GenApp(ns, templateInitAppYaml, params)
 }
 
 func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
@@ -332,7 +342,7 @@ func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]
 	for k, v := range params {
 		confMap[k] = v
 	}
-	conf, err := s.genConfig(ns, templateFuncConfYaml, confMap)
+	conf, err := s.GenConfig(ns, templateFuncConfYaml, confMap)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -348,7 +358,7 @@ func (s *InitServiceImpl) genFunctionApp(ns, nodeName string, params map[string]
 	for k, v := range params {
 		appMap[k] = v
 	}
-	return s.genApp(ns, templateFuncAppYaml, appMap)
+	return s.GenApp(ns, templateFuncAppYaml, appMap)
 }
 
 func (s *InitServiceImpl) genBrokerApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
@@ -364,7 +374,7 @@ func (s *InitServiceImpl) genBrokerApp(ns, nodeName string, params map[string]in
 	for k, v := range params {
 		confMap[k] = v
 	}
-	conf, err := s.genConfig(ns, templateBrokerConfYaml, confMap)
+	conf, err := s.GenConfig(ns, templateBrokerConfYaml, confMap)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -380,7 +390,7 @@ func (s *InitServiceImpl) genBrokerApp(ns, nodeName string, params map[string]in
 	for k, v := range params {
 		appMap[k] = v
 	}
-	return s.genApp(ns, templateBrokerAppYaml, appMap)
+	return s.GenApp(ns, templateBrokerAppYaml, appMap)
 }
 
 func (s *InitServiceImpl) genRuleApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
@@ -396,7 +406,7 @@ func (s *InitServiceImpl) genRuleApp(ns, nodeName string, params map[string]inte
 	for k, v := range params {
 		confMap[k] = v
 	}
-	conf, err := s.genConfig(ns, templateRuleConfYaml, confMap)
+	conf, err := s.GenConfig(ns, templateRuleConfYaml, confMap)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -412,7 +422,7 @@ func (s *InitServiceImpl) genRuleApp(ns, nodeName string, params map[string]inte
 	for k, v := range params {
 		appMap[k] = v
 	}
-	return s.genApp(ns, templateRuleAppYaml, appMap)
+	return s.GenApp(ns, templateRuleAppYaml, appMap)
 }
 
 func (s *InitServiceImpl) genNodeCerts(ns, nodeName, appName string) (*specV1.Secret, error) {
@@ -456,7 +466,7 @@ func (s *InitServiceImpl) getCoreConfig(ns, nodeName string, params map[string]i
 	return s.TemplateService.ParseTemplate(TemplateCoreConfYaml, params)
 }
 
-func (s *InitServiceImpl) genConfig(ns, template string, params map[string]interface{}) (*specV1.Configuration, error) {
+func (s *InitServiceImpl) GenConfig(ns, template string, params map[string]interface{}) (*specV1.Configuration, error) {
 	config := &specV1.Configuration{}
 	err := s.TemplateService.UnmarshalTemplate(template, params, config)
 	if err != nil {
@@ -473,7 +483,7 @@ func (s *InitServiceImpl) genConfig(ns, template string, params map[string]inter
 	return conf, nil
 }
 
-func (s *InitServiceImpl) genApp(ns, template string, params map[string]interface{}) (*specV1.Application, error) {
+func (s *InitServiceImpl) GenApp(ns, template string, params map[string]interface{}) (*specV1.Application, error) {
 	application := &specV1.Application{}
 	err := s.TemplateService.UnmarshalTemplate(template, params, application)
 	if err != nil {
