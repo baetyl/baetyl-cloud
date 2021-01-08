@@ -267,7 +267,11 @@ func TestInitService_GenApps(t *testing.T) {
 	sSecret.EXPECT().Create("ns", gomock.Any()).Return(secret, nil).Times(1)
 	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(5)
 
-	out, err := is.GenApps("ns", "abc")
+	node := &v1.Node{
+		Namespace: "ns",
+		Name:      "abc",
+	}
+	out, err := is.GenApps("ns", node)
 	assert.NoError(t, err)
 	assert.Equal(t, 5, len(out))
 }

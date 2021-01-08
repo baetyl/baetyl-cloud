@@ -33,7 +33,8 @@ func getMockNode() *specV1.Node {
 			common.LabelNodeName: "abc",
 		},
 		Attributes: map[string]interface{}{
-			BaetylCoreFrequency: common.DefaultCoreFrequency,
+			BaetylCoreFrequency:   common.DefaultCoreFrequency,
+			specV1.KeyAccelerator: "",
 		},
 	}
 	return mNode

@@ -161,6 +161,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		n.Attributes = map[string]interface{}{}
 	}
 	n.Attributes[BaetylCoreFrequency] = common.DefaultCoreFrequency
+	n.Attributes[v1.KeyAccelerator] = n.Accelerator
 
 	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
@@ -170,7 +171,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	apps, err := api.Init.GenApps(n.Namespace, n.Name)
+	apps, err := api.Init.GenApps(n.Namespace, n)
 	if err != nil {
 		return nil, err
 	}
