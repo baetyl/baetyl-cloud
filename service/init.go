@@ -243,15 +243,13 @@ func (s *InitServiceImpl) GenApps(ns string, node *specV1.Node) ([]*specV1.Appli
 		"Namespace":                  ns,
 		"NodeName":                   node.Name,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
+		"GPUStats":                   node.Accelerator == specV1.NVAccelerator,
 	}
 	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
 		err := handler.(HandlerPopulateParams)(ns, params)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
-	}
-	if node.Accelerator == specV1.KeyAccelerator {
-		params["GPUStats"] = true
 	}
 
 	var apps []*specV1.Application
