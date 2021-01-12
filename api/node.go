@@ -209,6 +209,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		common.LabelNodeName: node.Name,
 	})
 	node.Version = oldNode.Version
+	node.Attributes = oldNode.Attributes
 
 	if models.EqualNode(node, oldNode) {
 		return oldNode.View(OfflineDuration)
