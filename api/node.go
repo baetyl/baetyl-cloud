@@ -552,7 +552,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	coreService.Image = image
 
-	err = api.updateCoreAppConfig(app, node.Name, coreConfig.Frequency)
+	err = api.updateCoreAppConfig(app, node, coreConfig.Frequency)
 	if err != nil {
 		return nil, err
 	}
@@ -763,18 +763,22 @@ func (api *API) updateCoreVersions(node *v1.Node, currentVersion, updateVersion 
 	node.Attributes[BaetylCorePrevVersion] = currentVersion
 }
 
-func (api *API) updateCoreAppConfig(app *v1.Application, nodeName string, freq int) error {
+func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int) error {
 	config, err := api.getCoreAppConfig(app)
 	if err != nil {
 		return err
 	}
-
+	var accelerator string
+	if node.Attributes != nil {
+		accelerator, _ = node.Attributes[v1.KeyAccelerator].(string)
+	}
 	params := map[string]interface{}{
 		"CoreConfName":  config.Name,
 		"CoreAppName":   app.Name,
 		"CoreFrequency": fmt.Sprintf("%ds", freq),
+		"GPUStats":      accelerator == v1.NVAccelerator,
 	}
-	res, err := api.Init.GetResource(config.Namespace, nodeName, service.TemplateCoreConfYaml, params)
+	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateCoreConfYaml, params)
 	if err != nil {
 		return err
 	}

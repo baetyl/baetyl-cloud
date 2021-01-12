@@ -1406,6 +1406,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		"CoreAppName":   "baetyl-core-1",
 		"CoreConfName":  "baetyl-core-conf-ialplsycd",
 		"CoreFrequency": "40s",
+		"GPUStats":      false,
 	}
 
 	confData, err := json.Marshal(cconfig)
