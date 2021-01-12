@@ -59,7 +59,7 @@ func EqualNode(node1, node2 *specV1.Node) bool {
 	return reflect.DeepEqual(node1.Labels, node2.Labels) &&
 		reflect.DeepEqual(node1.Description, node2.Description) &&
 		reflect.DeepEqual(node1.Annotations, node2.Annotations) &&
-		reflect.DeepEqual(node1.Attributes, node2.Attributes)
+		reflect.DeepEqual(node1.OptionalSysApps, node2.OptionalSysApps)
 }
 
 type NodeCoreConfigs struct {
@@ -71,4 +71,8 @@ type NodeCoreConfigs struct {
 
 type NodeCoreVersions struct {
 	Versions []string `yaml:"versions,omitempty" json:"versions,omitempty"`
+}
+
+type NodeOptionalSysApps struct {
+	Apps []string `yaml:"apps,omitempty" json:"apps,omitempty"`
 }

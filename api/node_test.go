@@ -33,8 +33,8 @@ func getMockNode() *specV1.Node {
 			common.LabelNodeName: "abc",
 		},
 		Attributes: map[string]interface{}{
-			BaetylCoreFrequency:   common.DefaultCoreFrequency,
-			specV1.KeyAccelerator: "",
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
 		},
 	}
 	return mNode
@@ -1305,7 +1305,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Name:      n,
 		Version:   "0",
 		Attributes: map[string]interface{}{
-			BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},
@@ -1528,7 +1528,7 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 		Name:      n,
 		Version:   "0",
 		Attributes: map[string]interface{}{
-			BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},
@@ -1637,7 +1637,7 @@ func TestAPI_GetCoreAppVersions(t *testing.T) {
 		Name:      n,
 		Version:   "0",
 		Attributes: map[string]interface{}{
-			BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},
