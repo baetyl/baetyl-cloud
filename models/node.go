@@ -4,6 +4,8 @@ import (
 	"reflect"
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
 // NodeViewList node view list
@@ -59,7 +61,31 @@ func EqualNode(node1, node2 *specV1.Node) bool {
 	return reflect.DeepEqual(node1.Labels, node2.Labels) &&
 		reflect.DeepEqual(node1.Description, node2.Description) &&
 		reflect.DeepEqual(node1.Annotations, node2.Annotations) &&
-		reflect.DeepEqual(node1.OptionalSysApps, node2.OptionalSysApps)
+		reflect.DeepEqual(node1.SysApps, node2.SysApps)
+}
+
+func PopulateNode(node *specV1.Node) error {
+	val, ok := node.Attributes[specV1.KeyOptionalSysApps]
+	if !ok {
+		return common.Error(common.ErrResourceNotFound, common.Field("type", "node"), common.Field("name", specV1.KeyOptionalSysApps))
+	}
+	if val == nil {
+		return nil
+	}
+
+	ss, ok := val.([]interface{})
+	if !ok {
+		return common.Error(common.ErrConvertConflict, common.Field("name", specV1.KeyOptionalSysApps), common.Field("error", "failed to interface{} to []interface{}`"))
+	}
+
+	for _, d := range ss {
+		s, ok := d.(string)
+		if !ok {
+			return common.Error(common.ErrConvertConflict, common.Field("name", specV1.KeyOptionalSysApps), common.Field("error", "failed to interface{} to string`"))
+		}
+		node.SysApps = append(node.SysApps, s)
+	}
+	return nil
 }
 
 type NodeCoreConfigs struct {
@@ -73,6 +99,11 @@ type NodeCoreVersions struct {
 	Versions []string `yaml:"versions,omitempty" json:"versions,omitempty"`
 }
 
+type NodeSysApp struct {
+	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+}
+
 type NodeOptionalSysApps struct {
-	Apps []string `yaml:"apps,omitempty" json:"apps,omitempty"`
+	Apps []NodeSysApp `yaml:"apps,omitempty" json:"apps,omitempty"`
 }

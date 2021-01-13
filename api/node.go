@@ -162,7 +162,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	}
 	n.Attributes[v1.BaetylCoreFrequency] = common.DefaultCoreFrequency
 	n.Attributes[v1.KeyAccelerator] = n.Accelerator
-	n.Attributes[v1.KeyOptionalSysApps] = n.OptionalSysApps
+	n.Attributes[v1.KeyOptionalSysApps] = n.SysApps
 
 	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
@@ -212,26 +212,24 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	node.Version = oldNode.Version
 	node.Attributes = oldNode.Attributes
 
-	// populate OptionalSysApps from Attributes
-	if val, ok := oldNode.Attributes[v1.KeyOptionalSysApps]; ok {
-		for _, d := range val.([]interface{}) {
-			oldNode.OptionalSysApps = append(oldNode.OptionalSysApps, d.(string))
-		}
+	err = models.PopulateNode(node)
+	if err != nil {
+		return nil, err
 	}
 
 	if models.EqualNode(node, oldNode) {
 		return oldNode.View(OfflineDuration)
 	}
 
-	if !reflect.DeepEqual(node.OptionalSysApps, oldNode.OptionalSysApps) {
-		err = api.updateNodeOptionedSysApps(oldNode, node.OptionalSysApps)
+	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
+		err = api.updateNodeOptionedSysApps(oldNode, node.SysApps)
 		if err != nil {
 			return nil, err
 		}
 		if node.Attributes == nil {
 			node.Attributes = make(map[string]interface{})
 		}
-		node.Attributes[v1.KeyOptionalSysApps] = node.OptionalSysApps
+		node.Attributes[v1.KeyOptionalSysApps] = node.SysApps
 	}
 
 	node, err = api.Node.Update(c.GetNamespace(), node)
@@ -279,17 +277,14 @@ func (api *API) deleteAllSysAppsOfNode(node *v1.Node) (interface{}, error) {
 		sysAppNames = append(sysAppNames, v.Name)
 	}
 
-	apps, err := api.deleteSysApps(node.Namespace, sysAppNames)
-	if err != nil {
-		return nil, err
-	}
+	api.deleteSysApps(node.Namespace, sysAppNames)
 
-	for _, v := range apps {
-		if err := api.Index.RefreshNodesIndexByApp(node.Namespace, v.Name, make([]string, 0)); err != nil {
+	for _, v := range sysAppNames {
+		if err := api.Index.RefreshNodesIndexByApp(node.Namespace, v, make([]string, 0)); err != nil {
 			common.LogDirtyData(err,
 				log.Any("type", common.Index),
 				log.Any(common.KeyContextNamespace, node.Namespace),
-				log.Any("app", v.Name))
+				log.Any("app", v))
 		}
 	}
 	return nil, nil
@@ -625,7 +620,7 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) updateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string) error {
-	ns, name, oldSysApps := oldNode.Namespace, oldNode.Name, oldNode.OptionalSysApps
+	ns, name, oldSysApps := oldNode.Namespace, oldNode.Name, oldNode.SysApps
 	err := api.checkNodeOptionalSysApps(newSysApps)
 	if err != nil {
 		return err
@@ -654,16 +649,23 @@ func (api *API) updateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string)
 }
 
 func (api *API) GetNodeOptionalSysApps(_ *common.Context) (interface{}, error) {
+	res, err := api.Init.GetOptionalApps()
+	if err != nil {
+		return nil, err
+	}
 	return &models.NodeOptionalSysApps{
-		Apps: api.Init.GetOptionalApps(),
+		Apps: res,
 	}, nil
 }
 
 func (api *API) checkNodeOptionalSysApps(apps []string) error {
-	all := api.Init.GetOptionalApps()
+	supportApps, err := api.Init.GetOptionalApps()
+	if err != nil {
+		return err
+	}
 	m := make(map[string]bool)
-	for _, v := range all {
-		m[v] = true
+	for _, v := range supportApps {
+		m[v.Name] = true
 	}
 
 	for _, app := range apps {
@@ -685,14 +687,24 @@ func (api *API) deleteObsoleteSysApps(node *v1.Node, obsoleteAppAlias []string) 
 		}
 	}
 
-	apps, err := api.deleteSysApps(node.Namespace, obsoleteAppNames)
-	if err != nil {
-		return err
-	}
+	apps := api.deleteSysApps(node.Namespace, obsoleteAppNames)
 
 	for _, app := range apps {
-		if err := api.DeleteNodeAndAppIndex(node.Namespace, app); err != nil {
-			return err
+		if _, err := api.Node.DeleteNodeAppVersion(node.Namespace, app); err != nil {
+			common.LogDirtyData(err,
+				log.Any("type", "NodeAppVersion"),
+				log.Any(common.KeyContextNamespace, node.Namespace),
+				log.Any("node", node.Name),
+				log.Any("app", app.Name))
+		}
+	}
+
+	for _, v := range obsoleteAppNames {
+		if err := api.Index.RefreshNodesIndexByApp(node.Namespace, v, make([]string, 0)); err != nil {
+			common.LogDirtyData(err,
+				log.Any("type", common.Index),
+				log.Any(common.KeyContextNamespace, node.Namespace),
+				log.Any("app", v))
 		}
 	}
 
@@ -728,75 +740,75 @@ func (api *API) filterFreshAndObsoleteSysApps(newSysApps, oldSysApps []string) (
 	return fresh, obsolete
 }
 
-func (api *API) deleteSysApps(ns string, sysApps []string) ([]*v1.Application, error) {
+func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 	var appList []*v1.Application
 	for _, appName := range sysApps {
 		app, err := api.App.Get(ns, appName, "")
 		if err != nil {
-			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
-				continue
+			if e, ok := err.(errors.Coder); ok && e.Code() != common.ErrResourceNotFound {
+				common.LogDirtyData(err,
+					log.Any("type", common.Application),
+					log.Any(common.KeyContextNamespace, ns),
+					log.Any("name", appName))
 			}
-			common.LogDirtyData(err,
-				log.Any("type", common.Application),
-				log.Any(common.KeyContextNamespace, ns),
-				log.Any("name", appName))
-		} else {
-			for _, v := range app.Volumes {
-				// Clean Config
-				if v.Config != nil {
-					config, err := api.Config.Get(ns, v.Config.Name, "")
-					if err != nil {
-						common.LogDirtyData(err,
-							log.Any("type", common.Config),
-							log.Any(common.KeyContextNamespace, ns),
-							log.Any("name", v.Config.Name))
-						continue
-					}
+			continue
+		}
 
-					if res := checkIsSysResources(config.Labels); !res {
-						continue
-					}
+		for _, v := range app.Volumes {
+			// Clean Config
+			if v.Config != nil {
+				config, err := api.Config.Get(ns, v.Config.Name, "")
+				if err != nil {
+					common.LogDirtyData(err,
+						log.Any("type", common.Config),
+						log.Any(common.KeyContextNamespace, ns),
+						log.Any("name", v.Config.Name))
+					continue
+				}
 
-					if err := api.Config.Delete(ns, v.Config.Name); err != nil {
-						common.LogDirtyData(err,
-							log.Any("type", common.Config),
-							log.Any("namespace", ns),
-							log.Any("name", v.Config.Name))
+				if res := checkIsSysResources(config.Labels); !res {
+					continue
+				}
+
+				if err := api.Config.Delete(ns, v.Config.Name); err != nil {
+					common.LogDirtyData(err,
+						log.Any("type", common.Config),
+						log.Any("namespace", ns),
+						log.Any("name", v.Config.Name))
+				}
+			}
+			// Clean Secret
+			if v.Secret != nil {
+				secret, err := api.Secret.Get(ns, v.Secret.Name, "")
+				if err != nil {
+					common.LogDirtyData(err,
+						log.Any("type", common.Secret),
+						log.Any(common.KeyContextNamespace, ns),
+						log.Any("name", v.Secret.Name))
+					continue
+				}
+
+				if res := checkIsSysResources(secret.Labels); !res {
+					continue
+				}
+
+				if vv, ok := secret.Labels[v1.SecretLabel]; ok && vv == v1.SecretConfig {
+					if certID, _ok := secret.Annotations[common.AnnotationPkiCertID]; _ok {
+						if err := api.PKI.DeleteClientCertificate(certID); err != nil {
+							common.LogDirtyData(err,
+								log.Any("type", "pki"),
+								log.Any(common.KeyContextNamespace, ns),
+								log.Any(common.AnnotationPkiCertID, certID))
+						}
+					} else {
+						log.L().Warn("failed to get "+common.AnnotationPkiCertID+" of certificate secret", log.Any(common.KeyContextNamespace, ns), log.Any("name", v.Secret.Name))
 					}
 				}
-				// Clean Secret
-				if v.Secret != nil {
-					secret, err := api.Secret.Get(ns, v.Secret.Name, "")
-					if err != nil {
-						common.LogDirtyData(err,
-							log.Any("type", common.Secret),
-							log.Any(common.KeyContextNamespace, ns),
-							log.Any("name", v.Secret.Name))
-						continue
-					}
-
-					if res := checkIsSysResources(secret.Labels); !res {
-						continue
-					}
-
-					if vv, ok := secret.Labels[v1.SecretLabel]; ok && vv == v1.SecretConfig {
-						if certID, _ok := secret.Annotations[common.AnnotationPkiCertID]; _ok {
-							if err := api.PKI.DeleteClientCertificate(certID); err != nil {
-								common.LogDirtyData(err,
-									log.Any("type", "pki"),
-									log.Any(common.KeyContextNamespace, ns),
-									log.Any(common.AnnotationPkiCertID, certID))
-							}
-						} else {
-							log.L().Warn("failed to get "+common.AnnotationPkiCertID+" of certificate secret", log.Any(common.KeyContextNamespace, ns), log.Any("name", v.Secret.Name))
-						}
-					}
-					if err := api.Secret.Delete(ns, v.Secret.Name); err != nil {
-						common.LogDirtyData(err,
-							log.Any("type", common.Secret),
-							log.Any(common.KeyContextNamespace, ns),
-							log.Any("name", v.Secret.Name))
-					}
+				if err := api.Secret.Delete(ns, v.Secret.Name); err != nil {
+					common.LogDirtyData(err,
+						log.Any("type", common.Secret),
+						log.Any(common.KeyContextNamespace, ns),
+						log.Any("name", v.Secret.Name))
 				}
 			}
 		}
@@ -806,8 +818,9 @@ func (api *API) deleteSysApps(ns string, sysApps []string) ([]*v1.Application, e
 				log.Any(common.KeyContextNamespace, ns),
 				log.Any("name", appName))
 		}
+		appList = append(appList, app)
 	}
-	return appList, nil
+	return appList
 }
 
 // don't delete resource which doesn't belong to system

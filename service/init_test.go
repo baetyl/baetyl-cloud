@@ -253,19 +253,15 @@ func TestInitService_GenApps(t *testing.T) {
 
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-core-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-core-app.yml", gomock.Any(), gomock.Any()).Return(nil)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-broker-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-broker-app.yml", gomock.Any(), gomock.Any()).Return(nil)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-init-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-init-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sPKI.EXPECT().SignClientCertificate("ns.abc", gomock.Any()).Return(cert, nil)
 	sPKI.EXPECT().GetCA().Return([]byte("RootCA"), nil)
-	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(5)
+	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(3)
 	sSecret.EXPECT().Create("ns", gomock.Any()).Return(secret, nil).Times(1)
-	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(5)
+	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(3)
 
 	node := &v1.Node{
 		Namespace: "ns",
@@ -273,7 +269,7 @@ func TestInitService_GenApps(t *testing.T) {
 	}
 	out, err := is.GenApps("ns", node)
 	assert.NoError(t, err)
-	assert.Equal(t, 5, len(out))
+	assert.Equal(t, 3, len(out))
 }
 
 func TestInitService_GenOptionalApps(t *testing.T) {
@@ -319,7 +315,7 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 	node := &v1.Node{
 		Namespace: "ns",
 		Name:      "abc",
-		OptionalSysApps: []string{
+		SysApps: []string{
 			"baetyl-function",
 			"baetyl-rule",
 		},
@@ -330,7 +326,7 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 		"baetyl-rule":     is.genRuleApp,
 	}
 
-	out, err := is.GenOptionalApps("ns", node.Name, node.OptionalSysApps)
+	out, err := is.GenOptionalApps("ns", node.Name, node.SysApps)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(out))
 }
@@ -346,6 +342,7 @@ func TestInitService_GetOptionalApps(t *testing.T) {
 	sNode := service.NewMockNodeService(mock)
 	sAuth := service.NewMockAuthService(mock)
 	sPKI := service.NewMockPKIService(mock)
+	sProp := service.NewMockPropertyService(mock)
 
 	is := InitServiceImpl{}
 	is.TemplateService = sTemplate
@@ -360,8 +357,13 @@ func TestInitService_GetOptionalApps(t *testing.T) {
 	is.OptionalAppFuncs = map[string]GenAppFunc{
 		"a": nil,
 	}
+	is.Property = sProp
 
-	apps := is.GetOptionalApps()
+	sProp.EXPECT().GetPropertyValue("a-description").Return("a-description", nil)
+
+	apps, err := is.GetOptionalApps()
+	assert.NoError(t, err)
 	assert.Len(t, apps, 1)
-	assert.Equal(t, apps[0], "a")
+	assert.Equal(t, apps[0].Name, "a")
+	assert.Equal(t, apps[0].Description, "a-description")
 }

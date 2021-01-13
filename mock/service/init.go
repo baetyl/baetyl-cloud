@@ -5,6 +5,7 @@
 package service
 
 import (
+	models "github.com/baetyl/baetyl-cloud/v2/models"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
@@ -64,11 +65,12 @@ func (mr *MockInitServiceMockRecorder) GenOptionalApps(arg0, arg1, arg2 interfac
 }
 
 // GetOptionalApps mocks base method
-func (m *MockInitService) GetOptionalApps() []string {
+func (m *MockInitService) GetOptionalApps() ([]models.NodeSysApp, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOptionalApps")
-	ret0, _ := ret[0].([]string)
-	return ret0
+	ret0, _ := ret[0].([]models.NodeSysApp)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetOptionalApps indicates an expected call of GetOptionalApps
