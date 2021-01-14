@@ -83,6 +83,9 @@ func initNodeAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		nodes.PUT("/:name/core/configs", mockIM, common.Wrapper(api.UpdateCoreApp))
 		nodes.GET("/:name/core/configs", mockIM, common.Wrapper(api.GetCoreAppConfigs))
 		nodes.GET("/:name/core/versions", mockIM, common.Wrapper(api.GetCoreAppVersions))
+
+		nodes2 := v1.Group("/nodesysapps")
+		nodes2.GET("/optional", mockIM, common.Wrapper(api.GetNodeOptionalSysApps))
 	}
 	return api, router, mockCtl
 }
@@ -1336,6 +1339,27 @@ func TestAPI_GetNodeDeployHistory(t *testing.T) {
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req)
 	assert.Equal(t, http.StatusOK, w2.Code)
+}
+
+
+func Test_GetNodeOptionalSysApps(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+	sInit := ms.NewMockInitService(mockCtl)
+	api.Init = sInit
+	apps := []models.NodeSysApp{
+		{
+			Name: "a",
+			Description: "b",
+		},
+	}
+
+	sInit.EXPECT().GetOptionalApps().Return(apps, nil).Times(1)
+
+	req, _ := http.NewRequest(http.MethodGet, "/v1/nodesysapps/optional", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestGenInitCmdFromNode(t *testing.T) {

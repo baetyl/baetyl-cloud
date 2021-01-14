@@ -239,7 +239,6 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	}
 
 	node, err = api.Node.Update(c.GetNamespace(), node)
-
 	if err != nil {
 		return nil, err
 	}
