@@ -162,7 +162,9 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	}
 	n.Attributes[v1.BaetylCoreFrequency] = common.DefaultCoreFrequency
 	n.Attributes[v1.KeyAccelerator] = n.Accelerator
-	n.Attributes[v1.KeyOptionalSysApps] = n.SysApps
+	if n.SysApps != nil {
+		n.Attributes[v1.KeyOptionalSysApps] = n.SysApps
+	}
 
 	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
@@ -212,7 +214,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	node.Version = oldNode.Version
 	node.Attributes = oldNode.Attributes
 
-	err = models.PopulateNode(node)
+	err = models.PopulateNode(oldNode)
 	if err != nil {
 		return nil, err
 	}
@@ -226,10 +228,14 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if node.Attributes == nil {
-			node.Attributes = make(map[string]interface{})
+		if len(node.SysApps) == 0 {
+			delete(node.Attributes, v1.KeyOptionalSysApps)
+		} else {
+			if node.Attributes == nil {
+				node.Attributes = make(map[string]interface{})
+			}
+			node.Attributes[v1.KeyOptionalSysApps] = node.SysApps
 		}
-		node.Attributes[v1.KeyOptionalSysApps] = node.SysApps
 	}
 
 	node, err = api.Node.Update(c.GetNamespace(), node)
@@ -628,23 +634,15 @@ func (api *API) updateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string)
 
 	fresh, obsolete := api.filterFreshAndObsoleteSysApps(newSysApps, oldSysApps)
 
-	freshApps, err := api.Init.GenOptionalApps(ns, name, fresh)
+	err = api.updateFreshSysApps(ns, name, fresh)
 	if err != nil {
 		return err
-	}
-
-	for _, app := range freshApps {
-		err = api.UpdateNodeAndAppIndex(ns, app)
-		if err != nil {
-			return err
-		}
 	}
 
 	err = api.deleteObsoleteSysApps(oldNode, obsolete)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -659,6 +657,9 @@ func (api *API) GetNodeOptionalSysApps(_ *common.Context) (interface{}, error) {
 }
 
 func (api *API) checkNodeOptionalSysApps(apps []string) error {
+	if len(apps) == 0 {
+		return nil
+	}
 	supportApps, err := api.Init.GetOptionalApps()
 	if err != nil {
 		return err
@@ -676,7 +677,29 @@ func (api *API) checkNodeOptionalSysApps(apps []string) error {
 	return nil
 }
 
+func (api *API) updateFreshSysApps(ns, node string, freshAppAlias []string) error {
+	if len(freshAppAlias) == 0 {
+		return nil
+	}
+
+	freshApps, err := api.Init.GenOptionalApps(ns, node, freshAppAlias)
+	if err != nil {
+		return err
+	}
+
+	for _, app := range freshApps {
+		err = api.UpdateNodeAndAppIndex(ns, app)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (api *API) deleteObsoleteSysApps(node *v1.Node, obsoleteAppAlias []string) error {
+	if len(obsoleteAppAlias) == 0 {
+		return nil
+	}
 	var obsoleteAppNames []string
 	sysAppInfos := node.Desire.AppInfos(true)
 	for _, app := range obsoleteAppAlias {
@@ -716,10 +739,8 @@ func (api *API) filterFreshAndObsoleteSysApps(newSysApps, oldSysApps []string) (
 	obsolete := make([]string, 0)
 
 	old := map[string]bool{}
-	if len(oldSysApps) > 0 {
-		for _, app := range oldSysApps {
-			old[app] = true
-		}
+	for _, app := range oldSysApps {
+		old[app] = true
 	}
 
 	stale := map[string]bool{}

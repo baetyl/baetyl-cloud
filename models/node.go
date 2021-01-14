@@ -66,10 +66,7 @@ func EqualNode(node1, node2 *specV1.Node) bool {
 
 func PopulateNode(node *specV1.Node) error {
 	val, ok := node.Attributes[specV1.KeyOptionalSysApps]
-	if !ok {
-		return common.Error(common.ErrResourceNotFound, common.Field("type", "node"), common.Field("name", specV1.KeyOptionalSysApps))
-	}
-	if val == nil {
+	if !ok || val == nil {
 		return nil
 	}
 
