@@ -65,10 +65,10 @@ func (mr *MockInitServiceMockRecorder) GenOptionalApps(arg0, arg1, arg2 interfac
 }
 
 // GetOptionalApps mocks base method
-func (m *MockInitService) GetOptionalApps() ([]models.NodeSysApp, error) {
+func (m *MockInitService) GetOptionalApps() ([]models.NodeSysAppInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOptionalApps")
-	ret0, _ := ret[0].([]models.NodeSysApp)
+	ret0, _ := ret[0].([]models.NodeSysAppInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

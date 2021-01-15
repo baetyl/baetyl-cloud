@@ -55,7 +55,7 @@ type GenAppFunc func(ns, nodeName string, params map[string]interface{}) (*specV
 // InitService
 type InitService interface {
 	GetResource(ns, nodeName, resourceName string, params map[string]interface{}) (interface{}, error)
-	GetOptionalApps() ([]models.NodeSysApp, error)
+	GetOptionalApps() ([]models.NodeSysAppInfo, error)
 
 	GenApps(ns string, nodeName *specV1.Node) ([]*specV1.Application, error)
 	GenOptionalApps(ns string, nodeName string, apps []string) ([]*specV1.Application, error)
@@ -312,21 +312,18 @@ func (s *InitServiceImpl) GenOptionalApps(ns string, node string, appAlias []str
 	return apps, nil
 }
 
-func (s *InitServiceImpl) GetOptionalApps() ([]models.NodeSysApp, error) {
-	var apps []models.NodeSysApp
-	for k := range s.OptionalAppFuncs {
-		res, err := s.Property.GetPropertyValue(fmt.Sprintf("%s-description", k))
-		if err != nil {
-			return nil, err
-		}
-
-		app := models.NodeSysApp{
-			Name:        k,
-			Description: res,
-		}
-		apps = append(apps, app)
+func (s *InitServiceImpl) GetOptionalApps() ([]models.NodeSysAppInfo, error) {
+	sysApps, err := s.Property.ListOptionalSysApps()
+	if err != nil {
+		return nil, err
 	}
-	return apps, nil
+
+	for _, app := range sysApps {
+		if _, ok := s.OptionalAppFuncs[app.Name]; !ok {
+			return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "OptionalAppFuncs"), common.Field("name", app))
+		}
+	}
+	return sysApps, nil
 }
 
 func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {

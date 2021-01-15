@@ -646,12 +646,19 @@ func (api *API) updateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string)
 }
 
 func (api *API) GetNodeOptionalSysApps(_ *common.Context) (interface{}, error) {
-	res, err := api.Init.GetOptionalApps()
+	apps, err := api.Init.GetOptionalApps()
 	if err != nil {
 		return nil, err
 	}
+	var appViews []models.NodeSysAppView
+	for _, v := range apps {
+		appViews = append(appViews, models.NodeSysAppView{
+			Name:        v.Name,
+			Description: v.Description,
+		})
+	}
 	return &models.NodeOptionalSysApps{
-		Apps: res,
+		Apps: appViews,
 	}, nil
 }
 
@@ -659,13 +666,9 @@ func (api *API) checkNodeOptionalSysApps(apps []string) error {
 	if len(apps) == 0 {
 		return nil
 	}
-	supportApps, err := api.Init.GetOptionalApps()
+	m, err := api.getOptionalSysAppsInMap()
 	if err != nil {
 		return err
-	}
-	m := make(map[string]bool)
-	for _, v := range supportApps {
-		m[v.Name] = true
 	}
 
 	for _, app := range apps {
@@ -674,6 +677,18 @@ func (api *API) checkNodeOptionalSysApps(apps []string) error {
 		}
 	}
 	return nil
+}
+
+func (api *API) getOptionalSysAppsInMap() (map[string]models.NodeSysAppInfo, error) {
+	supportApps, err := api.Init.GetOptionalApps()
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]models.NodeSysAppInfo)
+	for _, v := range supportApps {
+		m[v.Name] = v
+	}
+	return m, nil
 }
 
 func (api *API) updateFreshSysApps(ns, node string, freshAppAlias []string) error {

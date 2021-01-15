@@ -825,7 +825,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	}
 
 	sNode.EXPECT().Get(mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
-	apps := []models.NodeSysApp{
+	apps := []models.NodeSysAppInfo{
 		{
 			Name:        "a",
 			Description: "aa",
@@ -1341,15 +1341,14 @@ func TestAPI_GetNodeDeployHistory(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w2.Code)
 }
 
-
 func Test_GetNodeOptionalSysApps(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	sInit := ms.NewMockInitService(mockCtl)
 	api.Init = sInit
-	apps := []models.NodeSysApp{
+	apps := []models.NodeSysAppInfo{
 		{
-			Name: "a",
+			Name:        "a",
 			Description: "b",
 		},
 	}
