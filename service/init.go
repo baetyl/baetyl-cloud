@@ -297,6 +297,13 @@ func (s *InitServiceImpl) GenOptionalApps(ns string, node string, appAlias []str
 	params := map[string]interface{}{
 		"Namespace": ns,
 		"NodeName":  node,
+		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
+	}
+	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
+		err := handler.(HandlerPopulateParams)(ns, params)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
 	}
 
 	var apps []*specV1.Application
