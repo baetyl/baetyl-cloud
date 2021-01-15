@@ -50,11 +50,15 @@ var (
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
 type GetInitResource func(ns, nodeName string, params map[string]interface{}) ([]byte, error)
 type GenAppsByOption func(ns string, node *specV1.Node, params map[string]interface{}) ([]*specV1.Application, error)
+type GenAppFunc func(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error)
 
 // InitService
 type InitService interface {
 	GetResource(ns, nodeName, resourceName string, params map[string]interface{}) (interface{}, error)
+	GetOptionalApps() ([]models.NodeSysAppInfo, error)
+
 	GenApps(ns string, nodeName *specV1.Node) ([]*specV1.Application, error)
+	GenOptionalApps(ns string, nodeName string, apps []string) ([]*specV1.Application, error)
 }
 
 type InitServiceImpl struct {
@@ -64,10 +68,11 @@ type InitServiceImpl struct {
 	Property        PropertyService
 	TemplateService TemplateService
 	*AppCombinedService
-	PKI             PKIService
-	Hooks           map[string]interface{}
-	ResourceMapFunc map[string]GetInitResource
-	log             *log.Logger
+	PKI              PKIService
+	Hooks            map[string]interface{}
+	ResourceMapFunc  map[string]GetInitResource
+	OptionalAppFuncs map[string]GenAppFunc
+	log              *log.Logger
 }
 
 // NewSyncService new SyncService
@@ -115,6 +120,11 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	initService.ResourceMapFunc[TemplateBaetylInitCommand] = initService.GetInitCommand
 	initService.ResourceMapFunc[TemplateCoreConfYaml] = initService.getCoreConfig
 	initService.ResourceMapFunc[templateBaetylInstallShell] = initService.getInstallShell
+
+	initService.OptionalAppFuncs = map[string]GenAppFunc{
+		specV1.BaetylFunction: initService.genFunctionApp,
+		specV1.BaetylRule:     initService.genRuleApp,
+	}
 
 	return initService, nil
 }
@@ -261,19 +271,17 @@ func (s *InitServiceImpl) GenApps(ns string, node *specV1.Node) ([]*specV1.Appli
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	fa, err := s.genFunctionApp(ns, node.Name, params)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
 	ba, err := s.genBrokerApp(ns, node.Name, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	ra, err := s.genRuleApp(ns, node.Name, params)
+	apps = append(apps, ca, ia, ba)
+
+	optionalSysApps, err := s.GenOptionalApps(ns, node.Name, node.SysApps)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, err
 	}
-	apps = append(apps, ca, ia, fa, ba, ra)
+	apps = append(apps, optionalSysApps...)
 
 	if gen, ok := s.Hooks[HookNameGenAppsByOption]; ok {
 		extApps, err := gen.(GenAppsByOption)(ns, node, params)
@@ -283,6 +291,39 @@ func (s *InitServiceImpl) GenApps(ns string, node *specV1.Node) ([]*specV1.Appli
 		apps = append(apps, extApps...)
 	}
 	return apps, nil
+}
+
+func (s *InitServiceImpl) GenOptionalApps(ns string, node string, appAlias []string) ([]*specV1.Application, error) {
+	params := map[string]interface{}{
+		"Namespace": ns,
+		"NodeName":  node,
+	}
+
+	var apps []*specV1.Application
+	for _, v := range appAlias {
+		if f, ok := s.OptionalAppFuncs[v]; ok {
+			app, err := f(ns, node, params)
+			if err != nil {
+				return nil, err
+			}
+			apps = append(apps, app)
+		}
+	}
+	return apps, nil
+}
+
+func (s *InitServiceImpl) GetOptionalApps() ([]models.NodeSysAppInfo, error) {
+	sysApps, err := s.Property.ListOptionalSysApps()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, app := range sysApps {
+		if _, ok := s.OptionalAppFuncs[app.Name]; !ok {
+			return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "OptionalAppFuncs"), common.Field("name", app))
+		}
+	}
+	return sysApps, nil
 }
 
 func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {

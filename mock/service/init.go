@@ -5,35 +5,36 @@
 package service
 
 import (
+	models "github.com/baetyl/baetyl-cloud/v2/models"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
 
-// MockInitService is a mock of InitService interface.
+// MockInitService is a mock of InitService interface
 type MockInitService struct {
 	ctrl     *gomock.Controller
 	recorder *MockInitServiceMockRecorder
 }
 
-// MockInitServiceMockRecorder is the mock recorder for MockInitService.
+// MockInitServiceMockRecorder is the mock recorder for MockInitService
 type MockInitServiceMockRecorder struct {
 	mock *MockInitService
 }
 
-// NewMockInitService creates a new mock instance.
+// NewMockInitService creates a new mock instance
 func NewMockInitService(ctrl *gomock.Controller) *MockInitService {
 	mock := &MockInitService{ctrl: ctrl}
 	mock.recorder = &MockInitServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockInitService) EXPECT() *MockInitServiceMockRecorder {
 	return m.recorder
 }
 
-// GenApps mocks base method.
+// GenApps mocks base method
 func (m *MockInitService) GenApps(arg0 string, arg1 *v1.Node) ([]*v1.Application, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenApps", arg0, arg1)
@@ -42,13 +43,43 @@ func (m *MockInitService) GenApps(arg0 string, arg1 *v1.Node) ([]*v1.Application
 	return ret0, ret1
 }
 
-// GenApps indicates an expected call of GenApps.
+// GenApps indicates an expected call of GenApps
 func (mr *MockInitServiceMockRecorder) GenApps(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenApps", reflect.TypeOf((*MockInitService)(nil).GenApps), arg0, arg1)
 }
 
-// GetResource mocks base method.
+// GenOptionalApps mocks base method
+func (m *MockInitService) GenOptionalApps(arg0, arg1 string, arg2 []string) ([]*v1.Application, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenOptionalApps", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]*v1.Application)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GenOptionalApps indicates an expected call of GenOptionalApps
+func (mr *MockInitServiceMockRecorder) GenOptionalApps(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenOptionalApps", reflect.TypeOf((*MockInitService)(nil).GenOptionalApps), arg0, arg1, arg2)
+}
+
+// GetOptionalApps mocks base method
+func (m *MockInitService) GetOptionalApps() ([]models.NodeSysAppInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOptionalApps")
+	ret0, _ := ret[0].([]models.NodeSysAppInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOptionalApps indicates an expected call of GetOptionalApps
+func (mr *MockInitServiceMockRecorder) GetOptionalApps() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptionalApps", reflect.TypeOf((*MockInitService)(nil).GetOptionalApps))
+}
+
+// GetResource mocks base method
 func (m *MockInitService) GetResource(arg0, arg1, arg2 string, arg3 map[string]interface{}) (interface{}, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetResource", arg0, arg1, arg2, arg3)
@@ -57,7 +88,7 @@ func (m *MockInitService) GetResource(arg0, arg1, arg2 string, arg3 map[string]i
 	return ret0, ret1
 }
 
-// GetResource indicates an expected call of GetResource.
+// GetResource indicates an expected call of GetResource
 func (mr *MockInitServiceMockRecorder) GetResource(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResource", reflect.TypeOf((*MockInitService)(nil).GetResource), arg0, arg1, arg2, arg3)
