@@ -631,14 +631,14 @@ func (api *API) updateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string)
 		return err
 	}
 
-	fresh, obsolete := api.filterFreshAndObsoleteSysApps(newSysApps, oldSysApps)
+	fresh, obsolete := api.filterSysApps(newSysApps, oldSysApps)
 
-	err = api.updateFreshSysApps(ns, name, fresh)
+	err = api.updateAddedSysApps(ns, name, fresh)
 	if err != nil {
 		return err
 	}
 
-	err = api.deleteObsoleteSysApps(oldNode, obsolete)
+	err = api.deleteDeletedSysApps(oldNode, obsolete)
 	if err != nil {
 		return err
 	}
@@ -691,7 +691,7 @@ func (api *API) getOptionalSysAppsInMap() (map[string]models.NodeSysAppInfo, err
 	return m, nil
 }
 
-func (api *API) updateFreshSysApps(ns, node string, freshAppAlias []string) error {
+func (api *API) updateAddedSysApps(ns, node string, freshAppAlias []string) error {
 	if len(freshAppAlias) == 0 {
 		return nil
 	}
@@ -710,7 +710,7 @@ func (api *API) updateFreshSysApps(ns, node string, freshAppAlias []string) erro
 	return nil
 }
 
-func (api *API) deleteObsoleteSysApps(node *v1.Node, obsoleteAppAlias []string) error {
+func (api *API) deleteDeletedSysApps(node *v1.Node, obsoleteAppAlias []string) error {
 	if len(obsoleteAppAlias) == 0 {
 		return nil
 	}
@@ -748,7 +748,7 @@ func (api *API) deleteObsoleteSysApps(node *v1.Node, obsoleteAppAlias []string) 
 	return nil
 }
 
-func (api *API) filterFreshAndObsoleteSysApps(newSysApps, oldSysApps []string) ([]string, []string) {
+func (api *API) filterSysApps(newSysApps, oldSysApps []string) ([]string, []string) {
 	fresh := make([]string, 0)
 	obsolete := make([]string, 0)
 

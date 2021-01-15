@@ -330,3 +330,46 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(out))
 }
+
+func TestInitService_GetOptionalApps(t *testing.T) {
+	mock := gomock.NewController(t)
+	defer mock.Finish()
+
+	sApp := service.NewMockApplicationService(mock)
+	sConfig := service.NewMockConfigService(mock)
+	sSecret := service.NewMockSecretService(mock)
+	sTemplate := service.NewMockTemplateService(mock)
+	sNode := service.NewMockNodeService(mock)
+	sAuth := service.NewMockAuthService(mock)
+	sPKI := service.NewMockPKIService(mock)
+	sProperty := service.NewMockPropertyService(mock)
+
+	is := InitServiceImpl{}
+	is.TemplateService = sTemplate
+	is.NodeService = sNode
+	is.AuthService = sAuth
+	is.PKI = sPKI
+	is.AppCombinedService = &AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+	is.OptionalAppFuncs = map[string]GenAppFunc{
+		"a": nil,
+	}
+	is.Property = sProperty
+
+	res := []models.NodeSysAppInfo{
+		{
+			Name:        "a",
+			Description: "a-description",
+		},
+	}
+	sProperty.EXPECT().ListOptionalSysApps().Return(res, nil)
+
+	apps, err := is.GetOptionalApps()
+	assert.NoError(t, err)
+	assert.Len(t, apps, 1)
+	assert.Equal(t, apps[0].Name, "a")
+	assert.Equal(t, apps[0].Description, "a-description")
+}
