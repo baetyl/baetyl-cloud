@@ -51,7 +51,7 @@ func (s *Shadow) ToShadowModel() (*models.Shadow, error) {
 		}
 	}
 	shadow.ReportMeta = reportMeta
-	var desireMeta  map[string]interface{}
+	var desireMeta map[string]interface{}
 	if s.DesireMeta != "" {
 		if err := json.Unmarshal([]byte(s.DesireMeta), &desireMeta); err != nil {
 			return nil, err
