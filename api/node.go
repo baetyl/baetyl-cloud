@@ -369,6 +369,10 @@ func (api *API) ParseAndCheckNode(c *common.Context) (*v1.Node, error) {
 	if node.Name == "" {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is required"))
 	}
+	err = api.checkNodeOptionalSysApps(node.SysApps)
+	if err != nil {
+		return nil, err
+	}
 
 	return node, nil
 }
@@ -626,14 +630,10 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 
 func (api *API) updateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string) error {
 	ns, name, oldSysApps := oldNode.Namespace, oldNode.Name, oldNode.SysApps
-	err := api.checkNodeOptionalSysApps(newSysApps)
-	if err != nil {
-		return err
-	}
 
 	fresh, obsolete := api.filterSysApps(newSysApps, oldSysApps)
 
-	err = api.updateAddedSysApps(ns, name, fresh)
+	err := api.updateAddedSysApps(ns, name, fresh)
 	if err != nil {
 		return err
 	}
