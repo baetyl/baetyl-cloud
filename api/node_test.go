@@ -33,7 +33,25 @@ func getMockNode() *specV1.Node {
 			common.LabelNodeName: "abc",
 		},
 		Attributes: map[string]interface{}{
-			BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+			specV1.KeyOptionalSysApps:  interface{}([]interface{}{"a"}),
+		},
+	}
+	return mNode
+}
+
+func getMockNode2() *specV1.Node {
+	mNode := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
 		},
 	}
 	return mNode
@@ -65,6 +83,9 @@ func initNodeAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		nodes.PUT("/:name/core/configs", mockIM, common.Wrapper(api.UpdateCoreApp))
 		nodes.GET("/:name/core/configs", mockIM, common.Wrapper(api.GetCoreAppConfigs))
 		nodes.GET("/:name/core/versions", mockIM, common.Wrapper(api.GetCoreAppVersions))
+
+		nodes2 := v1.Group("/nodesysapps")
+		nodes2.GET("/optional", mockIM, common.Wrapper(api.GetNodeOptionalSysApps))
 	}
 	return api, router, mockCtl
 }
@@ -118,7 +139,7 @@ func TestGetNode(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 	bytes := w.Body.Bytes()
-	assert.Equal(t, string(bytes), "{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false,\"mode\":\"cloud\"}\n")
+	assert.Equal(t, string(bytes), "{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"ready\":false,\"mode\":\"cloud\"}\n")
 
 	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, common.Error(common.ErrResourceNotFound))
 	// 404
@@ -158,7 +179,7 @@ func TestGetNodes(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, string(w.Body.Bytes()), "{\"total\":2,\"listOptions\":null,\"items\":[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false,\"mode\":\"cloud\"},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"ready\":false,\"mode\":\"cloud\"}]}\n")
+	assert.Equal(t, string(w.Body.Bytes()), "{\"total\":2,\"listOptions\":null,\"items\":[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"ready\":false,\"mode\":\"cloud\"},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"ready\":false,\"mode\":\"cloud\"}]}\n")
 
 	// 200 ResourceNotFound
 	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
@@ -173,7 +194,7 @@ func TestGetNodes(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, string(w.Body.Bytes()), "{\"total\":2,\"listOptions\":null,\"items\":[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"ready\":false,\"mode\":\"cloud\"},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"ready\":false,\"mode\":\"cloud\"}]}\n")
+	assert.Equal(t, string(w.Body.Bytes()), "{\"total\":2,\"listOptions\":null,\"items\":[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"ready\":false,\"mode\":\"cloud\"},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"ready\":false,\"mode\":\"cloud\"}]}\n")
 
 	// 400 validate error
 	nodeNames = &models.NodeNames{}
@@ -238,13 +259,15 @@ func TestGetNodeStats(t *testing.T) {
 
 	mNode.Report = map[string]interface{}{
 		"nodestats": map[string]interface{}{
-			"usage": map[string]string{
-				"cpu":    "1",
-				"memory": "512Mi",
-			},
-			"capacity": map[string]string{
-				"cpu":    "2",
-				"memory": "1024Mi",
+			"master": map[string]interface{}{
+				"usage": map[string]string{
+					"cpu":    "1",
+					"memory": "512Mi",
+				},
+				"capacity": map[string]string{
+					"cpu":    "2",
+					"memory": "1024Mi",
+				},
 			},
 		},
 		"time": "2020-04-13T10:07:12.267728Z",
@@ -258,13 +281,15 @@ func TestGetNodeStats(t *testing.T) {
 
 	mNode.Report = map[string]interface{}{
 		"nodestats": map[string]interface{}{
-			"usage": map[string]string{
-				"cpu":    "0.5",
-				"memory": "512Mi",
-			},
-			"capacity": map[string]string{
-				"cpu":    "2.5",
-				"memory": "1024Mi",
+			"master": map[string]interface{}{
+				"usage": map[string]string{
+					"cpu":    "0.5",
+					"memory": "512Mi",
+				},
+				"capacity": map[string]string{
+					"cpu":    "2.5",
+					"memory": "1024Mi",
+				},
 			},
 		},
 	}
@@ -277,32 +302,15 @@ func TestGetNodeStats(t *testing.T) {
 
 	mNode.Report = map[string]interface{}{
 		"nodestats": map[string]interface{}{
-			"usage": map[string]string{
-				"cpu":    "0.5a",
-				"memory": "512M",
-			},
-			"capacity": map[string]string{
-				"cpu":    "2.5a",
-				"memory": "1024M",
-			},
-		},
-	}
-	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
-	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
-	w = httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
-	assert.Contains(t, w.Body.String(), "quantities must match the regular expression '^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$'")
-
-	mNode.Report = map[string]interface{}{
-		"nodestats": map[string]interface{}{
-			"usage": map[string]string{
-				"cpu":    "0.5",
-				"memory": "512a",
-			},
-			"capacity": map[string]string{
-				"cpu":    "2.5",
-				"memory": "1024a",
+			"master": map[string]interface{}{
+				"usage": map[string]string{
+					"cpu":    "0.5a",
+					"memory": "512M",
+				},
+				"capacity": map[string]string{
+					"cpu":    "2.5a",
+					"memory": "1024M",
+				},
 			},
 		},
 	}
@@ -315,13 +323,36 @@ func TestGetNodeStats(t *testing.T) {
 
 	mNode.Report = map[string]interface{}{
 		"nodestats": map[string]interface{}{
-			"usage": map[string]string{
-				"cpu":    "0.5a",
-				"memory": "512a",
+			"master": map[string]interface{}{
+				"usage": map[string]string{
+					"cpu":    "0.5",
+					"memory": "512a",
+				},
+				"capacity": map[string]string{
+					"cpu":    "2.5",
+					"memory": "1024a",
+				},
 			},
-			"capacity": map[string]string{
-				"cpu":    "2.5",
-				"memory": "1024Mi",
+		},
+	}
+	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Contains(t, w.Body.String(), "quantities must match the regular expression '^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$'")
+
+	mNode.Report = map[string]interface{}{
+		"nodestats": map[string]interface{}{
+			"master": map[string]interface{}{
+				"usage": map[string]string{
+					"cpu":    "0.5a",
+					"memory": "512a",
+				},
+				"capacity": map[string]string{
+					"cpu":    "2.5",
+					"memory": "1024Mi",
+				},
 			},
 		},
 	}
@@ -410,7 +441,7 @@ func TestCreateNode(t *testing.T) {
 	api.PKI = sPKI
 	api.Init = sInit
 
-	mNode := getMockNode()
+	mNode := getMockNode2()
 
 	app1 := &specV1.Application{
 		Name:      "baetyl-core",
@@ -424,12 +455,14 @@ func TestCreateNode(t *testing.T) {
 
 	sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
-	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(2)
+	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(1)
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
-	sNode.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil)
+	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(mNode, nil)
+
+	mNode2 := getMockNode2()
 	w := httptest.NewRecorder()
-	body, _ := json.Marshal(mNode)
+	body, _ := json.Marshal(mNode2)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -438,8 +471,9 @@ func TestCreateNode(t *testing.T) {
 	mNode.Labels[common.LabelNodeName] = mNode.Name
 
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
-	sNode.EXPECT().Create(mNode.Namespace, mNode).Return(mNode, nil)
+	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode)
@@ -448,7 +482,130 @@ func TestCreateNode(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
-	sNode.EXPECT().Create(mNode.Namespace, mNode).Return(nil, fmt.Errorf("create node error"))
+	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(nil, fmt.Errorf("create node error"))
+	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mNode)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(fmt.Errorf("quota error"))
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mNode)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mNode.Name = "node-baetyl-test"
+	mNode.Labels[common.LabelNodeName] = mNode.Name
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mNode)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil)
+	mNode.Name = "node-baetyl-test"
+	mNode.Labels[common.LabelNodeName] = mNode.Name
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mNode)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	mNode.Name = ""
+	mNode.Labels[common.LabelNodeName] = mNode.Name
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mNode)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (name is required)")
+}
+
+func TestCreateNodeWithSysApps(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+	mLicense := ms.NewMockLicenseService(mockCtl)
+	api.License = mLicense
+
+	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	api.Node, api.Index = sNode, sIndex
+
+	sProp := ms.NewMockPropertyService(mockCtl)
+	sPKI := ms.NewMockPKIService(mockCtl)
+	sInit := ms.NewMockInitService(mockCtl)
+	api.Prop = sProp
+	api.PKI = sPKI
+	api.Init = sInit
+
+	mNode := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+		},
+	}
+
+	app1 := &specV1.Application{
+		Name:      "baetyl-core",
+		Namespace: mNode.Namespace,
+	}
+	app2 := &specV1.Application{
+		Name:      "baetyl-function",
+		Namespace: mNode.Namespace,
+	}
+	nodeList := []string{"s0", "s1", "s2"}
+
+	sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
+	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(1)
+	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(mNode, nil)
+
+	mNode2 := getMockNode2()
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(mNode2)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	mNode.Name = "node-test"
+	mNode.Labels[common.LabelNodeName] = mNode.Name
+
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(mNode, nil)
+	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mNode)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(nil, fmt.Errorf("create node error"))
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	w = httptest.NewRecorder()
@@ -575,36 +732,264 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	assert.Contains(t, w.Body.String(), "The request parameter is invalid. (The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
 }
 
-func TestUpdateNode(t *testing.T) {
+func TestUpdateNodeAddSysApp(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
 	sNode := ms.NewMockNodeService(mockCtl)
+	sInit := ms.NewMockInitService(mockCtl)
+	sProp := ms.NewMockPropertyService(mockCtl)
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
 	api.Node = sNode
+	api.Init = sInit
+	api.Prop = sProp
+	api.Index = sIndex
+	api.App = sApp
+	api.Config = sConfig
 
-	mApp := getMockNode()
+	mNode := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+		},
+	}
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil).Times(1)
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+
+	// equal case
 	w := httptest.NewRecorder()
-	body, _ := json.Marshal(mApp)
+	body, _ := json.Marshal(mNode)
 	req, _ := http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 
-	mApp2 := getMockNode()
-	mApp2.Labels["test"] = "test"
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mApp2, nil).AnyTimes()
-	sNode.EXPECT().Update(mApp.Namespace, mApp).Return(nil, fmt.Errorf("error"))
+	mNode2 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+			specV1.KeyOptionalSysApps:  interface{}([]interface{}{"a"}),
+		},
+	}
+
+	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode2, nil).Times(1)
+	opts := []models.NodeSysAppInfo{
+		{
+			Name: "a",
+		},
+	}
+	sInit.EXPECT().GetOptionalApps().Return(opts, nil).Times(1)
+
+	mNode3 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+			specV1.KeyOptionalSysApps:  interface{}([]interface{}{"a"}),
+		},
+		SysApps: []string{"a"},
+	}
+	// equal
 	w = httptest.NewRecorder()
-	body, _ = json.Marshal(mApp)
+	body, _ = json.Marshal(mNode3)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
+	//
+	//mNode4 := &specV1.Node{
+	//	Namespace: "default",
+	//	Name:      "abc",
+	//	Labels: map[string]string{
+	//		"tag":                "baidu",
+	//		common.LabelNodeName: "abc",
+	//		"test":               "test",
+	//	},
+	//	Attributes: map[string]interface{}{
+	//		specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+	//		specV1.KeyAccelerator:      "",
+	//	},
+	//}
+	//
+	//sNode.EXPECT().Get(mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
+	//apps := []models.NodeSysAppInfo{
+	//	{
+	//		Name:        "a",
+	//		Description: "aa",
+	//	},
+	//}
+	//sInit.EXPECT().GetOptionalApps().Return(apps, nil).Times(1)
+	//sInit.EXPECT().GenOptionalApps(mNode.Namespace, mNode.Name, []string{"a"}).Times(1)
+	//nodeList := []string{"abc"}
+	//sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	//sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
+	//
+	//mNode6 := &specV1.Node{
+	//	Namespace: "default",
+	//	Name:      "abc",
+	//	Labels: map[string]string{
+	//		"tag":                "baidu",
+	//		common.LabelNodeName: "abc",
+	//		"test":               "test",
+	//	},
+	//	Attributes: map[string]interface{}{
+	//		specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+	//		specV1.KeyAccelerator:      "",
+	//		specV1.KeyOptionalSysApps:  []string{"a"},
+	//	},
+	//	SysApps: []string{"a"},
+	//}
+	//sNode.EXPECT().Update(mNode.Namespace, mNode6).Return(mNode6, nil)
+	//
+	//mNode5 := &specV1.Node{
+	//	Namespace: "default",
+	//	Name:      "abc",
+	//	Labels: map[string]string{
+	//		"tag":                "baidu",
+	//		common.LabelNodeName: "abc",
+	//		"test":               "test",
+	//	},
+	//	Attributes: map[string]interface{}{
+	//		specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+	//		specV1.KeyAccelerator:      "",
+	//	},
+	//	SysApps: []string{"a"},
+	//}
+	//w = httptest.NewRecorder()
+	//body, _ = json.Marshal(mNode5)
+	//req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
+	//router.ServeHTTP(w, req)
+	//assert.Equal(t, http.StatusOK, w.Code)
+}
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mApp, nil).AnyTimes()
-	sNode.EXPECT().Update(mApp.Namespace, mApp).Return(mApp2, nil)
-	w = httptest.NewRecorder()
-	body, _ = json.Marshal(mApp)
-	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
+func TestUpdateNodeDeleteSysApp(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+	sNode := ms.NewMockNodeService(mockCtl)
+	sInit := ms.NewMockInitService(mockCtl)
+	sProp := ms.NewMockPropertyService(mockCtl)
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	api.Node = sNode
+	api.Init = sInit
+	api.Prop = sProp
+	api.Index = sIndex
+	api.App = sApp
+	api.Config = sConfig
+
+	desireContent := `
+	{
+		"sysapps":[{
+	      	"name":"rule-node12",
+			"version": "12"
+		}]
+	}`
+
+	desire := specV1.Desire{}
+	err := json.Unmarshal([]byte(desireContent), &desire)
+	assert.NoError(t, err)
+
+	mNode7 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+			specV1.KeyOptionalSysApps:  interface{}([]interface{}{"rule-node12"}),
+		},
+		Desire: desire,
+	}
+
+	sNode.EXPECT().Get(mNode7.Namespace, mNode7.Name).Return(mNode7, nil).Times(1)
+
+	appRule := &specV1.Application{
+		Name:      "rule-node12",
+		Namespace: mNode7.Namespace,
+		Version:   "12",
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
+		Volumes: []specV1.Volume{
+			{
+				Name: "config",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name:    "config1",
+						Version: "1",
+					},
+				},
+			},
+		},
+	}
+
+	sApp.EXPECT().Get(mNode7.Namespace, appRule.Name, "").Return(appRule, nil).Times(1)
+	sApp.EXPECT().Delete(mNode7.Namespace, appRule.Name, "").Return(nil).Times(1)
+	res := &specV1.Configuration{
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
+	}
+	sConfig.EXPECT().Get(mNode7.Namespace, "config1", "").Return(res, nil).Times(1)
+	sConfig.EXPECT().Delete(mNode7.Namespace, appRule.Volumes[0].Config.Name).Times(1)
+	sNode.EXPECT().DeleteNodeAppVersion(mNode7.Namespace, gomock.Any()).Return(nil, nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode7.Namespace, appRule.Name, gomock.Any()).Return(nil).Times(1)
+
+	mNode9 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+		},
+	}
+	sNode.EXPECT().Update(mNode7.Namespace, mNode9).Return(mNode9, nil)
+
+	mNode8 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+		},
+	}
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(mNode8)
+	req, _ := http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 }
@@ -719,7 +1104,7 @@ func TestDeleteNode(t *testing.T) {
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, appCore.Version).Return(nil).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, "").Return(nil).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appCore.Name, gomock.Any()).Return(nil).Times(1)
 	sConfig.EXPECT().Delete(mNode.Namespace, appCore.Volumes[0].Config.Name).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appCore.Volumes[1].Secret.Name, "").Return(secret1, nil).Times(1)
@@ -727,7 +1112,7 @@ func TestDeleteNode(t *testing.T) {
 	sSecret.EXPECT().Delete(mNode.Namespace, appCore.Volumes[1].Secret.Name).Times(1)
 
 	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, appFunction.Version).Return(nil).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, "").Return(nil).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(nil).Times(1)
 	sConfig.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(secret1f, nil).Times(1)
@@ -860,6 +1245,8 @@ func TestDeleteNodeError(t *testing.T) {
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil).AnyTimes()
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appCore.Name, gomock.Any()).Return(nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(nil).Times(1)
 
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
@@ -882,7 +1269,7 @@ func TestDeleteNodeError(t *testing.T) {
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, appCore.Version).Return(errors.New("error")).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, "").Return(errors.New("error")).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 	sConfig.EXPECT().Delete(mNode.Namespace, appCore.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appCore.Volumes[1].Secret.Name, "").Return(secret1, nil).Times(1)
@@ -890,7 +1277,7 @@ func TestDeleteNodeError(t *testing.T) {
 	sSecret.EXPECT().Delete(mNode.Namespace, appCore.Volumes[1].Secret.Name).Times(1)
 
 	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, appFunction.Version).Return(errors.New("error")).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, "").Return(errors.New("error")).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 	sConfig.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(nil, errors.New("error")).Times(1)
@@ -913,11 +1300,10 @@ func TestDeleteNodeError(t *testing.T) {
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, errors.New("error")).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, appCore.Version).Return(errors.New("error")).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 
 	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, appFunction.Version).Return(errors.New("error")).Times(1)
+	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, "").Return(errors.New("error")).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, appFunction.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 	sConfig.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(nil, errors.New("error")).Times(1)
@@ -961,6 +1347,26 @@ func TestAPI_GetNodeDeployHistory(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w2.Code)
 }
 
+func Test_GetNodeOptionalSysApps(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+	sInit := ms.NewMockInitService(mockCtl)
+	api.Init = sInit
+	apps := []models.NodeSysAppInfo{
+		{
+			Name:        "a",
+			Description: "b",
+		},
+	}
+
+	sInit.EXPECT().GetOptionalApps().Return(apps, nil).Times(1)
+
+	req, _ := http.NewRequest(http.MethodGet, "/v1/nodesysapps/optional", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
 func TestGenInitCmdFromNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
@@ -983,7 +1389,7 @@ func TestGenInitCmdFromNode(t *testing.T) {
 	node := getMockNode()
 	params := map[string]interface{}{
 		"InitApplyYaml": "baetyl-init-deployment.yml",
-		"mode":          "",
+		"mode":          "kube",
 	}
 	var expect interface{} = []byte("setup")
 	sInit.EXPECT().GetResource("default", "abc", service.TemplateBaetylInitCommand, params).Return(expect, nil).Times(1)
@@ -1294,7 +1700,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Name:      n,
 		Version:   "0",
 		Attributes: map[string]interface{}{
-			BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},
@@ -1395,6 +1801,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		"CoreAppName":   "baetyl-core-1",
 		"CoreConfName":  "baetyl-core-conf-ialplsycd",
 		"CoreFrequency": "40s",
+		"GPUStats":      false,
 	}
 
 	confData, err := json.Marshal(cconfig)
@@ -1516,7 +1923,7 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 		Name:      n,
 		Version:   "0",
 		Attributes: map[string]interface{}{
-			BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},
@@ -1625,7 +2032,7 @@ func TestAPI_GetCoreAppVersions(t *testing.T) {
 		Name:      n,
 		Version:   "0",
 		Attributes: map[string]interface{}{
-			BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},

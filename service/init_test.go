@@ -170,7 +170,7 @@ func TestInitService_GenCmd(t *testing.T) {
 		"mode":          "",
 	}
 	sAuth.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)
-	sProp.EXPECT().GetPropertyValue(TemplateKubeInitCommand).Return(TemplateBaetylInitCommand, nil)
+	sProp.EXPECT().GetPropertyValue(TemplateBaetylInitCommand).Return(TemplateBaetylInitCommand, nil)
 	sTemplate.EXPECT().Execute("setup-command", TemplateBaetylInitCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
 
 	res, err := as.GetInitCommand("ns", "name", params)
@@ -253,21 +253,123 @@ func TestInitService_GenApps(t *testing.T) {
 
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-core-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-core-app.yml", gomock.Any(), gomock.Any()).Return(nil)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-broker-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-broker-app.yml", gomock.Any(), gomock.Any()).Return(nil)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-init-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-init-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sPKI.EXPECT().SignClientCertificate("ns.abc", gomock.Any()).Return(cert, nil)
 	sPKI.EXPECT().GetCA().Return([]byte("RootCA"), nil)
-	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(5)
+	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(3)
 	sSecret.EXPECT().Create("ns", gomock.Any()).Return(secret, nil).Times(1)
-	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(5)
+	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(3)
 
-	out, err := is.GenApps("ns", "abc")
+	node := &v1.Node{
+		Namespace: "ns",
+		Name:      "abc",
+	}
+	out, err := is.GenApps("ns", node)
 	assert.NoError(t, err)
-	assert.Equal(t, 5, len(out))
+	assert.Equal(t, 3, len(out))
+}
+
+func TestInitService_GenOptionalApps(t *testing.T) {
+	mock := gomock.NewController(t)
+	defer mock.Finish()
+
+	sApp := service.NewMockApplicationService(mock)
+	sConfig := service.NewMockConfigService(mock)
+	sSecret := service.NewMockSecretService(mock)
+	sTemplate := service.NewMockTemplateService(mock)
+	sNode := service.NewMockNodeService(mock)
+	sAuth := service.NewMockAuthService(mock)
+	sPKI := service.NewMockPKIService(mock)
+
+	is := InitServiceImpl{}
+	is.TemplateService = sTemplate
+	is.NodeService = sNode
+	is.AuthService = sAuth
+	is.PKI = sPKI
+	is.AppCombinedService = &AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	config := &v1.Configuration{
+		Namespace: "ns",
+		Name:      "config",
+	}
+
+	app := &v1.Application{
+		Namespace: "ns",
+		Name:      "app",
+	}
+
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-app.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-app.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(2)
+	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(2)
+
+	node := &v1.Node{
+		Namespace: "ns",
+		Name:      "abc",
+		SysApps: []string{
+			"baetyl-function",
+			"baetyl-rule",
+		},
+	}
+
+	is.OptionalAppFuncs = map[string]GenAppFunc{
+		"baetyl-function": is.genFunctionApp,
+		"baetyl-rule":     is.genRuleApp,
+	}
+
+	out, err := is.GenOptionalApps("ns", node.Name, node.SysApps)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(out))
+}
+
+func TestInitService_GetOptionalApps(t *testing.T) {
+	mock := gomock.NewController(t)
+	defer mock.Finish()
+
+	sApp := service.NewMockApplicationService(mock)
+	sConfig := service.NewMockConfigService(mock)
+	sSecret := service.NewMockSecretService(mock)
+	sTemplate := service.NewMockTemplateService(mock)
+	sNode := service.NewMockNodeService(mock)
+	sAuth := service.NewMockAuthService(mock)
+	sPKI := service.NewMockPKIService(mock)
+	sProperty := service.NewMockPropertyService(mock)
+
+	is := InitServiceImpl{}
+	is.TemplateService = sTemplate
+	is.NodeService = sNode
+	is.AuthService = sAuth
+	is.PKI = sPKI
+	is.AppCombinedService = &AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+	is.OptionalAppFuncs = map[string]GenAppFunc{
+		"a": nil,
+	}
+	is.Property = sProperty
+
+	res := []models.NodeSysAppInfo{
+		{
+			Name:        "a",
+			Description: "a-description",
+		},
+	}
+	sProperty.EXPECT().ListOptionalSysApps().Return(res, nil)
+
+	apps, err := is.GetOptionalApps()
+	assert.NoError(t, err)
+	assert.Len(t, apps, 1)
+	assert.Equal(t, apps[0].Name, "a")
+	assert.Equal(t, apps[0].Description, "a-description")
 }

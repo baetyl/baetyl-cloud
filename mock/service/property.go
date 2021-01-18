@@ -62,6 +62,20 @@ func (mr *MockPropertyServiceMockRecorder) CreateProperty(arg0 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProperty", reflect.TypeOf((*MockPropertyService)(nil).CreateProperty), arg0)
 }
 
+// CreateSysApp mocks base method
+func (m *MockPropertyService) CreateSysApp(arg0 *models.NodeSysAppInfo) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateSysApp", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateSysApp indicates an expected call of CreateSysApp
+func (mr *MockPropertyServiceMockRecorder) CreateSysApp(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSysApp", reflect.TypeOf((*MockPropertyService)(nil).CreateSysApp), arg0)
+}
+
 // DeleteProperty mocks base method
 func (m *MockPropertyService) DeleteProperty(arg0 string) error {
 	m.ctrl.T.Helper()
@@ -74,6 +88,20 @@ func (m *MockPropertyService) DeleteProperty(arg0 string) error {
 func (mr *MockPropertyServiceMockRecorder) DeleteProperty(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProperty", reflect.TypeOf((*MockPropertyService)(nil).DeleteProperty), arg0)
+}
+
+// DeleteSysApp mocks base method
+func (m *MockPropertyService) DeleteSysApp(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSysApp", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSysApp indicates an expected call of DeleteSysApp
+func (mr *MockPropertyServiceMockRecorder) DeleteSysApp(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSysApp", reflect.TypeOf((*MockPropertyService)(nil).DeleteSysApp), arg0)
 }
 
 // GetProperty mocks base method
@@ -106,6 +134,36 @@ func (mr *MockPropertyServiceMockRecorder) GetPropertyValue(arg0 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPropertyValue", reflect.TypeOf((*MockPropertyService)(nil).GetPropertyValue), arg0)
 }
 
+// GetSysApp mocks base method
+func (m *MockPropertyService) GetSysApp(arg0 string) (*models.NodeSysAppInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSysApp", arg0)
+	ret0, _ := ret[0].(*models.NodeSysAppInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSysApp indicates an expected call of GetSysApp
+func (mr *MockPropertyServiceMockRecorder) GetSysApp(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSysApp", reflect.TypeOf((*MockPropertyService)(nil).GetSysApp), arg0)
+}
+
+// ListOptionalSysApps mocks base method
+func (m *MockPropertyService) ListOptionalSysApps() ([]models.NodeSysAppInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListOptionalSysApps")
+	ret0, _ := ret[0].([]models.NodeSysAppInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListOptionalSysApps indicates an expected call of ListOptionalSysApps
+func (mr *MockPropertyServiceMockRecorder) ListOptionalSysApps() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListOptionalSysApps", reflect.TypeOf((*MockPropertyService)(nil).ListOptionalSysApps))
+}
+
 // ListProperty mocks base method
 func (m *MockPropertyService) ListProperty(arg0 *models.Filter) ([]models.Property, error) {
 	m.ctrl.T.Helper()
@@ -121,6 +179,21 @@ func (mr *MockPropertyServiceMockRecorder) ListProperty(arg0 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProperty", reflect.TypeOf((*MockPropertyService)(nil).ListProperty), arg0)
 }
 
+// ListSysApps mocks base method
+func (m *MockPropertyService) ListSysApps() ([]models.NodeSysAppInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListSysApps")
+	ret0, _ := ret[0].([]models.NodeSysAppInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListSysApps indicates an expected call of ListSysApps
+func (mr *MockPropertyServiceMockRecorder) ListSysApps() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSysApps", reflect.TypeOf((*MockPropertyService)(nil).ListSysApps))
+}
+
 // UpdateProperty mocks base method
 func (m *MockPropertyService) UpdateProperty(arg0 *models.Property) error {
 	m.ctrl.T.Helper()
@@ -133,4 +206,18 @@ func (m *MockPropertyService) UpdateProperty(arg0 *models.Property) error {
 func (mr *MockPropertyServiceMockRecorder) UpdateProperty(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProperty", reflect.TypeOf((*MockPropertyService)(nil).UpdateProperty), arg0)
+}
+
+// UpdateSysApp mocks base method
+func (m *MockPropertyService) UpdateSysApp(arg0 *models.NodeSysAppInfo) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSysApp", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateSysApp indicates an expected call of UpdateSysApp
+func (mr *MockPropertyServiceMockRecorder) UpdateSysApp(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSysApp", reflect.TypeOf((*MockPropertyService)(nil).UpdateSysApp), arg0)
 }
