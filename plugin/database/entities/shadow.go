@@ -44,14 +44,18 @@ func (s *Shadow) ToShadowModel() (*models.Shadow, error) {
 	}
 	shadow.Desire = desire
 
-	reportMeta := map[string]interface{}{}
-	if err := json.Unmarshal([]byte(s.ReportMeta), &reportMeta); err != nil {
-		return nil, err
+	var reportMeta map[string]interface{}
+	if s.ReportMeta != "" {
+		if err := json.Unmarshal([]byte(s.ReportMeta), &reportMeta); err != nil {
+			return nil, err
+		}
 	}
 	shadow.ReportMeta = reportMeta
-	desireMeta := map[string]interface{}{}
-	if err := json.Unmarshal([]byte(s.DesireMeta), &desireMeta); err != nil {
-		return nil, err
+	var desireMeta  map[string]interface{}
+	if s.DesireMeta != "" {
+		if err := json.Unmarshal([]byte(s.DesireMeta), &desireMeta); err != nil {
+			return nil, err
+		}
 	}
 	shadow.DesireMeta = desireMeta
 	return shadow, nil
