@@ -148,16 +148,17 @@ CREATE TABLE IF NOT EXISTS `baetyl_property` (
 CREATE TABLE IF NOT EXISTS `baetyl_module` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID,主键',
   `name` varchar(255) NOT NULL DEFAULT '' COMMENT '模块名称',
+  `version` varchar(36) NOT NULL DEFAULT '' COMMENT '版本',
   `image` varchar(1024) NOT NULL DEFAULT '' COMMENT '镜像',
   `programs` varchar(2048) NOT NULL DEFAULT '' COMMENT '进程模式程序包',
-  `version` varchar(36) NOT NULL DEFAULT '' COMMENT '版本',
   `type` varchar(36) NOT NULL DEFAULT '0' COMMENT '应用类型，user:用户类型模块，runtime_user: 函数运行时类型的用户模块，system:系统类型模块，opt_system: 可选系统类型模块',
-  `is_hidden` int(1) NOT NULL DEFAULT '0' COMMENT '隐藏 1 不隐藏 0',
+  `is_latest` int(1) NOT NULL DEFAULT '0' COMMENT '是否是最新版本',
   `description` varchar(1024) NOT NULL DEFAULT '' COMMENT '描述',
-  `create_time` timestamp NOT NULL DEFAULT '2017-01-01 00:00:00' COMMENT '记录创建时间',
-  `update_time` timestamp NOT NULL DEFAULT '2017-01-01 00:00:00' COMMENT '记录更新时间',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
   PRIMARY KEY (`id`),
-  KEY `index_name` (`name`)
+  KEY `index_name` (`name`),
+  UNIQUE KEY `unique_name` (`name`,`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='module table';
 
 COMMIT;

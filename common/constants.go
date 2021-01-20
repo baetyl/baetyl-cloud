@@ -8,6 +8,7 @@ type Event string
 type SystemApplication string
 type CertType string
 type SyncMode string
+type ModuleType string
 
 const (
 	// TimeFormat
@@ -207,4 +208,11 @@ const (
 	ReportMeta = "reportMeta"
 	DesireMeta = "desireMeta"
 	NodeProps  = "nodeprops"
+)
+
+const (
+	Type_User            ModuleType = "user"
+	Type_User_RUNTIME    ModuleType = "runtime_user"
+	Type_System          ModuleType = "system"
+	Type_System_Optional ModuleType = "opt_system"
 )

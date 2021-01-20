@@ -20,12 +20,14 @@ CREATE TABLE IF NOT EXISTS baetyl_module
   programs    varchar(2048)    NOT NULL DEFAULT '',
   version     varchar(36)      NOT NULL DEFAULT '',
   type        varchar(36)      NOT NULL DEFAULT '',
-  is_hidden   int(1)           NOT NULL DEFAULT '0',
+  is_latest   int(1)           NOT NULL DEFAULT '0',
   description varchar(1024)    NOT NULL DEFAULT '',
   create_time timestamp        NOT NULL DEFAULT CURRENT_TIMESTAMP,
   update_time timestamp        NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-`,
+`, `
+CREATE UNIQUE INDEX name_version
+on baetyl_module (name, version);`,
 	}
 )
 
@@ -48,91 +50,166 @@ func TestModule(t *testing.T) {
 	db.MockCreateModuleTable()
 
 	module := &models.Module{
-		Name:              "baetyl",
-		Version:           "v2.0.0",
-		Image:             "baetyl:v1",
+		Name:    "baetyl",
+		Version: "v2.0.0",
+		Image:   "baetyl:v1",
 		Programs: map[string]string{
-			"linux-amd64": "url-linux-amd64",
+			"linux-amd64":    "url-linux-amd64",
 			"linux-arm64-v8": "url-linux-arm64-v8",
 		},
-		Type:              "a",
-		IsHidden:          false,
-		Description:       "for desp",
+		Type:        "a",
+		IsLatest:    false,
+		Description: "for desp",
 	}
 
-	err = db.CreateModule(module)
+	res, err := db.CreateModule(module)
 	assert.NoError(t, err)
+	checkModule(t, module, res)
 
-	res, err := db.GetModule(module.Name)
+	res, err = db.GetModuleByVersion(module.Name, module.Version)
+	assert.NoError(t, err)
+	checkModule(t, module, res)
+
+	res, err = db.CreateModule(module)
+	assert.Error(t, err)
+	assert.Equal(t, err.Error(), "UNIQUE constraint failed: baetyl_module.name, baetyl_module.version")
+
+	module01 := &models.Module{
+		Name:    "baetyl",
+		Version: "v2.1.0",
+		Image:   "baetyl:v11",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        "a",
+		IsLatest:    false,
+		Description: "for desp",
+	}
+
+	res, err = db.CreateModule(module01)
+	assert.NoError(t, err)
+	checkModule(t, module01, res)
+
+	res, err = db.GetModuleByVersion(module01.Name, module01.Version)
+	assert.NoError(t, err)
+	checkModule(t, module01, res)
+
+	ress, err := db.GetModules(module01.Name)
+	assert.NoError(t, err)
+	assert.Equal(t, len(ress), 2)
+	checkModule(t, &ress[0], module)
+	checkModule(t, &ress[1], module01)
+
+	res, err = db.GetModuleByImage(module01.Name, module01.Image)
+	assert.NoError(t, err)
+	checkModule(t, module01, res)
+
+	res, err = db.GetModuleByImage(module.Name, module.Image)
 	assert.NoError(t, err)
 	checkModule(t, module, res)
 
 	module2 := &models.Module{
-		Name:              "baetyl2",
-		Version:           "v2.1.0",
-		Image:             "baetyl:v2",
-		Type:              "a",
-		IsHidden:          false,
-		Description:       "for desp",
+		Name:        "baetyl2",
+		Version:     "v2.1.0",
+		Image:       "baetyl:v2",
+		Type:        "a",
+		IsLatest:    false,
+		Description: "for desp",
 	}
 
-	err = db.CreateModule(module2)
-	assert.NoError(t, err)
-
-	res, err = db.GetModule(module2.Name)
+	res, err = db.CreateModule(module2)
 	assert.NoError(t, err)
 	checkModule(t, module2, res)
-
-	module3 := &models.Module{
-		Name:              "baetyl3",
-		Version:           "v2.1.0",
-		Image:             "baetyl:v2",
-		Type:              "a",
-		IsHidden:          true,
-		Description:       "for desp",
-	}
-
-	err = db.CreateModule(module3)
-	assert.NoError(t, err)
-
-	res, err = db.GetModule(module3.Name)
-	assert.NoError(t, err)
-	checkModule(t, module3, res)
-
-	module.IsHidden = true
-	module.Description = "a"
-	module.Type = "b"
-	module.Image = "image-b"
-	module.Version = "version"
-	module.Programs = map[string]string{
-		"b": "b-url",
-	}
-	err = db.UpdateModule(module)
-	assert.NoError(t, err)
-
-	res, err = db.GetModule(module.Name)
-	assert.NoError(t, err)
-	checkModule(t, module, res)
-
-	module22 := &models.Module{
-		Name:              "baetyl2",
-		Version:           "v2.2.0",
-		Image:             "baetyl:v2.2",
-		Type:              "a",
-		IsHidden:          false,
-		Description:       "for desp",
-	}
-
-	err = db.CreateModule(module22)
-	assert.NoError(t, err)
-
-	res, err = db.GetModuleByVersion(module22.Name, module22.Version)
-	assert.NoError(t, err)
-	checkModule(t, module22, res)
 
 	res, err = db.GetModuleByVersion(module2.Name, module2.Version)
 	assert.NoError(t, err)
 	checkModule(t, module2, res)
+
+	module3 := &models.Module{
+		Name:        "baetyl3",
+		Version:     "v2.1.0",
+		Image:       "baetyl:v2",
+		Type:        "a",
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	res, err = db.CreateModule(module3)
+	assert.NoError(t, err)
+	checkModule(t, module3, res)
+
+	res, err = db.GetModuleByVersion(module3.Name, module3.Version)
+	assert.NoError(t, err)
+	checkModule(t, module3, res)
+
+	res, err = db.GetLatestModule(module3.Name)
+	assert.NoError(t, err)
+	checkModule(t, module3, res)
+
+	module31 := &models.Module{
+		Name:        "baetyl3",
+		Version:     "v2.2.0",
+		Image:       "baetyl:v2.2",
+		Type:        "a",
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	res, err = db.CreateModule(module31)
+	assert.NoError(t, err)
+	checkModule(t, module31, res)
+
+	res, err = db.GetLatestModule(module3.Name)
+	assert.NoError(t, err)
+	checkModule(t, module31, res)
+
+	module31.Description = "a"
+	module31.Programs = map[string]string{
+		"b": "b-url",
+	}
+	res, err = db.UpdateModuleByVersion(module31)
+	assert.NoError(t, err)
+	checkModule(t, module31, res)
+
+	res, err = db.GetLatestModule(module3.Name)
+	assert.NoError(t, err)
+	checkModule(t, module31, res)
+
+	module3.Description = "aaa"
+	module3.Programs = map[string]string{
+		"aaa": "aaa-url",
+	}
+	module3.IsLatest = true
+	res, err = db.UpdateModuleByVersion(module3)
+	assert.NoError(t, err)
+	checkModule(t, module3, res)
+
+	res, err = db.GetLatestModule(module3.Name)
+	assert.NoError(t, err)
+	checkModule(t, module3, res)
+
+	ress, err = db.GetModules(module3.Name)
+	assert.NoError(t, err)
+	assert.Equal(t, len(ress), 2)
+	checkModule(t, &ress[0], module3)
+	module31.IsLatest = false
+	checkModule(t, &ress[1], module31)
+
+	err = db.DeleteModuleByVersion(module3.Name, module3.Version)
+	assert.NoError(t, err)
+
+	ress, err = db.GetModules(module3.Name)
+	assert.NoError(t, err)
+	assert.Equal(t, len(ress), 1)
+	checkModule(t, &ress[0], module31)
+
+	err = db.DeleteModules(module3.Name)
+	assert.NoError(t, err)
+
+	ress, err = db.GetModules(module3.Name)
+	assert.Error(t, err)
+	assert.Equal(t, err.Error(), "The (module) resource (baetyl3) is not found.")
 }
 
 func TestListApp(t *testing.T) {
@@ -145,51 +222,51 @@ func TestListApp(t *testing.T) {
 	db.MockCreateModuleTable()
 
 	module := &models.Module{
-		Name:              "baetyl",
-		Version:           "v2.0.0",
-		Image:             "baetyl:v1",
+		Name:    "baetyl",
+		Version: "v2.0.1",
+		Image:   "baetyl:v1",
 		Programs: map[string]string{
-			"linux-amd64": "url-linux-amd64",
+			"linux-amd64":    "url-linux-amd64",
 			"linux-arm64-v8": "url-linux-arm64-v8",
 		},
-		Type:              "a",
-		IsHidden:          false,
-		Description:       "for desp",
+		Type:        "a",
+		IsLatest:    false,
+		Description: "for desp",
 	}
 
 	module2 := &models.Module{
-		Name:              "baetyl2",
-		Version:           "v2.0.2",
-		Image:             "baetyl:v2",
+		Name:    "baetyl2",
+		Version: "v2.0.2",
+		Image:   "baetyl:v2",
 		Programs: map[string]string{
-			"linux-amd64": "url-linux-amd64",
+			"linux-amd64":    "url-linux-amd64",
 			"linux-arm64-v8": "url-linux-arm64-v8",
 		},
-		Type:              "b",
-		IsHidden:          false,
-		Description:       "for desp",
+		Type:        "b",
+		IsLatest:    false,
+		Description: "for desp",
 	}
 
 	module3 := &models.Module{
-		Name:              "baetyl2",
-		Version:           "v2.0.2",
-		Image:             "baetyl:v2",
+		Name:    "baetyl3",
+		Version: "v2.0.3",
+		Image:   "baetyl:v3",
 		Programs: map[string]string{
-			"linux-amd64": "url-linux-amd64",
+			"linux-amd64":    "url-linux-amd64",
 			"linux-arm64-v8": "url-linux-arm64-v8",
 		},
-		Type:              "a",
-		IsHidden:          true,
-		Description:       "for desp",
+		Type:        "a",
+		IsLatest:    true,
+		Description: "for desp",
 	}
 
-	err = db.CreateModule(module)
+	_, err = db.CreateModule(module)
 	assert.NoError(t, err)
 
-	err = db.CreateModule(module2)
+	_, err = db.CreateModule(module2)
 	assert.NoError(t, err)
 
-	err = db.CreateModule(module3)
+	_, err = db.CreateModule(module3)
 	assert.NoError(t, err)
 
 	page := &models.Filter{
@@ -197,7 +274,7 @@ func TestListApp(t *testing.T) {
 		PageSize: 2,
 	}
 
-	resList, err := db.ListModule(page)
+	resList, err := db.ListModules(page)
 	assert.NoError(t, err)
 	assert.Len(t, resList, 2)
 	assert.Equal(t, module.Name, resList[0].Name)
@@ -206,7 +283,7 @@ func TestListApp(t *testing.T) {
 	checkModule(t, module2, &resList[1])
 
 	page = &models.Filter{}
-	resList, err = db.ListModule(page)
+	resList, err = db.ListModules(page)
 	assert.NoError(t, err)
 	assert.Len(t, resList, 3)
 	assert.Equal(t, module.Name, resList[0].Name)
@@ -216,27 +293,35 @@ func TestListApp(t *testing.T) {
 	checkModule(t, module2, &resList[1])
 	checkModule(t, module3, &resList[2])
 
-	resList, err = db.ListModuleWithOptions("a", false, page)
-	assert.NoError(t, err)
-	assert.Len(t, resList, 1)
-	assert.Equal(t, module.Name, resList[0].Name)
-	checkModule(t, module, &resList[0])
-
-	resList, err = db.ListModuleWithOptions("a", true, page)
+	resList, err = db.ListModulesByType("a", page)
 	assert.NoError(t, err)
 	assert.Len(t, resList, 1)
 	assert.Equal(t, module3.Name, resList[0].Name)
 	checkModule(t, module3, &resList[0])
 
-	resList, err = db.ListModuleWithOptions("b", false, page)
-	assert.NoError(t, err)
-	assert.Len(t, resList, 1)
-	assert.Equal(t, module2.Name, resList[0].Name)
-	checkModule(t, module2, &resList[0])
-
-	resList, err = db.ListModuleWithOptions("b", true, page)
+	resList, err = db.ListModulesByType("b", page)
 	assert.NoError(t, err)
 	assert.Len(t, resList, 0)
+
+	module4 := &models.Module{
+		Name:    "baetyl4",
+		Version: "v2.0.4",
+		Image:   "baetyl:v4",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        "b",
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	_, err = db.CreateModule(module4)
+	assert.NoError(t, err)
+
+	resList, err = db.ListModulesByType("b", page)
+	assert.NoError(t, err)
+	assert.Len(t, resList, 1)
 }
 
 func checkModule(t *testing.T, expect, actual *models.Module) {
@@ -245,6 +330,6 @@ func checkModule(t *testing.T, expect, actual *models.Module) {
 	assert.Equal(t, expect.Image, actual.Image)
 	assert.Equal(t, expect.Programs, actual.Programs)
 	assert.EqualValues(t, expect.Type, actual.Type)
-	assert.Equal(t, expect.IsHidden, actual.IsHidden)
+	assert.Equal(t, expect.IsLatest, actual.IsLatest)
 	assert.Equal(t, expect.Description, actual.Description)
 }

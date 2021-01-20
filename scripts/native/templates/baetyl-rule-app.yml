@@ -7,7 +7,7 @@ type: "container"
 system: true
 services:
   - name: "baetyl-rule"
-    image: "{{GetProperty "baetyl-rule-image"}}"
+    image: {{GetModuleImage "baetyl-rule"}}
     replica: 1
     volumeMounts:
       - name: "rule-conf"

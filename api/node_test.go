@@ -83,9 +83,6 @@ func initNodeAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		nodes.PUT("/:name/core/configs", mockIM, common.Wrapper(api.UpdateCoreApp))
 		nodes.GET("/:name/core/configs", mockIM, common.Wrapper(api.GetCoreAppConfigs))
 		nodes.GET("/:name/core/versions", mockIM, common.Wrapper(api.GetCoreAppVersions))
-
-		nodes2 := v1.Group("/nodesysapps")
-		nodes2.GET("/optional", mockIM, common.Wrapper(api.GetNodeOptionalSysApps))
 	}
 	return api, router, mockCtl
 }
@@ -787,12 +784,8 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	}
 
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode2, nil).Times(1)
-	opts := []models.NodeSysAppInfo{
-		{
-			Name: "a",
-		},
-	}
-	sInit.EXPECT().GetOptionalApps().Return(opts, nil).Times(1)
+	opts := []string{"a"}
+	sInit.EXPECT().GetOptionalApps().Return(opts).Times(1)
 
 	mNode3 := &specV1.Node{
 		Namespace: "default",
@@ -1347,26 +1340,6 @@ func TestAPI_GetNodeDeployHistory(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w2.Code)
 }
 
-func Test_GetNodeOptionalSysApps(t *testing.T) {
-	api, router, mockCtl := initNodeAPI(t)
-	defer mockCtl.Finish()
-	sInit := ms.NewMockInitService(mockCtl)
-	api.Init = sInit
-	apps := []models.NodeSysAppInfo{
-		{
-			Name:        "a",
-			Description: "b",
-		},
-	}
-
-	sInit.EXPECT().GetOptionalApps().Return(apps, nil).Times(1)
-
-	req, _ := http.NewRequest(http.MethodGet, "/v1/nodesysapps/optional", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
-}
-
 func TestGenInitCmdFromNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()
@@ -1688,12 +1661,14 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	mockProp := ms.NewMockPropertyService(mockCtl)
 	mockConfig := ms.NewMockConfigService(mockCtl)
 	mockInit := ms.NewMockInitService(mockCtl)
+	mockModule := ms.NewMockModuleService(mockCtl)
 	api.Init = mockInit
 	api.Node = mockNode
 	api.Index = mockIndex
 	api.App = mockApp
 	api.Prop = mockProp
 	api.Config = mockConfig
+	api.Module = mockModule
 
 	node := &specV1.Node{
 		Namespace: ns,
@@ -1745,25 +1720,12 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		System: true,
 	}
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
-
-	params := &models.Filter{
-		Name: BaetylVersionPrefix,
+	module := &models.Module{
+		Name:    "baetyl-core",
+		Version: "v2.0.0",
+		Image:   "baetyl-core:v2.0.0",
 	}
-	props := []models.Property{
-		{
-			Name:  BaetylVersionPrefix + "v2.0.0",
-			Value: "baetyl-core:v2.0.0",
-		},
-		{
-			Name:  BaetylVersionPrefix + "v2.1.0",
-			Value: "baetyl-core:v2.1.0",
-		},
-		{
-			Name:  BaetylVersionPrefix + "v2.2.0",
-			Value: "baetyl-core:v2.2.0",
-		},
-	}
-	mockProp.EXPECT().ListProperty(params).Return(props, nil).Times(1)
+	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(module, nil).Times(1)
 
 	coreConfig := models.NodeCoreConfigs{
 		Version:   "v2.0.0",
@@ -1780,13 +1742,8 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
-	mockProp.EXPECT().ListProperty(params).Return(props, nil).Times(1)
-
-	prop := &models.Property{
-		Name:  BaetylVersionPrefix + "v2.0.0",
-		Value: "baetyl-core:v2.0.0",
-	}
-	mockProp.EXPECT().GetProperty("baetyl-version-v2.0.0").Return(prop, nil).Times(1)
+	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(module, nil).Times(1)
+	mockModule.EXPECT().GetModuleByVersion(BaetylModule, "v2.0.0").Return(module, nil).Times(1)
 
 	cconfig := &specV1.Configuration{
 		Name:      "baetyl-core-conf-ialplsycd",
@@ -1829,13 +1786,13 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	res := specV1.Application{}
 	err = json.Unmarshal(w.Body.Bytes(), &res)
 	assert.NoError(t, err)
-	assert.EqualValues(t, prop.Value, res.Services[0].Image)
+	assert.EqualValues(t, "baetyl-core:v2.0.0", res.Services[0].Image)
 	assert.EqualValues(t, int32(30000), res.Services[0].Ports[0].HostPort)
 
 	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
-	mockProp.EXPECT().ListProperty(params).Return(nil, errors.New("err")).Times(1)
+	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(nil, errors.New("err")).Times(1)
 
 	coreConfig = models.NodeCoreConfigs{
 		Version:   "v2.0.0",
@@ -1861,8 +1818,8 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
-	mockProp.EXPECT().ListProperty(params).Return(props, nil).Times(1)
-	mockProp.EXPECT().GetProperty("baetyl-version-v2.0.0").Return(nil, errors.New("err")).Times(1)
+	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(module, nil).Times(1)
+	mockModule.EXPECT().GetModuleByVersion(BaetylModule, "v2.0.0").Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/test/core/configs", bytes.NewReader(data))
@@ -1872,8 +1829,8 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
-	mockProp.EXPECT().ListProperty(params).Return(props, nil).Times(1)
-	mockProp.EXPECT().GetProperty("baetyl-version-v2.0.0").Return(prop, nil).Times(1)
+	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(module, nil).Times(1)
+	mockModule.EXPECT().GetModuleByVersion(BaetylModule, "v2.0.0").Return(module, nil).Times(1)
 	ccconfig := &specV1.Configuration{
 		Name:      "baetyl-core-conf-ialplsycd",
 		Namespace: ns,
@@ -1911,12 +1868,14 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 	mockProp := ms.NewMockPropertyService(mockCtl)
 	mockConfig := ms.NewMockConfigService(mockCtl)
 	mockInit := ms.NewMockInitService(mockCtl)
+	mockModule := ms.NewMockModuleService(mockCtl)
 	api.Init = mockInit
 	api.Node = mockNode
 	api.Index = mockIndex
 	api.App = mockApp
 	api.Prop = mockProp
 	api.Config = mockConfig
+	api.Module = mockModule
 
 	node := &specV1.Node{
 		Namespace: ns,
@@ -1968,25 +1927,6 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 		System: true,
 	}
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
-
-	params := &models.Filter{
-		Name: BaetylVersionPrefix,
-	}
-	props := []models.Property{
-		{
-			Name:  BaetylVersionPrefix + "v2.0.0",
-			Value: "baetyl-core:v2.0.0",
-		},
-		{
-			Name:  BaetylVersionPrefix + "v2.1.0",
-			Value: "baetyl-core:v2.1.0",
-		},
-		{
-			Name:  BaetylVersionPrefix + "v2.2.0",
-			Value: "baetyl-core:v2.2.0",
-		},
-	}
-	mockProp.EXPECT().ListProperty(params).Return(props, nil).Times(1)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/test/core/configs", nil)
@@ -2078,24 +2018,24 @@ func TestAPI_GetCoreAppVersions(t *testing.T) {
 	}
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
 
-	params := &models.Filter{
-		Name: BaetylVersionPrefix,
-	}
-	props := []models.Property{
-		{
-			Name:  BaetylVersionPrefix + "v2.0.0",
-			Value: "baetyl-core:v2.0.0",
-		},
-		{
-			Name:  BaetylVersionPrefix + "v2.1.0",
-			Value: "baetyl-core:v2.1.0",
-		},
-		{
-			Name:  BaetylVersionPrefix + "v2.2.0",
-			Value: "baetyl-core:v2.2.0",
-		},
-	}
-	mockProp.EXPECT().ListProperty(params).Return(props, nil).Times(1)
+	//params := &models.Filter{
+	//	Name: BaetylVersionPrefix,
+	//}
+	//props := []models.Property{
+	//	{
+	//		Name:  BaetylVersionPrefix + "v2.0.0",
+	//		Value: "baetyl-core:v2.0.0",
+	//	},
+	//	{
+	//		Name:  BaetylVersionPrefix + "v2.1.0",
+	//		Value: "baetyl-core:v2.1.0",
+	//	},
+	//	{
+	//		Name:  BaetylVersionPrefix + "v2.2.0",
+	//		Value: "baetyl-core:v2.2.0",
+	//	},
+	//}
+	//mockProp.EXPECT().ListProperty(params).Return(props, nil).Times(1)
 
 	mockProp.EXPECT().GetPropertyValue("baetyl-version-latest").Return("v2.1.0", nil).Times(1)
 
