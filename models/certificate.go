@@ -67,9 +67,9 @@ type CertificateDataItem struct {
 
 // CertificateList Certificate List
 type CertificateList struct {
-	Total       int           `json:"total"`
-	ListOptions *ListOptions  `json:"listOptions"`
-	Items       []Certificate `json:"items"`
+	Total        int `json:"total"`
+	*ListOptions `json:",inline"`
+	Items        []Certificate `json:"items"`
 }
 
 func (r *Certificate) Equal(target *Certificate) bool {
