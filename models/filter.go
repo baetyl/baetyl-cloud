@@ -36,9 +36,9 @@ func (f *Filter) GetLimitNumber() int {
 
 func (f *Filter) GetFuzzyName() string {
 	if f.Name == "" {
-		f.Name = "%"
+		return "%"
 	} else if !strings.Contains(f.Name, "%") {
-		f.Name = "%" + f.Name + "%"
+		return "%" + f.Name + "%"
 	}
 	return f.Name
 }
