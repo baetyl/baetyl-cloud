@@ -738,12 +738,14 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sApp := ms.NewMockApplicationService(mockCtl)
 	sConfig := ms.NewMockConfigService(mockCtl)
+	sModule := ms.NewMockModuleService(mockCtl)
 	api.Node = sNode
 	api.Init = sInit
 	api.Prop = sProp
 	api.Index = sIndex
 	api.App = sApp
 	api.Config = sConfig
+	api.Module = sModule
 
 	mNode := &specV1.Node{
 		Namespace: "default",
@@ -784,8 +786,17 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	}
 
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode2, nil).Times(1)
-	opts := []string{"a"}
-	sInit.EXPECT().GetOptionalApps().Return(opts).Times(1)
+	modules := []models.Module{
+		{
+			Name: "a",
+			Image: "a-image",
+		},
+		{
+			Name: "b",
+			Image: "b-image",
+		},
+	}
+	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
 
 	mNode3 := &specV1.Node{
 		Namespace: "default",
@@ -808,70 +819,64 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	//
-	//mNode4 := &specV1.Node{
-	//	Namespace: "default",
-	//	Name:      "abc",
-	//	Labels: map[string]string{
-	//		"tag":                "baidu",
-	//		common.LabelNodeName: "abc",
-	//		"test":               "test",
-	//	},
-	//	Attributes: map[string]interface{}{
-	//		specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
-	//		specV1.KeyAccelerator:      "",
-	//	},
-	//}
-	//
-	//sNode.EXPECT().Get(mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
-	//apps := []models.NodeSysAppInfo{
-	//	{
-	//		Name:        "a",
-	//		Description: "aa",
-	//	},
-	//}
-	//sInit.EXPECT().GetOptionalApps().Return(apps, nil).Times(1)
-	//sInit.EXPECT().GenOptionalApps(mNode.Namespace, mNode.Name, []string{"a"}).Times(1)
-	//nodeList := []string{"abc"}
-	//sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
-	//sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
-	//
-	//mNode6 := &specV1.Node{
-	//	Namespace: "default",
-	//	Name:      "abc",
-	//	Labels: map[string]string{
-	//		"tag":                "baidu",
-	//		common.LabelNodeName: "abc",
-	//		"test":               "test",
-	//	},
-	//	Attributes: map[string]interface{}{
-	//		specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
-	//		specV1.KeyAccelerator:      "",
-	//		specV1.KeyOptionalSysApps:  []string{"a"},
-	//	},
-	//	SysApps: []string{"a"},
-	//}
-	//sNode.EXPECT().Update(mNode.Namespace, mNode6).Return(mNode6, nil)
-	//
-	//mNode5 := &specV1.Node{
-	//	Namespace: "default",
-	//	Name:      "abc",
-	//	Labels: map[string]string{
-	//		"tag":                "baidu",
-	//		common.LabelNodeName: "abc",
-	//		"test":               "test",
-	//	},
-	//	Attributes: map[string]interface{}{
-	//		specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
-	//		specV1.KeyAccelerator:      "",
-	//	},
-	//	SysApps: []string{"a"},
-	//}
-	//w = httptest.NewRecorder()
-	//body, _ = json.Marshal(mNode5)
-	//req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
-	//router.ServeHTTP(w, req)
-	//assert.Equal(t, http.StatusOK, w.Code)
+
+	mNode4 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+		},
+	}
+
+	sNode.EXPECT().Get(mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
+	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
+	sInit.EXPECT().GenOptionalApps(mNode.Namespace, mNode.Name, []string{"a"}).Times(1)
+	nodeList := []string{"abc"}
+	sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
+
+	mNode6 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+			specV1.KeyOptionalSysApps:  []string{"a"},
+		},
+		SysApps: []string{"a"},
+	}
+	sNode.EXPECT().Update(mNode.Namespace, mNode6).Return(mNode6, nil)
+
+	mNode5 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+		},
+		SysApps: []string{"a"},
+	}
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(mNode5)
+	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestUpdateNodeDeleteSysApp(t *testing.T) {
@@ -1889,6 +1894,12 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 	}
 
 	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	module := &models.Module{
+		Name:    "baetyl-core",
+		Version: "v2.0.0",
+		Image:   "baetyl-core:v2.0.0",
+	}
+	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(module, nil).Times(1)
 
 	appList := []string{
 		"baetyl-core-1",
@@ -1960,12 +1971,14 @@ func TestAPI_GetCoreAppVersions(t *testing.T) {
 	mockProp := ms.NewMockPropertyService(mockCtl)
 	mockConfig := ms.NewMockConfigService(mockCtl)
 	mockInit := ms.NewMockInitService(mockCtl)
+	mockModule := ms.NewMockModuleService(mockCtl)
 	api.Init = mockInit
 	api.Node = mockNode
 	api.Index = mockIndex
 	api.App = mockApp
 	api.Prop = mockProp
 	api.Config = mockConfig
+	api.Module = mockModule
 
 	node := &specV1.Node{
 		Namespace: ns,
@@ -1985,6 +1998,13 @@ func TestAPI_GetCoreAppVersions(t *testing.T) {
 		"baetyl-function-2",
 	}
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
+
+	module := &models.Module{
+		Name:    "baetyl-core",
+		Version: "v2.0.0",
+		Image:   "baetyl-core:v2.0.0",
+	}
+	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(module, nil).Times(1)
 
 	coreApp := &specV1.Application{
 		Name:      "baetyl-core-1",
@@ -2018,26 +2038,12 @@ func TestAPI_GetCoreAppVersions(t *testing.T) {
 	}
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
 
-	//params := &models.Filter{
-	//	Name: BaetylVersionPrefix,
-	//}
-	//props := []models.Property{
-	//	{
-	//		Name:  BaetylVersionPrefix + "v2.0.0",
-	//		Value: "baetyl-core:v2.0.0",
-	//	},
-	//	{
-	//		Name:  BaetylVersionPrefix + "v2.1.0",
-	//		Value: "baetyl-core:v2.1.0",
-	//	},
-	//	{
-	//		Name:  BaetylVersionPrefix + "v2.2.0",
-	//		Value: "baetyl-core:v2.2.0",
-	//	},
-	//}
-	//mockProp.EXPECT().ListProperty(params).Return(props, nil).Times(1)
-
-	mockProp.EXPECT().GetPropertyValue("baetyl-version-latest").Return("v2.1.0", nil).Times(1)
+	module2 := &models.Module{
+		Name:    "v2.1.0",
+		Version: "v2.1.0",
+		Image:   "baetyl-core:v2.1.0",
+	}
+	mockModule.EXPECT().GetLatestModule(BaetylModule).Return(module2, nil).Times(1)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/test/core/versions", nil)
