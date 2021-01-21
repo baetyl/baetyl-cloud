@@ -19,7 +19,7 @@ type ListOptions struct {
 	LabelSelector string `form:"selector,omitempty" json:"selector,omitempty"`
 	FieldSelector string `form:"fieldSelector,omitempty" json:"fieldSelector,omitempty"`
 	Limit         int64  `form:"limit,omitempty" json:"limit,omitempty"`
-	Continue      string `form:"continue,omitempty" json:"omitempty"`
+	Continue      string `form:"continue,omitempty" json:"continue,omitempty"`
 	Filter        `json:",inline"`
 }
 
