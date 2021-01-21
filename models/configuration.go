@@ -9,9 +9,9 @@ import (
 
 // ConfigurationList Configuration List
 type ConfigurationList struct {
-	Total       int                    `json:"total"`
-	ListOptions *ListOptions           `json:"listOptions"`
-	Items       []specV1.Configuration `json:"items"`
+	Total        int `json:"total"`
+	*ListOptions `json:",inline"`
+	Items        []specV1.Configuration `json:"items"`
 }
 
 type ConfigurationView struct {

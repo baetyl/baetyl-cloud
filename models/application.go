@@ -48,9 +48,9 @@ type AppItem struct {
 
 // ApplicationList app List
 type ApplicationList struct {
-	Total       int          `json:"total"`
-	ListOptions *ListOptions `json:"listOptions"`
-	Items       []AppItem    `json:"items"`
+	Total        int `json:"total"`
+	*ListOptions `json:",inline"`
+	Items        []AppItem `json:"items"`
 }
 
 type ServiceFunction struct {
