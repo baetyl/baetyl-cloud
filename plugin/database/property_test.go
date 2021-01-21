@@ -64,7 +64,7 @@ func TestProperty(t *testing.T) {
 	properties, err := db.ListProperty(page)
 	assert.NoError(t, err)
 	checkProperty(t, property, &properties[0])
-	count, err := db.CountProperty(page.Name)
+	count, err := db.CountProperty(page.GetFuzzyName())
 	assert.Equal(t, count, 1)
 
 	err = db.CreateProperty(&models.Property{
@@ -89,7 +89,7 @@ func TestProperty(t *testing.T) {
 	properties, err = db.ListProperty(page)
 	assert.NoError(t, err)
 	assert.Len(t, properties, 3)
-	count, err = db.CountProperty(page.Name)
+	count, err = db.CountProperty(page.GetFuzzyName())
 	assert.Equal(t, count, 3)
 
 	err = db.DeleteProperty(property.Name)
