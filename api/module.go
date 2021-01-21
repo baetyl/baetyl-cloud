@@ -49,7 +49,7 @@ func (api *API) CreateModule(c *common.Context) (interface{}, error) {
 	return models.ModuleView{Module: *res}, nil
 }
 
-func (api *API) UpdateModuleByVersion(c *common.Context) (interface{}, error) {
+func (api *API) UpdateModule(c *common.Context) (interface{}, error) {
 	name, version := c.GetNameFromParam(), c.Param("version")
 	module, err := api.Module.GetModuleByVersion(name, version)
 	if err != nil {
@@ -62,7 +62,7 @@ func (api *API) UpdateModuleByVersion(c *common.Context) (interface{}, error) {
 	}
 	module.Name = name
 	module.Version = version
-	res, err := api.Module.UpdateModule(module)
+	res, err := api.Module.UpdateModuleByVersion(module)
 	if err != nil {
 		return nil, err
 	}
@@ -70,17 +70,15 @@ func (api *API) UpdateModuleByVersion(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) DeleteModules(c *common.Context) (interface{}, error) {
-	err := api.Module.DeleteModules(c.GetNameFromParam())
-	if err != nil {
-		log.L().Error("failed to delete modules", log.Any("module", c.GetNameFromParam()), log.Error(err))
+	name, version := c.GetNameFromParam(), c.Param("version")
+	var err error
+	if version == "" {
+		err = api.Module.DeleteModules(name)
+	} else {
+		err = api.Module.DeleteModuleByVersion(name, version)
 	}
-	return nil, nil
-}
-
-func (api *API) DeleteModuleByVersion(c *common.Context) (interface{}, error) {
-	err := api.Module.DeleteModuleByVersion(c.GetNameFromParam(), c.Param("version"))
 	if err != nil {
-		log.L().Error("failed to delete modules by version", log.Any("module", c.GetNameFromParam()), log.Any("version", c.Param("version")), log.Error(err))
+		log.L().Error("failed to delete modules", log.Any("module", c.GetNameFromParam()), log.Any("version", version), log.Error(err))
 	}
 	return nil, nil
 }
@@ -94,9 +92,9 @@ func (api *API) ListModules(c *common.Context) (interface{}, error) {
 	var res []models.Module
 	var err error
 	switch common.ModuleType(tp) {
-	case common.Type_User_RUNTIME:
+	case common.TypeUserRuntime:
 		res, err = api.Module.ListRuntimeModules(params)
-	case common.Type_System_Optional:
+	case common.TypeSystemOptional:
 		res, err = api.Module.ListOptionalSysModules(params)
 	default:
 		res, err = api.Module.ListModules(params)
@@ -123,7 +121,7 @@ func (api *API) parseAndCheckModule(module *models.Module, c *common.Context) er
 	if module.Version == "" {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "version is required"))
 	}
-	if module.Type == string(common.Type_System_Optional) {
+	if module.Type == string(common.TypeSystemOptional) {
 		supportSysApps := api.Init.GetOptionalApps()
 		var ok bool
 		for _, v := range supportSysApps {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
@@ -148,10 +149,13 @@ func TestModule(t *testing.T) {
 	checkModule(t, module3, res)
 
 	module31 := &models.Module{
-		Name:        "baetyl3",
-		Version:     "v2.2.0",
-		Image:       "baetyl:v2.2",
-		Type:        "a",
+		Name:    "baetyl3",
+		Version: "v2.2.0",
+		Image:   "baetyl:v2.2",
+		Type:    "a",
+		Programs: map[string]string{
+			"linux/amd64": "aaa-url",
+		},
 		IsLatest:    true,
 		Description: "for desp",
 	}
@@ -163,6 +167,14 @@ func TestModule(t *testing.T) {
 	res, err = db.GetLatestModule(module3.Name)
 	assert.NoError(t, err)
 	checkModule(t, module31, res)
+
+	i, err := db.GetLatestModuleImage(module3.Name)
+	assert.NoError(t, err)
+	assert.Equal(t, i, module31.Image)
+
+	p, err := db.GetLatestModuleProgram(module3.Name, "linux/amd64")
+	assert.NoError(t, err)
+	assert.Equal(t, p, "aaa-url")
 
 	module31.Description = "a"
 	module31.Programs = map[string]string{
@@ -293,13 +305,13 @@ func TestListApp(t *testing.T) {
 	checkModule(t, module2, &resList[1])
 	checkModule(t, module3, &resList[2])
 
-	resList, err = db.ListModulesByType("a", page)
+	resList, err = db.listModulesByTypeTx(nil, "a", page)
 	assert.NoError(t, err)
 	assert.Len(t, resList, 1)
 	assert.Equal(t, module3.Name, resList[0].Name)
 	checkModule(t, module3, &resList[0])
 
-	resList, err = db.ListModulesByType("b", page)
+	resList, err = db.listModulesByTypeTx(nil, "b", page)
 	assert.NoError(t, err)
 	assert.Len(t, resList, 0)
 
@@ -319,7 +331,79 @@ func TestListApp(t *testing.T) {
 	_, err = db.CreateModule(module4)
 	assert.NoError(t, err)
 
-	resList, err = db.ListModulesByType("b", page)
+	module5 := &models.Module{
+		Name:    "baetyl5",
+		Version: "v2.0.5",
+		Image:   "baetyl:v5",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        "b",
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	_, err = db.CreateModule(module5)
+	assert.NoError(t, err)
+
+	resList, err = db.listModulesByTypeTx(nil, "b", page)
+	assert.NoError(t, err)
+	assert.Len(t, resList, 2)
+
+	module6 := &models.Module{
+		Name:    "baetyl6",
+		Version: "v2.0.6",
+		Image:   "baetyl:v6",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        string(common.TypeUserRuntime),
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	_, err = db.CreateModule(module6)
+	assert.NoError(t, err)
+
+	module7 := &models.Module{
+		Name:    "baetyl7",
+		Version: "v2.0.7",
+		Image:   "baetyl:v7",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        string(common.TypeUserRuntime),
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	_, err = db.CreateModule(module7)
+	assert.NoError(t, err)
+
+	resList, err = db.listModulesByTypeTx(nil, common.TypeUserRuntime, page)
+	assert.NoError(t, err)
+	assert.Len(t, resList, 2)
+
+	module8 := &models.Module{
+		Name:    "baetyl8",
+		Version: "v2.0.8",
+		Image:   "baetyl:v8",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        string(common.TypeSystemOptional),
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	_, err = db.CreateModule(module8)
+	assert.NoError(t, err)
+
+	resList, err = db.listModulesByTypeTx(nil, common.TypeSystemOptional, page)
 	assert.NoError(t, err)
 	assert.Len(t, resList, 1)
 }

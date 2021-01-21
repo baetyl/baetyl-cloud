@@ -211,8 +211,8 @@ const (
 )
 
 const (
-	Type_User            ModuleType = "user"
-	Type_User_RUNTIME    ModuleType = "runtime_user"
-	Type_System          ModuleType = "system"
-	Type_System_Optional ModuleType = "opt_system"
+	TypeUser           ModuleType = "user"
+	TypeUserRuntime    ModuleType = "runtime_user"
+	TypeSystem         ModuleType = "system"
+	TypeSystemOptional ModuleType = "opt_system"
 )

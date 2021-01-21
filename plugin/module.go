@@ -5,7 +5,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
@@ -21,7 +20,10 @@ type Module interface {
 	DeleteModules(name string) error
 	DeleteModuleByVersion(name, version string) error
 	ListModules(filter *models.Filter) ([]models.Module, error)
-	ListModulesByType(tp common.ModuleType, filter *models.Filter) ([]models.Module, error)
+	ListOptionalSysModules(filter *models.Filter) ([]models.Module, error)
+	ListRuntimeModules(filter *models.Filter) ([]models.Module, error)
+	GetLatestModuleImage(name string) (string, error)
+	GetLatestModuleProgram(name, platform string) (string, error)
 
 	GetModuleTx(tx *sqlx.Tx, name string) ([]models.Module, error)
 	GetModuleByVersionTx(tx *sqlx.Tx, name, version string) (*models.Module, error)
@@ -32,7 +34,10 @@ type Module interface {
 	DeleteModulesTx(tx *sqlx.Tx, name string) error
 	DeleteModuleByVersionTx(tx *sqlx.Tx, name, version string) error
 	ListModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error)
-	ListModulesByTypeTx(tx *sqlx.Tx, tp common.ModuleType, filter *models.Filter) ([]models.Module, error)
+	ListOptionalSysModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error)
+	ListRuntimeModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error)
+	GetLatestModuleImageTx(tx *sqlx.Tx, name string) (string, error)
+	GetLatestModuleProgramTx(tx *sqlx.Tx, name, platform string) (string, error)
 
 	// close
 	io.Closer

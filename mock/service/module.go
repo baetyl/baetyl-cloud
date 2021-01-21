@@ -212,7 +212,7 @@ func (mr *MockModuleServiceMockRecorder) ListRuntimeModules(arg0 interface{}) *g
 }
 
 // UpdateModule mocks base method
-func (m *MockModuleService) UpdateModule(arg0 *models.Module) (*models.Module, error) {
+func (m *MockModuleService) UpdateModuleByVersion(arg0 *models.Module) (*models.Module, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateModule", arg0)
 	ret0, _ := ret[0].(*models.Module)
@@ -221,7 +221,7 @@ func (m *MockModuleService) UpdateModule(arg0 *models.Module) (*models.Module, e
 }
 
 // UpdateModule indicates an expected call of UpdateModule
-func (mr *MockModuleServiceMockRecorder) UpdateModule(arg0 interface{}) *gomock.Call {
+func (mr *MockModuleServiceMockRecorder) UpdateModuleByVersion(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateModule", reflect.TypeOf((*MockModuleService)(nil).UpdateModule), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateModule", reflect.TypeOf((*MockModuleService)(nil).UpdateModuleByVersion), arg0)
 }

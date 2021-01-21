@@ -210,14 +210,14 @@ func (s *AdminServer) InitRoute() {
 	}
 	{
 		module := v1.Group("modules")
-		module.GET("/", common.Wrapper(s.api.ListModules))
+		module.GET("", common.Wrapper(s.api.ListModules))
 		module.GET("/:name", common.Wrapper(s.api.GetModules))
 		module.GET("/:name/version/:version", common.Wrapper(s.api.GetModuleByVersion))
 		module.GET("/:name/latest", common.Wrapper(s.api.GetLatestModule))
-		module.POST("/", common.Wrapper(s.api.CreateModule))
-		module.PUT("/:name/version/:version", common.Wrapper(s.api.UpdateModuleByVersion))
+		module.POST("", common.Wrapper(s.api.CreateModule))
+		module.PUT("/:name/version/:version", common.Wrapper(s.api.UpdateModule))
 		module.DELETE("/:name", common.Wrapper(s.api.DeleteModules))
-		module.DELETE("/:name/version/:version", common.Wrapper(s.api.DeleteModuleByVersion))
+		module.DELETE("/:name/version/:version", common.Wrapper(s.api.DeleteModules))
 	}
 	{
 		quotas := v1.Group("/quotas")

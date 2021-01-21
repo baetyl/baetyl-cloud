@@ -788,11 +788,11 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode2, nil).Times(1)
 	modules := []models.Module{
 		{
-			Name: "a",
+			Name:  "a",
 			Image: "a-image",
 		},
 		{
-			Name: "b",
+			Name:  "b",
 			Image: "b-image",
 		},
 	}

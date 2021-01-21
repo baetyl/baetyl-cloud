@@ -1,6 +1,8 @@
 package database
 
 import (
+	"fmt"
+
 	"github.com/jmoiron/sqlx"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -74,8 +76,20 @@ func (d *DB) ListModules(filter *models.Filter) ([]models.Module, error) {
 	return d.ListModulesTx(nil, filter)
 }
 
-func (d *DB) ListModulesByType(tp common.ModuleType, filter *models.Filter) ([]models.Module, error) {
-	return d.ListModulesByTypeTx(nil, tp, filter)
+func (d *DB) ListOptionalSysModules(filter *models.Filter) ([]models.Module, error) {
+	return d.ListOptionalSysModulesTx(nil, filter)
+}
+
+func (d *DB) ListRuntimeModules(filter *models.Filter) ([]models.Module, error) {
+	return d.ListRuntimeModulesTx(nil, filter)
+}
+
+func (d *DB) GetLatestModuleImage(name string) (string, error) {
+	return d.GetLatestModuleImageTx(nil, name)
+}
+
+func (d *DB) GetLatestModuleProgram(name, platform string) (string, error) {
+	return d.GetLatestModuleProgramTx(nil, name, platform)
 }
 
 func (d *DB) GetModuleTx(tx *sqlx.Tx, name string) ([]models.Module, error) {
@@ -188,7 +202,40 @@ FROM baetyl_module WHERE name LIKE ? ORDER BY create_time DESC
 	return d.listModuleTx(tx, selectSQL, args...)
 }
 
-func (d *DB) ListModulesByTypeTx(tx *sqlx.Tx, tp common.ModuleType, filter *models.Filter) ([]models.Module, error) {
+func (d *DB) ListOptionalSysModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error) {
+	t := common.TypeSystemOptional
+	return d.listModulesByTypeTx(tx, t, filter)
+}
+
+func (d *DB) ListRuntimeModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error) {
+	t := common.TypeUserRuntime
+	return d.listModulesByTypeTx(tx, t, filter)
+}
+
+func (d *DB) GetLatestModuleImageTx(tx *sqlx.Tx, name string) (string, error) {
+	module, err := d.GetLatestModuleTx(tx, name)
+	if err != nil {
+		return "", err
+	}
+	return module.Image, nil
+}
+
+func (d *DB) GetLatestModuleProgramTx(tx *sqlx.Tx, name, platform string) (string, error) {
+	module, err := d.GetLatestModuleTx(tx, name)
+	if err != nil {
+		return "", err
+	}
+	for k, v := range module.Programs {
+		if k == platform {
+			return v, nil
+		}
+	}
+	return "", common.Error(common.ErrResourceNotFound,
+		common.Field("type", "program"),
+		common.Field("name", fmt.Sprintf("%s-%s", name, platform)))
+}
+
+func (d *DB) listModulesByTypeTx(tx *sqlx.Tx, tp common.ModuleType, filter *models.Filter) ([]models.Module, error) {
 	selectSQL := `
 SELECT 
 id, name, image, programs, version, type, is_latest, description, create_time, update_time
