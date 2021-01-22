@@ -15,7 +15,3 @@ type Module struct {
 	CreationTimestamp time.Time         `json:"createTime,omitempty"`
 	UpdateTimestamp   time.Time         `json:"updateTime,omitempty"`
 }
-
-type ModuleView struct {
-	Module Module `json:"module,omitempty"`
-}
