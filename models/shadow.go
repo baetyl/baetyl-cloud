@@ -19,9 +19,9 @@ type Shadow struct {
 
 // NodeViewList node view list
 type ShadowList struct {
-	Total       int          `json:"total"`
-	ListOptions *ListOptions `json:"listOptions"`
-	Items       []Shadow     `json:"items"`
+	Total        int `json:"total"`
+	*ListOptions `json:",inline"`
+	Items        []Shadow `json:"items"`
 }
 
 func NewShadow(namespace, name string) *Shadow {
