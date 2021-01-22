@@ -25,7 +25,7 @@ func (api *API) GetModuleByVersion(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return models.ModuleView{Module: *res}, nil
+	return res, nil
 }
 
 func (api *API) GetLatestModule(c *common.Context) (interface{}, error) {
@@ -33,7 +33,7 @@ func (api *API) GetLatestModule(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return models.ModuleView{Module: *res}, nil
+	return res, nil
 }
 
 func (api *API) CreateModule(c *common.Context) (interface{}, error) {
@@ -46,7 +46,7 @@ func (api *API) CreateModule(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return models.ModuleView{Module: *res}, nil
+	return res, nil
 }
 
 func (api *API) UpdateModule(c *common.Context) (interface{}, error) {
@@ -66,7 +66,7 @@ func (api *API) UpdateModule(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return models.ModuleView{Module: *res}, nil
+	return res, nil
 }
 
 func (api *API) DeleteModules(c *common.Context) (interface{}, error) {
