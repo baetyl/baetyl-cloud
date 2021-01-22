@@ -8,7 +8,7 @@ type: "container"
 system: true
 services:
   - name: "baetyl-function"
-    image: "{{GetProperty "baetyl-function-image"}}"
+    image: {{GetModuleImage "baetyl-function"}}
     replica: 1
     volumeMounts:
       - name: "func-conf"

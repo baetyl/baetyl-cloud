@@ -95,19 +95,3 @@ type NodeCoreConfigs struct {
 type NodeCoreVersions struct {
 	Versions []string `yaml:"versions,omitempty" json:"versions,omitempty"`
 }
-
-type NodeSysAppView struct {
-	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
-	Description string `yaml:"description,omitempty" json:"description,omitempty"`
-}
-
-type NodeOptionalSysApps struct {
-	Apps []NodeSysAppView `yaml:"apps,omitempty" json:"apps,omitempty"`
-}
-
-type NodeSysAppInfo struct {
-	Name        string            `yaml:"name,omitempty" json:"name,omitempty"`
-	Image       string            `yaml:"image,omitempty" json:"image,omitempty"`
-	Description string            `yaml:"description,omitempty" json:"description,omitempty"`
-	Programs    map[string]string `yaml:"programs,omitempty" json:"programs,omitempty"`
-}

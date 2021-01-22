@@ -47,6 +47,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Functions = []string{}
 	expect.Plugin.Objects = []string{}
 	expect.Plugin.Property = "database"
+	expect.Plugin.Module = "database"
 	expect.Plugin.SyncLinks = []string{"httplink"}
 	expect.Plugin.Pubsub = "defaultpubsub"
 
