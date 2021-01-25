@@ -4,14 +4,14 @@ import "strings"
 
 type ListView struct {
 	Total    int         `json:"total"`
-	PageNo   int         `json:"pageNo"`
-	PageSize int         `json:"pageSize"`
-	Items    interface{} `json:"items,omitempty"`
+	PageNo   int         `json:"pageNo,omitempty"`
+	PageSize int         `json:"pageSize,omitempty"`
+	Items    interface{} `json:"items"`
 }
 
 type Filter struct {
-	PageNo   int    `form:"pageNo" json:"pageNo"`
-	PageSize int    `form:"pageSize" json:"pageSize"`
+	PageNo   int    `form:"pageNo" json:"pageNo,omitempty"`
+	PageSize int    `form:"pageSize" json:"pageSize,omitempty"`
 	Name     string `form:"name,omitempty" json:"name,omitempty"`
 }
 
