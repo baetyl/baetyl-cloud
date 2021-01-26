@@ -136,10 +136,6 @@ func (s *AdminServer) InitRoute() {
 		nodes.GET("/:name/core/versions", common.Wrapper(s.api.GetCoreAppVersions))
 	}
 	{
-		nodes := v1.Group("/nodesysapps")
-		nodes.GET("/optional", common.Wrapper(s.api.GetNodeOptionalSysApps))
-	}
-	{
 		apps := v1.Group("/apps")
 		apps.GET("/:name", common.Wrapper(s.api.GetApplication))
 		apps.GET("/:name/configs", common.Wrapper(s.api.GetSysAppConfigs))
