@@ -29,6 +29,7 @@ type MockServices struct {
 	shadow         *mockPlugin.MockShadow
 	license        *mockPlugin.MockLicense
 	property       *mockPlugin.MockProperty
+	module         *mockPlugin.MockModule
 }
 
 func (m *MockServices) Close() {
@@ -80,6 +81,13 @@ func mockLicense(mock plugin.License) plugin.Factory {
 }
 
 func mockProperty(mock plugin.Property) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return factory
+}
+
+func mockModule(mock plugin.Module) plugin.Factory {
 	factory := func() (plugin.Plugin, error) {
 		return mock, nil
 	}
@@ -153,6 +161,9 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 	mProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Property, mockProperty(mProperty))
 
+	mModule := mockPlugin.NewMockModule(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Module, mockModule(mModule))
+
 	mResource := mockPlugin.NewMockResource(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Resource, mockResource(mResource))
 
@@ -185,6 +196,7 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 		auth:           mAuth,
 		license:        mLicense,
 		property:       mProperty,
+		module:         mModule,
 	}
 }
 

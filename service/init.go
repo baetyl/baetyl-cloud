@@ -55,7 +55,7 @@ type GenAppFunc func(ns, nodeName string, params map[string]interface{}) (*specV
 // InitService
 type InitService interface {
 	GetResource(ns, nodeName, resourceName string, params map[string]interface{}) (interface{}, error)
-	GetOptionalApps() ([]models.NodeSysAppInfo, error)
+	GetOptionalApps() []string
 
 	GenApps(ns string, nodeName *specV1.Node) ([]*specV1.Application, error)
 	GenOptionalApps(ns string, nodeName string, apps []string) ([]*specV1.Application, error)
@@ -89,10 +89,17 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+	moduleService, err := NewModuleService(config)
+	if err != nil {
+		return nil, err
+	}
 	templateService, err := NewTemplateService(config, map[string]interface{}{
-		"GetProperty": propertyService.GetPropertyValue,
-		"RandString":  common.RandString,
+		"GetProperty":      propertyService.GetPropertyValue,
+		"RandString":       common.RandString,
+		"GetModuleImage":   moduleService.GetLatestModuleImage,
+		"GetModuleProgram": moduleService.GetLatestModuleProgram,
 	})
+
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -319,18 +326,12 @@ func (s *InitServiceImpl) GenOptionalApps(ns string, node string, appAlias []str
 	return apps, nil
 }
 
-func (s *InitServiceImpl) GetOptionalApps() ([]models.NodeSysAppInfo, error) {
-	sysApps, err := s.Property.ListOptionalSysApps()
-	if err != nil {
-		return nil, err
+func (s *InitServiceImpl) GetOptionalApps() []string {
+	var res []string
+	for k := range s.OptionalAppFuncs {
+		res = append(res, k)
 	}
-
-	for _, app := range sysApps {
-		if _, ok := s.OptionalAppFuncs[app.Name]; !ok {
-			return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "OptionalAppFuncs"), common.Field("name", app))
-		}
-	}
-	return sysApps, nil
+	return res
 }
 
 func (s *InitServiceImpl) genCoreApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {

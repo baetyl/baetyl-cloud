@@ -136,10 +136,6 @@ func (s *AdminServer) InitRoute() {
 		nodes.GET("/:name/core/versions", common.Wrapper(s.api.GetCoreAppVersions))
 	}
 	{
-		nodes := v1.Group("/nodesysapps")
-		nodes.GET("/optional", common.Wrapper(s.api.GetNodeOptionalSysApps))
-	}
-	{
 		apps := v1.Group("/apps")
 		apps.GET("/:name", common.Wrapper(s.api.GetApplication))
 		apps.GET("/:name/configs", common.Wrapper(s.api.GetSysAppConfigs))
@@ -183,14 +179,14 @@ func (s *AdminServer) InitRoute() {
 		// TODO: deprecated, to use property api
 		sysconfig := v1.Group("sysconfig")
 		sysconfig.GET("/baetyl_version/latest", common.Wrapper(func(c *common.Context) (interface{}, error) {
-			v, err := s.api.Prop.GetPropertyValue("baetyl-version-latest")
+			res, err := s.api.Module.GetLatestModule("baetyl")
 			if err != nil {
 				return nil, err
 			}
 			return map[string]string{
 				"type":  "baetyl_version",
 				"key":   "latest",
-				"value": v,
+				"value": res.Version,
 			}, nil
 		}))
 		sysconfig.GET("/baetyl-function-runtime", common.Wrapper(func(c *common.Context) (interface{}, error) {
@@ -211,6 +207,17 @@ func (s *AdminServer) InitRoute() {
 				"sysconfigs": runtimesView,
 			}, nil
 		}))
+	}
+	{
+		module := v1.Group("modules")
+		module.GET("", common.Wrapper(s.api.ListModules))
+		module.GET("/:name", common.Wrapper(s.api.GetModules))
+		module.GET("/:name/version/:version", common.Wrapper(s.api.GetModuleByVersion))
+		module.GET("/:name/latest", common.Wrapper(s.api.GetLatestModule))
+		module.POST("", common.Wrapper(s.api.CreateModule))
+		module.PUT("/:name/version/:version", common.Wrapper(s.api.UpdateModule))
+		module.DELETE("/:name", common.Wrapper(s.api.DeleteModules))
+		module.DELETE("/:name/version/:version", common.Wrapper(s.api.DeleteModules))
 	}
 	{
 		quotas := v1.Group("/quotas")

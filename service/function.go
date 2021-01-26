@@ -13,8 +13,6 @@ import (
 
 //go:generate mockgen -destination=../mock/service/function.go -package=service github.com/baetyl/baetyl-cloud/v2/service FunctionService
 
-const functionRuntimePrefix = "baetyl-function-runtime-"
-
 type FunctionService interface {
 	List(userID, source string) ([]models.Function, error)
 	ListFunctionVersions(userID, name, source string) ([]models.Function, error)
@@ -24,13 +22,13 @@ type FunctionService interface {
 }
 
 type functionService struct {
-	prop      PropertyService
+	module    ModuleService
 	functions map[string]plugin.Function
 }
 
 // NewFunctionService NewFunctionService
 func NewFunctionService(cfg *config.CloudConfig) (FunctionService, error) {
-	sProp, err := NewPropertyService(cfg)
+	sModule, err := NewModuleService(cfg)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -43,7 +41,7 @@ func NewFunctionService(cfg *config.CloudConfig) (FunctionService, error) {
 		functions[v] = cs.(plugin.Function)
 	}
 	return &functionService{
-		prop:      sProp,
+		module:    sModule,
 		functions: functions,
 	}, nil
 }
@@ -78,16 +76,14 @@ func (c *functionService) ListSources() []models.FunctionSource {
 }
 
 func (c *functionService) ListRuntimes() (map[string]string, error) {
-	params := &models.Filter{
-		Name: functionRuntimePrefix,
-	}
-	res, err := c.prop.ListProperty(params)
+	params := &models.Filter{}
+	res, err := c.module.ListRuntimeModules(params)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, err
 	}
 	runtimes := make(map[string]string)
 	for _, item := range res {
-		runtimes[item.Name[len(functionRuntimePrefix):]] = item.Value
+		runtimes[item.Name] = item.Image
 	}
 	return runtimes, nil
 }

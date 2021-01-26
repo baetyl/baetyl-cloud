@@ -24,12 +24,11 @@ const (
 	OfflineDuration         = 40 * time.Second
 	NodeNumber              = 1
 	BaetylCorePrevVersion   = "BaetylCorePrevVersion"
-	BaetylCoreFrequency     = "BaetylCoreFrequency"
 	BaetylNodeNameKey       = "baetyl-node-name"
 	BaetylAppNameKey        = "baetyl-app-name"
 	BaetylCoreConfPrefix    = "baetyl-core-conf"
 	BaetylCoreContainerPort = 80
-	BaetylVersionPrefix     = "baetyl-version-"
+	BaetylModule            = "baetyl"
 	DefaultMode             = "kube"
 )
 
@@ -619,10 +618,11 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 	}
 	coreVersions.Versions = append(coreVersions.Versions, currentVersion)
 
-	latestVersion, err := api.Prop.GetPropertyValue(BaetylVersionPrefix + "latest")
+	res, err := api.Module.GetLatestModule(BaetylModule)
 	if err != nil {
 		return nil, err
 	}
+	latestVersion := res.Version
 	if latestVersion != "" && latestVersion != currentVersion {
 		coreVersions.Versions = append(coreVersions.Versions, latestVersion)
 	}
@@ -646,23 +646,6 @@ func (api *API) updateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string)
 	return nil
 }
 
-func (api *API) GetNodeOptionalSysApps(_ *common.Context) (interface{}, error) {
-	apps, err := api.Init.GetOptionalApps()
-	if err != nil {
-		return nil, err
-	}
-	var appViews []models.NodeSysAppView
-	for _, v := range apps {
-		appViews = append(appViews, models.NodeSysAppView{
-			Name:        v.Name,
-			Description: v.Description,
-		})
-	}
-	return &models.NodeOptionalSysApps{
-		Apps: appViews,
-	}, nil
-}
-
 func (api *API) checkNodeOptionalSysApps(apps []string) error {
 	if len(apps) == 0 {
 		return nil
@@ -680,14 +663,14 @@ func (api *API) checkNodeOptionalSysApps(apps []string) error {
 	return nil
 }
 
-func (api *API) getOptionalSysAppsInMap() (map[string]models.NodeSysAppInfo, error) {
-	supportApps, err := api.Init.GetOptionalApps()
+func (api *API) getOptionalSysAppsInMap() (map[string]bool, error) {
+	supportApps, err := api.Module.ListOptionalSysModules(&models.Filter{})
 	if err != nil {
 		return nil, err
 	}
-	m := make(map[string]models.NodeSysAppInfo)
+	m := make(map[string]bool)
 	for _, v := range supportApps {
-		m[v.Name] = v
+		m[v.Name] = true
 	}
 	return m, nil
 }
@@ -887,38 +870,20 @@ func (api *API) parseCoreAppConfigs(c *common.Context) (*models.NodeCoreConfigs,
 	return config, nil
 }
 
-func (api *API) filterCoreVersionByImage(image string) (string, error) {
-	params := &models.Filter{
-		Name: BaetylVersionPrefix,
-	}
-
-	res, err := api.Prop.ListProperty(params)
-	if err != nil {
-		return "", err
-	}
-	for _, v := range res {
-		if v.Value == image {
-			return strings.TrimPrefix(v.Name, BaetylVersionPrefix), nil
-		}
-	}
-	return "", common.Error(common.ErrResourceNotFound, common.Field("type", "BaetylCoreVersion"), common.Field("name", image))
-}
-
 func (api *API) getCoreCurrentVersionByImage(image string) (string, error) {
-	version, err := api.filterCoreVersionByImage(image)
+	app, err := api.Module.GetModuleByImage(BaetylModule, image)
 	if err != nil {
 		return "", err
 	}
-
-	return version, nil
+	return app.Version, nil
 }
 
 func (api *API) getCoreImageByVersion(version string) (string, error) {
-	prop, err := api.Prop.GetProperty(BaetylVersionPrefix + version)
+	app, err := api.Module.GetModuleByVersion(BaetylModule, version)
 	if err != nil {
 		return "", err
 	}
-	return prop.Value, nil
+	return app.Image, nil
 }
 
 func (api *API) getCoreAppService(app *v1.Application) (*v1.Service, error) {

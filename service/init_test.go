@@ -359,17 +359,7 @@ func TestInitService_GetOptionalApps(t *testing.T) {
 	}
 	is.Property = sProperty
 
-	res := []models.NodeSysAppInfo{
-		{
-			Name:        "a",
-			Description: "a-description",
-		},
-	}
-	sProperty.EXPECT().ListOptionalSysApps().Return(res, nil)
-
-	apps, err := is.GetOptionalApps()
-	assert.NoError(t, err)
+	apps := is.GetOptionalApps()
 	assert.Len(t, apps, 1)
-	assert.Equal(t, apps[0].Name, "a")
-	assert.Equal(t, apps[0].Description, "a-description")
+	assert.Equal(t, apps[0], "a")
 }
