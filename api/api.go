@@ -18,6 +18,7 @@ type API struct {
 	PKI      service.PKIService
 	Auth     service.AuthService
 	Prop     service.PropertyService
+	Module   service.ModuleService
 	Init     service.InitService
 	License  service.LicenseService
 	Template service.TemplateService
@@ -63,6 +64,10 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
+	moduleService, err := service.NewModuleService(config)
+	if err != nil {
+		return nil, err
+	}
 	initService, err := service.NewInitService(config)
 	if err != nil {
 		return nil, err
@@ -72,8 +77,10 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		return nil, err
 	}
 	templateService, err := service.NewTemplateService(config, map[string]interface{}{
-		"GetProperty": propertyService.GetPropertyValue,
-		"RandString":  common.RandString,
+		"GetProperty":      propertyService.GetPropertyValue,
+		"RandString":       common.RandString,
+		"GetModuleImage":   moduleService.GetLatestModuleImage,
+		"GetModuleProgram": moduleService.GetLatestModuleProgram,
 	})
 	if err != nil {
 		return nil, err
@@ -87,6 +94,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		PKI:                pkiService,
 		Auth:               authService,
 		Prop:               propertyService,
+		Module:             moduleService,
 		Init:               initService,
 		License:            licenseService,
 		Template:           templateService,

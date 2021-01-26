@@ -8,7 +8,7 @@ type: "container"
 system: true
 services:
   - name: "baetyl-init"
-    image: "{{GetProperty "baetyl-image"}}"
+    image: {{GetModuleImage "baetyl"}}
     replica: 1
     args:
       - "init"

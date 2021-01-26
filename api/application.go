@@ -441,7 +441,9 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 		}
 		image, ok := runtimes[service.FunctionConfig.Runtime]
 		if !ok {
-			return nil, nil, common.Error(common.ErrResourceNotFound, common.Field("error", "runtime not found"))
+			return nil, nil, common.Error(common.ErrResourceNotFound,
+				common.Field("type", "runtime"),
+				common.Field("name", service.FunctionConfig.Runtime))
 		}
 		service.Image = image
 

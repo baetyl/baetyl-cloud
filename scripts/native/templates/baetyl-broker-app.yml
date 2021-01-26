@@ -7,7 +7,7 @@ type: "container"
 system: true
 services:
   - name: "baetyl-broker"
-    image: "{{GetProperty "baetyl-broker-image"}}"
+    image: {{GetModuleImage "baetyl-broker"}}
     replica: 1
     volumeMounts:
       - name: "broker-conf"

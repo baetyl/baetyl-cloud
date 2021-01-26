@@ -27,6 +27,7 @@ func TestNewAdminAPI(t *testing.T) {
 	c.Plugin.Objects = []string{common.RandString(9), common.RandString(9)}
 	c.Plugin.Functions = []string{common.RandString(9), common.RandString(9)}
 	c.Plugin.Property = common.RandString(9)
+	c.Plugin.Module = common.RandString(9)
 	c.Plugin.SyncLinks = []string{common.RandString(9), common.RandString(9)}
 
 	mockCtl := gomock.NewController(t)
@@ -68,6 +69,10 @@ func TestNewAdminAPI(t *testing.T) {
 	mockProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
 		return mockProperty, nil
+	})
+	mockModule := mockPlugin.NewMockModule(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Module, func() (plugin.Plugin, error) {
+		return mockModule, nil
 	})
 
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)

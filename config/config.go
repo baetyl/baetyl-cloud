@@ -34,6 +34,7 @@ type CloudConfig struct {
 		Objects    []string `yaml:"objects" json:"objects" default:"[]"`
 		Functions  []string `yaml:"functions" json:"functions" default:"[]"`
 		Property   string   `yaml:"property" json:"property" default:"database"`
+		Module     string   `yaml:"module" json:"module" default:"database"`
 		SyncLinks  []string `yaml:"synclinks" json:"synclinks" default:"[\"httplink\"]"`
 		DM         string   `yaml:"dm" json:"dm" default:"databaseext"`
 	} `yaml:"plugin" json:"plugin"`
