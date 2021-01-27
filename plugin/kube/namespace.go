@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/jinzhu/copier"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func toNamespaceModel(namespace *v1.Namespace) *models.Namespace {
