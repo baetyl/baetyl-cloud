@@ -879,6 +879,98 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestUpdateNodeAddSysApp2(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+	sNode := ms.NewMockNodeService(mockCtl)
+	sInit := ms.NewMockInitService(mockCtl)
+	sProp := ms.NewMockPropertyService(mockCtl)
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sModule := ms.NewMockModuleService(mockCtl)
+	api.Node = sNode
+	api.Init = sInit
+	api.Prop = sProp
+	api.Index = sIndex
+	api.App = sApp
+	api.Config = sConfig
+	api.Module = sModule
+
+	mNode4 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+		},
+	}
+
+	modules := []models.Module{
+		{
+			Name:  "baetyl-function",
+			Image: "a-image",
+		},
+		{
+			Name:  "baetyl-rule",
+			Image: "b-image",
+		},
+	}
+	sNode.EXPECT().Get(mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
+	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
+
+	appList := []string{
+		"baetyl-function",
+	}
+	sIndex.EXPECT().ListAppsByNode(mNode4.Namespace, mNode4.Name).Return(appList, nil).Times(1)
+	sInit.EXPECT().GenOptionalApps(mNode4.Namespace, mNode4.Name, []string{"baetyl-rule"}).Times(1)
+	nodeList := []string{"baetyl-rule"}
+	sNode.EXPECT().UpdateNodeAppVersion(mNode4.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	sIndex.EXPECT().RefreshNodesIndexByApp(mNode4.Namespace, gomock.Any(), nodeList).AnyTimes()
+
+	mNode6 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+			specV1.KeyOptionalSysApps:  []string{"baetyl-function", "baetyl-rule"},
+		},
+		SysApps: []string{"baetyl-function", "baetyl-rule"},
+	}
+	sNode.EXPECT().Update(mNode4.Namespace, mNode6).Return(mNode6, nil)
+
+	mNode5 := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.KeyAccelerator:      "",
+		},
+		SysApps: []string{"baetyl-function", "baetyl-rule"},
+	}
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(mNode5)
+	req, _ := http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
 func TestUpdateNodeDeleteSysApp(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()

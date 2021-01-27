@@ -680,12 +680,31 @@ func (api *API) updateAddedSysApps(ns, node string, freshAppAlias []string) erro
 		return nil
 	}
 
-	freshApps, err := api.Init.GenOptionalApps(ns, node, freshAppAlias)
+	// for compatible: sysApps is a new field and old nodes don't have this field
+	appList, err := api.Index.ListAppsByNode(ns, node)
+	if err != nil {
+		return err
+	}
+	var res []string
+	for _, alias := range freshAppAlias {
+		var exist bool
+		for _, appName := range appList {
+			if strings.Contains(appName, alias) {
+				exist = true
+				break
+			}
+		}
+		if !exist {
+			res = append(res, alias)
+		}
+	}
+
+	resApps, err := api.Init.GenOptionalApps(ns, node, res)
 	if err != nil {
 		return err
 	}
 
-	for _, app := range freshApps {
+	for _, app := range resApps {
 		err = api.UpdateNodeAndAppIndex(ns, app)
 		if err != nil {
 			return err
