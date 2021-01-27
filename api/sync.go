@@ -1,12 +1,11 @@
 package api
 
 import (
-	"github.com/baetyl/baetyl-go/v2/log"
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/service"
+	"github.com/baetyl/baetyl-go/v2/log"
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
 //go:generate mockgen -destination=../mock/api/sync.go -package=api github.com/baetyl/baetyl-cloud/v2/api SyncAPI

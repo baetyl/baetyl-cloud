@@ -7,7 +7,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/jinzhu/copier"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -47,6 +47,18 @@ func (c *client) CreateNamespace(namespace *models.Namespace) (*models.Namespace
 	return toNamespaceModel(n), nil
 }
 
+func (c *client) ListNamespace(listOptions *models.ListOptions) (*models.NamespaceList, error) {
+	defer utils.Trace(c.log.Debug, "ListNamespace")()
+	list, err := c.coreV1.Namespaces().List(*fromListOptionsModel(listOptions))
+	if err != nil {
+		return nil, err
+	}
+	listOptions.Continue = list.Continue
+	res := toNamespaceListModel(list)
+	res.ListOptions = listOptions
+	return res, nil
+}
+
 func (c *client) DeleteNamespace(namespace *models.Namespace) error {
 	defer utils.Trace(c.log.Debug, "DeleteNamespace")()
 	err := c.coreV1.Namespaces().Delete(namespace.Name, &metav1.DeleteOptions{})
@@ -60,4 +72,16 @@ func (c *client) DeleteNamespace(namespace *models.Namespace) error {
 		_, err = c.coreV1.Namespaces().Finalize(fromNamespaceModel(namespace))
 	}
 	return err
+}
+
+func toNamespaceListModel(list *v1.NamespaceList) *models.NamespaceList {
+	res := &models.NamespaceList{
+		Items: make([]models.Namespace, 0),
+	}
+	for _, ns := range list.Items {
+		n := toNamespaceModel(&ns)
+		res.Items = append(res.Items, *n)
+	}
+	res.Total = len(list.Items)
+	return res
 }
