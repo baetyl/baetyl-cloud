@@ -57,6 +57,27 @@ func TestCreateNamespace(t *testing.T) {
 	assert.Equal(t, "test", namespace.Name)
 }
 
+func TestListNamespace(t *testing.T) {
+	c := initNamespaceClient()
+	ns := &models.Namespace{
+		Name: "default",
+	}
+	_, err := c.CreateNamespace(ns)
+	assert.Error(t, err)
+
+	ns.Name = "test"
+	namespace, err := c.CreateNamespace(ns)
+	assert.NoError(t, err)
+	assert.Equal(t, "test", namespace.Name)
+
+	params := &models.ListOptions{}
+	nsList, err := c.ListNamespace(params)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, nsList.Total)
+	assert.Equal(t, "default", nsList.Items[0].Name)
+	assert.Equal(t, "test", nsList.Items[1].Name)
+}
+
 func TestDeleteNamespace(t *testing.T) {
 	c := initNamespaceClient()
 	ns := &models.Namespace{

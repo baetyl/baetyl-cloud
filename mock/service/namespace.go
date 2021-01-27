@@ -76,3 +76,18 @@ func (mr *MockNamespaceServiceMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockNamespaceService)(nil).Get), arg0)
 }
+
+// List mocks base method
+func (m *MockNamespaceService) List(arg0 *models.ListOptions) (*models.NamespaceList, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", arg0)
+	ret0, _ := ret[0].(*models.NamespaceList)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List
+func (mr *MockNamespaceServiceMockRecorder) List(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockNamespaceService)(nil).List), arg0)
+}
