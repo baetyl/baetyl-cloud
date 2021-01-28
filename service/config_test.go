@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/models"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func TestDefaultConfigService_Create(t *testing.T) {

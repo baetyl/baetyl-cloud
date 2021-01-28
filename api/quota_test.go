@@ -4,17 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 )
 
 var namespace = "default"

@@ -2,9 +2,11 @@ package service
 
 import (
 	"fmt"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 func TestLicenseService_CheckLicense(t *testing.T) {
