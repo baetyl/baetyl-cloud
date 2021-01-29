@@ -10,9 +10,9 @@ import (
 )
 
 type SecretList struct {
-	Total       int             `json:"total"`
-	ListOptions *ListOptions    `json:"listOptions"`
-	Items       []specV1.Secret `json:"items"`
+	Total        int `json:"total"`
+	*ListOptions `json:",inline"`
+	Items        []specV1.Secret `json:"items"`
 }
 
 func FromSecretToRegistry(s *specV1.Secret, needToFilter bool) *Registry {
@@ -124,9 +124,9 @@ func (s *SecretView) Equal(target *SecretView) bool {
 }
 
 type SecretViewList struct {
-	Total       int          `json:"total"`
-	ListOptions *ListOptions `json:"listOptions"`
-	Items       []SecretView `json:"items"`
+	Total        int `json:"total"`
+	*ListOptions `json:",inline"`
+	Items        []SecretView `json:"items"`
 }
 
 func (s *SecretView) ToSecret() *specV1.Secret {

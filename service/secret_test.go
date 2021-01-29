@@ -3,10 +3,11 @@ package service
 import (
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/models"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func genSecretTestCase() *specV1.Secret {

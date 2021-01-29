@@ -4,23 +4,23 @@ import "strings"
 
 type ListView struct {
 	Total    int         `json:"total"`
-	PageNo   int         `json:"pageNo"`
-	PageSize int         `json:"pageSize"`
-	Items    interface{} `json:"items,omitempty"`
+	PageNo   int         `json:"pageNo,omitempty"`
+	PageSize int         `json:"pageSize,omitempty"`
+	Items    interface{} `json:"items"`
 }
 
 type Filter struct {
-	PageNo   int    `form:"pageNo"`
-	PageSize int    `form:"pageSize"`
-	Name     string `form:"name,omitempty"`
+	PageNo   int    `form:"pageNo" json:"pageNo,omitempty"`
+	PageSize int    `form:"pageSize" json:"pageSize,omitempty"`
+	Name     string `form:"name,omitempty" json:"name,omitempty"`
 }
 
 type ListOptions struct {
-	LabelSelector string `form:"selector,omitempty"`
-	FieldSelector string `form:"fieldSelector,omitempty"`
-	Limit         int64  `form:"limit,omitempty"`
-	Continue      string `form:"continue,omitempty"`
-	Filter
+	LabelSelector string `form:"selector,omitempty" json:"selector,omitempty"`
+	FieldSelector string `form:"fieldSelector,omitempty" json:"fieldSelector,omitempty"`
+	Limit         int64  `form:"limit,omitempty" json:"limit,omitempty"`
+	Continue      string `form:"continue,omitempty" json:"continue,omitempty"`
+	Filter        `json:",inline"`
 }
 
 func (f *Filter) GetLimitOffset() int {
@@ -36,9 +36,9 @@ func (f *Filter) GetLimitNumber() int {
 
 func (f *Filter) GetFuzzyName() string {
 	if f.Name == "" {
-		f.Name = "%"
+		return "%"
 	} else if !strings.Contains(f.Name, "%") {
-		f.Name = "%" + f.Name + "%"
+		return "%" + f.Name + "%"
 	}
 	return f.Name
 }

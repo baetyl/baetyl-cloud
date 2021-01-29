@@ -357,7 +357,7 @@ spec:
       serviceAccountName: baetyl-edge-system-service-account
       containers:
         - name: baetyl-init
-          image: {{GetProperty "baetyl-image"}}
+          image: {{GetModuleImage "baetyl"}}
           imagePullPolicy: IfNotPresent
           args:
             - init

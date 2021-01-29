@@ -1,9 +1,10 @@
 package api
 
 import (
+	"github.com/baetyl/baetyl-go/v2/log"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-go/v2/log"
 )
 
 // GetQuota  for admin api
@@ -14,20 +15,20 @@ func (api *API) GetQuota(c *common.Context) (interface{}, error) {
 }
 
 // GetQuota for mis server api
-//  - param namespace
+//  - param namespace string
 func (api *API) GetQuotaForMis(c *common.Context) (interface{}, error) {
-	quota := &models.Quota{}
-	if err := c.LoadBody(quota); err != nil {
-		return nil, err
+	ns := c.Param(common.KeyContextNamespace)
+	quota := &models.Quota{
+		Namespace: ns,
 	}
 
 	return api.License.GetQuota(quota.Namespace)
 }
 
 // CreateQuota for mis server api
-//  - param namespace
-//  - param quotaName
-//  - param quota
+//  - param namespace string
+//  - param quotaName string
+//  - param quota int
 func (api *API) CreateQuota(c *common.Context) (interface{}, error) {
 	quota := &models.Quota{}
 	if err := c.LoadBody(quota); err != nil {
@@ -41,9 +42,9 @@ func (api *API) CreateQuota(c *common.Context) (interface{}, error) {
 }
 
 // UpdateQuota for mis server api
-//  - param namespace
-//  - param quotaName
-//  - param quota
+//  - param namespace string
+//  - param quotaName string
+//  - param quota int
 func (api *API) UpdateQuota(c *common.Context) (interface{}, error) {
 	quota := &models.Quota{}
 	if err := c.LoadBody(quota); err != nil {
@@ -54,8 +55,8 @@ func (api *API) UpdateQuota(c *common.Context) (interface{}, error) {
 }
 
 // DeleteQuota for mis server api
-//  - param namespace
-//  - param quotaName
+//  - param namespace string
+//  - param quotaName string
 func (api *API) DeleteQuota(c *common.Context) (interface{}, error) {
 	quota := &models.Quota{}
 	if err := c.LoadBody(quota); err != nil {
@@ -66,7 +67,7 @@ func (api *API) DeleteQuota(c *common.Context) (interface{}, error) {
 }
 
 // InitQuotas
-//  - param namespace
+//  - param namespace string
 func (api *API) InitQuotas(namespace string) error {
 	quotas, err := api.License.GetDefaultQuotas(namespace)
 	if err != nil {
@@ -76,7 +77,7 @@ func (api *API) InitQuotas(namespace string) error {
 }
 
 // DeleteQuotaByNamespace
-//  - param namespace
+//  - param namespace string
 func (api *API) DeleteQuotaByNamespace(namespace string) error {
 	if err := api.License.DeleteQuotaByNamespace(namespace); err != nil {
 		common.LogDirtyData(err,

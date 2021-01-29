@@ -298,6 +298,21 @@ func (mr *MockResourceMockRecorder) ListConfig(arg0, arg1 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListConfig", reflect.TypeOf((*MockResource)(nil).ListConfig), arg0, arg1)
 }
 
+// ListNamespace mocks base method
+func (m *MockResource) ListNamespace(arg0 *models.ListOptions) (*models.NamespaceList, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListNamespace", arg0)
+	ret0, _ := ret[0].(*models.NamespaceList)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListNamespace indicates an expected call of ListNamespace
+func (mr *MockResourceMockRecorder) ListNamespace(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNamespace", reflect.TypeOf((*MockResource)(nil).ListNamespace), arg0)
+}
+
 // ListNode mocks base method
 func (m *MockResource) ListNode(arg0 string, arg1 *models.ListOptions) (*models.NodeList, error) {
 	m.ctrl.T.Helper()

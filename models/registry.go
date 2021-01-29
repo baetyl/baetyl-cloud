@@ -30,9 +30,9 @@ type RegistryView struct {
 
 // RegistryList Registry List
 type RegistryList struct {
-	Total       int          `json:"total"`
-	ListOptions *ListOptions `json:"listOptions"`
-	Items       []Registry   `json:"items"`
+	Total        int `json:"total"`
+	*ListOptions `json:",inline"`
+	Items        []Registry `json:"items"`
 }
 
 func (r *Registry) Equal(target *Registry) bool {

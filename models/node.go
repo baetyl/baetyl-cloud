@@ -10,16 +10,16 @@ import (
 
 // NodeViewList node view list
 type NodeViewList struct {
-	Total       int               `json:"total"`
-	ListOptions *ListOptions      `json:"listOptions"`
-	Items       []specV1.NodeView `json:"items"`
+	Total        int `json:"total"`
+	*ListOptions `json:",inline"`
+	Items        []specV1.NodeView `json:"items"`
 }
 
 // NodeList node list
 type NodeList struct {
-	Total       int           `json:"total"`
-	ListOptions *ListOptions  `json:"listOptions"`
-	Items       []specV1.Node `json:"items"`
+	Total        int `json:"total"`
+	*ListOptions `json:",inline"`
+	Items        []specV1.Node `json:"items"`
 }
 
 type NodeNames struct {
@@ -94,20 +94,4 @@ type NodeCoreConfigs struct {
 
 type NodeCoreVersions struct {
 	Versions []string `yaml:"versions,omitempty" json:"versions,omitempty"`
-}
-
-type NodeSysAppView struct {
-	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
-	Description string `yaml:"description,omitempty" json:"description,omitempty"`
-}
-
-type NodeOptionalSysApps struct {
-	Apps []NodeSysAppView `yaml:"apps,omitempty" json:"apps,omitempty"`
-}
-
-type NodeSysAppInfo struct {
-	Name        string            `yaml:"name,omitempty" json:"name,omitempty"`
-	Image       string            `yaml:"image,omitempty" json:"image,omitempty"`
-	Description string            `yaml:"description,omitempty" json:"description,omitempty"`
-	Programs    map[string]string `yaml:"programs,omitempty" json:"programs,omitempty"`
 }

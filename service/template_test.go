@@ -42,6 +42,9 @@ func TestTemplateServiceImpl_UnmarshalTemplate(t *testing.T) {
 		"GetProperty": func(in string) string {
 			return fmt.Sprintf("out-%s", in)
 		},
+		"GetModuleImage": func(in string) string {
+			return fmt.Sprintf("out-%s", in)
+		},
 	}
 	sTemplate, err := NewTemplateService(mocks.conf, funcs)
 
@@ -66,7 +69,7 @@ namespace: ns-1
 selector: baetyl-node-name=node-name-1
 services:
 - name: baetyl-core
-  image: out-baetyl-image
+  image: out-baetyl
   replica: 1
   volumeMounts:
   - name: core-conf
@@ -153,7 +156,7 @@ namespace: ns-1
 selector: baetyl-node-name=node-name-1
 services:
 - name: baetyl-function
-  image: out-baetyl-function-image
+  image: out-baetyl-function
   replica: 1
   volumeMounts:
   - name: func-conf
@@ -206,6 +209,9 @@ func TestTemplateServiceImpl_ParseTemplate(t *testing.T) {
 	funcs := map[string]interface{}{
 		"GetProperty": func(in string) string {
 			return fmt.Sprintf("out-%s", in)
+		},
+		"GetModuleImage": func(in string) string {
+			return fmt.Sprintf("out-%s-image", in)
 		},
 	}
 	sTemplate, err := NewTemplateService(mocks.conf, funcs)

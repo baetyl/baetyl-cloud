@@ -82,8 +82,20 @@ func (s *MisServer) InitRoute() {
 
 		quota.POST("", common.WrapperMis(s.api.CreateQuota))
 		quota.DELETE("", common.WrapperMis(s.api.DeleteQuota))
-		quota.GET("", common.WrapperMis(s.api.GetQuotaForMis))
+		quota.GET("/:namespace", common.WrapperMis(s.api.GetQuotaForMis))
 		quota.PUT("", common.WrapperMis(s.api.UpdateQuota))
+	}
+	{
+		module := v1.Group("/modules")
+
+		module.GET("", common.WrapperMis(s.api.ListModules))
+		module.GET("/:name", common.WrapperMis(s.api.GetModules))
+		module.GET("/:name/version/:version", common.WrapperMis(s.api.GetModuleByVersion))
+		module.GET("/:name/latest", common.WrapperMis(s.api.GetLatestModule))
+		module.POST("", common.WrapperMis(s.api.CreateModule))
+		module.PUT("/:name/version/:version", common.WrapperMis(s.api.UpdateModule))
+		module.DELETE("/:name", common.WrapperMis(s.api.DeleteModules))
+		module.DELETE("/:name/version/:version", common.WrapperMis(s.api.DeleteModules))
 	}
 }
 

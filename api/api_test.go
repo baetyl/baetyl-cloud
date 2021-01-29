@@ -3,12 +3,13 @@ package api
 import (
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNewAdminAPI(t *testing.T) {
@@ -27,6 +28,7 @@ func TestNewAdminAPI(t *testing.T) {
 	c.Plugin.Objects = []string{common.RandString(9), common.RandString(9)}
 	c.Plugin.Functions = []string{common.RandString(9), common.RandString(9)}
 	c.Plugin.Property = common.RandString(9)
+	c.Plugin.Module = common.RandString(9)
 	c.Plugin.SyncLinks = []string{common.RandString(9), common.RandString(9)}
 
 	mockCtl := gomock.NewController(t)
@@ -56,7 +58,6 @@ func TestNewAdminAPI(t *testing.T) {
 	plugin.RegisterFactory(c.Plugin.Shadow, func() (plugin.Plugin, error) {
 		return mockShadow, nil
 	})
-
 	mockIndex := mockPlugin.NewMockIndex(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Index, func() (plugin.Plugin, error) {
 		return mockIndex, nil
@@ -68,6 +69,10 @@ func TestNewAdminAPI(t *testing.T) {
 	mockProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
 		return mockProperty, nil
+	})
+	mockModule := mockPlugin.NewMockModule(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Module, func() (plugin.Plugin, error) {
+		return mockModule, nil
 	})
 
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
