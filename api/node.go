@@ -127,7 +127,16 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 	return nodeViewList, nil
 }
 
-// CreateNode create one node
+/**
+ * @title: Create node.
+ * @description: Check validity of input node, add system label to node, insert node info
+ *               into storage and generate system apps.
+ * @receiver api
+ * @param c Context*   Context of request.
+ * @return interface{} nil      Request is invalid or quota is full or fail to insert node into storage.
+ *                     NodeView Create node success.
+ * @return error
+ */
 func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	n, err := api.ParseAndCheckNode(c)
 	if err != nil {
