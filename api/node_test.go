@@ -1681,6 +1681,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Version:   "0",
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylCoreAPIPort:   common.DefaultCoreAPIPort,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},
@@ -1732,6 +1733,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	}
 	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(module, nil).Times(1)
 
+	// equal case
 	coreConfig := models.NodeCoreConfigs{
 		Version:   "v2.0.0",
 		Frequency: 20,
@@ -1888,6 +1890,7 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 		Version:   "0",
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylCoreAPIPort:   common.DefaultCoreAPIPort,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},

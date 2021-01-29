@@ -30,6 +30,7 @@ const (
 	BaetylCoreContainerPort = 80
 	BaetylModule            = "baetyl"
 	DefaultMode             = "kube"
+	BaetylCoreAPIPort       = "BaetylCoreAPIPort"
 )
 
 // GetNode get a node
@@ -170,6 +171,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		n.Attributes = map[string]interface{}{}
 	}
 	n.Attributes[v1.BaetylCoreFrequency] = common.DefaultCoreFrequency
+	n.Attributes[v1.BaetylCoreAPIPort] = common.DefaultCoreAPIPort
 	n.Attributes[v1.KeyAccelerator] = n.Accelerator
 	if n.SysApps != nil {
 		n.Attributes[v1.KeyOptionalSysApps] = n.SysApps
@@ -494,7 +496,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	port, err := api.getCoreAppAPIPort(ns, coreService)
+	port, err := api.getCoreAppAPIPort(node)
 	if err != nil {
 		return nil, err
 	}
@@ -530,10 +532,11 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	node.Attributes[v1.BaetylCoreFrequency] = fmt.Sprintf("%d", coreConfig.Frequency)
 
-	err = api.updateCoreAppAPIPort(ns, coreService, coreConfig.APIPort)
+	err = api.updateCoreAppAPIPort(ns, coreService, port, coreConfig.APIPort)
 	if err != nil {
 		return nil, err
 	}
+	node.Attributes[v1.BaetylCoreAPIPort] = fmt.Sprintf("%d", coreConfig.APIPort)
 
 	res, err := api.App.Update(ns, app)
 	if err != nil {
@@ -584,7 +587,7 @@ func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
 	}
 
 	// get api port
-	coreInfo.APIPort, err = api.getCoreAppAPIPort(ns, coreService)
+	coreInfo.APIPort, err = api.getCoreAppAPIPort(node)
 	if err != nil {
 		return nil, err
 	}
@@ -972,19 +975,28 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int
 	return nil
 }
 
-func (api *API) getCoreAppAPIPort(ns string, service *v1.Service) (int, error) {
-	for _, v := range service.Ports {
-		if v.ContainerPort == int32(BaetylCoreContainerPort) {
-			return int(v.HostPort), nil
-		}
+func (api *API) getCoreAppAPIPort(node *v1.Node) (int, error) {
+	if node.Attributes == nil {
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
 	}
-	return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "APIPort"), common.Field("name", v1.BaetylCore), common.Field("namespace", ns))
+	if _, ok := node.Attributes[v1.BaetylCoreAPIPort]; !ok {
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", v1.BaetylCoreAPIPort), common.Field("namespace", node.Namespace))
+	}
+	port, ok := node.Attributes[v1.BaetylCoreAPIPort].(string)
+	if !ok {
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreAPIPort), common.Field("error", "failed to convert to string`"))
+	}
+	res, err := strconv.Atoi(port)
+	if err != nil {
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreAPIPort), common.Field("error", err.Error()))
+	}
+	return res, nil
 }
 
-func (api *API) updateCoreAppAPIPort(ns string, service *v1.Service, port int) error {
+func (api *API) updateCoreAppAPIPort(ns string, service *v1.Service, oldPort, newPort int) error {
 	for i, v := range service.Ports {
-		if v.ContainerPort == int32(BaetylCoreContainerPort) {
-			service.Ports[i].HostPort = int32(port)
+		if v.HostPort == int32(oldPort) {
+			service.Ports[i].HostPort = int32(newPort)
 			return nil
 		}
 	}
@@ -1018,11 +1030,11 @@ func (api *API) getCoreAppFrequency(node *v1.Node) (int, error) {
 	}
 	freq, ok := node.Attributes[v1.BaetylCoreFrequency].(string)
 	if !ok {
-		return 0, common.Error(common.ErrConvertConflict, common.Field("name", "v1.BaetylCoreFrequency"), common.Field("error", "failed to convert to string`"))
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreFrequency), common.Field("error", "failed to convert to string`"))
 	}
 	res, err := strconv.Atoi(freq)
 	if err != nil {
-		return 0, errors.Trace(err)
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreFrequency), common.Field("error", err.Error()))
 	}
 	return res, nil
 }
