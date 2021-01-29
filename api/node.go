@@ -171,7 +171,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		n.Attributes = map[string]interface{}{}
 	}
 	n.Attributes[v1.BaetylCoreFrequency] = common.DefaultCoreFrequency
-	n.Attributes[BaetylCoreAPIPort] = common.DefaultCoreAPIPort
+	n.Attributes[v1.BaetylCoreAPIPort] = common.DefaultCoreAPIPort
 	n.Attributes[v1.KeyAccelerator] = n.Accelerator
 	if n.SysApps != nil {
 		n.Attributes[v1.KeyOptionalSysApps] = n.SysApps
@@ -536,7 +536,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	node.Attributes[BaetylCoreAPIPort] = fmt.Sprintf("%d", coreConfig.APIPort)
+	node.Attributes[v1.BaetylCoreAPIPort] = fmt.Sprintf("%d", coreConfig.APIPort)
 
 	res, err := api.App.Update(ns, app)
 	if err != nil {
@@ -979,16 +979,16 @@ func (api *API) getCoreAppAPIPort(node *v1.Node) (int, error) {
 	if node.Attributes == nil {
 		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
 	}
-	if _, ok := node.Attributes[BaetylCoreAPIPort]; !ok {
-		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", BaetylCoreAPIPort), common.Field("namespace", node.Namespace))
+	if _, ok := node.Attributes[v1.BaetylCoreAPIPort]; !ok {
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", v1.BaetylCoreAPIPort), common.Field("namespace", node.Namespace))
 	}
-	port, ok := node.Attributes[BaetylCoreAPIPort].(string)
+	port, ok := node.Attributes[v1.BaetylCoreAPIPort].(string)
 	if !ok {
-		return 0, common.Error(common.ErrConvertConflict, common.Field("name", BaetylCoreAPIPort), common.Field("error", "failed to convert to string`"))
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreAPIPort), common.Field("error", "failed to convert to string`"))
 	}
 	res, err := strconv.Atoi(port)
 	if err != nil {
-		return 0, errors.Trace(err)
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreAPIPort), common.Field("error", err.Error()))
 	}
 	return res, nil
 }
@@ -1030,11 +1030,11 @@ func (api *API) getCoreAppFrequency(node *v1.Node) (int, error) {
 	}
 	freq, ok := node.Attributes[v1.BaetylCoreFrequency].(string)
 	if !ok {
-		return 0, common.Error(common.ErrConvertConflict, common.Field("name", "v1.BaetylCoreFrequency"), common.Field("error", "failed to convert to string`"))
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreFrequency), common.Field("error", "failed to convert to string`"))
 	}
 	res, err := strconv.Atoi(freq)
 	if err != nil {
-		return 0, errors.Trace(err)
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreFrequency), common.Field("error", err.Error()))
 	}
 	return res, nil
 }

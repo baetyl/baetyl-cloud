@@ -1681,7 +1681,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Version:   "0",
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
-			BaetylCoreAPIPort:          common.DefaultCoreAPIPort,
+			specV1.BaetylCoreAPIPort:   common.DefaultCoreAPIPort,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},
@@ -1890,7 +1890,7 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 		Version:   "0",
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
-			BaetylCoreAPIPort:          common.DefaultCoreAPIPort,
+			specV1.BaetylCoreAPIPort:   common.DefaultCoreAPIPort,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},
