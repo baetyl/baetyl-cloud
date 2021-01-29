@@ -33,7 +33,7 @@ func initQuotaAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 
 		quota.POST("", common.WrapperMis(api.CreateQuota))
 		quota.DELETE("", common.WrapperMis(api.DeleteQuota))
-		quota.GET("/mis", common.WrapperMis(api.GetQuotaForMis))
+		quota.GET("/:namespace", common.WrapperMis(api.GetQuotaForMis))
 		quota.PUT("", common.WrapperMis(api.UpdateQuota))
 	}
 
@@ -136,7 +136,7 @@ func TestAPI_GetQuotaForMis(t *testing.T) {
 
 	mLicense.EXPECT().GetQuota(namespace).Return(quotas, nil)
 	// 200
-	req, _ := http.NewRequest(http.MethodGet, "/v1/quotas/mis", bytes.NewBufferString(body))
+	req, _ := http.NewRequest(http.MethodGet, "/v1/quotas/default", bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
