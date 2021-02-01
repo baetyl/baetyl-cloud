@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	OfflineDuration         = 40 * time.Second
+	OfflineDuration         = 20
 	NodeNumber              = 1
 	BaetylCorePrevVersion   = "BaetylCorePrevVersion"
 	BaetylNodeNameKey       = "baetyl-node-name"
@@ -41,7 +41,7 @@ func (api *API) GetNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view, err := node.View(OfflineDuration)
+	view, err := api.ToNodeView(node)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 			}
 			return nil, err
 		}
-		view, err := node.View(OfflineDuration)
+		view, err := api.ToNodeView(node)
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +87,7 @@ func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view, err := node.View(OfflineDuration)
+	view, err := api.ToNodeView(node)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 		n := &nodeList.Items[idx]
 
 		var view *v1.NodeView
-		view, err = n.View(OfflineDuration)
+		view, err = api.ToNodeView(n)
 		if err != nil {
 			return nil, err
 		}
@@ -197,7 +197,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		}
 	}
 
-	view, err := node.View(OfflineDuration)
+	view, err := api.ToNodeView(node)
 	if err != nil {
 		return nil, err
 	}
@@ -231,7 +231,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	}
 
 	if models.EqualNode(node, oldNode) {
-		return oldNode.View(OfflineDuration)
+		return api.ToNodeView(oldNode)
 	}
 
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
@@ -254,7 +254,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view, err := node.View(OfflineDuration)
+	view, err := api.ToNodeView(node)
 	if err != nil {
 		return nil, err
 	}
@@ -283,6 +283,16 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	}
 
 	return api.deleteAllSysAppsOfNode(node)
+}
+
+func (api *API) ToNodeView(node *v1.Node) (*v1.NodeView, error) {
+	// get frequency
+	frequency, err := api.getCoreAppFrequency(node)
+	if err != nil {
+		return nil, err
+	}
+	t := time.Duration(frequency+OfflineDuration) * time.Second
+	return node.View(t)
 }
 
 func (api *API) deleteAllSysAppsOfNode(node *v1.Node) (interface{}, error) {
