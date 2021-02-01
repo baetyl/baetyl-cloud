@@ -81,9 +81,9 @@ func (s *MisServer) InitRoute() {
 		quota := v1.Group("/quotas")
 
 		quota.POST("", common.WrapperMis(s.api.CreateQuota))
-		quota.DELETE("/:name", common.WrapperMis(s.api.DeleteQuota))
-		quota.GET("/:name", common.WrapperMis(s.api.GetQuotaForMis))
-		quota.PUT("/:name", common.WrapperMis(s.api.UpdateQuota))
+		quota.DELETE("", common.WrapperMis(s.api.DeleteQuota))
+		quota.GET("/:namespace", common.WrapperMis(s.api.GetQuotaForMis))
+		quota.PUT("", common.WrapperMis(s.api.UpdateQuota))
 	}
 	{
 		module := v1.Group("/modules")

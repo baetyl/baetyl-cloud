@@ -15,6 +15,7 @@ import (
 type NamespaceService interface {
 	Get(namespace string) (*models.Namespace, error)
 	Create(namespace *models.Namespace) (*models.Namespace, error)
+	List(listOptions *models.ListOptions) (*models.NamespaceList, error)
 	Delete(namespace *models.Namespace) error
 }
 
@@ -46,6 +47,11 @@ func (s *namespaceService) Get(namespace string) (*models.Namespace, error) {
 // Create Create a namespace
 func (s *namespaceService) Create(namespace *models.Namespace) (*models.Namespace, error) {
 	return s.namespace.CreateNamespace(namespace)
+}
+
+// List get list namespace
+func (s *namespaceService) List(listOptions *models.ListOptions) (*models.NamespaceList, error) {
+	return s.namespace.ListNamespace(listOptions)
 }
 
 // Delete Delete the namespace

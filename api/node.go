@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	OfflineDuration         = 40 * time.Second
+	OfflineDuration         = 20
 	NodeNumber              = 1
 	BaetylCorePrevVersion   = "BaetylCorePrevVersion"
 	BaetylNodeNameKey       = "baetyl-node-name"
@@ -30,6 +30,7 @@ const (
 	BaetylCoreContainerPort = 80
 	BaetylModule            = "baetyl"
 	DefaultMode             = "kube"
+	BaetylCoreAPIPort       = "BaetylCoreAPIPort"
 )
 
 // GetNode get a node
@@ -40,7 +41,7 @@ func (api *API) GetNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view, err := node.View(OfflineDuration)
+	view, err := api.ToNodeView(node)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +66,7 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 			}
 			return nil, err
 		}
-		view, err := node.View(OfflineDuration)
+		view, err := api.ToNodeView(node)
 		if err != nil {
 			return nil, err
 		}
@@ -86,7 +87,7 @@ func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view, err := node.View(OfflineDuration)
+	view, err := api.ToNodeView(node)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +117,7 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 		n := &nodeList.Items[idx]
 
 		var view *v1.NodeView
-		view, err = n.View(OfflineDuration)
+		view, err = api.ToNodeView(n)
 		if err != nil {
 			return nil, err
 		}
@@ -127,7 +128,16 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 	return nodeViewList, nil
 }
 
-// CreateNode create one node
+/**
+ * @title: Create node.
+ * @description: Check validity of input node, add system label to node, insert node info
+ *               into storage and generate system apps.
+ * @receiver api
+ * @param c Context*   Context of request.
+ * @return interface{} nil      Request is invalid or quota is full or fail to insert node into storage.
+ *                     NodeView Create node success.
+ * @return error
+ */
 func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	n, err := api.ParseAndCheckNode(c)
 	if err != nil {
@@ -161,6 +171,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		n.Attributes = map[string]interface{}{}
 	}
 	n.Attributes[v1.BaetylCoreFrequency] = common.DefaultCoreFrequency
+	n.Attributes[v1.BaetylCoreAPIPort] = common.DefaultCoreAPIPort
 	n.Attributes[v1.KeyAccelerator] = n.Accelerator
 	if n.SysApps != nil {
 		n.Attributes[v1.KeyOptionalSysApps] = n.SysApps
@@ -186,7 +197,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		}
 	}
 
-	view, err := node.View(OfflineDuration)
+	view, err := api.ToNodeView(node)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +231,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	}
 
 	if models.EqualNode(node, oldNode) {
-		return oldNode.View(OfflineDuration)
+		return api.ToNodeView(oldNode)
 	}
 
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
@@ -243,7 +254,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view, err := node.View(OfflineDuration)
+	view, err := api.ToNodeView(node)
 	if err != nil {
 		return nil, err
 	}
@@ -272,6 +283,16 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	}
 
 	return api.deleteAllSysAppsOfNode(node)
+}
+
+func (api *API) ToNodeView(node *v1.Node) (*v1.NodeView, error) {
+	// get frequency
+	frequency, err := api.getCoreAppFrequency(node)
+	if err != nil {
+		return nil, err
+	}
+	t := time.Duration(frequency+OfflineDuration) * time.Second
+	return node.View(t)
 }
 
 func (api *API) deleteAllSysAppsOfNode(node *v1.Node) (interface{}, error) {
@@ -485,7 +506,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	port, err := api.getCoreAppAPIPort(ns, coreService)
+	port, err := api.getCoreAppAPIPort(node)
 	if err != nil {
 		return nil, err
 	}
@@ -521,10 +542,11 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	node.Attributes[v1.BaetylCoreFrequency] = fmt.Sprintf("%d", coreConfig.Frequency)
 
-	err = api.updateCoreAppAPIPort(ns, coreService, coreConfig.APIPort)
+	err = api.updateCoreAppAPIPort(ns, coreService, port, coreConfig.APIPort)
 	if err != nil {
 		return nil, err
 	}
+	node.Attributes[v1.BaetylCoreAPIPort] = fmt.Sprintf("%d", coreConfig.APIPort)
 
 	res, err := api.App.Update(ns, app)
 	if err != nil {
@@ -575,7 +597,7 @@ func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
 	}
 
 	// get api port
-	coreInfo.APIPort, err = api.getCoreAppAPIPort(ns, coreService)
+	coreInfo.APIPort, err = api.getCoreAppAPIPort(node)
 	if err != nil {
 		return nil, err
 	}
@@ -963,19 +985,28 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int
 	return nil
 }
 
-func (api *API) getCoreAppAPIPort(ns string, service *v1.Service) (int, error) {
-	for _, v := range service.Ports {
-		if v.ContainerPort == int32(BaetylCoreContainerPort) {
-			return int(v.HostPort), nil
-		}
+func (api *API) getCoreAppAPIPort(node *v1.Node) (int, error) {
+	if node.Attributes == nil {
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
 	}
-	return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "APIPort"), common.Field("name", v1.BaetylCore), common.Field("namespace", ns))
+	if _, ok := node.Attributes[v1.BaetylCoreAPIPort]; !ok {
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", v1.BaetylCoreAPIPort), common.Field("namespace", node.Namespace))
+	}
+	port, ok := node.Attributes[v1.BaetylCoreAPIPort].(string)
+	if !ok {
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreAPIPort), common.Field("error", "failed to convert to string`"))
+	}
+	res, err := strconv.Atoi(port)
+	if err != nil {
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreAPIPort), common.Field("error", err.Error()))
+	}
+	return res, nil
 }
 
-func (api *API) updateCoreAppAPIPort(ns string, service *v1.Service, port int) error {
+func (api *API) updateCoreAppAPIPort(ns string, service *v1.Service, oldPort, newPort int) error {
 	for i, v := range service.Ports {
-		if v.ContainerPort == int32(BaetylCoreContainerPort) {
-			service.Ports[i].HostPort = int32(port)
+		if v.HostPort == int32(oldPort) {
+			service.Ports[i].HostPort = int32(newPort)
 			return nil
 		}
 	}
@@ -1009,11 +1040,11 @@ func (api *API) getCoreAppFrequency(node *v1.Node) (int, error) {
 	}
 	freq, ok := node.Attributes[v1.BaetylCoreFrequency].(string)
 	if !ok {
-		return 0, common.Error(common.ErrConvertConflict, common.Field("name", "v1.BaetylCoreFrequency"), common.Field("error", "failed to convert to string`"))
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreFrequency), common.Field("error", "failed to convert to string`"))
 	}
 	res, err := strconv.Atoi(freq)
 	if err != nil {
-		return 0, errors.Trace(err)
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreFrequency), common.Field("error", err.Error()))
 	}
 	return res, nil
 }

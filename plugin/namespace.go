@@ -9,5 +9,6 @@ import (
 type Namespace interface {
 	GetNamespace(namespace string) (*models.Namespace, error)
 	CreateNamespace(namespace *models.Namespace) (*models.Namespace, error)
+	ListNamespace(listOptions *models.ListOptions) (*models.NamespaceList, error)
 	DeleteNamespace(namespace *models.Namespace) error
 }

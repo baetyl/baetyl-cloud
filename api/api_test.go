@@ -3,12 +3,13 @@ package api
 import (
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNewAdminAPI(t *testing.T) {
@@ -57,7 +58,6 @@ func TestNewAdminAPI(t *testing.T) {
 	plugin.RegisterFactory(c.Plugin.Shadow, func() (plugin.Plugin, error) {
 		return mockShadow, nil
 	})
-
 	mockIndex := mockPlugin.NewMockIndex(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Index, func() (plugin.Plugin, error) {
 		return mockIndex, nil

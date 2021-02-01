@@ -3,11 +3,12 @@ package service
 import (
 	"strings"
 
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
 //go:generate mockgen -destination=../mock/service/secret.go -package=service github.com/baetyl/baetyl-cloud/v2/service SecretService
