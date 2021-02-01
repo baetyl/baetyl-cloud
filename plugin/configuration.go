@@ -1,8 +1,9 @@
 package plugin
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/models"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 //go:generate mockgen -destination=../mock/plugin/configuration.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin Configuration

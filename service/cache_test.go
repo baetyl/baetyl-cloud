@@ -3,9 +3,10 @@ package service
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestCacheService(t *testing.T) {

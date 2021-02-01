@@ -6,8 +6,9 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/baetyl/baetyl-cloud/v2/models"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 //go:generate mockgen -destination=../mock/plugin/application_history.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin AppHistory

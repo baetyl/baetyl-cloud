@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"io"
 
-	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 //go:generate mockgen -destination=../mock/plugin/task.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin Task

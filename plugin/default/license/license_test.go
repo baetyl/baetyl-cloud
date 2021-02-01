@@ -1,8 +1,9 @@
 package license
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"testing"
+
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 
 	"github.com/stretchr/testify/assert"
 )
