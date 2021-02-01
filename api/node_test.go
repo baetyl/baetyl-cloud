@@ -390,6 +390,9 @@ func TestListNode(t *testing.T) {
 		Items: []specV1.Node{
 			{
 				Name: "node01",
+				Attributes: map[string]interface{}{
+					specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+				},
 			},
 		},
 	}
