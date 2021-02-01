@@ -22,7 +22,25 @@ func (api *API) GetQuotaForMis(c *common.Context) (interface{}, error) {
 		Namespace: ns,
 	}
 
-	return api.License.GetQuota(quota.Namespace)
+	quotas, err := api.License.GetQuota(quota.Namespace)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var quotaDatas []models.Quota
+	for k, v := range quotas {
+		quotaDatas = append(quotaDatas, models.Quota{
+			Namespace: ns,
+			QuotaName: k,
+			Quota:     v,
+		})
+	}
+
+	return models.MisData{
+		Count: len(quotaDatas),
+		Rows:  quotaDatas,
+	}, nil
 }
 
 // CreateQuota for mis server api
