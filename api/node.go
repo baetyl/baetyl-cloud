@@ -230,10 +230,6 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	if models.EqualNode(node, oldNode) {
-		return api.ToNodeView(oldNode)
-	}
-
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
 		err = api.updateNodeOptionedSysApps(oldNode, node.SysApps)
 		if err != nil {

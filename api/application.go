@@ -145,10 +145,6 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	if models.EqualApp(app, oldApp) {
-		return api.ToApplicationView(oldApp)
-	}
-
 	err = api.updateGenConfigsOfFunctionApp(ns, configs)
 	if err != nil {
 		return nil, err
