@@ -136,7 +136,7 @@ func TestGetNode(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 	bytes := w.Body.Bytes()
-	assert.Equal(t, string(bytes), "{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"ready\":false,\"mode\":\"cloud\"}\n")
+	assert.Equal(t, string(bytes), "{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"cluster\":false,\"ready\":false,\"mode\":\"cloud\"}\n")
 
 	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, common.Error(common.ErrResourceNotFound))
 	// 404
@@ -176,7 +176,7 @@ func TestGetNodes(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, string(w.Body.Bytes()), "{\"total\":2,\"items\":[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"ready\":false,\"mode\":\"cloud\"},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"ready\":false,\"mode\":\"cloud\"}]}\n")
+	assert.Equal(t, string(w.Body.Bytes()), "{\"total\":2,\"items\":[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"cluster\":false,\"ready\":false,\"mode\":\"cloud\"},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"cluster\":false,\"ready\":false,\"mode\":\"cloud\"}]}\n")
 
 	// 200 ResourceNotFound
 	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
@@ -191,7 +191,7 @@ func TestGetNodes(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, string(w.Body.Bytes()), "{\"total\":2,\"items\":[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"ready\":false,\"mode\":\"cloud\"},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"ready\":false,\"mode\":\"cloud\"}]}\n")
+	assert.Equal(t, string(w.Body.Bytes()), "{\"total\":2,\"items\":[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"cluster\":false,\"ready\":false,\"mode\":\"cloud\"},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"cluster\":false,\"ready\":false,\"mode\":\"cloud\"}]}\n")
 
 	// 400 validate error
 	nodeNames = &models.NodeNames{}
@@ -406,7 +406,7 @@ func TestListNode(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	bytes := w.Body.Bytes()
 	fmt.Println(string(bytes))
-	assert.Equal(t, string(bytes), "{\"total\":0,\"items\":[{\"name\":\"node01\",\"createTime\":\"0001-01-01T00:00:00Z\",\"ready\":false,\"mode\":\"cloud\"}]}\n")
+	assert.Equal(t, string(bytes), "{\"total\":0,\"items\":[{\"name\":\"node01\",\"createTime\":\"0001-01-01T00:00:00Z\",\"cluster\":false,\"ready\":false,\"mode\":\"cloud\"}]}\n")
 	nodelist := new(models.NodeList)
 	err := json.Unmarshal(bytes, nodelist)
 	assert.NoError(t, err)
