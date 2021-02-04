@@ -140,6 +140,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	}
 
 	appView.Version = oldApp.Version
+	appView.CreationTimestamp = oldApp.CreationTimestamp
 	app, configs, err := api.ToApplication(appView, oldApp)
 	if err != nil {
 		return nil, err
