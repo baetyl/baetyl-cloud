@@ -765,7 +765,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	}
 
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
-
+	sNode.EXPECT().Update(mNode.Namespace, mNode).Return(mNode, nil)
 	// equal case
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(mNode)
@@ -816,6 +816,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		},
 		SysApps: []string{"a"},
 	}
+	sNode.EXPECT().Update(mNode.Namespace, mNode3).Return(mNode3, nil)
 	// equal
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode3)
