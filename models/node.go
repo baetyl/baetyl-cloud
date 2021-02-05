@@ -1,8 +1,6 @@
 package models
 
 import (
-	"reflect"
-
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -55,13 +53,6 @@ type NodeMode struct {
 type NodePropertiesMetadata struct {
 	ReportMeta map[string]interface{} `yaml:"report,omitempty" json:"report,omitempty"`
 	DesireMeta map[string]interface{} `yaml:"desire,omitempty" json:"desire,omitempty"`
-}
-
-func EqualNode(node1, node2 *specV1.Node) bool {
-	return reflect.DeepEqual(node1.Labels, node2.Labels) &&
-		reflect.DeepEqual(node1.Description, node2.Description) &&
-		reflect.DeepEqual(node1.Annotations, node2.Annotations) &&
-		reflect.DeepEqual(node1.SysApps, node2.SysApps)
 }
 
 func PopulateNode(node *specV1.Node) error {

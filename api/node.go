@@ -224,14 +224,11 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	})
 	node.Version = oldNode.Version
 	node.Attributes = oldNode.Attributes
+	node.CreationTimestamp = oldNode.CreationTimestamp
 
 	err = models.PopulateNode(oldNode)
 	if err != nil {
 		return nil, err
-	}
-
-	if models.EqualNode(node, oldNode) {
-		return api.ToNodeView(oldNode)
 	}
 
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
