@@ -1,16 +1,17 @@
 package models
 
-import "time"
+import (
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
+)
 
 type Task struct {
-	TraceId    string    `json:"trace_id,omitempty" db:"trace_id"`
-	Namespace  string    `json:"namespace,omitempty" db:"namespace"`
-	Node       string    `json:"node,omitempty" db:"node"`
-	Type       string    `json:"type,omitempty" db:"type"`
-	State      string    `json:"state,omitempty" db:"state"`
-	Step       string    `json:"step,omitempty" db:"step"`
-	OldVersion string    `json:"old_version,omitempty" db:"old_version"`
-	NewVersion string    `json:"new_version,omitempty" db:"new_version"`
-	CreateTime time.Time `json:"createTime,omitempty" db:"create_time"`
-	UpdateTime time.Time `json:"updateTime,omitempty" db:"update_time"`
+	Id               int64                        `json:"id,omitempty"`
+	TaskName         string                       `json:"taskName"`
+	Namespace        string                       `json:"namespace,omitempty"`
+	ResourceName     string                       `json:"resourceName,omitempty"`
+	ResourceType     string                       `json:"resourceType,omitempty"`
+	Version          int64                        `json:"version,omitempty"`
+	ExpireTime       int64                        `json:"expireTime,omitempty"`
+	Status           int                          `json:"status,omitempty"`
+	ProcessorsStatus map[string]plugin.TaskStatus `json:"processorsStatus,omitempty"`
 }

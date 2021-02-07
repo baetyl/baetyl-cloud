@@ -1,27 +1,31 @@
 package plugin
 
 import (
-	"database/sql"
 	"io"
-
-	"github.com/jmoiron/sqlx"
 
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 //go:generate mockgen -destination=../mock/plugin/task.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin Task
 
+type TaskStatus int
+
+const (
+	TaskNew TaskStatus = iota
+	TaskProcessing
+	TaskNeedRetry
+	TaskFinished
+	TaskFailed
+)
+
 // Task interface of Task
 type Task interface {
-	CreateTask(task *models.Task) (sql.Result, error)
-	UpdateTask(task *models.Task) (sql.Result, error)
-	GetTask(traceId string) (*models.Task, error)
-	DeleteTask(traceId string) (sql.Result, error)
-	CountTask(task *models.Task) (int, error)
+	CreateTask(task *models.Task) (bool, error)
+	GetTask(name string) (*models.Task, error)
+	AcquireTaskLock(task *models.Task) (bool, error)
+	GetNeedProcessTask(number int, seconds float32) ([]*models.Task, error)
+	UpdateTask(task *models.Task) (bool, error)
+	DeleteTask(taskName string) (bool, error)
 
-	GetTaskTx(tx *sqlx.Tx, traceId string) (*models.Task, error)
-	CreateTaskTx(tx *sqlx.Tx, task *models.Task) (sql.Result, error)
-	UpdateTaskTx(tx *sqlx.Tx, task *models.Task) (sql.Result, error)
-	DeleteTaskTx(tx *sqlx.Tx, traceId string) (sql.Result, error)
 	io.Closer
 }
