@@ -61,6 +61,7 @@ func (api *API) CreateConfig(c *common.Context) (interface{}, error) {
 	}
 
 	ns, name := c.GetNamespace(), config.Name
+	config.Namespace = ns
 
 	// TODO: remove get method, return error inside service instead
 	oldConfig, err := api.Config.Get(ns, name, "")

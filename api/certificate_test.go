@@ -46,7 +46,7 @@ func TestCreateCertificate(t *testing.T) {
 		Secret: mkSecretService,
 	}
 
-	ns := "ns"
+	ns := "default"
 	keyData1 := `-----BEGIN RSA PRIVATE KEY-----
 MIIEpQIBAAKCAQEApd4vdBUOtuW+v4YXkqJUFyz18N3tk00Ff3X5SfT036qEC4SB
 FsZDyNAX5bhXKkKMX0oAWt7XowpCsUtppChkibfAQNtQbOBOTVC9UJEtef/edEVz
