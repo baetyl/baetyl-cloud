@@ -60,6 +60,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, name := c.GetNamespace(), appView.Name
+	appView.Namespace = ns
 
 	err = api.validApplication(ns, appView)
 	if err != nil {

@@ -48,6 +48,8 @@ func (api *API) CreateRegistry(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, name := c.GetNamespace(), cfg.Name
+	cfg.Namespace = ns
+
 	sd, err := api.Secret.Get(ns, name, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
