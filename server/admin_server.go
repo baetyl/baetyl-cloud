@@ -22,6 +22,7 @@ type AdminServer struct {
 	api     *api.API
 	auth    service.AuthService
 	license service.LicenseService
+	Hooks   []gin.HandlerFunc
 }
 
 // NewAdminServer create admin server
@@ -78,6 +79,7 @@ func (s *AdminServer) InitRoute() {
 	s.router.Use(RequestIDHandler)
 	s.router.Use(LoggerHandler)
 	s.router.Use(s.AuthHandler)
+	s.router.Use(s.Hooks...)
 	v1 := s.router.Group("v1")
 	{
 		configs := v1.Group("/configs")
