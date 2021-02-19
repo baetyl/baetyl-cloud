@@ -68,7 +68,20 @@ func validLabelsFunc() validator.Func {
 	return func(fl validator.FieldLevel) bool {
 		labels := fl.Field().Interface().(map[string]string)
 		for k, v := range labels {
-			if len(k) > 63 || len(v) > 63 || !labelRegex.MatchString(k) || !labelRegex.MatchString(v) {
+			if strings.Contains(k, "/") {
+				ss := strings.Split(k, "/")
+				if len(ss) != 2 {
+					return false
+				}
+				if len(ss[0]) > 253 || len(ss[0]) < 1 || !labelRegex.MatchString(ss[0]) || len(ss[1]) > 63 || !labelRegex.MatchString(ss[1]) {
+					return false
+				}
+			} else {
+				if len(k) > 63 || !labelRegex.MatchString(k) {
+					return false
+				}
+			}
+			if len(v) > 63 || !labelRegex.MatchString(v) {
 				return false
 			}
 		}
