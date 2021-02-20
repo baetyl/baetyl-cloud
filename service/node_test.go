@@ -3,7 +3,10 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"sync"
 	"testing"
+	"time"
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
@@ -1076,4 +1079,133 @@ func TestUpdateNodeMode(t *testing.T) {
 	mockObject.node.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to update node"))
 	err = ns.UpdateNodeMode("default", "abc", "cloud")
 	assert.Error(t, err)
+}
+
+func copyDesire(src *v1.Desire, dst *v1.Desire) {
+	var apps []specV1.AppInfo
+	dstApps := src.AppInfos(false)
+	if len(dstApps) == 0 {
+		return
+	}
+	for index := range dstApps {
+		apps = append(apps, specV1.AppInfo{Name: dstApps[index].Name, Version: dstApps[index].Version})
+	}
+	dst.SetAppInfos(false, apps)
+}
+
+func TestUpdateNodeAppVersion2(t *testing.T) {
+	mockObject := InitMockEnvironment(t)
+	defer mockObject.Close()
+	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
+	ss := nodeService{
+		indexService: mockIndexService,
+		shadow:       mockObject.shadow,
+		node:         mockObject.node,
+		app:          mockObject.app,
+	}
+	app1 := &specV1.Application{
+		Name:    "app01",
+		Version: "2",
+		Selector: "test",
+	}
+	app2 := &specV1.Application{
+		Name:    "app02",
+		Version: "2",
+		Selector: "test",
+	}
+	namespace := "test"
+
+	shadowList := &models.ShadowList{
+		Items: []models.Shadow{
+			{
+				Name: "test01",
+				Desire: map[string]interface{}{
+					common.DesiredApplications: []specV1.AppInfo{
+						{
+							"app01",
+							"1",
+						},
+						{
+							"app02",
+							"1",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	var desireLock sync.Mutex
+	mockObject.node.EXPECT().ListNode(namespace, gomock.Any()).DoAndReturn(
+		func(namespace string, listOptions *models.ListOptions) (*models.NodeList, error){
+			nodeList := &models.NodeList{
+				Items: []specV1.Node{
+					{
+						Name: "test01",
+					},
+				},
+			}
+			return nodeList, nil
+		}).AnyTimes()
+
+	mockObject.shadow.EXPECT().List(namespace, gomock.Any()).DoAndReturn(
+		func(namespace string, nodeList *models.NodeList) (*models.ShadowList, error) {
+			newShadowList := &models.ShadowList{
+				Items: []models.Shadow{
+					{Name: "test01", Desire: map[string]interface{}{}},
+				},
+			}
+			desireLock.Lock()
+			copyDesire(&shadowList.Items[0].Desire, &newShadowList.Items[0].Desire)
+			desireLock.Unlock()
+			return newShadowList, nil
+		}).AnyTimes()
+
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(namespace, name string) (*models.Shadow, error) {
+			newShadow := &models.Shadow{
+				Name: "test01",
+				Desire: map[string]interface{}{},
+			}
+			desireLock.Lock()
+			copyDesire(&shadowList.Items[0].Desire, &newShadow.Desire)
+			desireLock.Unlock()
+			return newShadow, nil
+		}).AnyTimes()
+
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).DoAndReturn(
+		func(shadow *models.Shadow) (*models.Shadow, error) {
+			time.Sleep(time.Duration(10000))
+			desireLock.Lock()
+			copyDesire(&shadow.Desire, &shadowList.Items[0].Desire)
+			desireLock.Unlock()
+			return &shadowList.Items[0], nil
+		})
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).DoAndReturn(
+		func(shadow *models.Shadow) (*models.Shadow, error) {
+			time.Sleep(time.Duration(100000))
+			desireLock.Lock()
+			copyDesire(&shadow.Desire, &shadowList.Items[0].Desire)
+			desireLock.Unlock()
+			return &shadowList.Items[0], nil
+		})
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		_, err := ss.UpdateNodeAppVersion(namespace, app1)
+		assert.NoError(t, err)
+	}()
+
+	go func() {
+		defer wg.Done()
+		_, err := ss.UpdateNodeAppVersion(namespace, app2)
+		assert.NoError(t, err)
+	}()
+	wg.Wait()
+	version1, _ := strconv.Atoi(shadowList.Items[0].Desire.AppInfos(false)[0].Version)
+	version2, _ := strconv.Atoi(shadowList.Items[0].Desire.AppInfos(false)[1].Version)
+	assert.Equal(t, version1 + version2, 3)
 }
