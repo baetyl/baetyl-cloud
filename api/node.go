@@ -41,12 +41,7 @@ func (api *API) GetNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	view, err := api.ToNodeView(node)
-	if err != nil {
-		return nil, err
-	}
-
-	return view, nil
+	return api.ToNodeView(node)
 }
 
 func (api *API) GetNodes(c *common.Context) (interface{}, error) {
