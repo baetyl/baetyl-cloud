@@ -16,12 +16,13 @@ import (
 
 // AdminServer admin server
 type AdminServer struct {
-	cfg     *config.CloudConfig
-	router  *gin.Engine
-	server  *http.Server
-	api     *api.API
-	auth    service.AuthService
-	license service.LicenseService
+	cfg              *config.CloudConfig
+	router           *gin.Engine
+	server           *http.Server
+	api              *api.API
+	auth             service.AuthService
+	license          service.LicenseService
+	ExternalHandlers []gin.HandlerFunc
 }
 
 // NewAdminServer create admin server
@@ -78,6 +79,7 @@ func (s *AdminServer) InitRoute() {
 	s.router.Use(RequestIDHandler)
 	s.router.Use(LoggerHandler)
 	s.router.Use(s.AuthHandler)
+	s.router.Use(s.ExternalHandlers...)
 	v1 := s.router.Group("v1")
 	{
 		configs := v1.Group("/configs")

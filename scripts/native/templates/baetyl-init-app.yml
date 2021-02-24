@@ -8,6 +8,7 @@ type: "container"
 system: true
 services:
   - name: "baetyl-init"
+    type: "deployment"
     image: {{GetModuleImage "baetyl"}}
     replica: 1
     args:
