@@ -144,7 +144,7 @@ func TestAPI_DeleteNamespace(t *testing.T) {
 	mkNamespaceService.EXPECT().Delete(nsa).Return(nil)
 	mkTaskService.EXPECT().AddTask(gomock.Any()).Return(err)
 
-	// 200
+	// 500
 	req, _ = http.NewRequest(http.MethodDelete, "/testA/namespace", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
