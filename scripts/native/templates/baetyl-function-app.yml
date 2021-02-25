@@ -8,6 +8,7 @@ type: "container"
 system: true
 services:
   - name: "baetyl-function"
+    type: "deployment"
     image: {{GetModuleImage "baetyl-function"}}
     replica: 1
     volumeMounts:

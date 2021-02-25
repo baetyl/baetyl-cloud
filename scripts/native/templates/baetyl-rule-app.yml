@@ -7,6 +7,7 @@ type: "container"
 system: true
 services:
   - name: "baetyl-rule"
+    type: "deployment"
     image: {{GetModuleImage "baetyl-rule"}}
     replica: 1
     volumeMounts:

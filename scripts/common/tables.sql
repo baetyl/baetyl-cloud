@@ -157,7 +157,6 @@ CREATE TABLE IF NOT EXISTS `baetyl_module` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
   PRIMARY KEY (`id`),
-  KEY `index_name` (`name`),
   UNIQUE KEY `unique_name` (`name`,`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='module table';
 

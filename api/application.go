@@ -60,6 +60,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, name := c.GetNamespace(), appView.Name
+	appView.Namespace = ns
 
 	err = api.validApplication(ns, appView)
 	if err != nil {
@@ -281,10 +282,19 @@ func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, er
 			}
 		}
 		if len(app.Registries) != 0 {
-			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "registries should be be empty in function app"))
+			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "registries should be empty in function app"))
 		}
 	} else {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "type is invalid"))
+	}
+
+	for _, svc := range app.Services {
+		if svc.Type != specV1.ServiceTypeDeployment &&
+			svc.Type != specV1.ServiceTypeDaemonSet &&
+			svc.Type != specV1.ServiceTypeStatefulSet {
+			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error",
+				"failed to parse service type, service type should be deployment / daemonset / statefulset"))
+		}
 	}
 	return app, nil
 }

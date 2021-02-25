@@ -723,6 +723,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 				Hostname: "test-agent",
 				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
 				Replica:  1,
+				Type:     specV1.ServiceTypeDeployment,
 				VolumeMounts: []specV1.VolumeMount{
 					{
 						Name:      "name",

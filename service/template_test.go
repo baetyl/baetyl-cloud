@@ -91,6 +91,7 @@ services:
   - core
   security:
     privileged: true
+  type: deployment
 volumes:
 - name: core-conf
   config:
@@ -165,6 +166,7 @@ services:
   ports:
   - containerPort: 80
     protocol: TCP
+  type: deployment
 volumes:
 - name: func-conf
   config:
