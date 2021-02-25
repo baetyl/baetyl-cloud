@@ -116,13 +116,15 @@ func TestAPI_DeleteNamespace(t *testing.T) {
 	defer mockCtl.Finish()
 	mkNamespaceService := ms.NewMockNamespaceService(mockCtl)
 	api.NS = mkNamespaceService
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+
+	mkTaskService := ms.NewMockTaskService(mockCtl)
+	api.Task = mkTaskService
 
 	nsa := getMockNS("testA")
+	//task := genTask("testA")
 
 	mkNamespaceService.EXPECT().Delete(nsa).Return(nil)
-	mLicense.EXPECT().DeleteQuotaByNamespace(nsa.Name).Return(nil)
+	mkTaskService.EXPECT().AddTask(gomock.Any()).Return(nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/testA/namespace", nil)
 	w := httptest.NewRecorder()
@@ -140,10 +142,11 @@ func TestAPI_DeleteNamespace(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	mkNamespaceService.EXPECT().Delete(nsa).Return(nil)
-	mLicense.EXPECT().DeleteQuotaByNamespace(nsa.Name).Return(err)
+	mkTaskService.EXPECT().AddTask(gomock.Any()).Return(err)
+
 	// 200
 	req, _ = http.NewRequest(http.MethodDelete, "/testA/namespace", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }

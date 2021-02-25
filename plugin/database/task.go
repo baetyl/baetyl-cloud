@@ -23,7 +23,7 @@ func (d *DB) CreateTask(task *models.Task) (bool, error) {
 }
 
 func (d *DB) GetTask(name string) (*models.Task, error) {
-	return d.GetTaskTx(name)
+	return d.GetTaskTx(nil, name)
 }
 
 func (d *DB) AcquireTaskLock(task *models.Task) (bool, error) {
@@ -40,13 +40,16 @@ func (d *DB) AcquireTaskLock(task *models.Task) (bool, error) {
 	return isOperatedSuccess(result)
 }
 
-func (d *DB) GetNeedProcessTask(number int, seconds float32) ([]*models.Task, error) {
-	selectSQL := `SELECT * FROM baetyl_task 
-WHERE updated_time < DATE_ADD(NOW(), INTERVAL ? SECOND) AND status < 3 
+// GetNeedProcessTask only support for mysql
+func (d *DB) GetNeedProcessTask(batchNum, expiredSeconds int32) ([]*models.Task, error) {
+	selectSQL := `SELECT id, name, registration_name, namespace, resource_name, resource_type, version, expire_time, 
+status, content, create_time, update_time
+FROM baetyl_task 
+WHERE update_time < DATE_ADD(NOW(), INTERVAL ? SECOND) AND status < ?
 limit ?`
 	var tArr []*entities.Task
 	var tasks []*models.Task
-	if err := d.Query(nil, selectSQL, &tArr, -1*seconds, number); err != nil {
+	if err := d.Query(nil, selectSQL, &tArr, -1*expiredSeconds, models.TaskFinished, batchNum); err != nil {
 		return nil, err
 	}
 
@@ -86,41 +89,46 @@ func (d *DB) DeleteTask(taskName string) (bool, error) {
 
 func (d *DB) CreateTaskTx(tx *sqlx.Tx, task *entities.Task) (sql.Result, error) {
 	insertSQL := `INSERT INTO baetyl_task
-(task_name, namespace, resource_name, resource_type, expire_time, content)
-VALUES (?,?,?,?,?,?)`
+(name, registration_name, namespace, resource_name, resource_type, expire_time, content)
+VALUES (?,?,?,?,?,?,?)`
 
-	return d.Exec(tx, insertSQL, task.TaskName, task.Namespace, task.ResourceName,
+	return d.Exec(tx, insertSQL, task.Name, task.RegistrationName, task.Namespace, task.ResourceName,
 		task.ResourceType, task.ExpireTime, task.Content)
 }
 
 func (d *DB) AcquireTaskLockTx(tx *sqlx.Tx, task *entities.Task) (sql.Result, error) {
-	updateSQL := `UPDATE baetyl_task SET status=?, version=version + 1, expire_time=? WHERE task_name=? and version=?`
-	return d.Exec(tx, updateSQL, task.Status, task.ExpireTime, task.TaskName, task.Version)
+	updateSQL := `UPDATE baetyl_task SET version=version + 1, expire_time=? WHERE id=? and version=?`
+	return d.Exec(tx, updateSQL, task.ExpireTime, task.Id, task.Version)
 }
 
 func (d *DB) UpdateTaskTx(tx *sqlx.Tx, task *entities.Task) (sql.Result, error) {
-	updateSQL := `UPDATE baetyl_task SET status=?,content=?,version=version + 1 WHERE task_name=? and version=?`
-	return d.Exec(tx, updateSQL, task.Status, task.Content, task.TaskName, task.Version)
+	updateSQL := `UPDATE baetyl_task SET status=?, content=?, version=version + 1 WHERE name=? and version=?`
+	return d.Exec(tx, updateSQL, task.Status, task.Content, task.Name, task.Version)
 }
 
-func (d *DB) DeleteTaskTx(tx *sqlx.Tx, taskName string) (sql.Result, error) {
-	deleteSQL := `DELETE FROM baetyl_task WHERE task_name=?`
-	return d.Exec(tx, deleteSQL, taskName)
+func (d *DB) DeleteTaskTx(tx *sqlx.Tx, name string) (sql.Result, error) {
+	deleteSQL := `DELETE FROM baetyl_task WHERE name=?`
+	return d.Exec(tx, deleteSQL, name)
 }
 
-func (d *DB) GetTaskTx(name string) (*models.Task, error) {
+func (d *DB) GetTaskTx(tx *sqlx.Tx, name string) (*models.Task, error) {
 	selectSQL := `
 SELECT  
-id, task_name, namespace, resource_name, resource_type, version, expire_time, status, content, created_time, updated_time
+id, name, namespace, registration_name, resource_name, resource_type, version, expire_time, status, content, 
+create_time, update_time
 FROM baetyl_task 
-WHERE name=? 
+WHERE name=?
 `
-	var task *entities.Task
-	if err := d.Query(nil, selectSQL, &task, name); err != nil {
+	var task []*entities.Task
+	if err := d.Query(tx, selectSQL, &task, name); err != nil {
 		return nil, err
 	}
 
-	return entities.ToTaskModel(task)
+	if len(task) > 0 {
+		return entities.ToTaskModel(task[0])
+	}
+
+	return nil, nil
 }
 
 func isOperatedSuccess(result sql.Result) (bool, error) {
