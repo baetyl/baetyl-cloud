@@ -46,21 +46,25 @@ func (d *DB) MockCreateIndexTable() {
 }
 
 func TestGetTable(t *testing.T) {
-	delete(cache, "application_config")
-	delete(cache, "config_application")
+	cache.Delete("application_config")
+	cache.Delete("config_application")
 	res := getTable(common.Application, common.Config)
 	assert.Equal(t, "baetyl_index_application_config", res)
-	assert.Equal(t, "baetyl_index_application_config", cache["application_config"])
-	assert.Equal(t, "baetyl_index_application_config", cache["config_application"])
+	appConfig, _ := cache.Load("application_config")
+	assert.Equal(t, "baetyl_index_application_config", appConfig.(string))
+	configApp, _ := cache.Load("config_application")
+	assert.Equal(t, "baetyl_index_application_config", configApp.(string))
 	assert.Equal(t, "baetyl_index_application_config", getTable(common.Application, common.Config))
 	assert.Equal(t, "baetyl_index_application_config", getTable(common.Config, common.Application))
 
-	delete(cache, "application_config")
-	delete(cache, "config_application")
+	cache.Delete("application_config")
+	cache.Delete("config_application")
 	res = getTable(common.Config, common.Application)
 	assert.Equal(t, "baetyl_index_application_config", res)
-	assert.Equal(t, "baetyl_index_application_config", cache["application_config"])
-	assert.Equal(t, "baetyl_index_application_config", cache["config_application"])
+	appConfig, _ = cache.Load("application_config")
+	assert.Equal(t, "baetyl_index_application_config", appConfig.(string))
+	configApp, _ = cache.Load("config_application")
+	assert.Equal(t, "baetyl_index_application_config", configApp.(string))
 }
 
 func TestIndex(t *testing.T) {

@@ -3,13 +3,14 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"sync"
 
 	"github.com/jmoiron/sqlx"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
-var cache = map[string]string{}
+var cache = sync.Map{}
 
 func (d *DB) CreateIndex(namespace string, keyA, keyB common.Resource, valueA, valueB string) (sql.Result, error) {
 	return d.CreateIndexTx(nil, namespace, keyA, keyB, valueA, valueB)
@@ -58,12 +59,12 @@ func (d *DB) RefreshIndex(namespace string, keyA, keyB common.Resource, valueA s
 
 func getTable(keyA, keyB common.Resource) string {
 	keyAB := string(keyA) + "_" + string(keyB)
-	if v, ok := cache[keyAB]; ok {
-		return v
+	if v, ok := cache.Load(keyAB); ok {
+		return v.(string)
 	}
 	keyBA := string(keyB) + "_" + string(keyA)
-	if v, ok := cache[keyBA]; ok {
-		return v
+	if v, ok := cache.Load(keyBA); ok {
+		return v.(string)
 	}
 	var res string
 	if keyA < keyB {
@@ -71,7 +72,7 @@ func getTable(keyA, keyB common.Resource) string {
 	} else {
 		res = "baetyl_index_" + keyBA
 	}
-	cache[keyAB] = res
-	cache[keyBA] = res
+	cache.Store(keyAB, res)
+	cache.Store(keyBA, res)
 	return res
 }
