@@ -78,6 +78,20 @@ func (mr *MockApplicationServiceMockRecorder) Delete(arg0, arg1, arg2 interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockApplicationService)(nil).Delete), arg0, arg1, arg2)
 }
 
+// DeleteAppHis mocks base method
+func (m *MockApplicationService) DeleteAppHis(arg0, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAppHis", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAppHis indicates an expected call of DeleteAppHis
+func (mr *MockApplicationServiceMockRecorder) DeleteAppHis(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAppHis", reflect.TypeOf((*MockApplicationService)(nil).DeleteAppHis), arg0, arg1)
+}
+
 // Get mocks base method
 func (m *MockApplicationService) Get(arg0, arg1, arg2 string) (*v1.Application, error) {
 	m.ctrl.T.Helper()

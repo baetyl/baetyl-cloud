@@ -93,18 +93,18 @@ func (mr *MockTaskMockRecorder) DeleteTask(arg0 interface{}) *gomock.Call {
 }
 
 // GetNeedProcessTask mocks base method
-func (m *MockTask) GetNeedProcessTask(arg0, arg1 int32) ([]*models.Task, error) {
+func (m *MockTask) GetNeedProcessTask(arg0 int32) ([]*models.Task, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNeedProcessTask", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetNeedProcessTask", arg0)
 	ret0, _ := ret[0].([]*models.Task)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetNeedProcessTask indicates an expected call of GetNeedProcessTask
-func (mr *MockTaskMockRecorder) GetNeedProcessTask(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockTaskMockRecorder) GetNeedProcessTask(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNeedProcessTask", reflect.TypeOf((*MockTask)(nil).GetNeedProcessTask), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNeedProcessTask", reflect.TypeOf((*MockTask)(nil).GetNeedProcessTask), arg0)
 }
 
 // GetTask mocks base method

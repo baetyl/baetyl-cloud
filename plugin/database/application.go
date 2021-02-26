@@ -18,11 +18,11 @@ func (d *DB) UpdateApplicationHis(app *specV1.Application, oldVersion string) (s
 	return d.UpdateApplicationHisWithTx(nil, app, oldVersion)
 }
 
-func (d *DB) DeleteApplicationHis(name, namespace, version string) (sql.Result, error) {
-	return d.DeleteApplicationHisWithTx(nil, name, namespace, version)
+func (d *DB) DeleteApplicationHis(namespace, name, version string) (sql.Result, error) {
+	return d.DeleteApplicationHisWithTx(nil, namespace, name, version)
 }
 
-func (d *DB) GetApplicationHis(name, namespace, version string) (*specV1.Application, error) {
+func (d *DB) GetApplicationHis(namespace, name, version string) (*specV1.Application, error) {
 	selectSQL := `
 SELECT  
 id, namespace, name, version, is_deleted, create_time, update_time, content
@@ -65,6 +65,10 @@ FROM baetyl_application_history WHERE namespace = ? AND name LIKE ? AND is_delet
 	return result, nil
 }
 
+func (d *DB) DeleteAllAppsHis(namespace, name string) (sql.Result, error) {
+	return d.DeleteAllAppsHisTx(nil, namespace, name)
+}
+
 func (d *DB) CreateApplicationHisWithTx(tx *sqlx.Tx, app *specV1.Application) (sql.Result, error) {
 	insertSQL := `
 INSERT INTO baetyl_application_history 
@@ -91,7 +95,7 @@ WHERE namespace = ? AND name = ? AND version = ?
 		app.Namespace, app.Name, oldVersion)
 }
 
-func (d *DB) DeleteApplicationHisWithTx(tx *sqlx.Tx, name, namespace, version string) (sql.Result, error) {
+func (d *DB) DeleteApplicationHisWithTx(tx *sqlx.Tx, namespace, name, version string) (sql.Result, error) {
 	deleteSQL := `
 UPDATE baetyl_application_history 
 SET is_deleted = 1
@@ -100,7 +104,7 @@ where namespace=? AND name=? AND version=?
 	return d.Exec(tx, deleteSQL, namespace, name, version)
 }
 
-func (d *DB) CountApplicationHis(tx *sqlx.Tx, name, namespace string) (int, error) {
+func (d *DB) CountApplicationHis(tx *sqlx.Tx, namespace, name string) (int, error) {
 	selectSQL := `
 SELECT count(name) AS count
 FROM baetyl_application_history WHERE namespace=? AND name=?
@@ -112,4 +116,12 @@ FROM baetyl_application_history WHERE namespace=? AND name=?
 		return 0, err
 	}
 	return res[0].Count, nil
+}
+
+func (d *DB) DeleteAllAppsHisTx(tx *sqlx.Tx, namespace, name string) (sql.Result, error) {
+	deleteSQL := `
+DELETE FROM baetyl_application_history
+WHERE namespace=? and name =?
+`
+	return d.Exec(tx, deleteSQL, namespace, name)
 }

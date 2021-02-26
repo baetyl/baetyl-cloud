@@ -94,6 +94,36 @@ func (mr *MockIndexMockRecorder) DeleteIndex(arg0, arg1, arg2, arg3 interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteIndex", reflect.TypeOf((*MockIndex)(nil).DeleteIndex), arg0, arg1, arg2, arg3)
 }
 
+// DeleteIndexByNamespace mocks base method
+func (m *MockIndex) DeleteIndexByNamespace(arg0 string, arg1, arg2 common.Resource) (sql.Result, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteIndexByNamespace", arg0, arg1, arg2)
+	ret0, _ := ret[0].(sql.Result)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteIndexByNamespace indicates an expected call of DeleteIndexByNamespace
+func (mr *MockIndexMockRecorder) DeleteIndexByNamespace(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteIndexByNamespace", reflect.TypeOf((*MockIndex)(nil).DeleteIndexByNamespace), arg0, arg1, arg2)
+}
+
+// DeleteIndexByNamespaceTx mocks base method
+func (m *MockIndex) DeleteIndexByNamespaceTx(arg0 *sqlx.Tx, arg1 string, arg2, arg3 common.Resource) (sql.Result, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteIndexByNamespaceTx", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(sql.Result)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteIndexByNamespaceTx indicates an expected call of DeleteIndexByNamespaceTx
+func (mr *MockIndexMockRecorder) DeleteIndexByNamespaceTx(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteIndexByNamespaceTx", reflect.TypeOf((*MockIndex)(nil).DeleteIndexByNamespaceTx), arg0, arg1, arg2, arg3)
+}
+
 // DeleteIndexTx mocks base method
 func (m *MockIndex) DeleteIndexTx(arg0 *sqlx.Tx, arg1 string, arg2, arg3 common.Resource, arg4 string) (sql.Result, error) {
 	m.ctrl.T.Helper()
@@ -137,6 +167,21 @@ func (m *MockIndex) ListIndexTx(arg0 *sqlx.Tx, arg1 string, arg2, arg3 common.Re
 func (mr *MockIndexMockRecorder) ListIndexTx(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListIndexTx", reflect.TypeOf((*MockIndex)(nil).ListIndexTx), arg0, arg1, arg2, arg3, arg4)
+}
+
+// ListResourcesByNamespace mocks base method
+func (m *MockIndex) ListResourcesByNamespace(arg0 string, arg1, arg2 common.Resource) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListResourcesByNamespace", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListResourcesByNamespace indicates an expected call of ListResourcesByNamespace
+func (mr *MockIndexMockRecorder) ListResourcesByNamespace(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListResourcesByNamespace", reflect.TypeOf((*MockIndex)(nil).ListResourcesByNamespace), arg0, arg1, arg2)
 }
 
 // RefreshIndex mocks base method

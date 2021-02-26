@@ -132,6 +132,7 @@ func (m *TaskManager) runTask(task *models.Task) {
 
 				// set to need retry
 				task.Status = int(models.TaskNeedRetry)
+				break
 			} else {
 				task.ProcessorsStatus[pName] = models.TaskFinished
 			}

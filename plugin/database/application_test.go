@@ -89,11 +89,11 @@ func TestDB_UpdateApplication(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, int64(1), num)
 
-	newApp, err := db.GetApplicationHis(app.Name, app.Namespace, app.Version)
+	newApp, err := db.GetApplicationHis(app.Namespace, app.Name, app.Version)
 	assert.NoError(t, err)
 	checkApplication(t, app, newApp)
 
-	res, err = db.DeleteApplicationHis(newApp.Name, newApp.Namespace, newApp.Version)
+	res, err = db.DeleteApplicationHis(newApp.Namespace, newApp.Name, newApp.Version)
 	assert.NoError(t, err)
 	num, err = res.RowsAffected()
 	assert.NoError(t, err)
@@ -112,11 +112,11 @@ func TestDB_GetApplication(t *testing.T) {
 	_, err := db.CreateApplicationHis(app)
 	assert.NoError(t, err)
 
-	res, err := db.GetApplicationHis(app.Name, app.Namespace, app.Version)
+	res, err := db.GetApplicationHis(app.Namespace, app.Name, app.Version)
 	assert.NoError(t, err)
 	checkApplication(t, app, res)
 
-	num, err := db.CountApplicationHis(nil, app.Name, app.Namespace)
+	num, err := db.CountApplicationHis(nil, app.Namespace, app.Name)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, num)
 

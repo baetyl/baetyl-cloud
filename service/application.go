@@ -22,6 +22,8 @@ type ApplicationService interface {
 	Delete(namespace, name, version string) error
 	List(namespace string, listOptions *models.ListOptions) (*models.ApplicationList, error)
 	CreateWithBase(namespace string, app, base *specV1.Application) (*specV1.Application, error)
+
+	DeleteAppHis(namespace, name string) error
 }
 
 type applicationService struct {
@@ -156,11 +158,10 @@ func (a *applicationService) Delete(namespace, name, version string) error {
 	}
 
 	// mark the application was deleted. err can ignore
-	if _, err := a.appHis.DeleteApplicationHis(namespace, name, version); err != nil {
+	if _, err := a.appHis.DeleteAllAppsHis(namespace, name); err != nil {
 		log.L().Error("delete application history error",
 			log.Any("name", name),
 			log.Any("namespace", namespace),
-			log.Any("version", version),
 			log.Error(err))
 	}
 	return nil
@@ -191,6 +192,11 @@ func (a *applicationService) CreateWithBase(namespace string, app, base *specV1.
 	}
 
 	return a.Create(namespace, app)
+}
+
+func (a *applicationService) DeleteAppHis(namespace, name string) error {
+	_, err := a.appHis.DeleteAllAppsHis(namespace, name)
+	return err
 }
 
 func (a *applicationService) constuctConfig(namespace string, base *specV1.Application) error {

@@ -33,6 +33,48 @@ func (m *MockIndexService) EXPECT() *MockIndexServiceMockRecorder {
 	return m.recorder
 }
 
+// DeleteConfigsAndAppsIndexByNamespace mocks base method
+func (m *MockIndexService) DeleteConfigsAndAppsIndexByNamespace(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteConfigsAndAppsIndexByNamespace", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteConfigsAndAppsIndexByNamespace indicates an expected call of DeleteConfigsAndAppsIndexByNamespace
+func (mr *MockIndexServiceMockRecorder) DeleteConfigsAndAppsIndexByNamespace(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConfigsAndAppsIndexByNamespace", reflect.TypeOf((*MockIndexService)(nil).DeleteConfigsAndAppsIndexByNamespace), arg0)
+}
+
+// DeleteNodesAndAppsIndexByNamespace mocks base method
+func (m *MockIndexService) DeleteNodesAndAppsIndexByNamespace(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteNodesAndAppsIndexByNamespace", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteNodesAndAppsIndexByNamespace indicates an expected call of DeleteNodesAndAppsIndexByNamespace
+func (mr *MockIndexServiceMockRecorder) DeleteNodesAndAppsIndexByNamespace(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNodesAndAppsIndexByNamespace", reflect.TypeOf((*MockIndexService)(nil).DeleteNodesAndAppsIndexByNamespace), arg0)
+}
+
+// DeleteSecretsAndAppsIndexByNamespace mocks base method
+func (m *MockIndexService) DeleteSecretsAndAppsIndexByNamespace(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSecretsAndAppsIndexByNamespace", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSecretsAndAppsIndexByNamespace indicates an expected call of DeleteSecretsAndAppsIndexByNamespace
+func (mr *MockIndexServiceMockRecorder) DeleteSecretsAndAppsIndexByNamespace(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSecretsAndAppsIndexByNamespace", reflect.TypeOf((*MockIndexService)(nil).DeleteSecretsAndAppsIndexByNamespace), arg0)
+}
+
 // ListAppIndexByConfig mocks base method
 func (m *MockIndexService) ListAppIndexByConfig(arg0, arg1 string) ([]string, error) {
 	m.ctrl.T.Helper()
@@ -61,6 +103,21 @@ func (m *MockIndexService) ListAppIndexBySecret(arg0, arg1 string) ([]string, er
 func (mr *MockIndexServiceMockRecorder) ListAppIndexBySecret(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppIndexBySecret", reflect.TypeOf((*MockIndexService)(nil).ListAppIndexBySecret), arg0, arg1)
+}
+
+// ListAppsByNamespace mocks base method
+func (m *MockIndexService) ListAppsByNamespace(arg0 string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAppsByNamespace", arg0)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAppsByNamespace indicates an expected call of ListAppsByNamespace
+func (mr *MockIndexServiceMockRecorder) ListAppsByNamespace(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppsByNamespace", reflect.TypeOf((*MockIndexService)(nil).ListAppsByNamespace), arg0)
 }
 
 // ListAppsByNode mocks base method
@@ -121,6 +178,21 @@ func (m *MockIndexService) ListNodesByApp(arg0, arg1 string) ([]string, error) {
 func (mr *MockIndexServiceMockRecorder) ListNodesByApp(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNodesByApp", reflect.TypeOf((*MockIndexService)(nil).ListNodesByApp), arg0, arg1)
+}
+
+// ListNodesByNamespace mocks base method
+func (m *MockIndexService) ListNodesByNamespace(arg0 string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListNodesByNamespace", arg0)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListNodesByNamespace indicates an expected call of ListNodesByNamespace
+func (mr *MockIndexServiceMockRecorder) ListNodesByNamespace(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNodesByNamespace", reflect.TypeOf((*MockIndexService)(nil).ListNodesByNamespace), arg0)
 }
 
 // RefreshAppIndexByConfig mocks base method

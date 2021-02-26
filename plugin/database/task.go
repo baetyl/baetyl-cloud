@@ -41,15 +41,15 @@ func (d *DB) AcquireTaskLock(task *models.Task) (bool, error) {
 }
 
 // GetNeedProcessTask only support for mysql
-func (d *DB) GetNeedProcessTask(batchNum, expiredSeconds int32) ([]*models.Task, error) {
+func (d *DB) GetNeedProcessTask(batchNum int32) ([]*models.Task, error) {
 	selectSQL := `SELECT id, name, registration_name, namespace, resource_name, resource_type, version, expire_time, 
 status, content, create_time, update_time
 FROM baetyl_task 
-WHERE update_time < DATE_ADD(NOW(), INTERVAL ? SECOND) AND status < ?
+WHERE update_time < DATE_ADD(NOW(), INTERVAL -1 * expire_time SECOND) AND status < ?
 limit ?`
 	var tArr []*entities.Task
 	var tasks []*models.Task
-	if err := d.Query(nil, selectSQL, &tArr, -1*expiredSeconds, models.TaskFinished, batchNum); err != nil {
+	if err := d.Query(nil, selectSQL, &tArr, models.TaskFinished, batchNum); err != nil {
 		return nil, err
 	}
 

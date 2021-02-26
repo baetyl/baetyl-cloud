@@ -137,13 +137,13 @@ func TestDefaultApplicationService_Delete(t *testing.T) {
 	mockObject.app.EXPECT().DeleteApplication(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 	mockIndexService.EXPECT().RefreshConfigIndexByApp(gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("error"))
 	mockIndexService.EXPECT().RefreshSecretIndexByApp(gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("error"))
-	mockObject.appHis.EXPECT().DeleteApplicationHis(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.appHis.EXPECT().DeleteAllAppsHis(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	err = as.Delete(newApp.Namespace, newApp.Name, "")
 	assert.NoError(t, err)
 
 	mockIndexService.EXPECT().RefreshConfigIndexByApp(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 	mockIndexService.EXPECT().RefreshSecretIndexByApp(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-	mockObject.appHis.EXPECT().DeleteApplicationHis(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
+	mockObject.appHis.EXPECT().DeleteAllAppsHis(gomock.Any(), gomock.Any()).Return(nil, nil)
 
 	err = as.Delete(newApp.Namespace, newApp.Name, "")
 	assert.NoError(t, err)

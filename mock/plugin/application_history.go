@@ -95,6 +95,21 @@ func (mr *MockAppHistoryMockRecorder) CreateApplicationHisWithTx(arg0, arg1 inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApplicationHisWithTx", reflect.TypeOf((*MockAppHistory)(nil).CreateApplicationHisWithTx), arg0, arg1)
 }
 
+// DeleteAllAppsHis mocks base method
+func (m *MockAppHistory) DeleteAllAppsHis(arg0, arg1 string) (sql.Result, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAllAppsHis", arg0, arg1)
+	ret0, _ := ret[0].(sql.Result)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAllAppsHis indicates an expected call of DeleteAllAppsHis
+func (mr *MockAppHistoryMockRecorder) DeleteAllAppsHis(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAllAppsHis", reflect.TypeOf((*MockAppHistory)(nil).DeleteAllAppsHis), arg0, arg1)
+}
+
 // DeleteApplicationHis mocks base method
 func (m *MockAppHistory) DeleteApplicationHis(arg0, arg1, arg2 string) (sql.Result, error) {
 	m.ctrl.T.Helper()

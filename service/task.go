@@ -38,7 +38,7 @@ func (t *taskService) AddTask(task *models.Task) error {
 }
 
 func (t *taskService) GetNeedProcessTasks() ([]*models.Task, error) {
-	return t.task.GetNeedProcessTask(t.cfg.Task.BatchNum, t.cfg.Task.LockExpiredTime)
+	return t.task.GetNeedProcessTask(t.cfg.Task.BatchNum)
 }
 
 func (t *taskService) UpdateTask(task *models.Task) (bool, error) {

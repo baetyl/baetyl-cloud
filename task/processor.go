@@ -6,12 +6,18 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/service"
+	"strings"
 )
 
 const (
-	DeleteNamespace        = "delete_namespace"
-	DeleteQuotaByNamespace = "delete_quota_by_namespace"
-	DeleteIndexByNamespace = "delete_index_by_namespace"
+	DeleteNamespace             = "delete_namespace"
+	DeleteNode                  = "delete_node"
+	DeleteApp                   = "delete_app"
+	DeleteSecret                = "delete_secret"
+	DeleteConfig                = "delete_config"
+	DeleteQuotaByNamespace      = "delete_quota_by_namespace"
+	DeleteIndexByNamespace      = "delete_index_by_namespace"
+	DeleteAppHistoryByNamespace = "delete_app_his_by_namespace"
 )
 
 func RegisterNamespaceProcessor(cfg *config.CloudConfig) error {
@@ -21,7 +27,15 @@ func RegisterNamespaceProcessor(cfg *config.CloudConfig) error {
 	}
 
 	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteNamespace, processor.DeleteNamespace)
+	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteNode, processor.DeleteNodesByNamespace)
+	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteApp, processor.DeleteAppsByNamespace)
+	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteSecret, processor.DeleteSecretsByNamespace)
+	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteConfig, processor.DeleteConfigsByNamespace)
 	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteQuotaByNamespace, processor.DeleteQuotaByNamespace)
+
+	// must before DeleteIndexByNamespace
+	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteAppHistoryByNamespace, processor.DeleteAppsHisByNamespace)
+
 	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteIndexByNamespace, processor.DeleteIndexByNamespace)
 
 	return nil
@@ -32,6 +46,7 @@ type namespaceProcessor struct {
 	namespaceService service.NamespaceService
 	resourceService  *service.AppCombinedService
 	lisenceService   service.LicenseService
+	nodeService      service.NodeService
 }
 
 func NewNamespaceProcessor(cfg *config.CloudConfig) (*namespaceProcessor, error) {
@@ -55,11 +70,17 @@ func NewNamespaceProcessor(cfg *config.CloudConfig) (*namespaceProcessor, error)
 	if err != nil {
 		return nil, err
 	}
+
+	nodeSvc, err := service.NewNodeService(cfg)
+	if err != nil {
+		return nil, err
+	}
 	return &namespaceProcessor{
 		indexService:     is,
 		resourceService:  rs,
 		namespaceService: ns,
 		lisenceService:   ls,
+		nodeService:      nodeSvc,
 	}, nil
 }
 
@@ -74,26 +95,104 @@ func (n *namespaceProcessor) DeleteQuotaByNamespace(task *models.Task) error {
 }
 
 func (n *namespaceProcessor) DeleteIndexByNamespace(task *models.Task) error {
-	apps, err := n.resourceService.App.List(task.Namespace, &models.ListOptions{})
+
+	err := n.indexService.DeleteConfigsAndAppsIndexByNamespace(task.Namespace)
 	if err != nil {
 		return err
 	}
 
-	for _, v := range apps.Items {
-		err = n.indexService.RefreshConfigIndexByApp(task.Namespace, v.Name, []string{})
+	err = n.indexService.DeleteNodesAndAppsIndexByNamespace(task.Namespace)
+	if err != nil {
+		return err
+	}
+
+	err = n.indexService.DeleteSecretsAndAppsIndexByNamespace(task.Namespace)
+	return err
+}
+
+func (n *namespaceProcessor) DeleteNodesByNamespace(task *models.Task) error {
+	list, err := n.nodeService.List(task.Namespace, &models.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, node := range list.Items {
+		err = n.nodeService.Delete(node.Namespace, node.Name)
+
+		if err != nil && !strings.Contains(err.Error(), "not found") {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+func (n *namespaceProcessor) DeleteAppsByNamespace(task *models.Task) error {
+	list, err := n.resourceService.App.List(task.Namespace, &models.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, app := range list.Items {
+		err = n.resourceService.App.Delete(app.Namespace, app.Name, "")
+
+		if err != nil && !strings.Contains(err.Error(), "not found") {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+func (n *namespaceProcessor) DeleteSecretsByNamespace(task *models.Task) error {
+	list, err := n.resourceService.Secret.List(task.Namespace, &models.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, secret := range list.Items {
+		err = n.resourceService.Secret.Delete(secret.Namespace, secret.Name)
+
+		if err != nil && !strings.Contains(err.Error(), "not found") {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (n *namespaceProcessor) DeleteConfigsByNamespace(task *models.Task) error {
+	list, err := n.resourceService.Config.List(task.Namespace, &models.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, config := range list.Items {
+		err = n.resourceService.Config.Delete(config.Namespace, config.Name)
+
+		if err != nil && !strings.Contains(err.Error(), "not found") {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (n *namespaceProcessor) DeleteAppsHisByNamespace(task *models.Task) error {
+	appNames, err := n.indexService.ListAppsByNamespace(task.Namespace)
+	if err != nil {
+		return err
+	}
+
+	for _, appName := range appNames {
+		err = n.resourceService.App.DeleteAppHis(task.Namespace, appName)
+
 		if err != nil {
 			return err
 		}
 
-		err = n.indexService.RefreshNodesIndexByApp(task.Namespace, v.Name, []string{})
-		if err != nil {
-			return err
-		}
-
-		err = n.indexService.RefreshSecretIndexByApp(task.Namespace, v.Name, []string{})
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }

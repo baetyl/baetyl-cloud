@@ -14,7 +14,7 @@ type Task interface {
 	CreateTask(task *models.Task) (bool, error)
 	GetTask(name string) (*models.Task, error)
 	AcquireTaskLock(task *models.Task) (bool, error)
-	GetNeedProcessTask(number int32, expiredSeconds int32) ([]*models.Task, error)
+	GetNeedProcessTask(number int32) ([]*models.Task, error)
 	UpdateTask(task *models.Task) (bool, error)
 	DeleteTask(taskName string) (bool, error)
 

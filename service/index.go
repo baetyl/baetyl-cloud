@@ -22,10 +22,17 @@ type IndexService interface {
 	ListAppsByNode(namespace, node string) ([]string, error)
 	ListAppIndexBySecret(namespace, secret string) ([]string, error)
 
+	ListNodesByNamespace(namespace string) ([]string, error)
+	ListAppsByNamespace(namespace string) ([]string, error)
+
 	// app and secret
 	RefreshSecretIndexByApp(namespace, app string, secrets []string) error
 	RefreshNodesIndexByApp(namespace, appName string, nodes []string) error
 	RefreshAppsIndexByNode(namespace, node string, apps []string) error
+
+	DeleteNodesAndAppsIndexByNamespace(namespace string) error
+	DeleteConfigsAndAppsIndexByNamespace(namespace string) error
+	DeleteSecretsAndAppsIndexByNamespace(namespace string) error
 }
 
 type indexService struct {
@@ -90,4 +97,25 @@ func (i *indexService) RefreshSecretIndexByApp(namespace, app string, secrets []
 
 func (i *indexService) ListAppIndexBySecret(namespace, secret string) ([]string, error) {
 	return i.ListIndex(namespace, common.Application, common.Secret, secret)
+}
+
+func (i *indexService) DeleteNodesAndAppsIndexByNamespace(namespace string) error {
+	_, err := i.index.DeleteIndexByNamespace(namespace, common.Node, common.Application)
+	return err
+}
+func (i *indexService) DeleteConfigsAndAppsIndexByNamespace(namespace string) error {
+	_, err := i.index.DeleteIndexByNamespace(namespace, common.Config, common.Application)
+	return err
+}
+func (i *indexService) DeleteSecretsAndAppsIndexByNamespace(namespace string) error {
+	_, err := i.index.DeleteIndexByNamespace(namespace, common.Secret, common.Application)
+	return err
+}
+
+func (i *indexService) ListNodesByNamespace(namespace string) ([]string, error) {
+	return i.index.ListResourcesByNamespace(namespace, common.Node, common.Application)
+}
+
+func (i *indexService) ListAppsByNamespace(namespace string) ([]string, error) {
+	return i.index.ListResourcesByNamespace(namespace, common.Application, common.Config)
 }

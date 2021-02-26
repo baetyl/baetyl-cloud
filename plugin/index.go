@@ -21,5 +21,10 @@ type Index interface {
 	ListIndexTx(tx *sqlx.Tx, namespace string, keyA, byKeyB common.Resource, valueB string) ([]string, error)
 	DeleteIndexTx(tx *sqlx.Tx, namespace string, keyA, byKeyB common.Resource, valueB string) (sql.Result, error)
 	RefreshIndex(namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error
+
+	ListResourcesByNamespace(namespace string, keyA, keyB common.Resource) ([]string, error)
+
+	DeleteIndexByNamespace(namespace string, keyA, keyB common.Resource) (sql.Result, error)
+	DeleteIndexByNamespaceTx(tx *sqlx.Tx, namespace string, keyA, keyB common.Resource) (sql.Result, error)
 	io.Closer
 }

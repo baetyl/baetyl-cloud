@@ -21,7 +21,7 @@ func TestTaskService(t *testing.T) {
 
 	mockObject.conf.Task.LockExpiredTime = 1
 	mockObject.conf.Task.BatchNum = 10
-	mockObject.task.EXPECT().GetNeedProcessTask(mockObject.conf.Task.BatchNum, mockObject.conf.Task.LockExpiredTime).Return([]*models.Task{
+	mockObject.task.EXPECT().GetNeedProcessTask(mockObject.conf.Task.BatchNum).Return([]*models.Task{
 		task,
 	}, nil)
 	tasks, err := taskService.GetNeedProcessTasks()

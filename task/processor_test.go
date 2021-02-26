@@ -35,40 +35,24 @@ func TestProcessor(t *testing.T) {
 	err = np.DeleteQuotaByNamespace(task)
 	assert.Error(t, err)
 
-	apps := &models.ApplicationList{
-		Items: []models.AppItem{
-			{
-				Name:      "app01",
-				Namespace: "default",
-			},
-		},
-	}
-	services.app.EXPECT().ListApplication(task.Namespace, &models.ListOptions{}).Return(apps, nil)
-	services.index.EXPECT().RefreshIndex(task.Namespace, common.Application, common.Config, apps.Items[0].Name, []string{}).Return(nil)
-	services.index.EXPECT().RefreshIndex(task.Namespace, common.Application, common.Node, apps.Items[0].Name, []string{}).Return(nil)
-	services.index.EXPECT().RefreshIndex(task.Namespace, common.Application, common.Secret, apps.Items[0].Name, []string{}).Return(nil)
+	services.index.EXPECT().DeleteIndexByNamespace(task.Namespace, common.Config, common.Application).Return(nil, nil)
+	services.index.EXPECT().DeleteIndexByNamespace(task.Namespace, common.Secret, common.Application).Return(nil, nil)
+	services.index.EXPECT().DeleteIndexByNamespace(task.Namespace, common.Node, common.Application).Return(nil, nil)
 	err = np.DeleteIndexByNamespace(task)
 	assert.NoError(t, err)
 
-	services.app.EXPECT().ListApplication(task.Namespace, &models.ListOptions{}).Return(nil, fmt.Errorf("err_get_app"))
+	services.index.EXPECT().DeleteIndexByNamespace(task.Namespace, common.Config, common.Application).Return(nil, fmt.Errorf("err_delete_index_app"))
 	err = np.DeleteIndexByNamespace(task)
 	assert.Error(t, err)
 
-	services.app.EXPECT().ListApplication(task.Namespace, &models.ListOptions{}).Return(apps, nil)
-	services.index.EXPECT().RefreshIndex(task.Namespace, common.Application, common.Config, apps.Items[0].Name, []string{}).Return(fmt.Errorf("err_delete_index_config"))
+	services.index.EXPECT().DeleteIndexByNamespace(task.Namespace, common.Config, common.Application).Return(nil, nil)
+	services.index.EXPECT().DeleteIndexByNamespace(task.Namespace, common.Node, common.Application).Return(nil, fmt.Errorf("err_delete_index_node"))
 	err = np.DeleteIndexByNamespace(task)
 	assert.Error(t, err)
 
-	services.app.EXPECT().ListApplication(task.Namespace, &models.ListOptions{}).Return(apps, nil)
-	services.index.EXPECT().RefreshIndex(task.Namespace, common.Application, common.Config, apps.Items[0].Name, []string{}).Return(nil)
-	services.index.EXPECT().RefreshIndex(task.Namespace, common.Application, common.Node, apps.Items[0].Name, []string{}).Return(fmt.Errorf("err_delete_index_node"))
-	err = np.DeleteIndexByNamespace(task)
-	assert.Error(t, err)
-
-	services.app.EXPECT().ListApplication(task.Namespace, &models.ListOptions{}).Return(apps, nil)
-	services.index.EXPECT().RefreshIndex(task.Namespace, common.Application, common.Config, apps.Items[0].Name, []string{}).Return(nil)
-	services.index.EXPECT().RefreshIndex(task.Namespace, common.Application, common.Node, apps.Items[0].Name, []string{}).Return(nil)
-	services.index.EXPECT().RefreshIndex(task.Namespace, common.Application, common.Secret, apps.Items[0].Name, []string{}).Return(fmt.Errorf("err_delete_index_secret"))
+	services.index.EXPECT().DeleteIndexByNamespace(task.Namespace, common.Config, common.Application).Return(nil, nil)
+	services.index.EXPECT().DeleteIndexByNamespace(task.Namespace, common.Node, common.Application).Return(nil, nil)
+	services.index.EXPECT().DeleteIndexByNamespace(task.Namespace, common.Secret, common.Application).Return(nil, fmt.Errorf("err_delete_index_secret"))
 	err = np.DeleteIndexByNamespace(task)
 	assert.Error(t, err)
 }

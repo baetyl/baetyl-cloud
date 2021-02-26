@@ -16,12 +16,13 @@ import (
 type AppHistory interface {
 	CreateApplicationHis(app *v1.Application) (sql.Result, error)
 	UpdateApplicationHis(app *v1.Application, oldVersion string) (sql.Result, error)
-	DeleteApplicationHis(name, namespace, version string) (sql.Result, error)
-	GetApplicationHis(name, namespace, version string) (*v1.Application, error)
+	DeleteApplicationHis(namespace, name, version string) (sql.Result, error)
+	DeleteAllAppsHis(namespace, name string) (sql.Result, error)
+	GetApplicationHis(namespace, name, version string) (*v1.Application, error)
 	ListApplicationHis(namespace string, filter *models.Filter) ([]v1.Application, error)
 	CreateApplicationHisWithTx(tx *sqlx.Tx, app *v1.Application) (sql.Result, error)
 	UpdateApplicationHisWithTx(tx *sqlx.Tx, app *v1.Application, oldVersion string) (sql.Result, error)
 	DeleteApplicationHisWithTx(tx *sqlx.Tx, name, namespace, version string) (sql.Result, error)
-	CountApplicationHis(tx *sqlx.Tx, name, namespace string) (int, error)
+	CountApplicationHis(tx *sqlx.Tx, namespace, name string) (int, error)
 	io.Closer
 }

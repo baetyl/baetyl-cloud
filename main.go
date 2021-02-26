@@ -80,8 +80,8 @@ func main() {
 		go as.Run()
 		defer as.Close()
 		ctx.Log().Info("init  server starting")
-		tm, tErr := task.NewTaskManager(&cfg)
-		if tErr != nil {
+		tm, err := task.NewTaskManager(&cfg)
+		if err != nil {
 			return err
 		}
 		task.RegisterNamespaceProcessor(&cfg)

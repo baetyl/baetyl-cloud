@@ -121,6 +121,8 @@ func mockTestConfig() *config.CloudConfig {
 	conf.Plugin.License = common.RandString(9)
 	conf.Plugin.Task = common.RandString(9)
 	conf.Plugin.Locker = common.RandString(9)
+	conf.Plugin.AppHistory = common.RandString(9)
+	conf.Plugin.Shadow = common.RandString(9)
 
 	return conf
 }
@@ -143,6 +145,9 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 
 	mTask := mockPlugin.NewMockTask(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Task, mockTask(mTask))
+
+	shadow := mockPlugin.NewMockShadow(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Shadow, mockShadowStorage(shadow))
 
 	mLock := mockPlugin.NewMockLocker(mockCtl)
 

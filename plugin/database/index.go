@@ -23,7 +23,9 @@ func (d *DB) ListIndex(namespace string, keyA, byKeyB common.Resource, valueB st
 func (d *DB) DeleteIndex(namespace string, keyA, byKeyB common.Resource, valueB string) (sql.Result, error) {
 	return d.DeleteIndexTx(nil, namespace, keyA, byKeyB, valueB)
 }
-
+func (d *DB) DeleteIndexByNamespace(namespace string, keyA, keyB common.Resource) (sql.Result, error) {
+	return d.DeleteIndexByNamespaceTx(nil, namespace, keyA, keyB)
+}
 func (d *DB) CreateIndexTx(tx *sqlx.Tx, namespace string, keyA, keyB common.Resource, valueA, valueB string) (sql.Result, error) {
 	selectSQL := fmt.Sprintf(`INSERT INTO %s (namespace, %s, %s) VALUES (?, ?, ?)`, getTable(keyA, keyB), keyA, keyB)
 	return d.Exec(tx, selectSQL, namespace, valueA, valueB)
@@ -55,6 +57,24 @@ func (d *DB) RefreshIndex(namespace string, keyA, keyB common.Resource, valueA s
 		}
 		return nil
 	})
+}
+
+func (d *DB) DeleteIndexByNamespaceTx(tx *sqlx.Tx, namespace string, keyA, keyB common.Resource) (sql.Result, error) {
+	selectSQL := fmt.Sprintf(`DELETE FROM %s WHERE namespace = ?`, getTable(keyA, keyB))
+	return d.Exec(tx, selectSQL, namespace)
+}
+
+func (d *DB) ListResourcesByNamespace(namespace string, keyA, keyB common.Resource) ([]string, error) {
+	return d.ListResourcesByNamespaceTx(nil, namespace, keyA, keyB)
+}
+
+func (d *DB) ListResourcesByNamespaceTx(tx *sqlx.Tx, namespace string, keyA, keyB common.Resource) ([]string, error) {
+	selectSQL := fmt.Sprintf(`SELECT %s FROM %s WHERE namespace = ?`, keyA, getTable(keyA, keyB))
+	var res []string
+	if err := d.Query(tx, selectSQL, &res, namespace); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func getTable(keyA, keyB common.Resource) string {
