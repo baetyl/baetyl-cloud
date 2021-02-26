@@ -14,14 +14,13 @@ var (
 	shaodowTables = []string{
 		`
 CREATE TABLE baetyl_node_shadow(
-    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-    name           VARCHAR(128) NOT NULL DEFAULT '',
-    namespace      VARCHAR(64) NOT NULL DEFAULT '',
-    create_time    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    desire_version VARCHAR(36) NOT NULL DEFAULT '',
-    report         BLOB,
-    desire         BLOB 
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        VARCHAR(128) NOT NULL DEFAULT '',
+    namespace   VARCHAR(64) NOT NULL DEFAULT '',
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    report      BLOB,
+    desire      BLOB 
 );
 `,
 	}
@@ -126,7 +125,4 @@ func TestShadow(t *testing.T) {
 	err = db.Delete(namespace, shadow.Name)
 	assert.NoError(t, err)
 
-	shadow.DesireVersion = "1"
-	result, err = db.UpdateDesire(shadow)
-	assert.Error(t, err, "invalid version")
 }
