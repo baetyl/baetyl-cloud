@@ -13,6 +13,8 @@ type CloudConfig struct {
 	AdminServer Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
 	MisServer   MisServer  `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
 	LogInfo     log.Config `yaml:"logger" json:"logger"`
+	Task        Task       `yaml:"task" json:"task"`
+	Lock        Lock       `yaml:"lock" json:"lock"`
 	Cache       struct {
 		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
 	} `yaml:"cache" json:"cache"`
@@ -36,6 +38,8 @@ type CloudConfig struct {
 		Property   string   `yaml:"property" json:"property" default:"database"`
 		Module     string   `yaml:"module" json:"module" default:"database"`
 		SyncLinks  []string `yaml:"synclinks" json:"synclinks" default:"[\"httplink\"]"`
+		Locker     string   `yaml:"locker" json:"locker" default:"defaultlocker"`
+		Task       string   `yaml:"task" json:"task" default:"database"`
 	} `yaml:"plugin" json:"plugin"`
 }
 
@@ -53,4 +57,16 @@ type Server struct {
 	WriteTimeout time.Duration     `yaml:"writeTimeout" json:"writeTimeout" default:"30s"`
 	ShutdownTime time.Duration     `yaml:"shutdownTime" json:"shutdownTime" default:"3s"`
 	Certificate  utils.Certificate `yaml:",inline" json:",inline"`
+}
+
+type Task struct {
+	BatchNum        int32 `yaml:"batchNum" json:"batchNum" default:"100"`
+	LockExpiredTime int32 `yaml:"lockExpiredTime" json:"lockExpiredTime" default:"60" unit:"second"`
+	ScheduleTime    int32 `yaml:"scheduletime" json:"scheduletime" default:"30" unit:"second"`
+	ConcurrentNum   int32 `yaml:"concurrentNum" json:"concurrentNum" default:"10"`
+	QueueLength     int32 `yaml:"queueLength" json:"queueLength" default:"100"`
+}
+
+type Lock struct {
+	ExpireTime int64 `yaml:"expireTime" json:"expireTime" default:"5" unit:"second"`
 }

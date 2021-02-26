@@ -30,6 +30,7 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	c.Plugin.License = common.RandString(9)
 	c.Plugin.Property = common.RandString(9)
 	c.Plugin.Module = common.RandString(9)
+	c.Plugin.Task = common.RandString(9)
 	mockCtl := gomock.NewController(t)
 
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
@@ -100,6 +101,10 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 		return mockAppHis, nil
 	})
 
+	mockTask := mockPlugin.NewMockTask(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Task, func() (plugin.Plugin, error) {
+		return mockTask, nil
+	})
 	mockAPI, err := api.NewAPI(c)
 	assert.NoError(t, err)
 

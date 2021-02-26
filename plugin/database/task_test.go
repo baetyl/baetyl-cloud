@@ -2,12 +2,11 @@ package database
 
 import (
 	"fmt"
-	"testing"
-	"time"
-
-	"github.com/stretchr/testify/assert"
-
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
+	"github.com/jmoiron/sqlx"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var (
@@ -15,16 +14,18 @@ var (
 		`
 CREATE TABLE baetyl_task
 (
-    trace_id          varchar(36)  NOT NULL DEFAULT '' PRIMARY KEY,
-    namespace         varchar(64)  NOT NULL DEFAULT '',
-    node              varchar(128)   NOT NULL DEFAULT '',
-    type              varchar(32)  NOT NULL DEFAULT '',
-    state             varchar(16)       NOT NULL DEFAULT '0',
-    step              text   NOT NULL,
-    old_version       varchar(36)   NOT NULL DEFAULT '',
-    new_version       varchar(36)     NOT NULL DEFAULT '',
-    create_time       timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time       timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP
+	id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    name              VARCHAR(128) NOT NULL DEFAULT '',
+    namespace         VARCHAR(64) NOT NULL DEFAULT '',
+    registration_name VARCHAR(32) NOT NULL DEFAULT '',
+    resource_type     VARCHAR(32) NOT NULL DEFAULT '',
+    resource_name     VARCHAR(128) NOT NULL DEFAULT '',
+    version           INTEGER NOT NULL DEFAULT 0,
+    expire_time       INTEGER  NOT NULL DEFAULT 0,
+    status            INTEGER  NOT NULL DEFAULT 0,
+    content           VARCHAR(1024)   NOT NULL DEFAULT '',
+    create_time       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 `,
 	}
@@ -40,19 +41,6 @@ func (d *DB) MockCreateTaskTable() {
 }
 
 func TestTask(t *testing.T) {
-	task := &models.Task{
-		TraceId:    "d6cb4c5e2b9611eaa104186590da6863",
-		Namespace:  "default",
-		Node:       "test node",
-		Type:       "APP",
-		State:      "1",
-		Step:       "2",
-		OldVersion: "123",
-		NewVersion: "345",
-		CreateTime: time.Now(),
-		UpdateTime: time.Now(),
-	}
-
 	db, err := MockNewDB()
 	if err != nil {
 		fmt.Printf("get mock sqlite3 error = %s", err.Error())
@@ -60,44 +48,95 @@ func TestTask(t *testing.T) {
 		return
 	}
 	db.MockCreateTaskTable()
-	res, err := db.CreateTask(task)
-	assert.NoError(t, err)
-	num, err := res.RowsAffected()
-	assert.NoError(t, err)
-	assert.Equal(t, int64(1), num)
 
-	resTask, err := db.GetTask(task.TraceId)
-	assert.NoError(t, err)
-	checkTask(t, task, resTask)
+	task := &entities.Task{
+		Name:             "task01",
+		Namespace:        "default",
+		RegistrationName: "delete_test",
+		ResourceType:     "namespace",
+		ResourceName:     "node01",
+	}
 
-	task.Step = "3"
-	res, err = db.UpdateTask(task)
-	assert.NoError(t, err)
-	num, err = res.RowsAffected()
-	assert.NoError(t, err)
-	assert.Equal(t, int64(1), num)
-	resTask, err = db.GetTask(task.TraceId)
-	assert.NoError(t, err)
-	checkTask(t, task, resTask)
+	mTask := &models.Task{
+		Name:             "task02",
+		Namespace:        "default",
+		RegistrationName: "delete_test",
+		ResourceType:     "namespace",
+		ResourceName:     "node02",
+	}
 
-	taskNum, err := db.CountTask(task)
-	assert.NoError(t, err)
-	assert.Equal(t, 1, taskNum)
+	err = db.Transact(func(tx *sqlx.Tx) error {
+		res, ierr := db.CreateTaskTx(tx, task)
+		assert.NoError(t, ierr)
+		num, ierr := res.RowsAffected()
+		assert.NoError(t, ierr)
+		assert.Equal(t, int64(1), num)
 
-	res, err = db.DeleteTask(task.TraceId)
-	assert.NoError(t, err)
-	num, err = res.RowsAffected()
-	assert.NoError(t, err)
-	assert.Equal(t, int64(1), num)
-}
+		tk, ierr := db.GetTaskTx(tx, task.Name)
+		assert.NoError(t, ierr)
+		assert.Equal(t, task.Name, tk.Name)
+		assert.Equal(t, task.Namespace, tk.Namespace)
+		assert.Equal(t, task.RegistrationName, tk.RegistrationName)
+		assert.Equal(t, 0, tk.Status)
 
-func checkTask(t *testing.T, expect, actual *models.Task) {
-	assert.Equal(t, expect.TraceId, actual.TraceId)
-	assert.Equal(t, expect.Namespace, actual.Namespace)
-	assert.Equal(t, expect.Node, actual.Node)
-	assert.Equal(t, expect.Type, actual.Type)
-	assert.Equal(t, expect.State, actual.State)
-	assert.Equal(t, expect.Step, actual.Step)
-	assert.Equal(t, expect.OldVersion, actual.OldVersion)
-	assert.Equal(t, expect.NewVersion, actual.NewVersion)
+		task.Version = tk.Version
+		task.Id = tk.Id
+		res, ierr = db.AcquireTaskLockTx(tx, task)
+		assert.NoError(t, ierr)
+		num, ierr = res.RowsAffected()
+		assert.NoError(t, ierr)
+		assert.Equal(t, int64(1), num)
+
+		tk, ierr = db.GetTaskTx(tx, task.Name)
+		assert.NoError(t, ierr)
+		task.Status = 3
+		task.Version = tk.Version
+		res, ierr = db.UpdateTaskTx(tx, task)
+		assert.NoError(t, ierr)
+		num, ierr = res.RowsAffected()
+		assert.NoError(t, ierr)
+		assert.Equal(t, int64(1), num)
+
+		res, ierr = db.DeleteTaskTx(tx, task.Name)
+		assert.NoError(t, ierr)
+		num, ierr = res.RowsAffected()
+		assert.NoError(t, ierr)
+		assert.Equal(t, int64(1), num)
+
+		return nil
+	})
+	assert.NoError(t, err)
+
+	res, err := db.CreateTask(mTask)
+	assert.NoError(t, err)
+	assert.True(t, res)
+
+	tk, err := db.GetTask(mTask.Name)
+	assert.NoError(t, err)
+	assert.Equal(t, mTask.Name, tk.Name)
+	assert.Equal(t, mTask.Namespace, tk.Namespace)
+	assert.Equal(t, mTask.RegistrationName, tk.RegistrationName)
+	assert.Equal(t, 0, tk.Status)
+
+	mTask.Id = tk.Id
+	mTask.Version = tk.Version
+	res, err = db.UpdateTask(mTask)
+	assert.NoError(t, err)
+	assert.True(t, res)
+
+	tk, err = db.GetTask(mTask.Name)
+	assert.NoError(t, err)
+	mTask.Version = tk.Version
+
+	//tasks, err := db.GetNeedProcessTask(10, 10)
+	//assert.NoError(t, err)
+	//assert.Equal(t, 1, len(tasks))
+
+	res, err = db.AcquireTaskLock(mTask)
+	assert.NoError(t, err)
+	assert.True(t, res)
+
+	res, err = db.DeleteTask(mTask.Name)
+	assert.NoError(t, err)
+	assert.True(t, res)
 }

@@ -15,7 +15,6 @@ type Shadow struct {
 	Report            v1.Report `json:"report,omitempty"`
 	Desire            v1.Desire `json:"desire,omitempty"`
 	CreationTimestamp time.Time `json:"createTime,omitempty"`
-	DesireVersion     string    `json:"desireVersion,omitempty"`
 }
 
 // NodeViewList node view list

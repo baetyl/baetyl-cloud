@@ -53,8 +53,7 @@ const (
 	ErrRegisterPackage         = "ErrRegisterPackage"
 	ErrRegisterRecordActivated = "ErrRegisterRecordActivated"
 	// * db
-	ErrDatabase  = "ErrDatabase"
-	ErrUpdateCas = "ErrUpdateCas"
+	ErrDatabase = "ErrDatabase"
 	// * k8s
 	ErrK8S = "ErrK8S"
 	// * ceph

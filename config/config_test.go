@@ -50,10 +50,19 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Module = "database"
 	expect.Plugin.SyncLinks = []string{"httplink"}
 	expect.Plugin.Pubsub = "defaultpubsub"
+	expect.Plugin.Locker = "defaultlocker"
+	expect.Plugin.Task = "database"
+	expect.Lock.ExpireTime = 5
 
 	expect.Template.Path = "/etc/baetyl/templates"
 
 	expect.Cache.ExpirationDuration = time.Minute * 10
+
+	expect.Task.ScheduleTime = 30
+	expect.Task.ConcurrentNum = 10
+	expect.Task.QueueLength = 100
+	expect.Task.LockExpiredTime = 60
+	expect.Task.BatchNum = 100
 	// case 0
 	cfg := &CloudConfig{}
 	err := utils.UnmarshalYAML(nil, cfg)
