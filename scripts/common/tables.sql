@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS `baetyl_node_shadow` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `report` text COMMENT '上报内容',
   `desire` text COMMENT '期望内容',
+  `desire_version` varchar(36) NOT NULL DEFAULT '' COMMENT 'desire版本，用于CAS',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_name` (`namespace`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='节点影子';
