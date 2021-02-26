@@ -216,3 +216,7 @@ const (
 	TypeSystem         ModuleType = "system"
 	TypeSystemOptional ModuleType = "opt_system"
 )
+
+const (
+	TaskNamespaceDelete = "namespace-delete"
+)

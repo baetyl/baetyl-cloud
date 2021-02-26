@@ -161,4 +161,21 @@ CREATE TABLE IF NOT EXISTS `baetyl_module` (
   UNIQUE KEY `unique_name` (`name`,`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='module table';
 
+CREATE TABLE `baetyl_task` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+  `name` varchar(128) NOT NULL DEFAULT '' COMMENT 'name',
+  `registration_name` varchar(32) NOT NULL DEFAULT '' COMMENT 'the registration name of task',
+  `namespace` varchar(64) NOT NULL DEFAULT '' COMMENT 'namespace',
+  `resource_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'resource type: node, namespace, config, app etc.',
+  `resource_name` varchar(128) NOT NULL DEFAULT '' COMMENT 'the name of resource,such as the name of node',
+  `version` bigint(20) NOT NULL DEFAULT '0' COMMENT 'version',
+  `expire_time` bigint(20) NOT NULL DEFAULT '0' COMMENT 'expire time(seconds)',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT 'task status 0: new 1:processing 2: need retry 3: finished 4: failed',
+  `content` varchar(1024) NOT NULL DEFAULT '' COMMENT 'task process status',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `udx_name` (`name`) USING BTREE,
+  KEY `idx_update_status` (`update_time`,`status`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='task for async process';
 COMMIT;

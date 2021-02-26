@@ -30,6 +30,7 @@ type MockServices struct {
 	license        *mockPlugin.MockLicense
 	property       *mockPlugin.MockProperty
 	module         *mockPlugin.MockModule
+	task           *mockPlugin.MockTask
 }
 
 func (m *MockServices) Close() {
@@ -115,6 +116,13 @@ func mockAppHis(mock plugin.AppHistory) plugin.Factory {
 	return factory
 }
 
+func mockTask(task plugin.Task) plugin.Factory {
+	factory := func() (plugin.Plugin, error) {
+		return task, nil
+	}
+	return factory
+}
+
 func mockTestConfig() *config.CloudConfig {
 	conf := &config.CloudConfig{}
 	conf.Plugin.Resource = common.RandString(9)
@@ -127,6 +135,7 @@ func mockTestConfig() *config.CloudConfig {
 	conf.Plugin.AppHistory = common.RandString(9)
 	conf.Plugin.License = common.RandString(9)
 	conf.Plugin.Property = common.RandString(9)
+	conf.Plugin.Task = common.RandString(9)
 	conf.Template.Path = "../scripts/native/templates"
 	return conf
 }
@@ -176,6 +185,9 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 	mAppHis := mockPlugin.NewMockAppHistory(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.AppHistory, mockAppHis(mAppHis))
 
+	mTask := mockPlugin.NewMockTask(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Task, mockTask(mTask))
+
 	_, err := NewSyncService(conf)
 	assert.Nil(t, err)
 
@@ -197,6 +209,7 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 		license:        mLicense,
 		property:       mProperty,
 		module:         mModule,
+		task:           mTask,
 	}
 }
 

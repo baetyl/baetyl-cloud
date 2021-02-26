@@ -11,6 +11,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/server"
+	"github.com/baetyl/baetyl-cloud/v2/task"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -18,6 +19,7 @@ import (
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/database"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/auth"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/license"
+	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/lock"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/pki"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/kube"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/link/httplink"
@@ -78,7 +80,12 @@ func main() {
 		go as.Run()
 		defer as.Close()
 		ctx.Log().Info("init  server starting")
-
+		tm, tErr := task.NewTaskManager(&cfg)
+		if tErr != nil {
+			return err
+		}
+		task.RegisterNamespaceProcessor(&cfg)
+		tm.Start()
 		ctx.Wait()
 		return nil
 	})

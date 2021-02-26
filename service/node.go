@@ -17,8 +17,6 @@ import (
 
 //go:generate mockgen -destination=../mock/service/node.go -package=service github.com/baetyl/baetyl-cloud/v2/service NodeService
 
-const casRetryTimes = 3
-
 // NodeService NodeService
 type NodeService interface {
 	Get(namespace, name string) (*specV1.Node, error)
@@ -29,7 +27,7 @@ type NodeService interface {
 	Delete(namespace, name string) error
 
 	UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error)
-	UpdateDesire(namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) (*models.Shadow, error)
+	UpdateDesire(namespace, name string, desire specV1.Desire) (*models.Shadow, error)
 
 	GetDesire(namespace, name string) (*specV1.Desire, error)
 
@@ -275,32 +273,17 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 }
 
 // UpdateDesire Update Desire
-// Parameter f can be RefreshNodeDesireByApp or DeleteNodeDesireByApp
-func (n *nodeService) UpdateDesire(namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) (*models.Shadow, error) {
-	// Retry times
-	var count = 0
-	for {
-		newShadow, err := n.shadow.Get(namespace, name)
-		if err != nil {
-			return nil, err
-		}
-
-		if newShadow == nil {
-			newShadow, err = n.createShadow(namespace, name, specV1.Desire{}, nil)
-		}
-
-		// Refresh desire in shadow by app
-		f(newShadow, app)
-		updatedShadow, err := n.shadow.UpdateDesire(newShadow)
-		if err == nil || err.Error() != common.ErrUpdateCas {
-			return updatedShadow, err
-		}
-		count ++
-		if count >= casRetryTimes {
-			break
-		}
+func (n *nodeService) UpdateDesire(namespace, name string, desire specV1.Desire) (*models.Shadow, error) {
+	shadow, err := n.shadow.Get(namespace, name)
+	if err != nil {
+		return nil, err
 	}
-	return nil, common.Error(common.ErrResourceConflict, common.Field("node", name), common.Field("type", "shadow"))
+
+	if shadow == nil {
+		return n.createShadow(namespace, name, desire, nil)
+	}
+
+	return n.updateDesire(shadow, desire)
 }
 
 func (n *nodeService) updateDesire(shadow *models.Shadow, desire specV1.Desire) (*models.Shadow, error) {
@@ -396,7 +379,7 @@ func (n *nodeService) UpdateNodeAppVersion(namespace string, app *specV1.Applica
 	}
 
 	// list nodes
-	nodeList, err := n.node.ListNode(namespace, &models.ListOptions{LabelSelector: app.Selector})
+	nodeList, err := n.List(namespace, &models.ListOptions{LabelSelector: app.Selector})
 	if err != nil {
 		return nil, err
 	}
@@ -405,7 +388,8 @@ func (n *nodeService) UpdateNodeAppVersion(namespace string, app *specV1.Applica
 	for idx := range nodeList.Items {
 		node := &nodeList.Items[idx]
 		nodes = append(nodes, node.Name)
-		_, err := n.UpdateDesire(node.Namespace, node.Name, app, RefreshNodeDesireByApp)
+		refreshNodeDesireByApp(node, app)
+		_, err := n.UpdateDesire(namespace, node.Name, node.Desire)
 		if err != nil {
 			return nil, err
 		}
@@ -434,7 +418,7 @@ func (n *nodeService) DeleteNodeAppVersion(namespace string, app *specV1.Applica
 	}
 
 	// list nodes
-	nodeList, err := n.node.ListNode(namespace, &models.ListOptions{LabelSelector: app.Selector})
+	nodeList, err := n.List(namespace, &models.ListOptions{LabelSelector: app.Selector})
 	if err != nil {
 		return nil, err
 	}
@@ -444,23 +428,35 @@ func (n *nodeService) DeleteNodeAppVersion(namespace string, app *specV1.Applica
 	for idx := range nodeList.Items {
 		node := &nodeList.Items[idx]
 		nodes = append(nodes, node.Name)
+		appInfos := make([]specV1.AppInfo, 0)
 
-		_, err = n.UpdateDesire(node.Namespace, node.Name, app, DeleteNodeDesireByApp)
-		if err != nil {
+		if node.Desire != nil {
+			apps := node.Desire.AppInfos(app.System)
+
+			for _, a := range apps {
+				if a.Name != app.Name {
+					appInfos = append(appInfos, a)
+				}
+			}
+			node.Desire.SetAppInfos(app.System, appInfos)
+
+			_, err = n.UpdateDesire(namespace, node.Name, node.Desire)
+			if err != nil {
 				return nil, err
 			}
+		}
 	}
 
 	return nodes, nil
 }
 
-func RefreshNodeDesireByApp(shadow *models.Shadow, app *specV1.Application) {
+func refreshNodeDesireByApp(node *specV1.Node, app *specV1.Application) {
 
-	if shadow.Desire == nil {
-		shadow.Desire = specV1.Desire{}
+	if node.Desire == nil {
+		node.Desire = specV1.Desire{}
 	}
 
-	apps := shadow.Desire.AppInfos(app.System)
+	apps := node.Desire.AppInfos(app.System)
 
 	if apps == nil {
 		apps = make([]specV1.AppInfo, 0)
@@ -484,23 +480,8 @@ func RefreshNodeDesireByApp(shadow *models.Shadow, app *specV1.Application) {
 		apps[idx].Version = app.Version
 	}
 
-	shadow.Desire.SetAppInfos(app.System, apps)
+	node.Desire.SetAppInfos(app.System, apps)
 
-}
-
-func DeleteNodeDesireByApp(shadow *models.Shadow, app *specV1.Application)  {
-	if shadow.Desire == nil {
-		return
-	}
-	appInfos := make([]specV1.AppInfo, 0)
-	apps := shadow.Desire.AppInfos(app.System)
-
-	for _, a := range apps {
-		if a.Name != app.Name {
-			appInfos = append(appInfos, a)
-		}
-	}
-	shadow.Desire.SetAppInfos(app.System, appInfos)
 }
 
 func toShadowMap(shadowList *models.ShadowList) map[string]*models.Shadow {

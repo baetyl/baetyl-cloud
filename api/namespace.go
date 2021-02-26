@@ -1,10 +1,11 @@
 package api
 
 import (
-	"github.com/baetyl/baetyl-go/v2/log"
+	"fmt"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-go/v2/log"
 )
 
 // CreateNamespace create one namespace
@@ -38,8 +39,16 @@ func (api *API) DeleteNamespace(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	if e := api.DeleteQuotaByNamespace(ns); e != nil {
-		log.L().Error("DeleteQuotaByNamespace error", log.Error(e))
+
+	return nil, api.Task.AddTask(genTask(ns))
+}
+
+func genTask(namespace string) *models.Task {
+	return &models.Task{
+		Name:             fmt.Sprintf("%s-%s", common.TaskNamespaceDelete, common.UUIDPrune()),
+		Namespace:        namespace,
+		RegistrationName: common.TaskNamespaceDelete,
+		ResourceName:     namespace,
+		ResourceType:     common.KeyContextNamespace,
 	}
-	return nil, nil
 }

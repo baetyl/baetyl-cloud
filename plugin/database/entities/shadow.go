@@ -10,14 +10,13 @@ import (
 )
 
 type Shadow struct {
-	Id            int64     `db:"id"`
-	Namespace     string    `db:"namespace"`
-	Name          string    `db:"name"`
-	CreateTime    time.Time `db:"create_time"`
-	UpdateTime    time.Time `db:"update_time"`
-	Report        string    `db:"report"`
-	Desire        string    `db:"desire"`
-	DesireVersion string    `db:"desire_version"`
+	Id         int64     `db:"id"`
+	Namespace  string    `db:"namespace"`
+	Name       string    `db:"name"`
+	CreateTime time.Time `db:"create_time"`
+	UpdateTime time.Time `db:"update_time"`
+	Report     string    `db:"report"`
+	Desire     string    `db:"desire"`
 }
 
 func (s *Shadow) ToShadowModel() (*models.Shadow, error) {
@@ -25,7 +24,6 @@ func (s *Shadow) ToShadowModel() (*models.Shadow, error) {
 		Namespace:         s.Namespace,
 		Name:              s.Name,
 		CreationTimestamp: s.CreateTime.UTC(),
-		DesireVersion:     s.DesireVersion,
 		Report:            models.BuildEmptyApps(),
 		Desire:            models.BuildEmptyApps(),
 	}

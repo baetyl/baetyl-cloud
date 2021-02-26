@@ -2,10 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-go/v2/errors"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 
@@ -67,12 +63,9 @@ func (d *DB) Delete(namespace, name string) error {
 func (d *DB) UpdateDesire(shadow *models.Shadow) (*models.Shadow, error) {
 	var shd *models.Shadow
 	err := d.Transact(func(tx *sqlx.Tx) error {
-		res, err := d.UpdateShadowDesireTx(tx, shadow)
+		_, err := d.UpdateShadowDesireTx(tx, shadow)
 		if err != nil {
 			return err
-		}
-		if rows, _ := res.RowsAffected(); rows == 0 {
-			return errors.New(common.ErrUpdateCas)
 		}
 		shd, err = d.GetShadowTx(tx, shadow.Namespace, shadow.Name)
 		return err
@@ -97,7 +90,7 @@ func (d *DB) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
 func (d *DB) GetShadowTx(tx *sqlx.Tx, namespace, name string) (*models.Shadow, error) {
 	selectSQL := `
 SELECT 
-id, name, namespace, report, desire, create_time, update_time, desire_version 
+id, name, namespace, report, desire, create_time, update_time 
 FROM baetyl_node_shadow WHERE namespace=? AND name=?
 `
 	var shadows []entities.Shadow
@@ -134,14 +127,14 @@ DELETE FROM baetyl_node_shadow WHERE namespace=? AND name=?
 func (d *DB) UpdateShadowDesireTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
 	updateSQL := `
 UPDATE baetyl_node_shadow
-SET desire=?, desire_version=?
-WHERE namespace=? AND name=? AND desire_version=?
+SET desire=?
+WHERE namespace=? AND name=?
 `
 	desire, err := shadow.GetDesireString()
 	if err != nil {
 		return nil, err
 	}
-	return d.Exec(tx, updateSQL, desire, genResourceVersion(), shadow.Namespace, shadow.Name, shadow.DesireVersion)
+	return d.Exec(tx, updateSQL, desire, shadow.Namespace, shadow.Name)
 }
 
 func (d *DB) UpdateShadowReportTx(tx *sqlx.Tx, shadow *models.Shadow) (sql.Result, error) {
@@ -161,7 +154,7 @@ WHERE namespace=? AND name=?
 func (d *DB) ListShadowByNamesTx(tx *sqlx.Tx, namespace string, names []string) ([]entities.Shadow, error) {
 	selectSQL := `
 SELECT 
-id, name, namespace, report, desire, create_time, update_time, desire_version
+id, name, namespace, report, desire, create_time, update_time 
 FROM baetyl_node_shadow WHERE namespace=? AND name in (?)
 `
 	result := make([]entities.Shadow, 0)
@@ -186,8 +179,4 @@ FROM baetyl_node_shadow WHERE namespace=? AND name in (?)
 	}
 
 	return result, nil
-}
-
-func genResourceVersion() string {
-	return fmt.Sprintf("%d%s", time.Now().UTC().Unix(), common.RandString(6))
 }
