@@ -4,7 +4,6 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
@@ -20,9 +19,9 @@ func RegisterNamespaceProcessor(cfg *config.CloudConfig) error {
 		return err
 	}
 
-	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteNamespace, processor.DeleteNamespace)
-	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteQuotaByNamespace, processor.DeleteQuotaByNamespace)
-	plugin.TaskRegister.AddTask(common.TaskNamespaceDelete, DeleteIndexByNamespace, processor.DeleteIndexByNamespace)
+	TaskRegister.Register(common.TaskNamespaceDelete, DeleteNamespace, processor.DeleteNamespace)
+	TaskRegister.Register(common.TaskNamespaceDelete, DeleteQuotaByNamespace, processor.DeleteQuotaByNamespace)
+	TaskRegister.Register(common.TaskNamespaceDelete, DeleteIndexByNamespace, processor.DeleteIndexByNamespace)
 
 	return nil
 }
@@ -31,7 +30,7 @@ type namespaceProcessor struct {
 	indexService     service.IndexService
 	namespaceService service.NamespaceService
 	resourceService  *service.AppCombinedService
-	lisenceService   service.LicenseService
+	licenceService   service.LicenseService
 }
 
 func NewNamespaceProcessor(cfg *config.CloudConfig) (*namespaceProcessor, error) {
@@ -59,7 +58,7 @@ func NewNamespaceProcessor(cfg *config.CloudConfig) (*namespaceProcessor, error)
 		indexService:     is,
 		resourceService:  rs,
 		namespaceService: ns,
-		lisenceService:   ls,
+		licenceService:   ls,
 	}, nil
 }
 
@@ -70,7 +69,7 @@ func (n *namespaceProcessor) DeleteNamespace(task *models.Task) error {
 }
 
 func (n *namespaceProcessor) DeleteQuotaByNamespace(task *models.Task) error {
-	return n.lisenceService.DeleteQuotaByNamespace(task.Namespace)
+	return n.licenceService.DeleteQuotaByNamespace(task.Namespace)
 }
 
 func (n *namespaceProcessor) DeleteIndexByNamespace(task *models.Task) error {

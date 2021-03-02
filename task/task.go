@@ -1,12 +1,14 @@
 package task
 
 import (
+	"time"
+
+	"github.com/baetyl/baetyl-go/v2/log"
+
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/service"
-	"github.com/baetyl/baetyl-go/v2/log"
-	"time"
 )
 
 const (
@@ -102,7 +104,7 @@ func (m *TaskManager) runTask(task *models.Task) {
 		return
 	}
 
-	processors := plugin.TaskRegister.GetTasksByName(task.RegistrationName)
+	processors := TaskRegister.GetProcessorsByTask(task.RegistrationName)
 
 	if task.ProcessorsStatus == nil {
 		task.ProcessorsStatus = map[string]models.TaskStatus{}
