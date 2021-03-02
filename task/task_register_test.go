@@ -1,9 +1,11 @@
-package plugin
+package task
 
 import (
-	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func TestTaskRegister_AddTask(t *testing.T) {
@@ -21,21 +23,21 @@ func TestTaskRegister_AddTask(t *testing.T) {
 	}
 
 	for _, task := range tasks {
-		res := TaskRegister.AddTask(task.TaskName, task.ProcessorName, task.processor)
+		res := TaskRegister.Register(task.TaskName, task.ProcessorName, task.processor)
 		assert.True(t, res)
 	}
 
-	processors := TaskRegister.GetTasksByName("task01")
+	processors := TaskRegister.GetProcessorsByTask("task01")
 	assert.Equal(t, len(tasks), len(processors))
 
-	res := TaskRegister.DeleteTaskProcessor("task01", "delete_processor")
+	res := TaskRegister.Unregister("task01", "delete_processor")
 	assert.True(t, res)
-	processors = TaskRegister.GetTasksByName("task01")
+	processors = TaskRegister.GetProcessorsByTask("task01")
 	assert.Equal(t, 1, len(processors))
 	assert.Nil(t, processors["delete_processor"])
 
-	TaskRegister.DeleteTasksByName("task01")
-	processors = TaskRegister.GetTasksByName("task01")
+	TaskRegister.UnregisterProcessors("task01")
+	processors = TaskRegister.GetProcessorsByTask("task01")
 	assert.Equal(t, 0, len(processors))
 
 }
