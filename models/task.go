@@ -19,6 +19,6 @@ type Task struct {
 	ResourceType     string                `json:"resourceType,omitempty"`
 	Version          int64                 `json:"version,omitempty"`
 	ExpireTime       int64                 `json:"expireTime,omitempty"`
-	Status           int                   `json:"status,omitempty"`
+	Status           TaskStatus            `json:"status,omitempty"`
 	ProcessorsStatus map[string]TaskStatus `json:"processorsStatus,omitempty"`
 }

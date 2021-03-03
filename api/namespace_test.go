@@ -120,10 +120,7 @@ func TestAPI_DeleteNamespace(t *testing.T) {
 	mkTaskService := ms.NewMockTaskService(mockCtl)
 	api.Task = mkTaskService
 
-	nsa := getMockNS("testA")
-	//task := genTask("testA")
-
-	mkNamespaceService.EXPECT().Delete(nsa).Return(nil)
+	mkNamespaceService.EXPECT().Get("testA").Return(nil, nil)
 	mkTaskService.EXPECT().AddTask(gomock.Any()).Return(nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/testA/namespace", nil)
@@ -133,16 +130,7 @@ func TestAPI_DeleteNamespace(t *testing.T) {
 
 	err := fmt.Errorf("error")
 
-	mkNamespaceService.EXPECT().Delete(nsa).Return(err)
-
-	// 500
-	req, _ = http.NewRequest(http.MethodDelete, "/testA/namespace", nil)
-	w = httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
-
-	mkNamespaceService.EXPECT().Delete(nsa).Return(nil)
-	mkTaskService.EXPECT().AddTask(gomock.Any()).Return(err)
+	mkNamespaceService.EXPECT().Get("testA").Return(nil, err)
 
 	// 500
 	req, _ = http.NewRequest(http.MethodDelete, "/testA/namespace", nil)

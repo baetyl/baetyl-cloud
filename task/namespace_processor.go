@@ -19,9 +19,9 @@ func RegisterNamespaceProcessor(cfg *config.CloudConfig) error {
 		return err
 	}
 
-	TaskRegister.Register(common.TaskNamespaceDelete, DeleteNamespace, processor.DeleteNamespace)
 	TaskRegister.Register(common.TaskNamespaceDelete, DeleteQuotaByNamespace, processor.DeleteQuotaByNamespace)
 	TaskRegister.Register(common.TaskNamespaceDelete, DeleteIndexByNamespace, processor.DeleteIndexByNamespace)
+	TaskRegister.Register(common.TaskNamespaceDelete, DeleteNamespace, processor.DeleteNamespace)
 
 	return nil
 }

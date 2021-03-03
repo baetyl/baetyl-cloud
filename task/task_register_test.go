@@ -8,7 +8,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
-func TestTaskRegister_AddTask(t *testing.T) {
+func TestTaskRegister(t *testing.T) {
 	tasks := []taskData{
 		{
 			TaskName:      "task01",
@@ -23,29 +23,35 @@ func TestTaskRegister_AddTask(t *testing.T) {
 	}
 
 	for _, task := range tasks {
-		res := TaskRegister.Register(task.TaskName, task.ProcessorName, task.processor)
-		assert.True(t, res)
+		err := TaskRegister.Register(task.TaskName, task.ProcessorName, task.processor)
+		assert.Nil(t, err)
 	}
 
-	processors := TaskRegister.GetProcessorsByTask("task01")
-	assert.Equal(t, len(tasks), len(processors))
+	err := TaskRegister.Register(tasks[0].TaskName, tasks[0].ProcessorName, tasks[0].processor)
+	assert.Equal(t, err, ErrProcessConflict)
 
-	res := TaskRegister.Unregister("task01", "delete_processor")
-	assert.True(t, res)
-	processors = TaskRegister.GetProcessorsByTask("task01")
-	assert.Equal(t, 1, len(processors))
-	assert.Nil(t, processors["delete_processor"])
+	psList := TaskRegister.GetProcessorListByTask("task01")
+	assert.Equal(t, len(tasks), len(psList))
 
-	TaskRegister.UnregisterProcessors("task01")
-	processors = TaskRegister.GetProcessorsByTask("task01")
-	assert.Equal(t, 0, len(processors))
+	psList = TaskRegister.GetProcessorListByTask("task03")
+	assert.Nil(t, psList)
+
+	err = TaskRegister.Unregister("task01", "delete_processor")
+	assert.Nil(t, err)
+	psList = TaskRegister.GetProcessorListByTask("task01")
+	assert.Equal(t, 1, len(psList))
+	assert.Equal(t, psList[0].name, "add_processor")
+
+	TaskRegister.UnregisterTask("task01")
+	psList = TaskRegister.GetProcessorListByTask("task01")
+	assert.Equal(t, 0, len(psList))
 
 }
 
 type taskData struct {
 	TaskName      string
 	ProcessorName string
-	processor     ProcessFunc
+	processor     ProcessorFunc
 	Expected      bool
 }
 

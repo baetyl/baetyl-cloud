@@ -11,10 +11,6 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
-const (
-	WarningNum = 10
-)
-
 type TaskManager struct {
 	taskService  service.TaskService
 	tasks        chan *models.Task
@@ -104,42 +100,36 @@ func (m *TaskManager) runTask(task *models.Task) {
 		return
 	}
 
-	processors := TaskRegister.GetProcessorsByTask(task.RegistrationName)
+	psList := TaskRegister.GetProcessorListByTask(task.RegistrationName)
 
 	if task.ProcessorsStatus == nil {
 		task.ProcessorsStatus = map[string]models.TaskStatus{}
 	}
 
-	task.Status = int(models.TaskFinished)
-
-	for pName, processFunc := range processors {
-		if isNeedRunTask(pName, task.ProcessorsStatus) {
-			err := processFunc(task)
+	for _, processor := range psList {
+		if isNeedRunTask(processor.name, task.ProcessorsStatus) {
+			err := processor.function(task)
 			if err != nil {
-				if task.Version > WarningNum {
-					log.L().Error("run process error", log.Any("name", task.Name),
-						log.Any("registrationName", task.RegistrationName),
-						log.Any("processorName", pName), log.Any("namespace", task.Namespace),
-						log.Any("resourceType", task.ResourceType),
-						log.Any("resourceName", task.ResourceName), log.Error(err))
-				} else {
-					log.L().Warn("run process error", log.Any("name", task.Name),
-						log.Any("registrationName", task.RegistrationName),
-						log.Any("processorName", pName), log.Any("namespace", task.Namespace),
-						log.Any("resourceType", task.ResourceType),
-						log.Any("resourceName", task.ResourceName), log.Error(err))
-				}
+				log.L().Error("run process error", log.Any("name", task.Name),
+					log.Any("registrationName", task.RegistrationName),
+					log.Any("processorName", processor.name), log.Any("namespace", task.Namespace),
+					log.Any("resourceType", task.ResourceType),
+					log.Any("resourceName", task.ResourceName), log.Error(err))
 
-				task.ProcessorsStatus[pName] = models.TaskNeedRetry
+				task.ProcessorsStatus[processor.name] = models.TaskNeedRetry
 
 				// set to need retry
-				task.Status = int(models.TaskNeedRetry)
+				task.Status = models.TaskNeedRetry
+				break
 			} else {
-				task.ProcessorsStatus[pName] = models.TaskFinished
+				task.ProcessorsStatus[processor.name] = models.TaskFinished
 			}
 		}
 	}
 
+	if task.Status != models.TaskNeedRetry {
+		task.Status = models.TaskFinished
+	}
 	task.Version = task.Version + 1
 	_, err = m.taskService.UpdateTask(task)
 	if err != nil {

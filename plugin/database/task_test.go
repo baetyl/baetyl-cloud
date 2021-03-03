@@ -77,7 +77,7 @@ func TestTask(t *testing.T) {
 		assert.Equal(t, task.Name, tk.Name)
 		assert.Equal(t, task.Namespace, tk.Namespace)
 		assert.Equal(t, task.RegistrationName, tk.RegistrationName)
-		assert.Equal(t, 0, tk.Status)
+		assert.Equal(t, models.TaskNew, tk.Status)
 
 		task.Version = tk.Version
 		task.Id = tk.Id
@@ -116,7 +116,7 @@ func TestTask(t *testing.T) {
 	assert.Equal(t, mTask.Name, tk.Name)
 	assert.Equal(t, mTask.Namespace, tk.Namespace)
 	assert.Equal(t, mTask.RegistrationName, tk.RegistrationName)
-	assert.Equal(t, 0, tk.Status)
+	assert.Equal(t, models.TaskNew, tk.Status)
 
 	mTask.Id = tk.Id
 	mTask.Version = tk.Version
