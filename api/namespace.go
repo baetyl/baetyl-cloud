@@ -35,7 +35,7 @@ func (api *API) GetNamespace(c *common.Context) (interface{}, error) {
 
 func (api *API) DeleteNamespace(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	err := api.NS.Delete(&models.Namespace{Name: ns})
+	_, err := api.NS.Get(ns)
 	if err != nil {
 		return nil, err
 	}
