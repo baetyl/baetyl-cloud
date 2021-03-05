@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
@@ -19,6 +20,7 @@ const (
 	ConfigDir                   = "/etc/baetyl"
 	ProgramConfigDir            = "/var/lib/baetyl/bin"
 	FunctionConfigPrefix        = "baetyl-function-config"
+	ProgramConfigPrefix         = "baetyl-program-config"
 	FunctionProgramConfigPrefix = "baetyl-function-program-config"
 	FunctionCodePrefix          = "baetyl-function-code"
 	FunctionDefaultConfigFile   = "conf.yml"
@@ -271,8 +273,11 @@ func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, er
 			if v.FunctionConfig != nil || v.Functions != nil {
 				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "add function info in container app"))
 			}
-			if v.Image == "" {
-				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "image is required in container app"))
+			if app.Mode == context.RunModeKube && v.Image == "" {
+				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "image is required in kube mode"))
+			}
+			if app.Mode == context.RunModeNative && v.ProgramConfig == "" {
+				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "program config is required in native mode"))
 			}
 		}
 	} else if app.Type == common.FunctionApp {
@@ -363,6 +368,13 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 		return nil, err
 	}
 
+	err = api.translateToNativeAppView(appView)
+	if err != nil {
+		return nil, err
+	}
+
+	populateAppDefaultField(appView)
+
 	if app.Type != common.FunctionApp {
 		return appView, nil
 	}
@@ -406,6 +418,7 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 	copier.Copy(app, appView)
 
 	translateSecretLikedModelsToSecrets(appView, app)
+	translateNativeApp(appView, app, oldApp)
 
 	if app.Type != common.FunctionApp {
 		return app, nil, nil
@@ -433,11 +446,13 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 		configs = append(configs, *programConfig)
 
 		if _, ok := oldServices[service.Name]; !ok {
-			volumeMount, volume := generateVmAndMount(service.Name, config.Name)
+			vmName := getNameOfFunctionConfigVolumeMount(service.Name)
+			volumeMount, volume := generateVmAndMount(config.Name, vmName, ConfigDir)
 			service.VolumeMounts = append(service.VolumeMounts, volumeMount)
 			app.Volumes = append(app.Volumes, volume)
 
-			volumeMountPrpgram, volumeProgram := genProgramVmAndMount(service.Name, programConfig.Name)
+			vmName = getNameOfFunctionProgramVmMount(service.Name)
+			volumeMountPrpgram, volumeProgram := generateVmAndMount(programConfig.Name, vmName, ProgramConfigDir)
 			service.VolumeMounts = append(service.VolumeMounts, volumeMountPrpgram)
 			app.Volumes = append(app.Volumes, volumeProgram)
 		}
@@ -462,6 +477,59 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 		}
 	}
 	return app, configs, nil
+}
+
+func translateNativeApp(appView *models.ApplicationView,
+	app *specV1.Application, oldApp *specV1.Application) {
+	if appView.Mode != context.RunModeNative || appView.Type == common.FunctionApp {
+		return
+	}
+	oldServices := map[string]bool{}
+	if oldApp != nil {
+		for _, service := range oldApp.Services {
+			oldServices[service.Name] = true
+		}
+	}
+
+	for index := range appView.Services {
+		service := &app.Services[index]
+		serviceView := &appView.Services[index]
+		if _, ok := oldServices[service.Name]; !ok {
+			vmName := getNameOfNativeProgramVolumeMount(service.Name)
+			volumeMount, volume := generateVmAndMount(serviceView.ProgramConfig, vmName, ProgramConfigDir)
+			service.VolumeMounts = append(service.VolumeMounts, volumeMount)
+			app.Volumes = append(app.Volumes, volume)
+		}
+	}
+}
+
+func (api *API) translateToNativeAppView(appView *models.ApplicationView) error {
+	if appView.Mode != context.RunModeNative || appView.Type == common.FunctionApp {
+		return nil
+	}
+	for index := range appView.Services {
+		service := &appView.Services[index]
+		vmName := getNameOfNativeProgramVolumeMount(service.Name)
+		configName, err := getNameOfNativeProgramConfig(appView, vmName)
+		if err != nil {
+			return err
+		}
+		service.ProgramConfig = configName
+
+		_, err = api.Config.Get(appView.Namespace, configName, "")
+		if err != nil {
+			return err
+		}
+
+		for i := range service.VolumeMounts {
+			mount := &service.VolumeMounts[i]
+			if mount.Name == vmName {
+				mount.Immutable = true
+				break
+			}
+		}
+	}
+	return nil
 }
 
 func translateSecretLikedModelsToSecrets(appView *models.ApplicationView, app *specV1.Application) {
@@ -554,6 +622,15 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 		_, err := api.Secret.Get(namesapce, r.Name, "")
 		if err != nil {
 			return err
+		}
+	}
+
+	for _, service := range app.Services {
+		if service.ProgramConfig != "" {
+			_, err := api.Config.Get(namesapce, service.ProgramConfig, "")
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -682,10 +759,10 @@ func generateProgramOfFunctionService(api *API, service *specV1.Service, app *sp
 	return config, nil
 }
 
-func generateVmAndMount(serviceName, configName string) (specV1.VolumeMount, specV1.Volume) {
+func generateVmAndMount(configName string, vmName, mountPath string) (specV1.VolumeMount, specV1.Volume) {
 	volumeMount := specV1.VolumeMount{
-		Name:      getNameOfFunctionConfigVolumeMount(serviceName),
-		MountPath: ConfigDir,
+		Name:      vmName,
+		MountPath: mountPath,
 		ReadOnly:  true,
 	}
 
@@ -700,25 +777,7 @@ func generateVmAndMount(serviceName, configName string) (specV1.VolumeMount, spe
 	return volumeMount, generatedConfigVolume
 }
 
-func genProgramVmAndMount(serviceName, configName string) (specV1.VolumeMount, specV1.Volume) {
-	volumeMount := specV1.VolumeMount{
-		Name:      getNameOfFunctionProgramVmMount(serviceName),
-		MountPath: ProgramConfigDir,
-		ReadOnly:  true,
-	}
-
-	generatedConfigVolume := specV1.Volume{
-		Name: volumeMount.Name,
-		VolumeSource: specV1.VolumeSource{
-			Config: &specV1.ObjectReference{
-				Name: configName,
-			},
-		},
-	}
-	return volumeMount, generatedConfigVolume
-}
-
-func populateFunctionVolumeMount(service *specV1.Service) {
+func populateFunctionVolumeMount(service *models.ServiceView) {
 	codeVm := getNameOfFunctionCodeVolumeMount(service.Name)
 	confVm := getNameOfFunctionConfigVolumeMount(service.Name)
 	programConfVm := getNameOfFunctionProgramVmMount(service.Name)
@@ -731,6 +790,31 @@ func populateFunctionVolumeMount(service *specV1.Service) {
 	}
 }
 
+func populateAppDefaultField(appView *models.ApplicationView) {
+	if appView.Mode == "" {
+		appView.Mode = context.RunModeKube
+	}
+	for i, v := range appView.Services {
+		if v.Type == "" {
+			appView.Services[i].Type = specV1.ServiceTypeDeployment
+		}
+	}
+}
+
+func getNameOfNativeProgramConfig(appView *models.ApplicationView, vmName string) (string, error) {
+	for _, v := range appView.Volumes {
+		if v.Name == vmName {
+			if v.Config == nil {
+				return "", common.Error(common.ErrVolumeType, common.Field("name", v.Name), common.Field("type", common.Config))
+			}
+			return v.Config.Name, nil
+		}
+	}
+	return "", common.Error(common.ErrResourceNotFound,
+		common.Field("type", "volume"),
+		common.Field("name", vmName))
+}
+
 func getNameOfFunctionConfigVolumeMount(serviceName string) string {
 	return fmt.Sprintf("%s-%s", FunctionConfigPrefix, serviceName)
 }
@@ -741,4 +825,8 @@ func getNameOfFunctionProgramVmMount(serviceName string) string {
 
 func getNameOfFunctionCodeVolumeMount(serviceName string) string {
 	return fmt.Sprintf("%s-%s", FunctionCodePrefix, serviceName)
+}
+
+func getNameOfNativeProgramVolumeMount(serviceName string) string {
+	return fmt.Sprintf("%s-%s", ProgramConfigPrefix, serviceName)
 }

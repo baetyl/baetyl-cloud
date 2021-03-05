@@ -8,6 +8,7 @@ import (
 
 type ApplicationView struct {
 	Name              string            `json:"name,omitempty" validate:"resourceName"`
+	Mode              string            `json:"mode,omitempty" default:"kube"`
 	Type              string            `json:"type,omitempty" default:"container"`
 	Labels            map[string]string `json:"labels,omitempty"`
 	Namespace         string            `json:"namespace,omitempty"`
@@ -15,7 +16,7 @@ type ApplicationView struct {
 	Version           string            `json:"version,omitempty"`
 	Selector          string            `json:"selector,omitempty"`
 	NodeSelector      string            `json:"nodeSelector,omitempty"`
-	Services          []specV1.Service  `json:"services,omitempty" validate:"dive"`
+	Services          []ServiceView     `json:"services,omitempty" validate:"dive"`
 	Volumes           []VolumeView      `json:"volumes,omitempty" validate:"dive"`
 	Description       string            `json:"description,omitempty"`
 	System            bool              `json:"system,omitempty"`
@@ -34,6 +35,7 @@ type VolumeView struct {
 
 type AppItem struct {
 	Name              string            `json:"name,omitempty" validate:"omitempty,resourceName"`
+	Mode              string            `json:"mode,omitempty" default:"kube"`
 	Type              string            `json:"type,omitempty" default:"container"`
 	Labels            map[string]string `json:"labels,omitempty"`
 	Selector          string            `json:"selector"`
@@ -54,4 +56,9 @@ type ApplicationList struct {
 
 type ServiceFunction struct {
 	Functions []specV1.ServiceFunction `json:"functions,omitempty"`
+}
+
+type ServiceView struct {
+	specV1.Service `json:",inline"`
+	ProgramConfig  string `json:"programConfig,omitempty"`
 }

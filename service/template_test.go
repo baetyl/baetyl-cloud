@@ -62,6 +62,7 @@ func TestTemplateServiceImpl_UnmarshalTemplate(t *testing.T) {
 			out:  &v1.Application{},
 			want: `name: core-app-1
 type: container
+mode: kube
 labels:
   baetyl-cloud-system: "true"
   resource-invisible: "true"
@@ -150,6 +151,7 @@ system: true
 			out:  &v1.Application{},
 			want: `name: func-app-name-1
 type: container
+mode: kube
 labels:
   baetyl-cloud-system: "true"
   resource-invisible: "true"

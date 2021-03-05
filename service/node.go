@@ -295,7 +295,7 @@ func (n *nodeService) UpdateDesire(namespace, name string, app *specV1.Applicati
 		if err == nil || err.Error() != common.ErrUpdateCas {
 			return updatedShadow, err
 		}
-		count ++
+		count++
 		if count >= casRetryTimes {
 			break
 		}
@@ -447,8 +447,8 @@ func (n *nodeService) DeleteNodeAppVersion(namespace string, app *specV1.Applica
 
 		_, err = n.UpdateDesire(node.Namespace, node.Name, app, DeleteNodeDesireByApp)
 		if err != nil {
-				return nil, err
-			}
+			return nil, err
+		}
 	}
 
 	return nodes, nil
@@ -488,7 +488,7 @@ func RefreshNodeDesireByApp(shadow *models.Shadow, app *specV1.Application) {
 
 }
 
-func DeleteNodeDesireByApp(shadow *models.Shadow, app *specV1.Application)  {
+func DeleteNodeDesireByApp(shadow *models.Shadow, app *specV1.Application) {
 	if shadow.Desire == nil {
 		return
 	}

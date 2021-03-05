@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/context"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -414,34 +415,36 @@ func TestCreateContainerApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Type:      common.ContainerApp,
-		Services: []specV1.Service{
+		Services: []models.ServiceView{
 			{
-				Name:     "agent",
-				Hostname: "test-agent",
-				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
-				Replica:  1,
-				VolumeMounts: []specV1.VolumeMount{
-					{
-						Name:      "name",
-						MountPath: "mountPath",
+				Service: specV1.Service{
+					Name:     "agent",
+					Hostname: "test-agent",
+					Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+					Replica:  1,
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "name",
+							MountPath: "mountPath",
+						},
 					},
-				},
-				Ports: []specV1.ContainerPort{
-					{
-						HostPort:      8080,
-						ContainerPort: 8080,
+					Ports: []specV1.ContainerPort{
+						{
+							HostPort:      8080,
+							ContainerPort: 8080,
+						},
 					},
-				},
-				Devices: []specV1.Device{
-					{
-						DevicePath: "DevicePath",
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
 					},
-				},
-				Args: []string{"test"},
-				Env: []specV1.Environment{
-					{
-						Name:  "name",
-						Value: "value",
+					Args: []string{"test"},
+					Env: []specV1.Environment{
+						{
+							Name:  "name",
+							Value: "value",
+						},
 					},
 				},
 			},
@@ -636,34 +639,36 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Type:      common.ContainerApp,
-		Services: []specV1.Service{
+		Services: []models.ServiceView{
 			{
-				Name:     "agent",
-				Hostname: "test-agent",
-				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
-				Replica:  1,
-				VolumeMounts: []specV1.VolumeMount{
-					{
-						Name:      "name",
-						MountPath: "mountPath",
+				Service: specV1.Service{
+					Name:     "agent",
+					Hostname: "test-agent",
+					Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+					Replica:  1,
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "name",
+							MountPath: "mountPath",
+						},
 					},
-				},
-				Ports: []specV1.ContainerPort{
-					{
-						HostPort:      8080,
-						ContainerPort: 8080,
+					Ports: []specV1.ContainerPort{
+						{
+							HostPort:      8080,
+							ContainerPort: 8080,
+						},
 					},
-				},
-				Devices: []specV1.Device{
-					{
-						DevicePath: "DevicePath",
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
 					},
-				},
-				Args: []string{"test"},
-				Env: []specV1.Environment{
-					{
-						Name:  "name",
-						Value: "value",
+					Args: []string{"test"},
+					Env: []specV1.Environment{
+						{
+							Name:  "name",
+							Value: "value",
+						},
 					},
 				},
 			},
@@ -713,6 +718,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		Name:              "abc",
 		Type:              common.ContainerApp,
 		Labels:            nil,
+		Mode:              "kube",
 		Namespace:         "baetyl-cloud",
 		CreationTimestamp: time.Time{},
 		Version:           "",
@@ -891,6 +897,298 @@ func TestUpdateContainerApplication(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
+func TestUpdateNativeNotFunctionApplication(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode := ms.NewMockNodeService(mockCtl)
+	sIndex := ms.NewMockIndexService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+
+	appView := &models.ApplicationView{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Mode:      context.RunModeNative,
+		Type:      common.ContainerApp,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:     "agent",
+					Hostname: "test-agent",
+					Replica:  1,
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "name",
+							MountPath: "mountPath",
+						},
+					},
+					Ports: []specV1.ContainerPort{
+						{
+							HostPort:      8080,
+							ContainerPort: 8080,
+						},
+					},
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
+					},
+					Args: []string{"test"},
+					Env: []specV1.Environment{
+						{
+							Name:  "name",
+							Value: "value",
+						},
+					},
+				},
+				ProgramConfig: "test-program",
+			},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "name",
+				Config: &specV1.ObjectReference{
+					Name: "agent-conf",
+				},
+			},
+		},
+	}
+
+	programConfig := &specV1.Configuration{
+		Name:      "test-program",
+		Namespace: "baetyl-cloud",
+		Labels: map[string]string{
+			"baetyl-config-type": "baetyl-program",
+		},
+		Data: map[string]string{
+			"darwin-amd64": "http://xx/xx.zip",
+			"linux-amd64":  "http://xx/xx.zip",
+			"linux-arm64":  "http://xx/xx.zip",
+			"linux-arm-v7": "http://xx/xx.zip",
+		},
+	}
+
+	agentConfig := &specV1.Configuration{}
+	app1 := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Mode:      context.RunModeNative,
+		Type:      common.ContainerApp,
+		Services: []specV1.Service{
+			{
+				Name:     "agent",
+				Hostname: "test-agent",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "name",
+						MountPath: "mountPath",
+					},
+					{
+						Name:      "baetyl-program-config-agent",
+						MountPath: "/var/lib/baetyl/bin",
+					},
+				},
+				Ports: []specV1.ContainerPort{
+					{
+						HostPort:      8080,
+						ContainerPort: 8080,
+					},
+				},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
+					},
+				},
+				Args: []string{"test"},
+				Env: []specV1.Environment{
+					{
+						Name:  "name",
+						Value: "value",
+					},
+				},
+			},
+		},
+		Volumes: []specV1.Volume{
+			{
+				Name: "name",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "agent-conf",
+					},
+				},
+			},
+			{
+				Name: "baetyl-program-config-agent",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "test-program",
+					},
+				},
+			},
+		},
+	}
+	sConfig.EXPECT().Get(appView.Namespace, "test-program", "").Return(programConfig, nil).Times(2)
+	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), nil).Return(app1, nil)
+	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return([]string{}, nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil).Times(1)
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(appView)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	appView2 := &models.ApplicationView{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Mode:      context.RunModeNative,
+		Type:      common.ContainerApp,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:     "agent2",
+					Hostname: "test-agent2",
+					Replica:  1,
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "name",
+							MountPath: "mountPath",
+						},
+					},
+					Ports: []specV1.ContainerPort{
+						{
+							HostPort:      8080,
+							ContainerPort: 8080,
+						},
+					},
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
+					},
+					Args: []string{"test"},
+					Env: []specV1.Environment{
+						{
+							Name:  "name",
+							Value: "value",
+						},
+					},
+				},
+				ProgramConfig: "test-program2",
+			},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "name",
+				Config: &specV1.ObjectReference{
+					Name: "agent-conf2",
+				},
+			},
+		},
+	}
+
+	programConfig2 := &specV1.Configuration{
+		Name:      "test-program2",
+		Namespace: "baetyl-cloud",
+		Labels: map[string]string{
+			"baetyl-config-type": "baetyl-program",
+		},
+		Data: map[string]string{
+			"darwin-amd64": "http://xx/xx.zip",
+			"linux-amd64":  "http://xx/xx.zip",
+			"linux-arm64":  "http://xx/xx.zip",
+			"linux-arm-v7": "http://xx/xx.zip",
+		},
+	}
+
+	app2 := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Mode:      context.RunModeNative,
+		Type:      common.ContainerApp,
+		Services: []specV1.Service{
+			{
+				Name:     "agent2",
+				Hostname: "test-agent2",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "name",
+						MountPath: "mountPath",
+					},
+					{
+						Name:      "baetyl-program-config-agent2",
+						MountPath: "/var/lib/baetyl/bin",
+					},
+				},
+				Ports: []specV1.ContainerPort{
+					{
+						HostPort:      8080,
+						ContainerPort: 8080,
+					},
+				},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
+					},
+				},
+				Args: []string{"test"},
+				Env: []specV1.Environment{
+					{
+						Name:  "name",
+						Value: "value",
+					},
+				},
+			},
+		},
+		Volumes: []specV1.Volume{
+			{
+				Name: "name",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "agent-conf2",
+					},
+				},
+			},
+			{
+				Name: "baetyl-program-config-agent2",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "test-program2",
+					},
+				},
+			},
+		},
+	}
+
+	agentConfig2 := &specV1.Configuration{}
+	sConfig.EXPECT().Get(appView.Namespace, "agent-conf2", "").Return(agentConfig2, nil).Times(1)
+	sConfig.EXPECT().Get(appView.Namespace, "test-program2", "").Return(programConfig2, nil).Times(2)
+
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(app1, nil).Times(1)
+	sApp.EXPECT().Update(appView.Namespace, gomock.Any()).Return(app2, nil)
+	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return([]string{}, nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView2)
+	req, _ = http.NewRequest(http.MethodPut, "/v1/apps/abc", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
 func TestUpdateInvisibleApplication(t *testing.T) {
 	api, router, mockCtl := initApplicationAPI(t)
 	defer mockCtl.Finish()
@@ -1039,32 +1337,34 @@ func TestCreateFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Type:      common.FunctionApp,
-		Services: []specV1.Service{
+		Services: []models.ServiceView{
 			{
-				Name:     "agent",
-				Hostname: "test-agent",
-				Replica:  1,
-				Image:    "image",
-				VolumeMounts: []specV1.VolumeMount{
-					{
-						Name:      "baetyl-function-code-agent",
-						MountPath: "/var/lib/baetyl/code",
+				Service: specV1.Service{
+					Name:     "agent",
+					Hostname: "test-agent",
+					Replica:  1,
+					Image:    "image",
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "baetyl-function-code-agent",
+							MountPath: "/var/lib/baetyl/code",
+						},
 					},
-				},
-				Devices: []specV1.Device{
-					{
-						DevicePath: "DevicePath",
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
 					},
-				},
-				FunctionConfig: &specV1.ServiceFunctionConfig{
-					Name:    "func1",
-					Runtime: "python36",
-				},
-				Functions: []specV1.ServiceFunction{
-					{
-						Name:    "process",
-						Handler: "index.handler",
-						CodeDir: "path",
+					FunctionConfig: &specV1.ServiceFunctionConfig{
+						Name:    "func1",
+						Runtime: "python36",
+					},
+					Functions: []specV1.ServiceFunction{
+						{
+							Name:    "process",
+							Handler: "index.handler",
+							CodeDir: "path",
+						},
 					},
 				},
 			},
@@ -1672,82 +1972,86 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	newAppView := &models.ApplicationView{
 		Namespace: namespace,
 		Type:      common.FunctionApp,
-		Services: []specV1.Service{
+		Services: []models.ServiceView{
 			{
-				Name:     "agent2",
-				Hostname: "test-agent2",
-				Replica:  1,
-				Image:    "image2",
-				VolumeMounts: []specV1.VolumeMount{
-					{
-						Name:      "baetyl-funciton-code-agent2",
-						MountPath: "/var/lib/baetyl/code",
+				Service: specV1.Service{
+					Name:     "agent2",
+					Hostname: "test-agent2",
+					Replica:  1,
+					Image:    "image2",
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "baetyl-funciton-code-agent2",
+							MountPath: "/var/lib/baetyl/code",
+						},
+						{
+							Name:      "baetyl-function-config-agent2",
+							MountPath: "/etc/baetyl",
+						},
+						{
+							Name:      "baetyl-function-program-config-agent2",
+							MountPath: "/var/lib/baetyl/bin",
+						},
 					},
-					{
-						Name:      "baetyl-function-config-agent2",
-						MountPath: "/etc/baetyl",
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
 					},
-					{
-						Name:      "baetyl-function-program-config-agent2",
-						MountPath: "/var/lib/baetyl/bin",
+					Args: []string{"test"},
+					FunctionConfig: &specV1.ServiceFunctionConfig{
+						Name:    "func2",
+						Runtime: "python36",
 					},
-				},
-				Devices: []specV1.Device{
-					{
-						DevicePath: "DevicePath",
-					},
-				},
-				Args: []string{"test"},
-				FunctionConfig: &specV1.ServiceFunctionConfig{
-					Name:    "func2",
-					Runtime: "python36",
-				},
-				Functions: []specV1.ServiceFunction{
-					{
-						Name:    "process2",
-						Handler: "index.handler",
-						CodeDir: "path",
-					},
-					{
-						Name:    "process2extra",
-						Handler: "index.handler",
-						CodeDir: "path",
+					Functions: []specV1.ServiceFunction{
+						{
+							Name:    "process2",
+							Handler: "index.handler",
+							CodeDir: "path",
+						},
+						{
+							Name:    "process2extra",
+							Handler: "index.handler",
+							CodeDir: "path",
+						},
 					},
 				},
 			},
 			{
-				Name:     "agent3",
-				Hostname: "test-agent3",
-				Replica:  1,
-				Image:    "image3",
-				VolumeMounts: []specV1.VolumeMount{
-					{
-						Name:      "baetyl-function-code-agent3",
-						MountPath: "/var/lib/baetyl/code",
+				Service: specV1.Service{
+					Name:     "agent3",
+					Hostname: "test-agent3",
+					Replica:  1,
+					Image:    "image3",
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "baetyl-function-code-agent3",
+							MountPath: "/var/lib/baetyl/code",
+						},
+						{
+							Name:      "baetyl-function-config-agent3",
+							MountPath: "/etc/baetyl",
+						},
+						{
+							Name:      "baetyl-function-program-config-agent3",
+							MountPath: "/var/lib/baetyl/bin",
+						},
 					},
-					{
-						Name:      "baetyl-function-config-agent3",
-						MountPath: "/etc/baetyl",
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
 					},
-					{
-						Name:      "baetyl-function-program-config-agent3",
-						MountPath: "/var/lib/baetyl/bin",
+					FunctionConfig: &specV1.ServiceFunctionConfig{
+						Name:    "func3",
+						Runtime: "python36",
 					},
-				},
-				Devices: []specV1.Device{
-					{
-						DevicePath: "DevicePath",
-					},
-				},
-				FunctionConfig: &specV1.ServiceFunctionConfig{
-					Name:    "func3",
-					Runtime: "python36",
-				},
-				Functions: []specV1.ServiceFunction{
-					{
-						Name:    "process3",
-						Handler: "index.handler",
-						CodeDir: "path",
+					Functions: []specV1.ServiceFunction{
+						{
+							Name:    "process3",
+							Handler: "index.handler",
+							CodeDir: "path",
+						},
 					},
 				},
 			},
@@ -1964,6 +2268,896 @@ func TestDeleteApplication(t *testing.T) {
 
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/apps/abc", nil)
 	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestCreateKubeFunctionApplication(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sNode := ms.NewMockNodeService(mockCtl)
+	sFunc := ms.NewMockFunctionService(mockCtl)
+	sTempalte := ms.NewMockTemplateService(mockCtl)
+
+	api.App = sApp
+	api.Index = sIndex
+	api.Secret = sSecret
+	api.Config = sConfig
+	api.Node = sNode
+	api.Func = sFunc
+	api.Template = sTempalte
+
+	appView := &models.ApplicationView{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Mode:      context.RunModeKube,
+		Type:      common.FunctionApp,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:     "agent",
+					Hostname: "test-agent",
+					Replica:  1,
+					Image:    "image",
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "baetyl-function-code-agent",
+							MountPath: "/var/lib/baetyl/code",
+						},
+					},
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
+					},
+					FunctionConfig: &specV1.ServiceFunctionConfig{
+						Name:    "func1",
+						Runtime: "python36",
+					},
+					Functions: []specV1.ServiceFunction{
+						{
+							Name:    "process",
+							Handler: "index.handler",
+							CodeDir: "path",
+						},
+					},
+				},
+			},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "baetyl-function-code-agent",
+				Config: &specV1.ObjectReference{
+					Name: "func1",
+				},
+			},
+		},
+	}
+
+	config := &specV1.Configuration{}
+	app := &specV1.Application{}
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(app, nil).Times(1)
+
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(appView)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusForbidden, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(nil, fmt.Errorf("config not found")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusNotFound, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusNotFound, w.Code)
+
+	eden2 := &specV1.Application{
+		Namespace: appView.Namespace,
+		Name:      "abc",
+		Mode:      context.RunModeKube,
+		Type:      common.ContainerApp,
+		Services:  []specV1.Service{},
+		Volumes: []specV1.Volume{
+			{
+				Name: "volume2",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name:    "config2",
+						Version: "2",
+					},
+				},
+			},
+		},
+	}
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	eden2 = &specV1.Application{
+		Namespace: appView.Namespace,
+		Name:      "abc",
+		Type:      common.FunctionApp,
+		Mode:      context.RunModeKube,
+		Services:  []specV1.Service{},
+		Volumes: []specV1.Volume{
+			{
+				Name: "volume2",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name:    "config2",
+						Version: "2",
+					},
+				},
+			},
+		},
+	}
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	config2 := &specV1.Configuration{}
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(errors.New("err")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(nil, errors.New("err")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	functions := models.ServiceFunction{
+		Functions: []specV1.ServiceFunction{
+			{
+				Name:    "process",
+				Handler: "index.handler",
+				CodeDir: "path",
+			},
+		},
+	}
+	data, err := json.Marshal(&functions)
+	assert.NoError(t, err)
+	config = &specV1.Configuration{
+		Name: fmt.Sprintf("baetyl-function-%s-%s-%s", app.Name, "agent", common.RandString(9)),
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
+		Data: map[string]string{
+			"service.yml": string(data),
+		},
+	}
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
+	funcs := map[string]string{
+		"python36": "image",
+	}
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
+	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
+	// one more for program config
+	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(config, nil).Times(2)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	mApp := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.FunctionApp,
+		Mode:      context.RunModeKube,
+		Services: []specV1.Service{
+			{
+				Name:     "agent",
+				Image:    "image",
+				Hostname: "test-agent",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "baetyl-function-code-agent",
+						MountPath: "/var/lib/baetyl/code",
+					},
+					{
+						Name:      "baetyl-function-config-agent",
+						MountPath: "/etc/baetyl",
+					},
+				},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
+					},
+				},
+				FunctionConfig: &specV1.ServiceFunctionConfig{
+					Name:    "func1",
+					Runtime: "python36",
+				},
+				Functions: []specV1.ServiceFunction{
+					{
+						Name:    "process",
+						Handler: "index.handler",
+						CodeDir: "path",
+					},
+				},
+			},
+		},
+		Volumes: []specV1.Volume{
+			{
+				Name: "baetyl-function-code-agent",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "func1",
+					},
+				},
+			},
+			{
+				Name: "baetyl-function-config-agent",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "baetyl-function-app-service-xxx",
+					},
+				},
+			},
+		},
+	}
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
+	// one more for program config
+	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(config, nil).Times(2)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), gomock.Any()).Return(mApp, nil).Times(1)
+	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
+	// one more for program config
+	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(config, nil).Times(2)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), gomock.Any()).Return(mApp, nil).Times(1)
+	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return([]string{}, nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil).Times(1)
+	sConfig.EXPECT().Get(appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestCreateKubeNotFunctionApplication(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode := ms.NewMockNodeService(mockCtl)
+	sIndex := ms.NewMockIndexService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+
+	appView := &models.ApplicationView{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Mode:      context.RunModeKube,
+		Type:      common.ContainerApp,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:     "agent",
+					Hostname: "test-agent",
+					Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+					Replica:  1,
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "name",
+							MountPath: "mountPath",
+						},
+					},
+					Ports: []specV1.ContainerPort{
+						{
+							HostPort:      8080,
+							ContainerPort: 8080,
+						},
+					},
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
+					},
+					Args: []string{"test"},
+					Env: []specV1.Environment{
+						{
+							Name:  "name",
+							Value: "value",
+						},
+					},
+				},
+			},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "name",
+				Config: &specV1.ObjectReference{
+					Name: "agent-conf",
+				},
+			},
+			{
+				Name: "secret",
+				Secret: &specV1.ObjectReference{
+					Name: "secret01",
+				},
+			},
+		},
+		Registries: []models.RegistryView{
+			{
+				Name: "registry01",
+			},
+		},
+	}
+
+	config := &specV1.Configuration{}
+	secret := &specV1.Secret{}
+
+	eden2 := &specV1.Application{
+		Namespace: appView.Namespace,
+		Name:      "abc",
+		Mode:      context.RunModeKube,
+		Type:      common.ContainerApp,
+		Services:  []specV1.Service{},
+		Volumes: []specV1.Volume{
+			{
+				Name: "testSecret01",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name:    "secret01",
+						Version: "1",
+					},
+				},
+			},
+		},
+	}
+
+	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Return(eden2, nil).Times(1)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), eden2).Return(eden2, nil)
+	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return([]string{}, nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(appView)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestCreateNativeFunctionApplication(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sNode := ms.NewMockNodeService(mockCtl)
+	sFunc := ms.NewMockFunctionService(mockCtl)
+	sTempalte := ms.NewMockTemplateService(mockCtl)
+
+	api.App = sApp
+	api.Index = sIndex
+	api.Secret = sSecret
+	api.Config = sConfig
+	api.Node = sNode
+	api.Func = sFunc
+	api.Template = sTempalte
+
+	appView := &models.ApplicationView{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.FunctionApp,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:     "agent",
+					Hostname: "test-agent",
+					Replica:  1,
+					Image:    "image",
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "baetyl-function-code-agent",
+							MountPath: "/var/lib/baetyl/code",
+						},
+					},
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
+					},
+					FunctionConfig: &specV1.ServiceFunctionConfig{
+						Name:    "func1",
+						Runtime: "python36",
+					},
+					Functions: []specV1.ServiceFunction{
+						{
+							Name:    "process",
+							Handler: "index.handler",
+							CodeDir: "path",
+						},
+					},
+				},
+			},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "baetyl-function-code-agent",
+				Config: &specV1.ObjectReference{
+					Name: "func1",
+				},
+			},
+		},
+	}
+
+	config := &specV1.Configuration{}
+	app := &specV1.Application{}
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(app, nil).Times(1)
+
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(appView)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusForbidden, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(nil, fmt.Errorf("config not found")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusNotFound, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusNotFound, w.Code)
+
+	eden2 := &specV1.Application{
+		Namespace: appView.Namespace,
+		Name:      "abc",
+		Type:      common.ContainerApp,
+		Services:  []specV1.Service{},
+		Volumes: []specV1.Volume{
+			{
+				Name: "volume2",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name:    "config2",
+						Version: "2",
+					},
+				},
+			},
+		},
+	}
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	eden2 = &specV1.Application{
+		Namespace: appView.Namespace,
+		Name:      "abc",
+		Type:      common.FunctionApp,
+		Services:  []specV1.Service{},
+		Volumes: []specV1.Volume{
+			{
+				Name: "volume2",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name:    "config2",
+						Version: "2",
+					},
+				},
+			},
+		},
+	}
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	config2 := &specV1.Configuration{}
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(errors.New("err")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(nil, errors.New("err")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	functions := models.ServiceFunction{
+		Functions: []specV1.ServiceFunction{
+			{
+				Name:    "process",
+				Handler: "index.handler",
+				CodeDir: "path",
+			},
+		},
+	}
+	data, err := json.Marshal(&functions)
+	assert.NoError(t, err)
+	config = &specV1.Configuration{
+		Name: fmt.Sprintf("baetyl-function-%s-%s-%s", app.Name, "agent", common.RandString(9)),
+		Labels: map[string]string{
+			common.LabelSystem: "true",
+		},
+		Data: map[string]string{
+			"service.yml": string(data),
+		},
+	}
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
+	funcs := map[string]string{
+		"python36": "image",
+	}
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
+	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
+	// one more for program config
+	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(config, nil).Times(2)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	mApp := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.FunctionApp,
+		Services: []specV1.Service{
+			{
+				Name:     "agent",
+				Image:    "image",
+				Hostname: "test-agent",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "baetyl-function-code-agent",
+						MountPath: "/var/lib/baetyl/code",
+					},
+					{
+						Name:      "baetyl-function-config-agent",
+						MountPath: "/etc/baetyl",
+					},
+				},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
+					},
+				},
+				FunctionConfig: &specV1.ServiceFunctionConfig{
+					Name:    "func1",
+					Runtime: "python36",
+				},
+				Functions: []specV1.ServiceFunction{
+					{
+						Name:    "process",
+						Handler: "index.handler",
+						CodeDir: "path",
+					},
+				},
+			},
+		},
+		Volumes: []specV1.Volume{
+			{
+				Name: "baetyl-function-code-agent",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "func1",
+					},
+				},
+			},
+			{
+				Name: "baetyl-function-config-agent",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "baetyl-function-app-service-xxx",
+					},
+				},
+			},
+		},
+	}
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
+	// one more for program config
+	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(config, nil).Times(2)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), gomock.Any()).Return(mApp, nil).Times(1)
+	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
+	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
+	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
+	// one more for program config
+	sConfig.EXPECT().Upsert(appView.Namespace, gomock.Any()).Return(config, nil).Times(2)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), gomock.Any()).Return(mApp, nil).Times(1)
+	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return([]string{}, nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil).Times(1)
+	sConfig.EXPECT().Get(appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestCreateNativeNotFunctionApplication(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode := ms.NewMockNodeService(mockCtl)
+	sIndex := ms.NewMockIndexService(mockCtl)
+	api.Index = sIndex
+	api.Node = sNode
+
+	appView := &models.ApplicationView{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Mode:      context.RunModeNative,
+		Type:      common.ContainerApp,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:     "agent",
+					Hostname: "test-agent",
+					Replica:  1,
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "name",
+							MountPath: "mountPath",
+						},
+					},
+					Ports: []specV1.ContainerPort{
+						{
+							HostPort:      8080,
+							ContainerPort: 8080,
+						},
+					},
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
+					},
+					Args: []string{"test"},
+					Env: []specV1.Environment{
+						{
+							Name:  "name",
+							Value: "value",
+						},
+					},
+				},
+				ProgramConfig: "test-program",
+			},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "name",
+				Config: &specV1.ObjectReference{
+					Name: "agent-conf",
+				},
+			},
+			{
+				Name: "secret",
+				Secret: &specV1.ObjectReference{
+					Name: "secret01",
+				},
+			},
+		},
+		Registries: []models.RegistryView{
+			{
+				Name: "registry01",
+			},
+		},
+	}
+
+	programConfig := &specV1.Configuration{
+		Name:      "test-program",
+		Namespace: "baetyl-cloud",
+		Labels: map[string]string{
+			"baetyl-config-type": "baetyl-program",
+		},
+		Data: map[string]string{
+			"darwin-amd64": "http://xx/xx.zip",
+			"linux-amd64":  "http://xx/xx.zip",
+			"linux-arm64":  "http://xx/xx.zip",
+			"linux-arm-v7": "http://xx/xx.zip",
+		},
+	}
+
+	secret := &specV1.Secret{}
+
+	eden2 := &specV1.Application{
+		Namespace: appView.Namespace,
+		Name:      "abc",
+		Type:      common.ContainerApp,
+		Services:  []specV1.Service{},
+		Volumes: []specV1.Volume{
+			{
+				Name: "testSecret01",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name:    "secret01",
+						Version: "1",
+					},
+				},
+			},
+		},
+	}
+
+	agentConfig := &specV1.Configuration{}
+	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
+	sConfig.EXPECT().Get(appView.Namespace, "test-program", "").Return(programConfig, nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Return(eden2, nil).Times(1)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), eden2).Return(eden2, nil)
+	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return([]string{}, nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil).Times(1)
+	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(appView)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 }
