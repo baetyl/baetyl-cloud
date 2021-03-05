@@ -60,5 +60,5 @@ type ServiceFunction struct {
 
 type ServiceView struct {
 	specV1.Service `json:",inline"`
-	ProgramConfig  string `json:"programConfig,omitempty" validate:"resourceName"`
+	ProgramConfig  string `json:"programConfig,omitempty"`
 }

@@ -16,7 +16,7 @@ var (
 
 type ProcessorFunc func(task *models.Task) error
 
-var TaskRegister = taskRegister {
+var TaskRegister = taskRegister{
 	tasks: &sync.Map{},
 }
 
@@ -66,7 +66,7 @@ func (m *taskRegister) Unregister(taskName, processorName string) error {
 			m.tasks.Store(taskName, psList)
 			return nil
 		}
-		i ++
+		i++
 	}
 
 	return ErrTaskNotExist

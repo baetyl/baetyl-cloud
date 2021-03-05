@@ -268,21 +268,16 @@ func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, er
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is required"))
 	}
 
-	if app.Mode == context.RunModeNative {
-		for _, v := range app.Services {
-			if v.ProgramConfig == "" {
-				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "program config can't be emprt in native mode"))
-			}
-		}
-	}
-
 	if app.Type == common.ContainerApp {
 		for _, v := range app.Services {
 			if v.FunctionConfig != nil || v.Functions != nil {
 				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "add function info in container app"))
 			}
-			if v.Image == "" {
-				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "image is required in container app"))
+			if app.Mode == context.RunModeKube && v.Image == "" {
+				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "image is required in kube mode"))
+			}
+			if app.Mode == context.RunModeNative && v.ProgramConfig == "" {
+				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "program config is required in native mode"))
 			}
 		}
 	} else if app.Type == common.FunctionApp {
@@ -377,6 +372,8 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 	if err != nil {
 		return nil, err
 	}
+
+	populateAppDefaultField(appView)
 
 	if app.Type != common.FunctionApp {
 		return appView, nil
@@ -484,7 +481,7 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 
 func translateNativeApp(appView *models.ApplicationView,
 	app *specV1.Application, oldApp *specV1.Application) {
-	if appView.Mode != context.RunModeNative {
+	if appView.Mode != context.RunModeNative || appView.Type == common.FunctionApp {
 		return
 	}
 	oldServices := map[string]bool{}
@@ -507,7 +504,7 @@ func translateNativeApp(appView *models.ApplicationView,
 }
 
 func (api *API) translateToNativeAppView(appView *models.ApplicationView) error {
-	if appView.Mode != context.RunModeNative {
+	if appView.Mode != context.RunModeNative || appView.Type == common.FunctionApp {
 		return nil
 	}
 	for index := range appView.Services {
@@ -625,6 +622,15 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 		_, err := api.Secret.Get(namesapce, r.Name, "")
 		if err != nil {
 			return err
+		}
+	}
+
+	for _, service := range app.Services {
+		if service.ProgramConfig != "" {
+			_, err := api.Config.Get(namesapce, service.ProgramConfig, "")
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -780,6 +786,17 @@ func populateFunctionVolumeMount(service *models.ServiceView) {
 		mount := &service.VolumeMounts[i]
 		if mount.Name == codeVm || mount.Name == confVm || mount.Name == programConfVm {
 			mount.Immutable = true
+		}
+	}
+}
+
+func populateAppDefaultField(appView *models.ApplicationView) {
+	if appView.Mode == "" {
+		appView.Mode = context.RunModeKube
+	}
+	for i, v := range appView.Services {
+		if v.Type == "" {
+			appView.Services[i].Type = specV1.ServiceTypeDeployment
 		}
 	}
 }

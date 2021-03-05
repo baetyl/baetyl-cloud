@@ -1104,13 +1104,13 @@ func TestUpdateNodeAppVersion2(t *testing.T) {
 		app:          mockObject.app,
 	}
 	app1 := &specV1.Application{
-		Name:    "app01",
-		Version: "2",
+		Name:     "app01",
+		Version:  "2",
 		Selector: "test",
 	}
 	app2 := &specV1.Application{
-		Name:    "app02",
-		Version: "2",
+		Name:     "app02",
+		Version:  "2",
 		Selector: "test",
 	}
 	namespace := "test"
@@ -1138,7 +1138,7 @@ func TestUpdateNodeAppVersion2(t *testing.T) {
 
 	var desireLock sync.Mutex
 	mockObject.node.EXPECT().ListNode(namespace, gomock.Any()).DoAndReturn(
-		func(namespace string, listOptions *models.ListOptions) (*models.NodeList, error){
+		func(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
 			nodeList := &models.NodeList{
 				Items: []specV1.Node{
 					{
@@ -1152,7 +1152,7 @@ func TestUpdateNodeAppVersion2(t *testing.T) {
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).DoAndReturn(
 		func(namespace, name string) (*models.Shadow, error) {
 			newShadow := &models.Shadow{
-				Name: "test01",
+				Name:   "test01",
 				Desire: map[string]interface{}{},
 			}
 			desireLock.Lock()
