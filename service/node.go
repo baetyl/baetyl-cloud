@@ -15,6 +15,10 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
+const KeyCheckResourceDependency = "checkResourceDependency"
+
+type CheckResourceDependency func(ns, nodeName string) error
+
 //go:generate mockgen -destination=../mock/service/node.go -package=service github.com/baetyl/baetyl-cloud/v2/service NodeService
 
 // NodeService NodeService
@@ -39,11 +43,12 @@ type NodeService interface {
 	UpdateNodeMode(ns, name, mode string) error
 }
 
-type nodeService struct {
+type NodeServiceImpl struct {
 	indexService IndexService
 	node         plugin.Node
 	shadow       plugin.Shadow
 	app          plugin.Application
+	Hooks        map[string]interface{}
 }
 
 // NewNodeService NewNodeService
@@ -68,16 +73,17 @@ func NewNodeService(config *config.CloudConfig) (NodeService, error) {
 		return nil, err
 	}
 
-	return &nodeService{
+	return &NodeServiceImpl{
 		indexService: is,
 		node:         node.(plugin.Node),
 		shadow:       shadow.(plugin.Shadow),
 		app:          app.(plugin.Application),
+		Hooks:        make(map[string]interface{}),
 	}, nil
 }
 
 // Get get the node
-func (n *nodeService) Get(namespace, name string) (*specV1.Node, error) {
+func (n *NodeServiceImpl) Get(namespace, name string) (*specV1.Node, error) {
 	node, err := n.node.GetNode(namespace, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
@@ -100,7 +106,7 @@ func (n *nodeService) Get(namespace, name string) (*specV1.Node, error) {
 }
 
 // Create create a node
-func (n *nodeService) Create(namespace string, node *specV1.Node) (*specV1.Node, error) {
+func (n *NodeServiceImpl) Create(namespace string, node *specV1.Node) (*specV1.Node, error) {
 	res, err := n.node.CreateNode(namespace, node)
 	if err != nil {
 		log.L().Error("create node failed", log.Error(err))
@@ -119,7 +125,7 @@ func (n *nodeService) Create(namespace string, node *specV1.Node) (*specV1.Node,
 }
 
 // Update update node
-func (n *nodeService) Update(namespace string, node *specV1.Node) (*specV1.Node, error) {
+func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.Node, error) {
 	res, err := n.node.UpdateNode(namespace, node)
 	if err != nil {
 		return nil, err
@@ -142,7 +148,7 @@ func (n *nodeService) Update(namespace string, node *specV1.Node) (*specV1.Node,
 }
 
 // List get list node
-func (n *nodeService) List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
+func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
 	list, err := n.node.ListNode(namespace, listOptions)
 	if err != nil {
 		return nil, err
@@ -165,7 +171,7 @@ func (n *nodeService) List(namespace string, listOptions *models.ListOptions) (*
 }
 
 // Count get current node number
-func (n *nodeService) Count(namespace string) (map[string]int, error) {
+func (n *NodeServiceImpl) Count(namespace string) (map[string]int, error) {
 	list, err := n.List(namespace, &models.ListOptions{})
 	if err != nil {
 		return nil, err
@@ -176,7 +182,13 @@ func (n *nodeService) Count(namespace string) (map[string]int, error) {
 }
 
 // Delete delete node
-func (n *nodeService) Delete(namespace, name string) error {
+func (n *NodeServiceImpl) Delete(namespace, name string) error {
+	if check, ok := n.Hooks[KeyCheckResourceDependency].(CheckResourceDependency); ok {
+		if err := check(namespace, name); err != nil {
+			return err
+		}
+	}
+
 	if err := n.node.DeleteNode(namespace, name); err != nil {
 		return err
 	}
@@ -200,7 +212,7 @@ func (n *nodeService) Delete(namespace, name string) error {
 }
 
 // UpdateReport Update Report
-func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error) {
+func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error) {
 	shadow, err := n.shadow.Get(namespace, name)
 	if err != nil {
 		return nil, err
@@ -273,7 +285,7 @@ func (n *nodeService) UpdateReport(namespace, name string, report specV1.Report)
 }
 
 // UpdateDesire Update Desire
-func (n *nodeService) UpdateDesire(namespace, name string, desire specV1.Desire) (*models.Shadow, error) {
+func (n *NodeServiceImpl) UpdateDesire(namespace, name string, desire specV1.Desire) (*models.Shadow, error) {
 	shadow, err := n.shadow.Get(namespace, name)
 	if err != nil {
 		return nil, err
@@ -286,7 +298,7 @@ func (n *nodeService) UpdateDesire(namespace, name string, desire specV1.Desire)
 	return n.updateDesire(shadow, desire)
 }
 
-func (n *nodeService) updateDesire(shadow *models.Shadow, desire specV1.Desire) (*models.Shadow, error) {
+func (n *NodeServiceImpl) updateDesire(shadow *models.Shadow, desire specV1.Desire) (*models.Shadow, error) {
 	if shadow.Desire == nil {
 		shadow.Desire = desire
 	} else {
@@ -299,7 +311,7 @@ func (n *nodeService) updateDesire(shadow *models.Shadow, desire specV1.Desire) 
 	return n.shadow.UpdateDesire(shadow)
 }
 
-func (n *nodeService) GetDesire(namespace, name string) (*specV1.Desire, error) {
+func (n *NodeServiceImpl) GetDesire(namespace, name string) (*specV1.Desire, error) {
 	shadow, _ := n.shadow.Get(namespace, name)
 	if shadow == nil {
 		return nil, common.Error(
@@ -311,7 +323,7 @@ func (n *nodeService) GetDesire(namespace, name string) (*specV1.Desire, error) 
 	return &shadow.Desire, nil
 }
 
-func (n *nodeService) updateNodeAndAppIndex(namespace string, node *specV1.Node, shadow *models.Shadow) error {
+func (n *NodeServiceImpl) updateNodeAndAppIndex(namespace string, node *specV1.Node, shadow *models.Shadow) error {
 	apps, err := n.app.ListApplication(namespace, &models.ListOptions{})
 	if err != nil {
 		log.L().Error("list application error", log.Error(err))
@@ -339,7 +351,7 @@ func (n *nodeService) updateNodeAndAppIndex(namespace string, node *specV1.Node,
 //   - param nodeLabels: the labels of node
 //   - return desire: the node's desire
 //   - return appNames: matched application names
-func (n *nodeService) rematchApplicationsForNode(apps *models.ApplicationList, labels map[string]string) (specV1.Desire, []string) {
+func (n *NodeServiceImpl) rematchApplicationsForNode(apps *models.ApplicationList, labels map[string]string) (specV1.Desire, []string) {
 	desireApps := make([]specV1.AppInfo, 0)
 	sysApps := make([]specV1.AppInfo, 0)
 
@@ -373,7 +385,7 @@ func (n *nodeService) rematchApplicationsForNode(apps *models.ApplicationList, l
 }
 
 // UpdateNodeAppVersion update the node desire's appVersion for app changed
-func (n *nodeService) UpdateNodeAppVersion(namespace string, app *specV1.Application) ([]string, error) {
+func (n *NodeServiceImpl) UpdateNodeAppVersion(namespace string, app *specV1.Application) ([]string, error) {
 	if app.Selector == "" {
 		return nil, nil
 	}
@@ -397,7 +409,7 @@ func (n *nodeService) UpdateNodeAppVersion(namespace string, app *specV1.Applica
 	return nodes, nil
 }
 
-func (n *nodeService) createShadow(namespace, name string, desire specV1.Desire, report specV1.Report) (*models.Shadow, error) {
+func (n *NodeServiceImpl) createShadow(namespace, name string, desire specV1.Desire, report specV1.Report) (*models.Shadow, error) {
 	shadow := models.NewShadow(namespace, name)
 
 	if desire != nil {
@@ -412,7 +424,7 @@ func (n *nodeService) createShadow(namespace, name string, desire specV1.Desire,
 }
 
 // DeleteNodeAppVersion delete the node desire's appVersion for app deleted
-func (n *nodeService) DeleteNodeAppVersion(namespace string, app *specV1.Application) ([]string, error) {
+func (n *NodeServiceImpl) DeleteNodeAppVersion(namespace string, app *specV1.Application) ([]string, error) {
 	if app.Selector == "" {
 		return nil, nil
 	}
@@ -494,7 +506,7 @@ func toShadowMap(shadowList *models.ShadowList) map[string]*models.Shadow {
 	return shadowMap
 }
 
-func (n *nodeService) GetNodeProperties(namespace, name string) (*models.NodeProperties, error) {
+func (n *NodeServiceImpl) GetNodeProperties(namespace, name string) (*models.NodeProperties, error) {
 	node, err := n.node.GetNode(namespace, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
@@ -542,7 +554,7 @@ func (n *nodeService) GetNodeProperties(namespace, name string) (*models.NodePro
 
 // UpdateNodeProperties update desire of node properties
 // and can not update report of node properties
-func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models.NodeProperties) (*models.NodeProperties, error) {
+func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *models.NodeProperties) (*models.NodeProperties, error) {
 	node, err := n.node.GetNode(namespace, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
@@ -603,7 +615,7 @@ func (n *nodeService) UpdateNodeProperties(namespace, name string, props *models
 	return props, nil
 }
 
-func (n *nodeService) UpdateNodeMode(ns, name, mode string) error {
+func (n *NodeServiceImpl) UpdateNodeMode(ns, name, mode string) error {
 	node, err := n.node.GetNode(ns, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
