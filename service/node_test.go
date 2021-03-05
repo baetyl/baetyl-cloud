@@ -87,7 +87,7 @@ func TestDefaultNodeService_List(t *testing.T) {
 		Items: []models.Shadow{},
 	}
 
-	nsvc := nodeService{
+	nsvc := NodeServiceImpl{
 		shadow: mockObject.shadow,
 		node:   mockObject.node,
 	}
@@ -113,7 +113,7 @@ func TestDefaultNodeService_Delete(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
-	cs := nodeService{
+	cs := NodeServiceImpl{
 		indexService: mockIndexService,
 		shadow:       mockObject.shadow,
 		node:         mockObject.node,
@@ -141,7 +141,7 @@ func TestDefaultNodeService_Create(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
-	ns := nodeService{
+	ns := NodeServiceImpl{
 		indexService: mockIndexService,
 		shadow:       mockObject.shadow,
 		node:         mockObject.node,
@@ -196,7 +196,7 @@ func TestDefaultNodeService_Update(t *testing.T) {
 	defer mockObject.Close()
 
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
-	ns := nodeService{
+	ns := NodeServiceImpl{
 		indexService: mockIndexService,
 		shadow:       mockObject.shadow,
 		node:         mockObject.node,
@@ -265,7 +265,7 @@ func TestUpdateNodeAppVersion(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
-	ss := nodeService{
+	ss := NodeServiceImpl{
 		indexService: mockIndexService,
 		shadow:       mockObject.shadow,
 		node:         mockObject.node,
@@ -402,7 +402,7 @@ func TestDeleteNodeAppVersion(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
-	ss := nodeService{
+	ss := NodeServiceImpl{
 		indexService: mockIndexService,
 		shadow:       mockObject.shadow,
 		node:         mockObject.node,
@@ -547,7 +547,7 @@ func TestUpdateReport(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
-	ss := nodeService{
+	ss := NodeServiceImpl{
 		shadow: mockObject.shadow,
 		node:   mockObject.node,
 		app:    mockObject.app,
@@ -744,7 +744,7 @@ func TestUpdateDesired(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
-	ns := nodeService{
+	ns := NodeServiceImpl{
 		shadow: mockObject.shadow,
 		node:   mockObject.node,
 		app:    mockObject.app,
@@ -786,7 +786,7 @@ func TestRematchApplicationForNode(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
-	ns := nodeService{
+	ns := NodeServiceImpl{
 		shadow: mockObject.shadow,
 		node:   mockObject.node,
 		app:    mockObject.app,
@@ -845,7 +845,7 @@ func TestGetNodeProperties(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
-	ns := nodeService{
+	ns := NodeServiceImpl{
 		node:   mockObject.node,
 		shadow: mockObject.shadow,
 	}
@@ -924,7 +924,7 @@ func TestUpdateNodeProperties(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 
-	ns := nodeService{
+	ns := NodeServiceImpl{
 		node:   mockObject.node,
 		shadow: mockObject.shadow,
 	}
@@ -1062,7 +1062,7 @@ func TestUpdateNodeMode(t *testing.T) {
 	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.node.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, nil)
 
-	ns := nodeService{
+	ns := NodeServiceImpl{
 		node: mockObject.node,
 	}
 	err := ns.UpdateNodeMode("default", "abc", "cloud")
