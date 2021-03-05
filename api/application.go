@@ -423,7 +423,6 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 	translateSecretLikedModelsToSecrets(appView, app)
 	translateNativeApp(appView, app, oldApp)
 
-
 	if app.Type != common.FunctionApp {
 		return app, nil, nil
 	}
