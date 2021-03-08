@@ -3,9 +3,10 @@ package api
 import (
 	"fmt"
 
+	"github.com/baetyl/baetyl-go/v2/log"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-go/v2/log"
 )
 
 // CreateNamespace create one namespace
