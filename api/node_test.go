@@ -36,7 +36,10 @@ func getMockNode() *specV1.Node {
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
 			specV1.KeyOptionalSysApps:  interface{}([]interface{}{"a"}),
+			specV1.KeySyncMode:         specV1.CloudMode,
 		},
+		SysApps: []string{"a"},
+		Mode:    specV1.CloudMode,
 	}
 	return mNode
 }
@@ -406,7 +409,7 @@ func TestListNode(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	bytes := w.Body.Bytes()
 	fmt.Println(string(bytes))
-	assert.Equal(t, string(bytes), "{\"total\":0,\"items\":[{\"name\":\"node01\",\"createTime\":\"0001-01-01T00:00:00Z\",\"cluster\":false,\"ready\":false,\"mode\":\"cloud\"}]}\n")
+	assert.Equal(t, string(bytes), "{\"total\":0,\"items\":[{\"name\":\"node01\",\"createTime\":\"0001-01-01T00:00:00Z\",\"cluster\":false,\"ready\":false,\"mode\":\"\"}]}\n")
 	nodelist := new(models.NodeList)
 	err := json.Unmarshal(bytes, nodelist)
 	assert.NoError(t, err)
