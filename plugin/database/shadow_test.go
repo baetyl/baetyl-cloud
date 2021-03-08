@@ -22,8 +22,8 @@ CREATE TABLE baetyl_node_shadow(
     desire_version VARCHAR(36) NOT NULL DEFAULT '',
     report      BLOB,
     desire      BLOB,
-	report_meta BLOB,
-	desire_meta BLOB
+    report_meta BLOB,
+    desire_meta BLOB
 );
 `,
 	}
