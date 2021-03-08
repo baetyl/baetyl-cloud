@@ -41,6 +41,12 @@ func (s *SyncServer) InitMsgRouter() {
 	}
 }
 
+func (s *SyncServer) AddMsgRouter(router string, handler HandlerMessage) {
+	for _, v := range s.links {
+		v.AddMsgRouter(router, handler)
+	}
+}
+
 func (s *SyncServer) Run() {
 	for k, v := range s.links {
 		go v.Start()

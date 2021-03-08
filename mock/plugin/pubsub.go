@@ -9,30 +9,30 @@ import (
 	reflect "reflect"
 )
 
-// MockPubsub is a mock of Pubsub interface
+// MockPubsub is a mock of Pubsub interface.
 type MockPubsub struct {
 	ctrl     *gomock.Controller
 	recorder *MockPubsubMockRecorder
 }
 
-// MockPubsubMockRecorder is the mock recorder for MockPubsub
+// MockPubsubMockRecorder is the mock recorder for MockPubsub.
 type MockPubsubMockRecorder struct {
 	mock *MockPubsub
 }
 
-// NewMockPubsub creates a new mock instance
+// NewMockPubsub creates a new mock instance.
 func NewMockPubsub(ctrl *gomock.Controller) *MockPubsub {
 	mock := &MockPubsub{ctrl: ctrl}
 	mock.recorder = &MockPubsubMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockPubsub) EXPECT() *MockPubsubMockRecorder {
 	return m.recorder
 }
 
-// Close mocks base method
+// Close mocks base method.
 func (m *MockPubsub) Close() error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Close")
@@ -40,13 +40,13 @@ func (m *MockPubsub) Close() error {
 	return ret0
 }
 
-// Close indicates an expected call of Close
+// Close indicates an expected call of Close.
 func (mr *MockPubsubMockRecorder) Close() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockPubsub)(nil).Close))
 }
 
-// Publish mocks base method
+// Publish mocks base method.
 func (m *MockPubsub) Publish(arg0 string, arg1 interface{}) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Publish", arg0, arg1)
@@ -54,36 +54,36 @@ func (m *MockPubsub) Publish(arg0 string, arg1 interface{}) error {
 	return ret0
 }
 
-// Publish indicates an expected call of Publish
+// Publish indicates an expected call of Publish.
 func (mr *MockPubsubMockRecorder) Publish(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockPubsub)(nil).Publish), arg0, arg1)
 }
 
-// Subscribe mocks base method
-func (m *MockPubsub) Subscribe(arg0 string) (chan interface{}, error) {
+// Subscribe mocks base method.
+func (m *MockPubsub) Subscribe(arg0 string) (<-chan interface{}, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Subscribe", arg0)
-	ret0, _ := ret[0].(chan interface{})
+	ret0, _ := ret[0].(<-chan interface{})
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Subscribe indicates an expected call of Subscribe
+// Subscribe indicates an expected call of Subscribe.
 func (mr *MockPubsubMockRecorder) Subscribe(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockPubsub)(nil).Subscribe), arg0)
 }
 
-// Unsubscribe mocks base method
-func (m *MockPubsub) Unsubscribe(arg0 string, arg1 chan interface{}) error {
+// Unsubscribe mocks base method.
+func (m *MockPubsub) Unsubscribe(arg0 string, arg1 <-chan interface{}) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Unsubscribe", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Unsubscribe indicates an expected call of Unsubscribe
+// Unsubscribe indicates an expected call of Unsubscribe.
 func (mr *MockPubsubMockRecorder) Unsubscribe(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unsubscribe", reflect.TypeOf((*MockPubsub)(nil).Unsubscribe), arg0, arg1)

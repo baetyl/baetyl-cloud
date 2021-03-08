@@ -14,6 +14,8 @@ type Shadow struct {
 	Name              string    `json:"name,omitempty"`
 	Report            v1.Report `json:"report,omitempty"`
 	Desire            v1.Desire `json:"desire,omitempty"`
+	ReportMeta        v1.Report `json:"reportMeta,omitempty"`
+	DesireMeta        v1.Desire `json:"desireMeta,omitempty"`
 	CreationTimestamp time.Time `json:"createTime,omitempty"`
 	DesireVersion     string    `json:"desireVersion,omitempty"`
 }
@@ -27,10 +29,12 @@ type ShadowList struct {
 
 func NewShadow(namespace, name string) *Shadow {
 	return &Shadow{
-		Name:      name,
-		Namespace: namespace,
-		Report:    BuildEmptyApps(),
-		Desire:    BuildEmptyApps(),
+		Name:       name,
+		Namespace:  namespace,
+		Report:     BuildEmptyApps(),
+		Desire:     BuildEmptyApps(),
+		ReportMeta: v1.Report{},
+		DesireMeta: v1.Desire{},
 	}
 }
 
@@ -40,6 +44,8 @@ func NewShadowFromNode(node *v1.Node) *Shadow {
 		Namespace:         node.Namespace,
 		Report:            node.Report,
 		Desire:            node.Desire,
+		ReportMeta:        v1.Report{},
+		DesireMeta:        v1.Desire{},
 		CreationTimestamp: node.CreationTimestamp.UTC(),
 	}
 
@@ -63,6 +69,14 @@ func (s *Shadow) GetDesireString() (string, error) {
 	return string(desire), nil
 }
 
+func (s *Shadow) GetDesireMetaString() (string, error) {
+	desireMeta, err := json.Marshal(s.DesireMeta)
+	if err != nil {
+		return "", err
+	}
+	return string(desireMeta), nil
+}
+
 func (s *Shadow) GetReportString() (string, error) {
 	report, err := json.Marshal(s.Report)
 	if err != nil {
@@ -70,6 +84,14 @@ func (s *Shadow) GetReportString() (string, error) {
 	}
 
 	return string(report), nil
+}
+
+func (s *Shadow) GetReportMetaString() (string, error) {
+	reportMeta, err := json.Marshal(s.ReportMeta)
+	if err != nil {
+		return "", err
+	}
+	return string(reportMeta), nil
 }
 
 func BuildEmptyApps() map[string]interface{} {

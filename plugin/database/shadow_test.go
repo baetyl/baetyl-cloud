@@ -14,14 +14,16 @@ var (
 	shaodowTables = []string{
 		`
 CREATE TABLE baetyl_node_shadow(
-    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-    name           VARCHAR(128) NOT NULL DEFAULT '',
-    namespace      VARCHAR(64) NOT NULL DEFAULT '',
-    create_time    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        VARCHAR(128) NOT NULL DEFAULT '',
+    namespace   VARCHAR(64) NOT NULL DEFAULT '',
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     desire_version VARCHAR(36) NOT NULL DEFAULT '',
-    report         BLOB,
-    desire         BLOB 
+    report      BLOB,
+    desire      BLOB,
+	report_meta BLOB,
+	desire_meta BLOB
 );
 `,
 	}
@@ -66,6 +68,8 @@ func TestShadow(t *testing.T) {
 				},
 			},
 		},
+		ReportMeta: map[string]interface{}{},
+		DesireMeta: map[string]interface{}{},
 	}
 	result, err := db.Create(shadow)
 	assert.NoError(t, err)
