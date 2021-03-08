@@ -786,6 +786,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			specV1.KeyAccelerator:      "",
 			specV1.KeyOptionalSysApps:  interface{}([]interface{}{"a"}),
 		},
+		SysApps: []string{"a"},
 	}
 
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode2, nil).Times(1)
@@ -856,7 +857,6 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
-			specV1.KeyOptionalSysApps:  []string{"a"},
 		},
 		SysApps: []string{"a"},
 	}
@@ -922,9 +922,9 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
-			specV1.KeyOptionalSysApps:  interface{}([]interface{}{"rule-node12"}),
 		},
-		Desire: desire,
+		SysApps: []string{"rule-node12"},
+		Desire:  desire,
 	}
 
 	sNode.EXPECT().Get(mNode7.Namespace, mNode7.Name).Return(mNode7, nil).Times(1)

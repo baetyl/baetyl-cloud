@@ -7,16 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v2"
-
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
-
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	"gopkg.in/yaml.v2"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
@@ -161,17 +159,6 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	// set default frequency here
-	if n.Attributes == nil {
-		n.Attributes = map[string]interface{}{}
-	}
-	n.Attributes[v1.BaetylCoreFrequency] = common.DefaultCoreFrequency
-	n.Attributes[v1.BaetylCoreAPIPort] = common.DefaultCoreAPIPort
-	n.Attributes[v1.KeyAccelerator] = n.Accelerator
-	if n.SysApps != nil {
-		n.Attributes[v1.KeyOptionalSysApps] = n.SysApps
-	}
-
 	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
 		if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
@@ -221,23 +208,10 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	node.Attributes = oldNode.Attributes
 	node.CreationTimestamp = oldNode.CreationTimestamp
 
-	err = models.PopulateNode(oldNode)
-	if err != nil {
-		return nil, err
-	}
-
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
 		err = api.updateNodeOptionedSysApps(oldNode, node.SysApps)
 		if err != nil {
 			return nil, err
-		}
-		if len(node.SysApps) == 0 {
-			delete(node.Attributes, v1.KeyOptionalSysApps)
-		} else {
-			if node.Attributes == nil {
-				node.Attributes = make(map[string]interface{})
-			}
-			node.Attributes[v1.KeyOptionalSysApps] = node.SysApps
 		}
 	}
 
