@@ -612,6 +612,10 @@ func (api *API) translateSecretsToSecretLikedResources(appView *models.Applicati
 func (api *API) validApplication(namesapce string, app *models.ApplicationView) error {
 	for _, v := range app.Volumes {
 		if v.Config != nil {
+			// native program config will be validate by service.ProgramConfig
+			if isProgramConfig(v.Name) {
+				continue
+			}
 			_, err := api.Config.Get(namesapce, v.Config.Name, "")
 			if err != nil {
 				return err
@@ -647,6 +651,13 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 		}
 	}
 	return nil
+}
+
+func isProgramConfig(volume string) bool {
+	if strings.HasPrefix(volume, ProgramConfigPrefix) {
+		return true
+	}
+	return false
 }
 
 func (api *API) isAppCanDelete(namesapce, name string) (bool, error) {

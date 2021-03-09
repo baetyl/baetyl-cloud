@@ -1050,6 +1050,150 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
+	appView12 := &models.ApplicationView{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Mode:      context.RunModeNative,
+		Type:      common.ContainerApp,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:     "agent",
+					Hostname: "test-agent",
+					Replica:  1,
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "name",
+							MountPath: "mountPath",
+						},
+						{
+							Name:      "baetyl-program-config-agent",
+							MountPath: "/var/lib/baetyl/bin",
+						},
+					},
+					Ports: []specV1.ContainerPort{
+						{
+							HostPort:      8080,
+							ContainerPort: 8080,
+						},
+					},
+					Devices: []specV1.Device{
+						{
+							DevicePath: "DevicePath",
+						},
+					},
+					Args: []string{"test"},
+					Env: []specV1.Environment{
+						{
+							Name:  "name",
+							Value: "value",
+						},
+					},
+				},
+				ProgramConfig: "test-program2",
+			},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "name",
+				Config: &specV1.ObjectReference{
+					Name: "agent-conf",
+				},
+			},
+			{
+				Name: "baetyl-program-config-agent",
+				Config: &specV1.ObjectReference{
+					Name: "test-program",
+				},
+			},
+		},
+	}
+
+	programConfig2 := &specV1.Configuration{
+		Name:      "test-program2",
+		Namespace: "baetyl-cloud",
+		Labels: map[string]string{
+			"baetyl-config-type": "baetyl-program",
+		},
+		Data: map[string]string{
+			"darwin-amd64": "http://xx/xx.zip",
+			"linux-amd64":  "http://xx/xx.zip",
+			"linux-arm64":  "http://xx/xx.zip",
+			"linux-arm-v7": "http://xx/xx.zip",
+		},
+	}
+
+	app12 := &specV1.Application{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Mode:      context.RunModeNative,
+		Type:      common.ContainerApp,
+		Services: []specV1.Service{
+			{
+				Name:     "agent",
+				Hostname: "test-agent",
+				Replica:  1,
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "name",
+						MountPath: "mountPath",
+					},
+					{
+						Name:      "baetyl-program-config-agent",
+						MountPath: "/var/lib/baetyl/bin",
+					},
+				},
+				Ports: []specV1.ContainerPort{
+					{
+						HostPort:      8080,
+						ContainerPort: 8080,
+					},
+				},
+				Devices: []specV1.Device{
+					{
+						DevicePath: "DevicePath",
+					},
+				},
+				Args: []string{"test"},
+				Env: []specV1.Environment{
+					{
+						Name:  "name",
+						Value: "value",
+					},
+				},
+			},
+		},
+		Volumes: []specV1.Volume{
+			{
+				Name: "name",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "agent-conf",
+					},
+				},
+			},
+			{
+				Name: "baetyl-program-config-agent",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name: "test-program2",
+					},
+				},
+			},
+		},
+	}
+	sConfig.EXPECT().Get(appView.Namespace, "test-program2", "").Return(programConfig2, nil).Times(2)
+	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().CreateWithBase(appView.Namespace, gomock.Any(), nil).Return(app12, nil)
+	sNode.EXPECT().UpdateNodeAppVersion(appView.Namespace, gomock.Any()).Return([]string{}, nil).Times(1)
+	sIndex.EXPECT().RefreshNodesIndexByApp(appView.Namespace, gomock.Any(), gomock.Any()).Return(nil).Times(1)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView12)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
 	appView2 := &models.ApplicationView{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
@@ -1096,20 +1240,6 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 					Name: "agent-conf2",
 				},
 			},
-		},
-	}
-
-	programConfig2 := &specV1.Configuration{
-		Name:      "test-program2",
-		Namespace: "baetyl-cloud",
-		Labels: map[string]string{
-			"baetyl-config-type": "baetyl-program",
-		},
-		Data: map[string]string{
-			"darwin-amd64": "http://xx/xx.zip",
-			"linux-amd64":  "http://xx/xx.zip",
-			"linux-arm64":  "http://xx/xx.zip",
-			"linux-arm-v7": "http://xx/xx.zip",
 		},
 	}
 
