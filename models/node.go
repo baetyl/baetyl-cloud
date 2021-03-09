@@ -2,8 +2,6 @@ package models
 
 import (
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
-
-	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
 // NodeViewList node view list
@@ -53,27 +51,6 @@ type NodeMode struct {
 type NodePropertiesMetadata struct {
 	ReportMeta map[string]interface{} `yaml:"report,omitempty" json:"report,omitempty"`
 	DesireMeta map[string]interface{} `yaml:"desire,omitempty" json:"desire,omitempty"`
-}
-
-func PopulateNode(node *specV1.Node) error {
-	val, ok := node.Attributes[specV1.KeyOptionalSysApps]
-	if !ok || val == nil {
-		return nil
-	}
-
-	ss, ok := val.([]interface{})
-	if !ok {
-		return common.Error(common.ErrConvertConflict, common.Field("name", specV1.KeyOptionalSysApps), common.Field("error", "failed to interface{} to []interface{}`"))
-	}
-
-	for _, d := range ss {
-		s, ok := d.(string)
-		if !ok {
-			return common.Error(common.ErrConvertConflict, common.Field("name", specV1.KeyOptionalSysApps), common.Field("error", "failed to interface{} to string`"))
-		}
-		node.SysApps = append(node.SysApps, s)
-	}
-	return nil
 }
 
 type NodeCoreConfigs struct {

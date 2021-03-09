@@ -8,7 +8,7 @@ import (
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/jinzhu/copier"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -38,6 +38,31 @@ func toNodeModel(node *v1alpha1.Node) *specV1.Node {
 		err = json.Unmarshal([]byte(metadata), &n.Annotations)
 		if err != nil {
 			log.L().Error("report unmarshal exception", log.Error(err))
+		}
+	}
+
+	if val, ok := n.Attributes[specV1.KeyOptionalSysApps]; ok && val != nil {
+		ss, ok := val.([]interface{})
+		if !ok {
+			log.L().Error(common.ErrConvertConflict, log.Any("name", specV1.KeyOptionalSysApps), log.Any("error", "failed to interface{} to []interface{}`"))
+		}
+
+		for _, d := range ss {
+			s, ok := d.(string)
+			if !ok {
+				log.L().Error(common.ErrConvertConflict, log.Any("name", specV1.KeyOptionalSysApps), log.Any("error", "failed to interface{} to string`"))
+			}
+			n.SysApps = append(n.SysApps, s)
+		}
+	}
+	if val, ok := n.Attributes[specV1.KeyAccelerator]; ok {
+		if accelerator, ok := val.(string); ok {
+			n.Accelerator = accelerator
+		}
+	}
+	if val, ok := n.Attributes[specV1.KeySyncMode]; ok {
+		if mode, ok := val.(string); ok {
+			n.Mode = specV1.SyncMode(mode)
 		}
 	}
 	return n
@@ -78,6 +103,22 @@ func fromNodeModel(node *specV1.Node) (*v1alpha1.Node, error) {
 			return nil, err
 		}
 		n.Annotations[common.AnnotationMetadata] = string(metadata)
+	}
+
+	if node.Attributes == nil {
+		node.Attributes = make(map[string]interface{})
+	}
+	node.Attributes[specV1.KeyOptionalSysApps] = node.SysApps
+	node.Attributes[specV1.KeyAccelerator] = node.Accelerator
+	// set default value
+	if _, ok := node.Attributes[specV1.BaetylCoreFrequency]; !ok {
+		node.Attributes[specV1.BaetylCoreFrequency] = common.DefaultCoreFrequency
+	}
+	if _, ok := node.Attributes[specV1.BaetylCoreAPIPort]; !ok {
+		node.Attributes[specV1.BaetylCoreAPIPort] = common.DefaultCoreAPIPort
+	}
+	if _, ok := node.Attributes[specV1.KeySyncMode]; !ok {
+		node.Attributes[specV1.KeySyncMode] = specV1.CloudMode
 	}
 
 	err := copier.Copy(&n.Spec, node)
