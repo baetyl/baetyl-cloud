@@ -484,20 +484,33 @@ func translateNativeApp(appView *models.ApplicationView,
 	if appView.Mode != context.RunModeNative || appView.Type == common.FunctionApp {
 		return
 	}
-	oldServices := map[string]bool{}
-	if oldApp != nil {
-		for _, service := range oldApp.Services {
-			oldServices[service.Name] = true
-		}
-	}
 
 	for index := range appView.Services {
 		service := &app.Services[index]
 		serviceView := &appView.Services[index]
-		if _, ok := oldServices[service.Name]; !ok {
-			vmName := getNameOfNativeProgramVolumeMount(service.Name)
-			volumeMount, volume := generateVmAndMount(serviceView.ProgramConfig, vmName, ProgramConfigDir)
+		vmName := getNameOfNativeProgramVolumeMount(service.Name)
+		volumeMount, volume := generateVmAndMount(serviceView.ProgramConfig, vmName, ProgramConfigDir)
+
+		var exist bool
+		for _, v := range service.VolumeMounts {
+			if v.Name == vmName {
+				exist = true
+				break
+			}
+		}
+		if !exist {
 			service.VolumeMounts = append(service.VolumeMounts, volumeMount)
+		}
+
+		exist = false
+		for i, v := range app.Volumes {
+			if v.Name == vmName {
+				app.Volumes[i] = volume
+				exist = true
+				break
+			}
+		}
+		if !exist {
 			app.Volumes = append(app.Volumes, volume)
 		}
 	}
