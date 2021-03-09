@@ -208,6 +208,8 @@ const (
 	ReportMeta = "reportMeta"
 	DesireMeta = "desireMeta"
 	NodeProps  = "nodeprops"
+	NodeInfo   = "node"
+	NodeStats  = "nodestats"
 )
 
 const (
