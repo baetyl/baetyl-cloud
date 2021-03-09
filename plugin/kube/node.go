@@ -56,10 +56,14 @@ func toNodeModel(node *v1alpha1.Node) *specV1.Node {
 		}
 	}
 	if val, ok := n.Attributes[specV1.KeyAccelerator]; ok {
-		n.Accelerator = val.(string)
+		if acce, ok := val.(string); ok {
+			n.Accelerator = acce
+		}
 	}
 	if val, ok := n.Attributes[specV1.KeySyncMode]; ok {
-		n.Mode = specV1.SyncMode(val.(string))
+		if mode, ok := val.(string); ok {
+			n.Mode = specV1.SyncMode(mode)
+		}
 	}
 	return n
 }
@@ -107,14 +111,14 @@ func fromNodeModel(node *specV1.Node) (*v1alpha1.Node, error) {
 	node.Attributes[specV1.KeyOptionalSysApps] = node.SysApps
 	node.Attributes[specV1.KeyAccelerator] = node.Accelerator
 	// set default value
-	if node.Attributes[specV1.BaetylCoreFrequency] == nil {
+	if _, ok := node.Attributes[specV1.BaetylCoreFrequency]; !ok {
 		node.Attributes[specV1.BaetylCoreFrequency] = common.DefaultCoreFrequency
 	}
-	if node.Attributes[specV1.BaetylCoreAPIPort] == nil {
+	if _, ok := node.Attributes[specV1.BaetylCoreAPIPort]; !ok {
 		node.Attributes[specV1.BaetylCoreAPIPort] = common.DefaultCoreAPIPort
 	}
-	if node.Attributes[specV1.KeySyncMode] == nil {
-		node.Attributes[specV1.BaetylCoreAPIPort] = specV1.CloudMode
+	if _, ok := node.Attributes[specV1.KeySyncMode]; !ok {
+		node.Attributes[specV1.KeySyncMode] = specV1.CloudMode
 	}
 
 	err := copier.Copy(&n.Spec, node)
