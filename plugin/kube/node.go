@@ -56,8 +56,8 @@ func toNodeModel(node *v1alpha1.Node) *specV1.Node {
 		}
 	}
 	if val, ok := n.Attributes[specV1.KeyAccelerator]; ok {
-		if acce, ok := val.(string); ok {
-			n.Accelerator = acce
+		if accelerator, ok := val.(string); ok {
+			n.Accelerator = accelerator
 		}
 	}
 	if val, ok := n.Attributes[specV1.KeySyncMode]; ok {
