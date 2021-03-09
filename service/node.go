@@ -282,6 +282,14 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 		} else {
 			shadow.Report[common.NodeProps] = newPropsReport
 		}
+		// TODO refactor merge and remove this
+		// since merge won't delete exist key-val, node info and stats should override
+		if node, ok := report[common.NodeInfo]; ok {
+			shadow.Report[common.NodeInfo] = node
+		}
+		if nodeStats, ok := report[common.NodeStats]; ok {
+			shadow.Report[common.NodeStats] = nodeStats
+		}
 	}
 	return n.shadow.UpdateReport(shadow)
 }
