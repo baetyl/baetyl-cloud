@@ -34,11 +34,15 @@ const (
 	templateBrokerAppYaml      = "baetyl-broker-app.yml"
 	templateRuleConfYaml       = "baetyl-rule-conf.yml"
 	templateRuleAppYaml        = "baetyl-rule-app.yml"
+	templateLogConfYaml        = "baetyl-log-conf.yml"
+	templateLogAppYaml         = "baetyl-log-app.yml"
 	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
 	templateBaetylInstallShell = "baetyl-install.sh"
 
 	TemplateCoreConfYaml      = "baetyl-core-conf.yml"
 	TemplateBaetylInitCommand = "baetyl-init-command"
+
+	BaetylLog = "baetyl-log"
 )
 
 var (
@@ -131,6 +135,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	initService.OptionalAppFuncs = map[string]GenAppFunc{
 		specV1.BaetylFunction: initService.genFunctionApp,
 		specV1.BaetylRule:     initService.genRuleApp,
+		BaetylLog:             initService.genLogApp,
 	}
 
 	return initService, nil
@@ -473,6 +478,38 @@ func (s *InitServiceImpl) genRuleApp(ns, nodeName string, params map[string]inte
 		appMap[k] = v
 	}
 	return s.GenApp(ns, templateRuleAppYaml, appMap)
+}
+
+func (s *InitServiceImpl) genLogApp(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
+	appName := fmt.Sprintf("baetyl-log-%s", common.RandString(9))
+	confName := fmt.Sprintf("baetyl-log-conf-%s", common.RandString(9))
+	// create config
+	confMap := map[string]interface{}{
+		"Namespace":   ns,
+		"NodeName":    nodeName,
+		"LogAppName":  appName,
+		"LogConfName": confName,
+	}
+	for k, v := range params {
+		confMap[k] = v
+	}
+	conf, err := s.GenConfig(ns, templateLogConfYaml, confMap)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	// create application
+	appMap := map[string]interface{}{
+		"Namespace":      ns,
+		"NodeName":       nodeName,
+		"LogAppName":     appName,
+		"LogConfName":    conf.Name,
+		"LogConfVersion": conf.Version,
+	}
+	for k, v := range params {
+		appMap[k] = v
+	}
+	return s.GenApp(ns, templateLogAppYaml, appMap)
 }
 
 func (s *InitServiceImpl) genNodeCerts(ns, nodeName, appName string) (*specV1.Secret, error) {

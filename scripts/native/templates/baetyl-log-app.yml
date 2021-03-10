@@ -1,0 +1,47 @@
+name: "{{.LogAppName}}"
+namespace: "{{.Namespace}}"
+selector: "baetyl-node-name={{.NodeName}}"
+labels:
+  baetyl-cloud-system: "true"
+type: "container"
+system: true
+services:
+  - name: "baetyl-log"
+    type: "daemonset"
+    image: {{GetModuleImage "baetyl-log"}}
+    args:
+      - "-c"
+      - "/etc/filebeat/filebeat.yml"
+      - "-e"
+    volumeMounts:
+      - name: "conf"
+        mountPath: "/etc/filebeat"
+        readOnly: true
+      - name: "store"
+        mountPath: "/store"
+      - name: "log-docker-containers"
+        mountPath: "/var/lib/docker/containers"
+        readOnly: true
+      - name: "log-containers"
+        mountPath: "/var/log/containers"
+        readOnly: true
+      - name: "log-pods"
+        mountPath: "/var/log/pods"
+        readOnly: true
+volumes:
+  - name: "conf"
+    config:
+      name: "{{.LogConfName}}"
+      version: "{{.LogConfVersion}}"
+  - name: "store"
+    hostPath:
+      path: /var/lib/filebeat-data
+  - name: "log-docker-containers"
+    hostPath:
+      path: /var/lib/docker/containers
+  - name: "log-containers"
+    hostPath:
+      path: /var/log/containers
+  - name: "log-pods"
+    hostPath:
+      path: /var/log/pods

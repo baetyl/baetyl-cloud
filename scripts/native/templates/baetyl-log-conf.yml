@@ -1,0 +1,34 @@
+name: "{{.LogConfName}}"
+namespace: "{{.Namespace}}"
+system: true
+labels:
+  baetyl-app-name: "{{.LogAppName}}"
+  baetyl-node-name: "{{.NodeName}}"
+  baetyl-cloud-system: "true"
+data:
+  conf.yml: |-
+    filebeat.inputs:
+    - type: container
+      enabled: true
+      paths:
+        - /var/log/containers/*_baetyl-edge-system_*.log
+        - /var/log/containers/*_baetyl-edge_*.log
+      fields:
+        node: {{.NodeName}}
+        namespace: {{.Namespace}}
+      fields_under_root: true
+
+    filebeat.band_width.rate: 2m
+
+    setup.template.enabled: false
+    setup.ilm.enabled: false
+
+    output.elasticsearch:
+      hosts: {{GetProperty "elastic-hosts"}}
+      username: "{{GetProperty "elastic-edge-username"}}"
+      password: "{{GetProperty "elastic-edge-password"}}"
+      index: "{{GetProperty "elastic-edge-index"}}"
+      pipeline: "{{GetProperty "elastic-edge-pipeline"}}"
+
+    path.data: store/data
+    path.logs: store/logs
