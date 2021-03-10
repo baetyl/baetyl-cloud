@@ -42,12 +42,14 @@ const (
 )
 
 var (
-	CmdExpirationInSeconds  = int64(60 * 60)
-	HookNamePopulateParams  = "populateParams"
-	HookNameGenAppsByOption = "genAppsByOption"
+	CmdExpirationInSeconds        = int64(60 * 60)
+	HookNamePopulateParams        = "populateParams"
+	HookNamePopulateOptAppsParams = "populateOptAppsParams"
+	HookNameGenAppsByOption       = "genAppsByOption"
 )
 
 type HandlerPopulateParams func(ns string, params map[string]interface{}) error
+type HandlerPopulateOptAppsParams func(ns string, params map[string]interface{}, appAlias []string) error
 type GetInitResource func(ns, nodeName string, params map[string]interface{}) ([]byte, error)
 type GenAppsByOption func(ns string, node *specV1.Node, params map[string]interface{}) ([]*specV1.Application, error)
 type GenAppFunc func(ns, nodeName string, params map[string]interface{}) (*specV1.Application, error)
@@ -306,8 +308,8 @@ func (s *InitServiceImpl) GenOptionalApps(ns string, node string, appAlias []str
 		"NodeName":                   node,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
 	}
-	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
-		err := handler.(HandlerPopulateParams)(ns, params)
+	if handler, ok := s.Hooks[HookNamePopulateOptAppsParams]; ok {
+		err := handler.(HandlerPopulateOptAppsParams)(ns, params, appAlias)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
