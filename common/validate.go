@@ -10,6 +10,7 @@ import (
 
 const (
 	resourceName     = "resourceName"
+	serviceName      = "serviceName"
 	fingerprintValue = "fingerprintValue"
 	memory           = "memory"
 	duration         = "duration"
@@ -34,16 +35,19 @@ var regexps = map[string]string{
 var validate *validator.Validate
 var labelRegex *regexp.Regexp
 var resourceRegex *regexp.Regexp
+var serviceRegex *regexp.Regexp
 var fingerprintRegex *regexp.Regexp
 
 func init() {
 	labelRegex, _ = regexp.Compile("^([A-Za-z0-9][-A-Za-z0-9_\\.]*)?[A-Za-z0-9]?$")
 	resourceRegex, _ = regexp.Compile("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
+	serviceRegex, _ = regexp.Compile("^[a-z0-9]([-a-z0-9]*[a-z0-9])?([a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
 	fingerprintRegex, _ = regexp.Compile("^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$")
 	validate = validator.New()
 	validate.RegisterValidation(nonBaetyl, nonBaetylFunc())
 	validate.RegisterValidation(validLabels, validLabelsFunc())
 	validate.RegisterValidation(resourceName, validRexAndLengthFunc(resourceLength, resourceRegex))
+	validate.RegisterValidation(serviceName, validRexAndLengthFunc(resourceLength, serviceRegex))
 	validate.RegisterValidation(fingerprintValue, validRexAndLengthFunc(resourceLength, fingerprintRegex))
 	validate.RegisterValidation(maxLength, validMaxLengthFunc())
 	for k, v := range regexps {

@@ -245,6 +245,7 @@ func (api *API) listAppByNames(namespace string, appNames []string) (*models.App
 			Version:           app.Version,
 			Namespace:         app.Namespace,
 			Selector:          app.Selector,
+			NodeSelector:      app.NodeSelector,
 			CreationTimestamp: app.CreationTimestamp,
 			Description:       app.Description,
 		})
