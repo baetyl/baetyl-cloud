@@ -151,6 +151,11 @@ func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.N
 
 // List get list node
 func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
+	pageSize := listOptions.GetLimitNumber()
+	if listOptions.NodeSelector != "" && pageSize > 0 {
+		// in order to get all node data
+		listOptions.PageSize = 0
+	}
 	list, err := n.node.ListNode(namespace, listOptions)
 	if err != nil {
 		return nil, err
@@ -168,7 +173,10 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 			node.Report = shadow.Report
 		}
 	}
-
+	if listOptions.NodeSelector != "" {
+		listOptions.PageSize = pageSize
+		return filterNodeListByNodeSelector(list), nil
+	}
 	return list, nil
 }
 
@@ -696,5 +704,51 @@ func updateNodePropertiesMeta(node *specV1.Node, meta *models.NodePropertiesMeta
 	}
 	if meta.DesireMeta != nil {
 		node.Attributes[common.DesireMeta] = meta.DesireMeta
+	}
+}
+
+func filterNodeListByNodeSelector(list *models.NodeList) *models.NodeList {
+	// filter nodes according to nodeSelector
+	items := []specV1.Node{}
+	for _, item := range list.Items {
+		if item.Report == nil || len(item.Report) == 0 {
+			continue
+		}
+		clusterVar, ok := item.Report[common.NodeInfo]
+		if !ok {
+			continue
+		}
+		cluster, ok := clusterVar.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		for _, nodeVar := range cluster {
+			node, ok := nodeVar.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			labelVar, ok := node["labels"]
+			if !ok {
+				continue
+			}
+			labels, ok := labelVar.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			ls := map[string]string{}
+			for k, v := range labels {
+				ls[k] = v.(string)
+			}
+			if ok, err := utils.IsLabelMatch(list.ListOptions.NodeSelector, ls); err != nil || !ok {
+				continue
+			}
+			items = append(items, item)
+		}
+	}
+	start, end := models.GetPagingParam(list.ListOptions, len(items))
+	return &models.NodeList{
+		Total:       len(items),
+		ListOptions: list.ListOptions,
+		Items:       items[start:end],
 	}
 }

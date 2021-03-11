@@ -98,7 +98,7 @@ func setNodeAddressIfExist(msg specV1.Message, report *specV1.Report) {
 	if addr, ok := msg.Metadata["address"]; !ok {
 		return
 	} else {
-		nodeVal, ok := (*report)["node"]
+		nodeVal, ok := (*report)[common.NodeInfo]
 		if ok {
 			nodes, ok := nodeVal.(map[string]interface{})
 			if !ok {
@@ -110,7 +110,7 @@ func setNodeAddressIfExist(msg specV1.Message, report *specV1.Report) {
 					continue
 				}
 				node["address"] = addr
-				(*report)["node"].(map[string]interface{})[k] = node
+				(*report)[common.NodeInfo].(map[string]interface{})[k] = node
 			}
 		}
 	}

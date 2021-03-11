@@ -17,6 +17,7 @@ type Filter struct {
 
 type ListOptions struct {
 	LabelSelector string `form:"selector,omitempty" json:"selector,omitempty"`
+	NodeSelector  string `form:"nodeSelector,omitempty" json:"nodeSelector,omitempty"`
 	FieldSelector string `form:"fieldSelector,omitempty" json:"fieldSelector,omitempty"`
 	Limit         int64  `form:"limit,omitempty" json:"limit,omitempty"`
 	Continue      string `form:"continue,omitempty" json:"continue,omitempty"`
@@ -41,4 +42,21 @@ func (f *Filter) GetFuzzyName() string {
 		return "%" + f.Name + "%"
 	}
 	return f.Name
+}
+
+func GetPagingParam(listOptions *ListOptions, resLen int) (start, end int) {
+	start = 0
+	end = resLen
+	if listOptions.GetLimitNumber() > 0 {
+		start = listOptions.GetLimitOffset()
+		end = listOptions.GetLimitOffset() + listOptions.GetLimitNumber()
+		if end > resLen {
+			end = resLen
+		}
+		if start > resLen {
+			start = 0
+			end = 0
+		}
+	}
+	return start, end
 }

@@ -1201,3 +1201,111 @@ func TestUpdateNodeAppVersion2(t *testing.T) {
 	assert.Equal(t, shadowList.Items[0].Desire.AppInfos(false)[0].Version, "2")
 	assert.Equal(t, shadowList.Items[0].Desire.AppInfos(false)[1].Version, "2")
 }
+
+func TestFilterNodeListByNodeSelector(t *testing.T) {
+	list := &models.NodeList{
+		Total: 8,
+		ListOptions: &models.ListOptions{
+			NodeSelector: "1=1",
+			Filter: models.Filter{
+				PageNo:   1,
+				PageSize: 20,
+			},
+		},
+		Items: []specV1.Node{
+			{
+				Name: "n0",
+				Report: map[string]interface{}{
+					"node": map[string]interface{}{
+						"master": map[string]interface{}{
+							"labels": map[string]interface{}{
+								"1": "1",
+							},
+						},
+					},
+				},
+			},
+			{
+				Name: "n1",
+			},
+			{
+				Name: "n2",
+				Report: map[string]interface{}{
+					"time": "2021-03-04T18:07:02.958761Z",
+				},
+			},
+			{
+				Name: "n3",
+				Report: map[string]interface{}{
+					"node": "err",
+				},
+			},
+			{
+				Name: "n4",
+				Report: map[string]interface{}{
+					"node": map[string]interface{}{
+						"master": "err",
+					},
+				},
+			},
+			{
+				Name: "n5",
+				Report: map[string]interface{}{
+					"node": map[string]interface{}{
+						"master": map[string]interface{}{
+							"arch": "amd64",
+						},
+					},
+				},
+			},
+			{
+				Name: "n6",
+				Report: map[string]interface{}{
+					"node": map[string]interface{}{
+						"master": map[string]interface{}{
+							"labels": "err",
+						},
+					},
+				},
+			},
+			{
+				Name: "n7",
+				Report: map[string]interface{}{
+					"node": map[string]interface{}{
+						"master": map[string]interface{}{
+							"labels": map[string]interface{}{
+								"2": "2",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	expect := &models.NodeList{
+		Total: 1,
+		ListOptions: &models.ListOptions{
+			NodeSelector: "1=1",
+			Filter: models.Filter{
+				PageNo:   1,
+				PageSize: 20,
+			},
+		},
+		Items: []specV1.Node{
+			{
+				Name: "n0",
+				Report: map[string]interface{}{
+					"node": map[string]interface{}{
+						"master": map[string]interface{}{
+							"labels": map[string]interface{}{
+								"1": "1",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	res := filterNodeListByNodeSelector(list)
+	assert.EqualValues(t, expect, res)
+}
