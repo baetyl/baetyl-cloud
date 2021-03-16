@@ -743,6 +743,7 @@ func filterNodeListByNodeSelector(list *models.NodeList) *models.NodeList {
 				continue
 			}
 			items = append(items, item)
+			break
 		}
 	}
 	start, end := models.GetPagingParam(list.ListOptions, len(items))
