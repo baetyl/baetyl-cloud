@@ -4,7 +4,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/baetyl/baetyl-go/v2/utils"
@@ -17,7 +16,7 @@ import (
 
 const KeyCheckResourceDependency = "checkResourceDependency"
 
-type CheckResourceDependency func(ns, nodeName string) error
+type CheckResourceDependencyFunc func(ns, nodeName string) error
 
 //go:generate mockgen -destination=../mock/service/node.go -package=service github.com/baetyl/baetyl-cloud/v2/service NodeService
 
@@ -193,7 +192,7 @@ func (n *NodeServiceImpl) Count(namespace string) (map[string]int, error) {
 
 // Delete delete node
 func (n *NodeServiceImpl) Delete(namespace, name string) error {
-	if check, ok := n.Hooks[KeyCheckResourceDependency].(CheckResourceDependency); ok {
+	if check, ok := n.Hooks[KeyCheckResourceDependency].(CheckResourceDependencyFunc); ok {
 		if err := check(namespace, name); err != nil {
 			return err
 		}
@@ -240,39 +239,7 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 		return n.createShadow(namespace, name, nil, report)
 	}
 
-	// update node props meta
-	node, err := n.node.GetNode(namespace, name)
-	if err != nil {
-		return nil, err
-	}
-	meta, err := getNodePropertiesMeta(node)
-	if err != nil {
-		return nil, err
-	}
-	newPropsReport := map[string]interface{}{}
-	if props, ok := report[common.NodeProps]; ok && props != nil {
-		newPropsReport, ok = props.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("invalid report of node properties")
-		}
-	}
-	oldPropsReport := map[string]interface{}{}
-	if props, ok := shadow.Report[common.NodeProps]; ok && props != nil {
-		oldPropsReport, ok = props.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("invalid report of node properties")
-		}
-	}
-	diff, err := specV1.Desire(newPropsReport).DiffWithNil(oldPropsReport)
-	now := time.Now().UTC()
-	for key, val := range diff {
-		meta.ReportMeta[key] = now
-		if val == nil {
-			delete(meta.ReportMeta, key)
-		}
-	}
-	updateNodePropertiesMeta(node, meta)
-	if _, err := n.node.UpdateNode(namespace, node); err != nil {
+	if err := n.updateReportNodeProperties(namespace, name, report, shadow); err != nil {
 		return nil, err
 	}
 
@@ -284,13 +251,6 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 			return nil, err
 		}
 		// TODO refactor merge and remove this
-		// since merge won't delete exist key-val, node props should override
-		if len(newPropsReport) == 0 {
-			delete(shadow.Report, common.NodeProps)
-		} else {
-			shadow.Report[common.NodeProps] = newPropsReport
-		}
-		// TODO refactor merge and remove this
 		// since merge won't delete exist key-val, node info and stats should override
 		if node, ok := report[common.NodeInfo]; ok {
 			shadow.Report[common.NodeInfo] = node
@@ -300,6 +260,41 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 		}
 	}
 	return n.shadow.UpdateReport(shadow)
+}
+
+func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report specV1.Report, shad *models.Shadow) error {
+	node, err := n.node.GetNode(ns, name)
+	if err != nil {
+		return err
+	}
+	newReport := map[string]interface{}{}
+	if props, ok := report[common.NodeProps].(map[string]interface{}); ok {
+		newReport = props
+	}
+	oldReport := map[string]interface{}{}
+	if props, ok := shad.Report[common.NodeProps].(map[string]interface{}); ok {
+		oldReport = props
+	}
+	diff, err := specV1.Desire(newReport).DiffWithNil(oldReport)
+	meta := getNodePropertiesMeta(node)
+	now := time.Now().UTC()
+	for key, val := range diff {
+		meta.ReportMeta[key] = now
+		if val == nil {
+			delete(meta.ReportMeta, key)
+		}
+	}
+	updateNodePropertiesMeta(node, meta)
+	if _, err := n.node.UpdateNode(ns, node); err != nil {
+		return err
+	}
+	// since merge won't delete exist key-val, node props should override
+	if len(newReport) == 0 {
+		delete(shad.Report, common.NodeProps)
+	} else {
+		shad.Report[common.NodeProps] = newReport
+	}
+	return nil
 }
 
 // UpdateDesire Update Desire
@@ -554,26 +549,15 @@ func (n *NodeServiceImpl) GetNodeProperties(namespace, name string) (*models.Nod
 	if err != nil {
 		return nil, err
 	}
-	meta, err := getNodePropertiesMeta(node)
-	if err != nil {
-		return nil, err
-	}
 	report := map[string]interface{}{}
-	props, ok := shadow.Report[common.NodeProps]
-	if ok && props != nil {
-		report, ok = props.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("invalid report shadow")
-		}
+	if props, ok := shadow.Report[common.NodeProps].(map[string]interface{}); ok {
+		report = props
 	}
 	desire := map[string]interface{}{}
-	props, ok = shadow.Desire[common.NodeProps]
-	if ok && props != nil {
-		desire, ok = props.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("invalid report shadow")
-		}
+	if props, ok := shadow.Desire[common.NodeProps].(map[string]interface{}); ok {
+		desire = props
 	}
+	meta := getNodePropertiesMeta(node)
 	nodeProps := &models.NodeProperties{
 		State: models.NodePropertiesState{
 			Report: report,
@@ -602,22 +586,16 @@ func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *mo
 	if err != nil {
 		return nil, err
 	}
-	meta, err := getNodePropertiesMeta(node)
-	if err != nil {
-		return nil, common.Error(common.ErrResourceNotFound, common.Field("node", node.Name), common.Field("meta", "shadow meta"))
-	}
 	oldDesire := map[string]interface{}{}
-	if props, ok := shadow.Desire[common.NodeProps]; ok && props != nil {
-		oldDesire, ok = props.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("invalid desire of node properties")
-		}
+	if props, ok := shadow.Desire[common.NodeProps].(map[string]interface{}); ok {
+		oldDesire = props
 	}
 	var newDesire specV1.Desire = props.State.Desire
 	diff, err := newDesire.DiffWithNil(oldDesire)
 	if err != nil {
 		return nil, err
 	}
+	meta := getNodePropertiesMeta(node)
 	now := time.Now().UTC()
 	for key, val := range diff {
 		meta.DesireMeta[key] = now
@@ -626,11 +604,8 @@ func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *mo
 		}
 	}
 	report := map[string]interface{}{}
-	if props, ok := shadow.Report[common.NodeProps]; ok && props != nil {
-		report, ok = props.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("invalid report of node properties")
-		}
+	if props, ok := shadow.Report[common.NodeProps].(map[string]interface{}); ok {
+		report = props
 	}
 	props.State.Report = report
 	// cast to map[string]interface{} should not omit
@@ -670,34 +645,29 @@ func (n *NodeServiceImpl) UpdateNodeMode(ns, name, mode string) error {
 	return nil
 }
 
-func getNodePropertiesMeta(node *specV1.Node) (*models.NodePropertiesMetadata, error) {
+func getNodePropertiesMeta(node *specV1.Node) *models.NodePropertiesMetadata {
 	propsMeta := &models.NodePropertiesMetadata{
-		ReportMeta: map[string]interface{}{},
-		DesireMeta: map[string]interface{}{},
+		ReportMeta: make(map[string]interface{}),
+		DesireMeta: make(map[string]interface{}),
 	}
-	meta, ok := node.Attributes[common.ReportMeta]
-	if ok && meta != nil {
-		propsMeta.ReportMeta, ok = meta.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("invalid report meta")
-		}
+	if node == nil || node.Attributes == nil {
+		return propsMeta
 	}
-	meta, ok = node.Attributes[common.DesireMeta]
-	if ok && meta != nil {
-		propsMeta.DesireMeta, ok = meta.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("invalid desire meta")
-		}
+	if meta, ok := node.Attributes[common.ReportMeta].(map[string]interface{}); ok {
+		propsMeta.ReportMeta = meta
 	}
-	return propsMeta, nil
+	if meta, ok := node.Attributes[common.DesireMeta].(map[string]interface{}); ok {
+		propsMeta.DesireMeta = meta
+	}
+	return propsMeta
 }
 
 func updateNodePropertiesMeta(node *specV1.Node, meta *models.NodePropertiesMetadata) {
-	if meta == nil {
+	if meta == nil || node == nil {
 		return
 	}
 	if node.Attributes == nil {
-		node.Attributes = map[string]interface{}{}
+		node.Attributes = make(map[string]interface{})
 	}
 	if meta.ReportMeta != nil {
 		node.Attributes[common.ReportMeta] = meta.ReportMeta
