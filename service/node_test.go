@@ -893,34 +893,6 @@ func TestGetNodeProperties(t *testing.T) {
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get shadow"))
 	_, err = ns.GetNodeProperties("default", "abc")
 	assert.Error(t, err)
-
-	invalidShadow := &models.Shadow{
-		Report: map[string]interface{}{"nodeprops": "a"},
-	}
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(invalidShadow, nil)
-	_, err = ns.GetNodeProperties("default", "abc")
-	assert.Error(t, err)
-
-	invalidShadow = &models.Shadow{
-		Desire: map[string]interface{}{"nodeprops": "a"},
-	}
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(invalidShadow, nil)
-	_, err = ns.GetNodeProperties("default", "abc")
-	assert.Error(t, err)
-
-	invalidNode := &v1.Node{Attributes: map[string]interface{}{common.ReportMeta: "a"}}
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(invalidNode, nil)
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil)
-	_, err = ns.GetNodeProperties("default", "abc")
-	assert.Error(t, err)
-
-	invalidNode = &v1.Node{Attributes: map[string]interface{}{common.DesireMeta: "a"}}
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(invalidNode, nil)
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil)
-	_, err = ns.GetNodeProperties("default", "abc")
-	assert.Error(t, err)
 }
 
 func TestUpdateNodeProperties(t *testing.T) {
@@ -1016,29 +988,6 @@ func TestUpdateNodeProperties(t *testing.T) {
 
 	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get shadow"))
-	_, err = ns.UpdateNodeProperties("default", "abc", nodeProps)
-	assert.Error(t, err)
-
-	invalidShadow := &models.Shadow{
-		Desire: map[string]interface{}{"nodeprops": "a"},
-	}
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(invalidShadow, nil)
-	_, err = ns.UpdateNodeProperties("default", "abc", nodeProps)
-	assert.Error(t, err)
-
-	invalidShadow = &models.Shadow{
-		Report: map[string]interface{}{"nodeprops": "a"},
-		Desire: map[string]interface{}{"nodeprops": map[string]interface{}{"a": "1"}},
-	}
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(invalidShadow, nil)
-	_, err = ns.UpdateNodeProperties("default", "abc", nodeProps)
-	assert.Error(t, err)
-
-	invalidNode := &v1.Node{Attributes: map[string]interface{}{common.ReportMeta: "a"}}
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(invalidNode, nil)
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil)
 	_, err = ns.UpdateNodeProperties("default", "abc", nodeProps)
 	assert.Error(t, err)
 
