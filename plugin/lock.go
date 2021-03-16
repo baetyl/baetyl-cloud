@@ -5,28 +5,25 @@ package plugin
 // Locker - the lock manager for baetyl cloud
 type Locker interface {
 
-	// Lock lock the resource
+	// Lock lock the resource, Lock should be paired with Unlock.
 	// PARAMS:
 	//   - name: the lock's name
 	// RETURNS:
-	//   true: if locked success
 	//   error: if has error else nil
-	Lock(name string) (bool, error)
+	Lock(name string) error
 
-	// LockWithExpireTime lock the resouce with expire time
+	// LockWithExpireTime lock the resource with expire time
 	// PARAMS:
 	//   - name: the lock's name
 	//   - expireTime(seconds): the expire time of the lock, if acquired the lock
 	// RETURNS:
-	//   true: if locked success
 	//   error: if has error else nil
-	LockWithExpireTime(name string, expireTime int64) (bool, error)
+	LockWithExpireTime(name string, expireTime int64) error
 
-	// ReleaseLock release the lock by name
+	// Unlock release the lock by name
 	// PARAMS:
 	//	 - name: the lock's name
 	// RETURNS:
-	//   true: if lock is released
 	//   error: if has error else nil
-	ReleaseLock(name string) (bool, error)
+	Unlock(name string) error
 }
