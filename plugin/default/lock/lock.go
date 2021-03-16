@@ -36,27 +36,28 @@ func New() (plugin.Plugin, error) {
 }
 
 // Lock lock the resource DefaultExpireTime seconds
-func (l *taskLocker) Lock(name string) (bool, error) {
+func (l *taskLocker) Lock(name string) error {
 	return l.LockWithExpireTime(name, DefaultExpireTime)
 }
 
 // LockWithExpireTime lock the resource expireTime seconds
-func (l *taskLocker) LockWithExpireTime(name string, expireTime int64) (bool, error) {
+func (l *taskLocker) LockWithExpireTime(name string, expireTime int64) error {
 	t, err := l.task.GetTask(name)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if t == nil {
-		return false, nil
+		return nil
 	}
 
 	t.ExpireTime = expireTime
-	return l.task.AcquireTaskLock(t)
+	_, err = l.task.AcquireTaskLock(t)
+	return err
 }
 
-// ReleaseLook releaseLock
-func (l *taskLocker) ReleaseLock(name string) (bool, error) {
+// Unlock unlock
+func (l *taskLocker) Unlock(name string) error {
 	return l.LockWithExpireTime(name, 0)
 }
 

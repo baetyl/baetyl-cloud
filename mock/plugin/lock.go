@@ -33,12 +33,11 @@ func (m *MockLocker) EXPECT() *MockLockerMockRecorder {
 }
 
 // Lock mocks base method
-func (m *MockLocker) Lock(arg0 string) (bool, error) {
+func (m *MockLocker) Lock(arg0 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Lock", arg0)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Lock indicates an expected call of Lock
@@ -48,12 +47,11 @@ func (mr *MockLockerMockRecorder) Lock(arg0 interface{}) *gomock.Call {
 }
 
 // LockWithExpireTime mocks base method
-func (m *MockLocker) LockWithExpireTime(arg0 string, arg1 int64) (bool, error) {
+func (m *MockLocker) LockWithExpireTime(arg0 string, arg1 int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "LockWithExpireTime", arg0, arg1)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // LockWithExpireTime indicates an expected call of LockWithExpireTime
@@ -62,17 +60,16 @@ func (mr *MockLockerMockRecorder) LockWithExpireTime(arg0, arg1 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LockWithExpireTime", reflect.TypeOf((*MockLocker)(nil).LockWithExpireTime), arg0, arg1)
 }
 
-// ReleaseLock mocks base method
-func (m *MockLocker) ReleaseLock(arg0 string) (bool, error) {
+// UnLock mocks base method
+func (m *MockLocker) UnLock(arg0 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ReleaseLock", arg0)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "UnLock", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// ReleaseLock indicates an expected call of ReleaseLock
-func (mr *MockLockerMockRecorder) ReleaseLock(arg0 interface{}) *gomock.Call {
+// UnLock indicates an expected call of UnLock
+func (mr *MockLockerMockRecorder) UnLock(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReleaseLock", reflect.TypeOf((*MockLocker)(nil).ReleaseLock), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnLock", reflect.TypeOf((*MockLocker)(nil).UnLock), arg0)
 }
