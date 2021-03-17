@@ -3,6 +3,7 @@ package service
 import (
 	"strings"
 
+	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
@@ -78,6 +79,9 @@ func (a *applicationService) Get(namespace, name, version string) (*specV1.Appli
 // Create create application
 func (a *applicationService) Create(namespace string, app *specV1.Application) (*specV1.Application, error) {
 	configs, secrets, err := a.getConfigsAndSecrets(namespace, app)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 	if err = a.indexService.RefreshConfigIndexByApp(namespace, app.Name, configs); err != nil {
 		return nil, err
 	}
