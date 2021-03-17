@@ -89,7 +89,7 @@ func (m *TaskManager) RunTasks() {
 
 func (m *TaskManager) runTask(task *models.Task) {
 	defer func() { <-m.concurrency }()
-	err := m.lock.LockWithExpireTime(task.Name, m.config.Lock.ExpireTime)
+	err := m.lock.LockWithExpireTime(task.Name, "", m.config.Lock.ExpireTime)
 	if err != nil {
 		log.L().Error("get lock error",
 			log.Any("name", task.Name),

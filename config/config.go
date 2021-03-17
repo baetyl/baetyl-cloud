@@ -38,7 +38,7 @@ type CloudConfig struct {
 		Property   string   `yaml:"property" json:"property" default:"database"`
 		Module     string   `yaml:"module" json:"module" default:"database"`
 		SyncLinks  []string `yaml:"synclinks" json:"synclinks" default:"[\"httplink\"]"`
-		Locker     string   `yaml:"locker" json:"locker" default:"defaultlocker"`
+		Locker     string   `yaml:"locker" json:"locker" default:"emptylocker"`
 		Task       string   `yaml:"task" json:"task" default:"database"`
 		DM         string   `yaml:"dm" json:"dm" default:"databaseext"`
 	} `yaml:"plugin" json:"plugin"`

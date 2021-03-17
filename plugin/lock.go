@@ -10,7 +10,7 @@ type Locker interface {
 	//   - name: the lock's name
 	// RETURNS:
 	//   error: if has error else nil
-	Lock(name string) error
+	Lock(name, value string) error
 
 	// LockWithExpireTime lock the resource with expire time
 	// PARAMS:
@@ -18,12 +18,12 @@ type Locker interface {
 	//   - expireTime(seconds): the expire time of the lock, if acquired the lock
 	// RETURNS:
 	//   error: if has error else nil
-	LockWithExpireTime(name string, expireTime int64) error
+	LockWithExpireTime(name, value string, expireTime int64) error
 
 	// Unlock release the lock by name
 	// PARAMS:
 	//	 - name: the lock's name
 	// RETURNS:
 	//   error: if has error else nil
-	Unlock(name string) error
+	Unlock(name, value string) error
 }
