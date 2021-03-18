@@ -239,10 +239,6 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 		return n.createShadow(namespace, name, nil, report)
 	}
 
-	if err := n.updateReportNodeProperties(namespace, name, report, shadow); err != nil {
-		return nil, err
-	}
-
 	if shadow.Report == nil {
 		shadow.Report = report
 	} else {
@@ -259,6 +255,9 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 			shadow.Report[common.NodeStats] = nodeStats
 		}
 	}
+	if err := n.updateReportNodeProperties(namespace, name, report, shadow); err != nil {
+		return nil, err
+	}
 	return n.shadow.UpdateReport(shadow)
 }
 
@@ -267,20 +266,21 @@ func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report spe
 	if err != nil {
 		return err
 	}
-	newReport := map[string]interface{}{}
+	newProps := map[string]interface{}{}
 	if props, ok := report[common.NodeProps].(map[string]interface{}); ok {
-		newReport = props
+		newProps = props
 	}
-	oldReport := map[string]interface{}{}
+	oldProps := map[string]interface{}{}
 	if props, ok := shad.Report[common.NodeProps].(map[string]interface{}); ok {
-		oldReport = props
+		oldProps = props
 	}
-	diff, err := specV1.Desire(newReport).DiffWithNil(oldReport)
+	diff, err := specV1.Desire(newProps).DiffWithNil(oldProps)
 	meta := getNodePropertiesMeta(node)
 	now := time.Now().UTC()
 	for key, val := range diff {
-		meta.ReportMeta[key] = now
-		if val == nil {
+		if val != nil {
+			meta.ReportMeta[key] = now
+		} else {
 			delete(meta.ReportMeta, key)
 		}
 	}
@@ -289,10 +289,10 @@ func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report spe
 		return err
 	}
 	// since merge won't delete exist key-val, node props should override
-	if len(newReport) == 0 {
+	if len(newProps) == 0 {
 		delete(shad.Report, common.NodeProps)
 	} else {
-		shad.Report[common.NodeProps] = newReport
+		shad.Report[common.NodeProps] = newProps
 	}
 	return nil
 }
