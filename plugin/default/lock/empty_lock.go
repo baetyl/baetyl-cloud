@@ -3,7 +3,7 @@ package lock
 import "github.com/baetyl/baetyl-cloud/v2/plugin"
 
 func init() {
-	plugin.RegisterFactory("emptylocker", New)
+	plugin.RegisterFactory("defaultlocker", New)
 }
 
 type emptyLocker struct{}
