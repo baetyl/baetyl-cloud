@@ -1130,7 +1130,7 @@ func TestUpdateNodeAppVersion2(t *testing.T) {
 			}
 			copyDesire(&shadow.Desire, &shadowList.Items[0].Desire)
 			return &shadowList.Items[0], nil
-		}).Times(2)
+		}).AnyTimes()
 
 	wg := sync.WaitGroup{}
 	wg.Add(2)
