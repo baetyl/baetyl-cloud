@@ -6,7 +6,7 @@ func init() {
 	plugin.RegisterFactory("emptylocker", New)
 }
 
-type emptyLocker struct {}
+type emptyLocker struct{}
 
 func New() (plugin.Plugin, error) {
 	return &emptyLocker{}, nil
