@@ -52,6 +52,7 @@ func (api *API) ListApplication(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
+	api.ToApplicationListView(apps)
 	return apps, err
 }
 
@@ -477,6 +478,14 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 		}
 	}
 	return app, configs, nil
+}
+
+func (api *API) ToApplicationListView(apps *models.ApplicationList) {
+	for i := range apps.Items {
+		if apps.Items[i].Mode == "" {
+			apps.Items[i].Mode = context.RunModeKube
+		}
+	}
 }
 
 func translateNativeApp(appView *models.ApplicationView,
