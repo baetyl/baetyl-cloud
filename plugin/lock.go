@@ -1,5 +1,7 @@
 package plugin
 
+import "io"
+
 //go:generate mockgen -destination=../mock/plugin/lock.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin Locker
 
 // Locker - the lock manager for baetyl cloud
@@ -26,4 +28,5 @@ type Locker interface {
 	// RETURNS:
 	//   error: if has error else nil
 	Unlock(name, value string) error
+	io.Closer
 }

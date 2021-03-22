@@ -148,6 +148,7 @@ func PopulateFailedResponse(cc *Context, err error, abort bool) {
 
 // HandlerFunc HandlerFunc
 type HandlerFunc func(c *Context) (interface{}, error)
+type LockFunc func(name, value string) error
 
 // Wrapper Wrapper
 // TODO: to use gin.HandlerFunc ?
@@ -164,6 +165,38 @@ func Wrapper(handler HandlerFunc) func(c *gin.Context) {
 				PopulateFailedResponse(cc, err, false)
 			}
 		}()
+		res, err := handler(cc)
+		if err != nil {
+			log.L().Error("failed to handler request", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
+			PopulateFailedResponse(cc, err, false)
+			return
+		}
+		log.L().Debug("process success", log.Any(cc.GetTrace()), log.Any("response", _toJsonString(res)))
+		// unlike JSON, does not replace special html characters with their unicode entities. eg: JSON(&)->'\u0026' PureJSON(&)->'&'
+		cc.PureJSON(PackageResponse(res))
+	}
+}
+
+// WrapperWithLock wrap handler with lock
+func WrapperWithLock(handler HandlerFunc, lockFunc, unlockFunc LockFunc) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		cc := NewContext(c)
+		defer func() {
+			if r := recover(); r != nil {
+				err, ok := r.(error)
+				if !ok {
+					err = Error(ErrUnknown, Field("error", r))
+				}
+				log.L().Info("handle a panic", log.Any(cc.GetTrace()), log.Code(err), log.Error(err), log.Any("panic", string(debug.Stack())))
+				PopulateFailedResponse(cc, err, false)
+			}
+		}()
+		requestId := cc.Request.Header.Get(GetTraceHeader())
+		err := lockFunc("namespace_" + cc.GetNamespace(), requestId)
+		if err != nil {
+			return
+		}
+		defer unlockFunc(cc.GetNamespace(), requestId)
 		res, err := handler(cc)
 		if err != nil {
 			log.L().Error("failed to handler request", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
