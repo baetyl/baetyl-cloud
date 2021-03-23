@@ -159,6 +159,15 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	if n.Attributes == nil {
+		n.Attributes = make(map[string]interface{})
+	}
+	version, err := api.getCoreLatestVersion()
+	if err != nil {
+		return nil, err
+	}
+	n.Attributes["BaetylCoreVersion"] = version
+
 	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
 		if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
@@ -870,6 +879,14 @@ func (api *API) getCoreCurrentVersionByImage(image string) (string, error) {
 	return app.Version, nil
 }
 
+func (api *API) getCoreLatestVersion() (string, error) {
+	app, err := api.Module.GetLatestModule(BaetylModule)
+	if err != nil {
+		return "", err
+	}
+	return app.Version, nil
+}
+
 func (api *API) getCoreImageByVersion(version string) (string, error) {
 	app, err := api.Module.GetModuleByVersion(BaetylModule, version)
 	if err != nil {
@@ -904,6 +921,7 @@ func (api *API) getCoreAppConfig(app *v1.Application) (*v1.Configuration, error)
 }
 
 func (api *API) updateCoreVersions(node *v1.Node, currentVersion, updateVersion string) {
+	node.Attributes[v1.BaetylCoreVersion] = updateVersion
 	if v, ok := node.Attributes[BaetylCorePrevVersion]; ok && v.(string) == updateVersion {
 		delete(node.Attributes, BaetylCorePrevVersion)
 		return
