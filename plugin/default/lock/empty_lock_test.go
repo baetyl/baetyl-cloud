@@ -1,6 +1,7 @@
 package lock
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,14 +10,11 @@ import (
 func TestEmptyLocker(t *testing.T) {
 	locker := &emptyLocker{}
 
-	err := locker.Lock("", "")
+	res, err := locker.Lock(context.Background(), "", 0)
 	assert.NoError(t, err)
+	assert.Equal(t, res, "")
 
-	err = locker.LockWithExpireTime("", "", 10)
-	assert.NoError(t, err)
-
-	err = locker.Unlock("", "")
-	assert.NoError(t, err)
+	locker.Unlock(context.Background(), "", "")
 
 	err = locker.Close()
 	assert.NoError(t, err)

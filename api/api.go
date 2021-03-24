@@ -23,6 +23,7 @@ type API struct {
 	License  service.LicenseService
 	Template service.TemplateService
 	Task     service.TaskService
+	Locker   service.LockerService
 	*service.AppCombinedService
 	log *log.Logger
 }
@@ -90,6 +91,10 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
+	lockerService, err := service.NewLockerService(config)
+	if err != nil {
+		return nil, err
+	}
 	return &API{
 		NS:                 namespaceService,
 		Node:               nodeService,
@@ -104,6 +109,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		License:            licenseService,
 		Template:           templateService,
 		Task:               taskService,
+		Locker:             lockerService,
 		AppCombinedService: acs,
 		log:                log.L().With(log.Any("api", "admin")),
 	}, nil

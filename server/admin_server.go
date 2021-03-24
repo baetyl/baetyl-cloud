@@ -84,7 +84,7 @@ func (s *AdminServer) InitRoute() {
 	{
 		configs := v1.Group("/configs")
 		configs.GET("/:name", common.Wrapper(s.api.GetConfig))
-		configs.PUT("/:name", common.Wrapper(s.api.UpdateConfig))
+		configs.PUT("/:name", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.UpdateConfig))
 		configs.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceForDeleting, true), common.Wrapper(s.api.DeleteConfig))
 		configs.POST("", common.WrapperRaw(s.api.ValidateResourceForCreating, true), common.Wrapper(s.api.CreateConfig))
 		configs.GET("", common.Wrapper(s.api.ListConfig))
@@ -103,7 +103,7 @@ func (s *AdminServer) InitRoute() {
 	{
 		certificate := v1.Group("/certificates")
 		certificate.GET("/:name", common.Wrapper(s.api.GetCertificate))
-		certificate.PUT("/:name", common.Wrapper(s.api.UpdateCertificate))
+		certificate.PUT("/:name", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.UpdateCertificate))
 		certificate.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceForDeleting, true), common.Wrapper(s.api.DeleteCertificate))
 		certificate.POST("", common.WrapperRaw(s.api.ValidateResourceForCreating, true), common.Wrapper(s.api.CreateCertificate))
 		certificate.GET("", common.Wrapper(s.api.ListCertificate))
@@ -124,7 +124,7 @@ func (s *AdminServer) InitRoute() {
 		nodes.PUT("", common.Wrapper(s.api.GetNodes))
 		nodes.GET("/:name/apps", common.Wrapper(s.api.GetAppByNode))
 		nodes.GET("/:name/stats", common.Wrapper(s.api.GetNodeStats))
-		nodes.PUT("/:name", common.Wrapper(s.api.UpdateNode))
+		nodes.PUT("/:name", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.UpdateNode))
 		nodes.DELETE("/:name", common.Wrapper(s.api.DeleteNode))
 		nodes.POST("", s.NodeQuotaHandler, common.Wrapper(s.api.CreateNode))
 		nodes.GET("", common.Wrapper(s.api.ListNode))
@@ -144,9 +144,9 @@ func (s *AdminServer) InitRoute() {
 		apps.GET("/:name/secrets", common.Wrapper(s.api.GetSysAppSecrets))
 		apps.GET("/:name/certificates", common.Wrapper(s.api.GetSysAppCertificates))
 		apps.GET("/:name/registries", common.Wrapper(s.api.GetSysAppRegistries))
-		apps.PUT("/:name", common.Wrapper(s.api.UpdateApplication))
+		apps.PUT("/:name", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.UpdateApplication))
 		apps.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceForDeleting, true), common.Wrapper(s.api.DeleteApplication))
-		apps.POST("", common.WrapperRaw(s.api.ValidateResourceForCreating, true), common.Wrapper(s.api.CreateApplication))
+		apps.POST("", common.WrapperRaw(s.api.ValidateResourceForCreating, true), common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.CreateApplication))
 		apps.GET("", common.Wrapper(s.api.ListApplication))
 	}
 	{
