@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"runtime/debug"
@@ -148,6 +149,8 @@ func PopulateFailedResponse(cc *Context, err error, abort bool) {
 
 // HandlerFunc HandlerFunc
 type HandlerFunc func(c *Context) (interface{}, error)
+type LockFunc func(ctx context.Context, name string, ttl int64) (string, error)
+type UnlockFunc func(ctx context.Context, name, version string)
 
 // Wrapper Wrapper
 // TODO: to use gin.HandlerFunc ?
@@ -173,6 +176,33 @@ func Wrapper(handler HandlerFunc) func(c *gin.Context) {
 		log.L().Debug("process success", log.Any(cc.GetTrace()), log.Any("response", _toJsonString(res)))
 		// unlike JSON, does not replace special html characters with their unicode entities. eg: JSON(&)->'\u0026' PureJSON(&)->'&'
 		cc.PureJSON(PackageResponse(res))
+	}
+}
+
+// WrapperWithLock wrap handler with lock
+func WrapperWithLock(lockFunc LockFunc, unlockFunc UnlockFunc) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		cc := NewContext(c)
+		defer func() {
+			if r := recover(); r != nil {
+				err, ok := r.(error)
+				if !ok {
+					err = Error(ErrUnknown, Field("error", r))
+				}
+				log.L().Info("handle a panic", log.Any(cc.GetTrace()), log.Code(err), log.Error(err), log.Any("panic", string(debug.Stack())))
+				PopulateFailedResponse(cc, err, false)
+			}
+		}()
+		ctx := context.Background()
+		lockName := "namespace_" + cc.GetNamespace()
+		version, err := lockFunc(ctx, lockName, 0)
+		if err != nil {
+			log.L().Error("failed to handler request", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
+			PopulateFailedResponse(cc, err, true)
+			return
+		}
+		defer unlockFunc(ctx, lockName, version)
+		cc.Next()
 	}
 }
 

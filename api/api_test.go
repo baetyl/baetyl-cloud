@@ -31,6 +31,7 @@ func TestNewAdminAPI(t *testing.T) {
 	c.Plugin.Module = common.RandString(9)
 	c.Plugin.SyncLinks = []string{common.RandString(9), common.RandString(9)}
 	c.Plugin.Task = common.RandString(9)
+	c.Plugin.Locker = common.RandString(9)
 
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
@@ -92,6 +93,11 @@ func TestNewAdminAPI(t *testing.T) {
 	mockTask := mockPlugin.NewMockTask(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Task, func() (plugin.Plugin, error) {
 		return mockTask, nil
+	})
+
+	mockLocker := mockPlugin.NewMockLocker(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Locker, func() (plugin.Plugin, error) {
+		return mockLocker, nil
 	})
 	api, err := NewAPI(c)
 	assert.NoError(t, err)

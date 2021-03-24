@@ -89,17 +89,6 @@ func (m *TaskManager) RunTasks() {
 
 func (m *TaskManager) runTask(task *models.Task) {
 	defer func() { <-m.concurrency }()
-	err := m.lock.LockWithExpireTime(task.Name, "", m.config.Lock.ExpireTime)
-	if err != nil {
-		log.L().Error("get lock error",
-			log.Any("name", task.Name),
-			log.Any("namespace", task.Namespace),
-			log.Any("resourceType", task.ResourceType),
-			log.Any("resourceName", task.ResourceName),
-			log.Error(err))
-		return
-	}
-
 	psList := TaskRegister.GetProcessorListByTask(task.RegistrationName)
 
 	if task.ProcessorsStatus == nil {
@@ -131,7 +120,7 @@ func (m *TaskManager) runTask(task *models.Task) {
 		task.Status = models.TaskFinished
 	}
 	task.Version = task.Version + 1
-	_, err = m.taskService.UpdateTask(task)
+	_, err := m.taskService.UpdateTask(task)
 	if err != nil {
 		log.L().Error("update task error",
 			log.Any("name", task.Name),

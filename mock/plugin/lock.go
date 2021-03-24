@@ -5,6 +5,7 @@
 package plugin
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -32,44 +33,43 @@ func (m *MockLocker) EXPECT() *MockLockerMockRecorder {
 	return m.recorder
 }
 
-// Lock mocks base method
-func (m *MockLocker) Lock(arg0, arg1 string) error {
+// Close mocks base method
+func (m *MockLocker) Close() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Lock", arg0, arg1)
+	ret := m.ctrl.Call(m, "Close")
 	ret0, _ := ret[0].(error)
 	return ret0
+}
+
+// Close indicates an expected call of Close
+func (mr *MockLockerMockRecorder) Close() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockLocker)(nil).Close))
+}
+
+// Lock mocks base method
+func (m *MockLocker) Lock(arg0 context.Context, arg1 string, arg2 int64) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Lock", arg0, arg1, arg2)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Lock indicates an expected call of Lock
-func (mr *MockLockerMockRecorder) Lock(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockLockerMockRecorder) Lock(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lock", reflect.TypeOf((*MockLocker)(nil).Lock), arg0, arg1)
-}
-
-// LockWithExpireTime mocks base method
-func (m *MockLocker) LockWithExpireTime(arg0, arg1 string, arg2 int64) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "LockWithExpireTime", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// LockWithExpireTime indicates an expected call of LockWithExpireTime
-func (mr *MockLockerMockRecorder) LockWithExpireTime(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LockWithExpireTime", reflect.TypeOf((*MockLocker)(nil).LockWithExpireTime), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lock", reflect.TypeOf((*MockLocker)(nil).Lock), arg0, arg1, arg2)
 }
 
 // Unlock mocks base method
-func (m *MockLocker) Unlock(arg0, arg1 string) error {
+func (m *MockLocker) Unlock(arg0 context.Context, arg1, arg2 string) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Unlock", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
+	m.ctrl.Call(m, "Unlock", arg0, arg1, arg2)
 }
 
 // Unlock indicates an expected call of Unlock
-func (mr *MockLockerMockRecorder) Unlock(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockLockerMockRecorder) Unlock(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unlock", reflect.TypeOf((*MockLocker)(nil).Unlock), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unlock", reflect.TypeOf((*MockLocker)(nil).Unlock), arg0, arg1, arg2)
 }
