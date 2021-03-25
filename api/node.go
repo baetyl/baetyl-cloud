@@ -432,7 +432,7 @@ func (api *API) ParseAndCheckNodeMode(c *common.Context) (*models.NodeMode, erro
 	if err != nil {
 		return nil, err
 	}
-	if nodeMode.Mode != string(v1.CloudMode) && nodeMode.Mode != string(v1.LocalMode) {
+	if v1.SyncMode(nodeMode.Mode) != v1.CloudMode && v1.SyncMode(nodeMode.Mode) != v1.LocalMode {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("mode", "mode should be local or cloud"))
 	}
 	return nodeMode, nil
