@@ -444,6 +444,9 @@ func TestCreateNode(t *testing.T) {
 	api.PKI = sPKI
 	api.Init = sInit
 
+	sModule := ms.NewMockModuleService(mockCtl)
+	api.Module = sModule
+
 	mNode := getMockNode2()
 
 	app1 := &specV1.Application{
@@ -462,6 +465,11 @@ func TestCreateNode(t *testing.T) {
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(mNode, nil)
+	m := &models.Module{
+		Name:    "baetyl",
+		Version: "2.1.2",
+	}
+	sModule.EXPECT().GetLatestModule(gomock.Any()).Return(m, nil).AnyTimes()
 
 	mNode2 := getMockNode2()
 	w := httptest.NewRecorder()
@@ -556,6 +564,9 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 	api.PKI = sPKI
 	api.Init = sInit
 
+	sModule := ms.NewMockModuleService(mockCtl)
+	api.Module = sModule
+
 	mNode := &specV1.Node{
 		Namespace: "default",
 		Name:      "abc",
@@ -585,6 +596,11 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(mNode, nil)
+	m := &models.Module{
+		Name:    "core",
+		Version: "2.1.2",
+	}
+	sModule.EXPECT().GetLatestModule(gomock.Any()).Return(m, nil).AnyTimes()
 
 	mNode2 := getMockNode2()
 	w := httptest.NewRecorder()
