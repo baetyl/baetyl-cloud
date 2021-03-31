@@ -108,6 +108,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 
 	config.Version = res.Version
 	config.UpdateTimestamp = time.Now()
+	config.CreationTimestamp = res.CreationTimestamp
 	res, err = api.Config.Update(ns, config)
 	if err != nil {
 		log.L().Error("Update config failed", log.Error(err))
