@@ -175,6 +175,11 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 		return nil, errors.Trace(err)
 	}
 
+	node, err := s.NodeService.Get(ns, nodeName)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	params["Namespace"] = ns
 	params["NodeName"] = nodeName
 	params["NodeCertName"] = cert.Name
@@ -186,6 +191,8 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["EdgeSystemNamespace"] = context.EdgeSystemNamespace()
 	params["InitAppName"] = init.Name
 	params["InitVersion"] = init.Version
+	params["GPUStats"] = node.Accelerator == specV1.NVAccelerator
+
 	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
 }
 
