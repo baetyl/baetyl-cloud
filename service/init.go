@@ -550,7 +550,8 @@ func (s *InitServiceImpl) GenApp(ns, template string, params map[string]interfac
 	}
 	app, err := s.App.Create(ns, application)
 	if err != nil {
-		res, err := s.App.Get(ns, application.Name, "")
+		var res *specV1.Application
+		res, err = s.App.Get(ns, application.Name, "")
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
