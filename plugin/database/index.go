@@ -45,11 +45,17 @@ func (d *DB) DeleteIndexTx(tx *sqlx.Tx, namespace string, keyA, byKeyB common.Re
 
 func (d *DB) RefreshIndex(namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error {
 	return d.Transact(func(tx *sqlx.Tx) error {
-		if _, err := d.DeleteIndexTx(tx, namespace, keyB, keyA, valueA); err != nil {
+		res, err := d.ListIndexTx(tx, namespace, keyB, keyA, valueA)
+		if err != nil {
 			return err
 		}
+		if len(res) > 0 {
+			if _, err = d.DeleteIndexTx(tx, namespace, keyB, keyA, valueA); err != nil {
+				return err
+			}
+		}
 		for _, b := range valueBs {
-			if _, err := d.CreateIndexTx(tx, namespace, keyA, keyB, valueA, b); err != nil {
+			if _, err = d.CreateIndexTx(tx, namespace, keyA, keyB, valueA, b); err != nil {
 				return err
 			}
 		}
