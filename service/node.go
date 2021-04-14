@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/baetyl/baetyl-go/v2/utils"
@@ -45,11 +46,12 @@ type NodeService interface {
 }
 
 type NodeServiceImpl struct {
-	indexService IndexService
-	node         plugin.Node
-	shadow       plugin.Shadow
-	app          plugin.Application
-	Hooks        map[string]interface{}
+	indexService  IndexService
+	node          plugin.Node
+	app           plugin.Application
+	Shadow        plugin.Shadow
+	SysAppService SystemAppService
+	Hooks         map[string]interface{}
 }
 
 // NewNodeService NewNodeService
@@ -69,17 +71,23 @@ func NewNodeService(config *config.CloudConfig) (NodeService, error) {
 		return nil, err
 	}
 
+	system, err := NewSystemAppService(config)
+	if err != nil {
+		return nil, err
+	}
+
 	is, err := NewIndexService(config)
 	if err != nil {
 		return nil, err
 	}
 
 	return &NodeServiceImpl{
-		indexService: is,
-		node:         node.(plugin.Node),
-		shadow:       shadow.(plugin.Shadow),
-		app:          app.(plugin.Application),
-		Hooks:        make(map[string]interface{}),
+		indexService:  is,
+		SysAppService: system,
+		node:          node.(plugin.Node),
+		Shadow:        shadow.(plugin.Shadow),
+		app:           app.(plugin.Application),
+		Hooks:         make(map[string]interface{}),
 	}, nil
 }
 
@@ -94,7 +102,7 @@ func (n *NodeServiceImpl) Get(namespace, name string) (*specV1.Node, error) {
 		return nil, err
 	}
 
-	shadow, err := n.shadow.Get(namespace, name)
+	shadow, err := n.Shadow.Get(namespace, name)
 	if err != nil {
 		return nil, err
 	}
@@ -114,13 +122,25 @@ func (n *NodeServiceImpl) Create(namespace string, node *specV1.Node) (*specV1.N
 		return nil, err
 	}
 
-	shadow, err := n.shadow.Create(models.NewShadowFromNode(res))
+	shadow, err := n.Shadow.Create(models.NewShadowFromNode(res))
 	if err != nil {
 		return nil, err
 	}
 
 	if err = n.updateNodeAndAppIndex(namespace, res, shadow); err != nil {
 		return nil, err
+	}
+
+	apps, err := n.SysAppService.GenApps(namespace, node)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, app := range apps {
+		err = n.UpdateNodeAndAppIndex(namespace, app)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
 	}
 	return res, err
 }
@@ -132,7 +152,7 @@ func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.N
 		return nil, err
 	}
 
-	shadow, err := n.shadow.Get(namespace, node.Name)
+	shadow, err := n.Shadow.Get(namespace, node.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +179,7 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 	if err != nil {
 		return nil, err
 	}
-	shadowList, err := n.shadow.List(namespace, list)
+	shadowList, err := n.Shadow.List(namespace, list)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +222,7 @@ func (n *NodeServiceImpl) Delete(namespace, name string) error {
 		return err
 	}
 
-	if err := n.shadow.Delete(namespace, name); err != nil {
+	if err := n.Shadow.Delete(namespace, name); err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", common.Shadow),
 			log.Any("namespace", namespace),
@@ -222,7 +242,7 @@ func (n *NodeServiceImpl) Delete(namespace, name string) error {
 
 // UpdateReport Update Report
 func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error) {
-	shadow, err := n.shadow.Get(namespace, name)
+	shadow, err := n.Shadow.Get(namespace, name)
 	if err != nil {
 		return nil, err
 	}
@@ -258,7 +278,7 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 	if err := n.updateReportNodeProperties(namespace, name, report, shadow); err != nil {
 		return nil, err
 	}
-	return n.shadow.UpdateReport(shadow)
+	return n.Shadow.UpdateReport(shadow)
 }
 
 func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report specV1.Report, shad *models.Shadow) error {
@@ -303,7 +323,7 @@ func (n *NodeServiceImpl) UpdateDesire(namespace, name string, app *specV1.Appli
 	// Retry times
 	var count = 0
 	for {
-		newShadow, err := n.shadow.Get(namespace, name)
+		newShadow, err := n.Shadow.Get(namespace, name)
 		if err != nil {
 			return nil, err
 		}
@@ -312,9 +332,9 @@ func (n *NodeServiceImpl) UpdateDesire(namespace, name string, app *specV1.Appli
 			newShadow, err = n.createShadow(namespace, name, specV1.Desire{}, nil)
 		}
 
-		// Refresh desire in shadow by app
+		// Refresh desire in Shadow by app
 		f(newShadow, app)
-		updatedShadow, err := n.shadow.UpdateDesire(newShadow)
+		updatedShadow, err := n.Shadow.UpdateDesire(newShadow)
 		if err == nil || err.Error() != common.ErrUpdateCas {
 			return updatedShadow, err
 		}
@@ -323,7 +343,7 @@ func (n *NodeServiceImpl) UpdateDesire(namespace, name string, app *specV1.Appli
 			break
 		}
 	}
-	return nil, common.Error(common.ErrResourceConflict, common.Field("node", name), common.Field("type", "shadow"))
+	return nil, common.Error(common.ErrResourceConflict, common.Field("node", name), common.Field("type", "Shadow"))
 }
 
 func (n *NodeServiceImpl) updateDesire(shadow *models.Shadow, desire specV1.Desire) (*models.Shadow, error) {
@@ -336,15 +356,15 @@ func (n *NodeServiceImpl) updateDesire(shadow *models.Shadow, desire specV1.Desi
 		}
 	}
 
-	return n.shadow.UpdateDesire(shadow)
+	return n.Shadow.UpdateDesire(shadow)
 }
 
 func (n *NodeServiceImpl) GetDesire(namespace, name string) (*specV1.Desire, error) {
-	shadow, _ := n.shadow.Get(namespace, name)
+	shadow, _ := n.Shadow.Get(namespace, name)
 	if shadow == nil {
 		return nil, common.Error(
 			common.ErrResourceNotFound,
-			common.Field("type", "shadow"),
+			common.Field("type", "Shadow"),
 			common.Field("name", name),
 			common.Field("namespace", namespace))
 	}
@@ -447,7 +467,7 @@ func (n *NodeServiceImpl) createShadow(namespace, name string, desire specV1.Des
 		shadow.Report = report
 	}
 
-	return n.shadow.Create(shadow)
+	return n.Shadow.Create(shadow)
 }
 
 // DeleteNodeAppVersion delete the node desire's appVersion for app deleted
@@ -545,7 +565,7 @@ func (n *NodeServiceImpl) GetNodeProperties(namespace, name string) (*models.Nod
 		log.L().Error("get node failed", log.Error(err))
 		return nil, err
 	}
-	shadow, err := n.shadow.Get(namespace, name)
+	shadow, err := n.Shadow.Get(namespace, name)
 	if err != nil {
 		return nil, err
 	}
@@ -582,7 +602,7 @@ func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *mo
 		log.L().Error("get node failed", log.Error(err))
 		return nil, err
 	}
-	shadow, err := n.shadow.Get(namespace, name)
+	shadow, err := n.Shadow.Get(namespace, name)
 	if err != nil {
 		return nil, err
 	}
@@ -614,7 +634,7 @@ func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *mo
 	props.Meta.DesireMeta = meta.DesireMeta
 	// cast to map[string]interface{} should not omit
 	shadow.Desire[common.NodeProps] = map[string]interface{}(newDesire)
-	_, err = n.shadow.UpdateDesire(shadow)
+	_, err = n.Shadow.UpdateDesire(shadow)
 	if err != nil {
 		return nil, err
 	}
@@ -643,6 +663,14 @@ func (n *NodeServiceImpl) UpdateNodeMode(ns, name, mode string) error {
 		return err
 	}
 	return nil
+}
+
+func (n *NodeServiceImpl) UpdateNodeAndAppIndex(namespace string, app *specV1.Application) error {
+	nodes, err := n.UpdateNodeAppVersion(namespace, app)
+	if err != nil {
+		return err
+	}
+	return n.indexService.RefreshNodesIndexByApp(namespace, app.Name, nodes)
 }
 
 func getNodePropertiesMeta(node *specV1.Node) *models.NodePropertiesMetadata {

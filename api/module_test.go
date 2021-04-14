@@ -113,13 +113,15 @@ func TestCreateModule(t *testing.T) {
 	defer mockCtl.Finish()
 	sModule := ms.NewMockModuleService(mockCtl)
 	sInit := ms.NewMockInitService(mockCtl)
+	sSysApp := ms.NewMockSystemAppService(mockCtl)
 	api.Module = sModule
 	api.Init = sInit
+	api.SysApp = sSysApp
 
 	s := []string{
 		"baetyl-function",
 	}
-	sInit.EXPECT().GetOptionalApps().Return(s).Times(1)
+	sSysApp.EXPECT().GetOptionalApps().Return(s).Times(1)
 	m1 := &models.Module{
 		Name:    "baetyl-function",
 		Version: "m1v",
@@ -133,7 +135,7 @@ func TestCreateModule(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	sInit.EXPECT().GetOptionalApps().Return(s).Times(1)
+	sSysApp.EXPECT().GetOptionalApps().Return(s).Times(1)
 	sModule.EXPECT().CreateModule(m1).Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
@@ -148,13 +150,15 @@ func TestUpdateModule(t *testing.T) {
 	defer mockCtl.Finish()
 	sModule := ms.NewMockModuleService(mockCtl)
 	sInit := ms.NewMockInitService(mockCtl)
+	sSysApp := ms.NewMockSystemAppService(mockCtl)
 	api.Module = sModule
 	api.Init = sInit
+	api.SysApp = sSysApp
 
 	s := []string{
 		"baetyl-function",
 	}
-	sInit.EXPECT().GetOptionalApps().Return(s).Times(1)
+	sSysApp.EXPECT().GetOptionalApps().Return(s).Times(1)
 	m1 := &models.Module{
 		Name:    "baetyl-function",
 		Version: "m1v",
