@@ -176,18 +176,6 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	apps, err := api.Init.GenApps(n.Namespace, n)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, app := range apps {
-		err = api.UpdateNodeAndAppIndex(n.Namespace, app)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-	}
-
 	view, err := api.ToNodeView(node)
 	if err != nil {
 		return nil, err
@@ -681,7 +669,7 @@ func (api *API) updateAddedSysApps(ns, node string, freshAppAlias []string) erro
 		return nil
 	}
 
-	freshApps, err := api.Init.GenOptionalApps(ns, node, freshAppAlias)
+	freshApps, err := api.SysApp.GenOptionalApps(ns, node, freshAppAlias)
 	if err != nil {
 		return err
 	}

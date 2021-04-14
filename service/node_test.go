@@ -90,7 +90,7 @@ func TestDefaultNodeService_List(t *testing.T) {
 	}
 
 	nsvc := NodeServiceImpl{
-		shadow: mockObject.shadow,
+		Shadow: mockObject.shadow,
 		node:   mockObject.node,
 	}
 
@@ -117,7 +117,7 @@ func TestDefaultNodeService_Delete(t *testing.T) {
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	cs := NodeServiceImpl{
 		indexService: mockIndexService,
-		shadow:       mockObject.shadow,
+		Shadow:       mockObject.shadow,
 		node:         mockObject.node,
 	}
 
@@ -143,14 +143,26 @@ func TestDefaultNodeService_Create(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
+	mockSysAppService := ms.NewMockSystemAppService(mockObject.ctl)
 	ns := NodeServiceImpl{
-		indexService: mockIndexService,
-		shadow:       mockObject.shadow,
-		node:         mockObject.node,
-		app:          mockObject.app,
+		indexService:  mockIndexService,
+		SysAppService: mockSysAppService,
+		Shadow:        mockObject.shadow,
+		node:          mockObject.node,
+		app:           mockObject.app,
 	}
 	node := genNodeTestCase()
 	shadow := genShadowTestCase()
+	apps := &models.ApplicationList{
+		Items: []models.AppItem{
+			{Namespace: node.Namespace, Name: "app01", Version: "1", Selector: "test=example"},
+		},
+	}
+	app1 := &specV1.Application{
+		Name:      "baetyl-core",
+		Namespace: node.Namespace,
+		Selector:  "abc",
+	}
 
 	mockObject.shadow.EXPECT().Create(gomock.Any()).Return(shadow, nil).AnyTimes()
 
@@ -160,35 +172,37 @@ func TestDefaultNodeService_Create(t *testing.T) {
 	_, err := ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
+	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil).AnyTimes()
 	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	apps := &models.ApplicationList{
-		Items: []models.AppItem{
-			{Namespace: node.Namespace, Name: "app01", Version: "1", Selector: "test=example"},
-		},
-	}
-
-	//mockObject.matcher.EXPECT().IsLabelMatch(gomock.Any(), gomock.Any()).Return(true, nil).AnyTimes()
-	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
-	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil)
+	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil).AnyTimes()
 	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
-	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil)
-	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil)
+	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil).AnyTimes()
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("error"))
 	_, err = ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil)
-	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(apps, nil)
-	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any()).Return(nil, nil)
-	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockSysAppService.EXPECT().GenApps(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error"))
+	_, err = ns.Create(node.Namespace, node)
+	assert.NotNil(t, err)
+
+	mockSysAppService.EXPECT().GenApps(node.Namespace, gomock.Any()).Return([]*specV1.Application{app1}, nil)
+	mockObject.node.EXPECT().ListNode(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	_, err = ns.Create(node.Namespace, node)
+	assert.NotNil(t, err)
+
+	app2 := &specV1.Application{
+		Name:      "baetyl-function",
+		Namespace: node.Namespace,
+	}
+	mockSysAppService.EXPECT().GenApps(node.Namespace, gomock.Any()).Return([]*specV1.Application{app2}, nil)
+	mockIndexService.EXPECT().RefreshNodesIndexByApp(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 	_, err = ns.Create(node.Namespace, node)
 	assert.NoError(t, err)
 }
@@ -200,7 +214,7 @@ func TestDefaultNodeService_Update(t *testing.T) {
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	ns := NodeServiceImpl{
 		indexService: mockIndexService,
-		shadow:       mockObject.shadow,
+		Shadow:       mockObject.shadow,
 		node:         mockObject.node,
 		app:          mockObject.app,
 	}
@@ -269,7 +283,7 @@ func TestUpdateNodeAppVersion(t *testing.T) {
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	ss := NodeServiceImpl{
 		indexService: mockIndexService,
-		shadow:       mockObject.shadow,
+		Shadow:       mockObject.shadow,
 		node:         mockObject.node,
 		app:          mockObject.app,
 	}
@@ -404,7 +418,7 @@ func TestDeleteNodeAppVersion(t *testing.T) {
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	ss := NodeServiceImpl{
 		indexService: mockIndexService,
-		shadow:       mockObject.shadow,
+		Shadow:       mockObject.shadow,
 		node:         mockObject.node,
 		app:          mockObject.app,
 	}
@@ -547,7 +561,7 @@ func TestUpdateReport(t *testing.T) {
 	defer mockObject.Close()
 
 	ss := NodeServiceImpl{
-		shadow: mockObject.shadow,
+		Shadow: mockObject.shadow,
 		node:   mockObject.node,
 		app:    mockObject.app,
 	}
@@ -584,7 +598,7 @@ func TestUpdateReport(t *testing.T) {
 	assert.NotNil(t, err)
 
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil)
-	//mockObject.dbStorage.EXPECT().Create(gomock.Any()).Return(shadow, nil)
+	//mockObject.dbStorage.EXPECT().Create(gomock.Any()).Return(Shadow, nil)
 	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(node, nil)
 	mockObject.node.EXPECT().UpdateNode(node.Namespace, gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().UpdateReport(gomock.Any()).Return(shadow, nil)
@@ -744,7 +758,7 @@ func TestUpdateDesired(t *testing.T) {
 	defer mockObject.Close()
 
 	ns := NodeServiceImpl{
-		shadow: mockObject.shadow,
+		Shadow: mockObject.shadow,
 		node:   mockObject.node,
 		app:    mockObject.app,
 	}
@@ -790,7 +804,7 @@ func TestRematchApplicationForNode(t *testing.T) {
 	defer mockObject.Close()
 
 	ns := NodeServiceImpl{
-		shadow: mockObject.shadow,
+		Shadow: mockObject.shadow,
 		node:   mockObject.node,
 		app:    mockObject.app,
 	}
@@ -850,7 +864,7 @@ func TestGetNodeProperties(t *testing.T) {
 
 	ns := NodeServiceImpl{
 		node:   mockObject.node,
-		shadow: mockObject.shadow,
+		Shadow: mockObject.shadow,
 	}
 
 	node := &v1.Node{Attributes: map[string]interface{}{
@@ -890,7 +904,7 @@ func TestGetNodeProperties(t *testing.T) {
 	assert.Error(t, err)
 
 	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get shadow"))
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get Shadow"))
 	_, err = ns.GetNodeProperties("default", "abc")
 	assert.Error(t, err)
 }
@@ -901,7 +915,7 @@ func TestUpdateNodeProperties(t *testing.T) {
 
 	ns := NodeServiceImpl{
 		node:   mockObject.node,
-		shadow: mockObject.shadow,
+		Shadow: mockObject.shadow,
 	}
 
 	node := &v1.Node{Attributes: map[string]interface{}{
@@ -987,7 +1001,7 @@ func TestUpdateNodeProperties(t *testing.T) {
 	assert.Error(t, err)
 
 	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get shadow"))
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get Shadow"))
 	_, err = ns.UpdateNodeProperties("default", "abc", nodeProps)
 	assert.Error(t, err)
 
@@ -1048,7 +1062,7 @@ func TestUpdateNodeAppVersion2(t *testing.T) {
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 	ss := NodeServiceImpl{
 		indexService: mockIndexService,
-		shadow:       mockObject.shadow,
+		Shadow:       mockObject.shadow,
 		node:         mockObject.node,
 		app:          mockObject.app,
 	}

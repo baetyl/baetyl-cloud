@@ -18,6 +18,9 @@ type DBStorage interface {
 	Transact(func(*sqlx.Tx) error) error
 	Exec(tx *sqlx.Tx, sql string, args ...interface{}) (sql.Result, error)
 	Query(tx *sqlx.Tx, sql string, data interface{}, args ...interface{}) error
+	BeginTx() (*sqlx.Tx, error)
+	Commit(tx *sqlx.Tx)
+	Rollback(tx *sqlx.Tx)
 
 	io.Closer
 }
@@ -107,5 +110,28 @@ func (d *DB) Query(tx *sqlx.Tx, sql string, data interface{}, args ...interface{
 	}
 	err = errors.Trace(err)
 	return
+}
 
+func (d *DB) BeginTx() (*sqlx.Tx, error) {
+	return d.db.Beginx()
+}
+
+func (d *DB) Commit(tx *sqlx.Tx) {
+	if tx == nil {
+		return
+	}
+	err := tx.Commit()
+	if err != nil {
+		log.Error(err)
+	}
+}
+
+func (d *DB) Rollback(tx *sqlx.Tx) {
+	if tx == nil {
+		return
+	}
+	err := tx.Rollback()
+	if err != nil {
+		log.Error(err)
+	}
 }

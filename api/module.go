@@ -122,7 +122,7 @@ func (api *API) parseAndCheckModule(module *models.Module, c *common.Context) er
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "version is required"))
 	}
 	if module.Type == string(common.TypeSystemOptional) {
-		supportSysApps := api.Init.GetOptionalApps()
+		supportSysApps := api.SysApp.GetOptionalApps()
 		var ok bool
 		for _, v := range supportSysApps {
 			if v == module.Name {

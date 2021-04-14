@@ -439,29 +439,14 @@ func TestCreateNode(t *testing.T) {
 
 	sProp := ms.NewMockPropertyService(mockCtl)
 	sPKI := ms.NewMockPKIService(mockCtl)
-	sInit := ms.NewMockInitService(mockCtl)
 	api.Prop = sProp
 	api.PKI = sPKI
-	api.Init = sInit
 
 	sModule := ms.NewMockModuleService(mockCtl)
 	api.Module = sModule
 
 	mNode := getMockNode2()
 
-	app1 := &specV1.Application{
-		Name:      "baetyl-core",
-		Namespace: mNode.Namespace,
-	}
-	app2 := &specV1.Application{
-		Name:      "baetyl-function",
-		Namespace: mNode.Namespace,
-	}
-	nodeList := []string{"s0", "s1", "s2"}
-
-	sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
-	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
-	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(1)
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(mNode, nil)
@@ -484,7 +469,6 @@ func TestCreateNode(t *testing.T) {
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
-	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode)
@@ -580,19 +564,10 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 		},
 	}
 
-	app1 := &specV1.Application{
-		Name:      "baetyl-core",
-		Namespace: mNode.Namespace,
-	}
-	app2 := &specV1.Application{
-		Name:      "baetyl-function",
-		Namespace: mNode.Namespace,
-	}
 	nodeList := []string{"s0", "s1", "s2"}
 
 	sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
-	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(1)
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(mNode, nil)
@@ -615,7 +590,6 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
-	sInit.EXPECT().GenApps(mNode.Namespace, gomock.Any()).Return([]*specV1.Application{app1, app2}, nil).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode)
@@ -761,6 +735,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	sApp := ms.NewMockApplicationService(mockCtl)
 	sConfig := ms.NewMockConfigService(mockCtl)
 	sModule := ms.NewMockModuleService(mockCtl)
+	sSysApp := ms.NewMockSystemAppService(mockCtl)
 	api.Node = sNode
 	api.Init = sInit
 	api.Prop = sProp
@@ -768,6 +743,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	api.App = sApp
 	api.Config = sConfig
 	api.Module = sModule
+	api.SysApp = sSysApp
 
 	mNode := &specV1.Node{
 		Namespace: "default",
@@ -860,7 +836,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 
 	sNode.EXPECT().Get(mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
 	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
-	sInit.EXPECT().GenOptionalApps(mNode.Namespace, mNode.Name, []string{"a"}).Times(1)
+	sSysApp.EXPECT().GenOptionalApps(mNode.Namespace, mNode.Name, []string{"a"}).Times(1)
 	nodeList := []string{"abc"}
 	sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	sIndex.EXPECT().RefreshNodesIndexByApp(mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
