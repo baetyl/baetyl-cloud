@@ -164,15 +164,23 @@ func TestDefaultNodeService_Create(t *testing.T) {
 		Selector:  "abc",
 	}
 
-	mockObject.shadow.EXPECT().Create(gomock.Any()).Return(shadow, nil).AnyTimes()
-
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
-
 	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(nil, fmt.Errorf("error"))
 	_, err := ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
 
 	mockObject.node.EXPECT().CreateNode(node.Namespace, node).Return(node, nil).AnyTimes()
+	mockObject.shadow.EXPECT().Create(gomock.Any()).Return(nil, fmt.Errorf("error"))
+	_, err = ns.Create(node.Namespace, node)
+	assert.NotNil(t, err)
+
+	mockObject.shadow.EXPECT().Create(gomock.Any()).Return(shadow, nil).AnyTimes()
+	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
+
+	mockSysAppService.EXPECT().GenApps(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error"))
+	_, err = ns.Create(node.Namespace, node)
+	assert.NotNil(t, err)
+
+	mockSysAppService.EXPECT().GenApps(node.Namespace, gomock.Any()).Return([]*specV1.Application{app1}, nil).AnyTimes()
 	mockObject.app.EXPECT().ListApplication(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
@@ -187,22 +195,7 @@ func TestDefaultNodeService_Create(t *testing.T) {
 	_, err = ns.Create(node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	mockSysAppService.EXPECT().GenApps(node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error"))
-	_, err = ns.Create(node.Namespace, node)
-	assert.NotNil(t, err)
-
-	mockSysAppService.EXPECT().GenApps(node.Namespace, gomock.Any()).Return([]*specV1.Application{app1}, nil)
-	mockObject.node.EXPECT().ListNode(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
-	_, err = ns.Create(node.Namespace, node)
-	assert.NotNil(t, err)
-
-	app2 := &specV1.Application{
-		Name:      "baetyl-function",
-		Namespace: node.Namespace,
-	}
-	mockSysAppService.EXPECT().GenApps(node.Namespace, gomock.Any()).Return([]*specV1.Application{app2}, nil)
-	mockIndexService.EXPECT().RefreshNodesIndexByApp(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 	_, err = ns.Create(node.Namespace, node)
 	assert.NoError(t, err)
 }
