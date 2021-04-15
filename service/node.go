@@ -4,7 +4,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/baetyl/baetyl-go/v2/utils"
@@ -127,20 +126,13 @@ func (n *NodeServiceImpl) Create(namespace string, node *specV1.Node) (*specV1.N
 		return nil, err
 	}
 
-	if err = n.updateNodeAndAppIndex(namespace, res, shadow); err != nil {
-		return nil, err
-	}
-
-	apps, err := n.SysAppService.GenApps(namespace, node)
+	_, err = n.SysAppService.GenApps(namespace, node)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, app := range apps {
-		err = n.UpdateNodeAndAppIndex(namespace, app)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
+	if err = n.updateNodeAndAppIndex(namespace, res, shadow); err != nil {
+		return nil, err
 	}
 	return res, err
 }
@@ -663,14 +655,6 @@ func (n *NodeServiceImpl) UpdateNodeMode(ns, name, mode string) error {
 		return err
 	}
 	return nil
-}
-
-func (n *NodeServiceImpl) UpdateNodeAndAppIndex(namespace string, app *specV1.Application) error {
-	nodes, err := n.UpdateNodeAppVersion(namespace, app)
-	if err != nil {
-		return err
-	}
-	return n.indexService.RefreshNodesIndexByApp(namespace, app.Name, nodes)
 }
 
 func getNodePropertiesMeta(node *specV1.Node) *models.NodePropertiesMetadata {
