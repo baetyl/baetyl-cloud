@@ -92,6 +92,9 @@ const (
 
 	ErrResourceInvisible = "ErrResourceInvisible"
 	ErrConvertConflict   = "ErrConvertConflict"
+
+	ErrPubsubTimeout   = "ErrPubsubTimeout"
+	ErrUpdateSubLabels = "ErrUpdateSubLabels"
 )
 
 var templates = map[Code]string{
@@ -168,6 +171,9 @@ var templates = map[Code]string{
 
 	ErrResourceInvisible: "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} is not visible.",
 	ErrConvertConflict:   "Problem with converting {{if .name}} ({{.name}}){{end}}.{{if .error}} ({{.error}}){{end}}",
+
+	ErrPubsubTimeout:   "Publish or subscribe message timeout. {{if .error}} ({{.error}}){{end}}",
+	ErrUpdateSubLabels: "Failed to update sub node labels. {{if .error}} ({{.error}}){{end}}",
 }
 
 func getHTTPStatus(c Code) int {
