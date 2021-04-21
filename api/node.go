@@ -210,7 +210,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	node.Mode = oldNode.Mode
 
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
-		err = api.updateNodeOptionedSysApps(oldNode, node.SysApps)
+		err = api.UpdateNodeOptionedSysApps(oldNode, node.SysApps)
 		if err != nil {
 			return nil, err
 		}
@@ -618,7 +618,7 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 	return coreVersions, nil
 }
 
-func (api *API) updateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string) error {
+func (api *API) UpdateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string) error {
 	ns, name, oldSysApps := oldNode.Namespace, oldNode.Name, oldNode.SysApps
 
 	fresh, obsolete := api.filterSysApps(newSysApps, oldSysApps)

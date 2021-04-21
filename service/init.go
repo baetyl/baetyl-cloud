@@ -48,9 +48,9 @@ type InitServiceImpl struct {
 	Property        PropertyService
 	TemplateService TemplateService
 	*AppCombinedService
-	PKI              PKIService
-	ResourceMapFunc  map[string]GetInitResource
-	log              *log.Logger
+	PKI             PKIService
+	ResourceMapFunc map[string]GetInitResource
+	log             *log.Logger
 }
 
 // NewSyncService new SyncService

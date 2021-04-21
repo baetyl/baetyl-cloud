@@ -15,15 +15,15 @@ import (
 //go:generate mockgen -destination=../mock/service/system_app.go -package=service github.com/baetyl/baetyl-cloud/v2/service SystemAppService
 
 const (
-	templateInitConfYaml       = "baetyl-init-conf.yml"
-	templateInitAppYaml        = "baetyl-init-app.yml"
-	templateCoreAppYaml        = "baetyl-core-app.yml"
-	templateFuncConfYaml       = "baetyl-function-conf.yml"
-	templateFuncAppYaml        = "baetyl-function-app.yml"
-	templateBrokerConfYaml     = "baetyl-broker-conf.yml"
-	templateBrokerAppYaml      = "baetyl-broker-app.yml"
-	templateRuleConfYaml       = "baetyl-rule-conf.yml"
-	templateRuleAppYaml        = "baetyl-rule-app.yml"
+	templateInitConfYaml   = "baetyl-init-conf.yml"
+	templateInitAppYaml    = "baetyl-init-app.yml"
+	templateCoreAppYaml    = "baetyl-core-app.yml"
+	templateFuncConfYaml   = "baetyl-function-conf.yml"
+	templateFuncAppYaml    = "baetyl-function-app.yml"
+	templateBrokerConfYaml = "baetyl-broker-conf.yml"
+	templateBrokerAppYaml  = "baetyl-broker-app.yml"
+	templateRuleConfYaml   = "baetyl-rule-conf.yml"
+	templateRuleAppYaml    = "baetyl-rule-app.yml"
 )
 
 var (
@@ -47,7 +47,7 @@ type SystemAppServiceImpl struct {
 	cfg             *config.CloudConfig
 	Property        PropertyService
 	TemplateService TemplateService
-	PKI              PKIService
+	PKI             PKIService
 	*AppCombinedService
 	Hooks            map[string]interface{}
 	OptionalAppFuncs map[string]GenAppFunc
@@ -77,7 +77,7 @@ func NewSystemAppService(config *config.CloudConfig) (SystemAppService, error) {
 		return nil, errors.Trace(err)
 	}
 
-	systemService := &SystemAppServiceImpl {
+	systemService := &SystemAppServiceImpl{
 		cfg:                config,
 		Property:           propertyService,
 		TemplateService:    templateService,
