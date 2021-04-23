@@ -167,7 +167,9 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	n.Attributes["BaetylCoreVersion"] = version
-
+	if n.Accelerator == v1.NVAccelerator {
+		n.SysApps = append(n.SysApps, v1.BaetylGPUMetrics)
+	}
 	node, err := api.Node.Create(n.Namespace, n)
 	if err != nil {
 		if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
