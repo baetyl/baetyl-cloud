@@ -10,11 +10,11 @@ import (
 
 type IndexService interface {
 	// comment
-	RefreshIndex(namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error
+	RefreshIndex(tx interface{}, namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error
 	ListIndex(namespace string, keyA, byKeyB common.Resource, valueB string) ([]string, error)
 	// app and config
-	RefreshAppIndexByConfig(namespace, config string, apps []string) error
-	RefreshConfigIndexByApp(namespace, app string, configs []string) error
+	RefreshAppIndexByConfig(tx interface{}, namespace, config string, apps []string) error
+	RefreshConfigIndexByApp(tx interface{}, namespace, app string, configs []string) error
 	ListAppIndexByConfig(namespace, config string) ([]string, error)
 	ListConfigIndexByApp(namespace, app string) ([]string, error)
 
@@ -23,9 +23,9 @@ type IndexService interface {
 	ListAppIndexBySecret(namespace, secret string) ([]string, error)
 
 	// app and secret
-	RefreshSecretIndexByApp(namespace, app string, secrets []string) error
-	RefreshNodesIndexByApp(namespace, appName string, nodes []string) error
-	RefreshAppsIndexByNode(namespace, node string, apps []string) error
+	RefreshSecretIndexByApp(tx interface{}, namespace, app string, secrets []string) error
+	RefreshNodesIndexByApp(tx interface{}, namespace, appName string, nodes []string) error
+	RefreshAppsIndexByNode(tx interface{}, namespace, node string, apps []string) error
 }
 
 type indexService struct {
@@ -41,8 +41,8 @@ func NewIndexService(config *config.CloudConfig) (IndexService, error) {
 	return &indexService{index: index.(plugin.Index)}, nil
 }
 
-func (i *indexService) RefreshIndex(namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error {
-	return i.index.RefreshIndex(namespace, keyA, keyB, valueA, valueBs)
+func (i *indexService) RefreshIndex(tx interface{}, namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error {
+	return i.index.RefreshIndex(tx, namespace, keyA, keyB, valueA, valueBs)
 }
 
 func (i *indexService) ListIndex(namespace string, keyA, byKeyB common.Resource, valueB string) ([]string, error) {
@@ -51,12 +51,12 @@ func (i *indexService) ListIndex(namespace string, keyA, byKeyB common.Resource,
 
 // helper
 // app and config
-func (i *indexService) RefreshAppIndexByConfig(namespace, config string, apps []string) error {
-	return i.RefreshIndex(namespace, common.Config, common.Application, config, apps)
+func (i *indexService) RefreshAppIndexByConfig(tx interface{}, namespace, config string, apps []string) error {
+	return i.RefreshIndex(tx, namespace, common.Config, common.Application, config, apps)
 }
 
-func (i *indexService) RefreshConfigIndexByApp(namespace, app string, configs []string) error {
-	return i.RefreshIndex(namespace, common.Application, common.Config, app, configs)
+func (i *indexService) RefreshConfigIndexByApp(tx interface{}, namespace, app string, configs []string) error {
+	return i.RefreshIndex(tx, namespace, common.Application, common.Config, app, configs)
 }
 
 func (i *indexService) ListAppIndexByConfig(namespace, config string) ([]string, error) {
@@ -67,12 +67,12 @@ func (i *indexService) ListConfigIndexByApp(namespace, app string) ([]string, er
 	return i.ListIndex(namespace, common.Config, common.Application, app)
 }
 
-func (i *indexService) RefreshNodesIndexByApp(namespace, appName string, nodes []string) error {
-	return i.RefreshIndex(namespace, common.Application, common.Node, appName, nodes)
+func (i *indexService) RefreshNodesIndexByApp(tx interface{}, namespace, appName string, nodes []string) error {
+	return i.RefreshIndex(tx, namespace, common.Application, common.Node, appName, nodes)
 }
 
-func (i *indexService) RefreshAppsIndexByNode(namespace, node string, apps []string) error {
-	return i.RefreshIndex(namespace, common.Node, common.Application, node, apps)
+func (i *indexService) RefreshAppsIndexByNode(tx interface{}, namespace, node string, apps []string) error {
+	return i.RefreshIndex(tx, namespace, common.Node, common.Application, node, apps)
 }
 
 func (i *indexService) ListNodesByApp(namespace, app string) ([]string, error) {
@@ -84,8 +84,8 @@ func (i *indexService) ListAppsByNode(namespace, node string) ([]string, error) 
 }
 
 // secret && apps
-func (i *indexService) RefreshSecretIndexByApp(namespace, app string, secrets []string) error {
-	return i.RefreshIndex(namespace, common.Application, common.Secret, app, secrets)
+func (i *indexService) RefreshSecretIndexByApp(tx interface{}, namespace, app string, secrets []string) error {
+	return i.RefreshIndex(tx, namespace, common.Application, common.Secret, app, secrets)
 }
 
 func (i *indexService) ListAppIndexBySecret(namespace, secret string) ([]string, error) {

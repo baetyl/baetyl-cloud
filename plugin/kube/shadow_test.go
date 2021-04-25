@@ -86,7 +86,7 @@ func initShadowClient() *client {
 
 func TestClient_Get(t *testing.T) {
 	c := initShadowClient()
-	shadow, err := c.Get("default", "node01")
+	shadow, err := c.Get(nil, "default", "node01")
 	assert.NoError(t, err)
 	assert.Equal(t, "node01", shadow.Name)
 	assert.NotNil(t, shadow.Report)
@@ -99,7 +99,7 @@ func TestClient_Create(t *testing.T) {
 	namespace := "default"
 	name := "node-test"
 	shadow := models.NewShadow(namespace, name)
-	shd, err := c.Create(shadow)
+	shd, err := c.Create(nil, shadow)
 	assert.NoError(t, err)
 	assert.Equal(t, name, shd.Name)
 	assert.NotNil(t, shd.Report)
@@ -107,7 +107,7 @@ func TestClient_Create(t *testing.T) {
 	namespace = "default"
 	name = "node01"
 	shadow = models.NewShadow(namespace, name)
-	shd, err = c.Create(shadow)
+	shd, err = c.Create(nil, shadow)
 	assert.NoError(t, err)
 	assert.Equal(t, name, shd.Name)
 	assert.NotNil(t, shd.Report)
@@ -144,7 +144,7 @@ func TestClient_Delete(t *testing.T) {
 	name := "node01"
 	err := c.Delete(namespace, name)
 	assert.NoError(t, err)
-	_, err = c.Get(namespace, name)
+	_, err = c.Get(nil, namespace, name)
 	assert.Error(t, err)
 	assert.True(t, strings.Contains(err.Error(), "not found"))
 }
@@ -161,7 +161,7 @@ func TestClient_UpdateDesire(t *testing.T) {
 			Version: "1",
 		},
 	}
-	shd, err := c.UpdateDesire(shadow)
+	shd, err := c.UpdateDesire(nil, shadow)
 	assert.NoError(t, err)
 	assert.Equal(t, "app01", shd.Desire.AppInfos(false)[0].Name)
 }

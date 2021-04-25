@@ -10,10 +10,10 @@ import (
 
 // Shadow
 type Shadow interface {
-	Get(namespace, name string) (*models.Shadow, error)
-	Create(shadow *models.Shadow) (*models.Shadow, error)
+	Get(tx interface{}, namespace, name string) (*models.Shadow, error)
+	Create(tx interface{}, shadow *models.Shadow) (*models.Shadow, error)
 	Delete(namespace, name string) error
-	UpdateDesire(shadow *models.Shadow) (*models.Shadow, error)
+	UpdateDesire(tx interface{}, shadow *models.Shadow) (*models.Shadow, error)
 	UpdateReport(shadow *models.Shadow) (*models.Shadow, error)
 	List(namespace string, nodeList *models.NodeList) (*models.ShadowList, error)
 	io.Closer

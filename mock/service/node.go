@@ -50,18 +50,18 @@ func (mr *MockNodeServiceMockRecorder) Count(arg0 interface{}) *gomock.Call {
 }
 
 // Create mocks base method
-func (m *MockNodeService) Create(arg0 string, arg1 *v1.Node) (*v1.Node, error) {
+func (m *MockNodeService) Create(arg0 interface{}, arg1 string, arg2 *v1.Node) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0, arg1)
+	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockNodeServiceMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockNodeServiceMockRecorder) Create(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockNodeService)(nil).Create), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockNodeService)(nil).Create), arg0, arg1, arg2)
 }
 
 // Delete mocks base method

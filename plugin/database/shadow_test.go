@@ -71,13 +71,13 @@ func TestShadow(t *testing.T) {
 		ReportMeta: map[string]interface{}{},
 		DesireMeta: map[string]interface{}{},
 	}
-	result, err := db.Create(shadow)
+	result, err := db.Create(nil, shadow)
 	assert.NoError(t, err)
 	assert.Equal(t, shadow.Name, result.Name)
 	assert.Equal(t, shadow.Desire.AppInfos(isSysApp), result.Desire.AppInfos(isSysApp))
 	assert.Equal(t, shadow.Report.AppInfos(isSysApp), result.Report.AppInfos(isSysApp))
 
-	n, err := db.Get(namespace, shadow.Name)
+	n, err := db.Get(nil, namespace, shadow.Name)
 	assert.NoError(t, err)
 	assert.Equal(t, shadow.Name, n.Name)
 	assert.Equal(t, shadow.Desire.AppInfos(isSysApp), n.Desire.AppInfos(isSysApp))
@@ -108,7 +108,7 @@ func TestShadow(t *testing.T) {
 	}
 
 	shadow.Desire = desire
-	result, err = db.UpdateDesire(shadow)
+	result, err = db.UpdateDesire(nil, shadow)
 	assert.NoError(t, err)
 	assert.Equal(t, desire.AppInfos(isSysApp), result.Desire.AppInfos(isSysApp))
 	assert.Equal(t, report.AppInfos(isSysApp), result.Report.AppInfos(isSysApp))
@@ -131,6 +131,6 @@ func TestShadow(t *testing.T) {
 	assert.NoError(t, err)
 
 	shadow.DesireVersion = "1"
-	result, err = db.UpdateDesire(shadow)
+	result, err = db.UpdateDesire(nil, shadow)
 	assert.Error(t, err, "invalid version")
 }

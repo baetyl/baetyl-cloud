@@ -30,7 +30,7 @@ func TestDefaultRegistryService_Get(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
 	registry := genSecretTestCase()
-	mockObject.secret.EXPECT().GetSecret(gomock.Any(), gomock.Any(), "").Return(genSecretTestCase(), nil).AnyTimes()
+	mockObject.secret.EXPECT().GetSecret(gomock.Any(), gomock.Any(), gomock.Any(), "").Return(genSecretTestCase(), nil).AnyTimes()
 	cs, err := NewSecretService(mockObject.conf)
 	assert.NoError(t, err)
 	_, err = cs.Get(registry.Namespace, registry.Name, "")
@@ -67,8 +67,8 @@ func TestDefaultRegistryService_Create(t *testing.T) {
 	cs, err := NewSecretService(mockObject.conf)
 	assert.NoError(t, err)
 	registry := genSecretTestCase()
-	mockObject.secret.EXPECT().CreateSecret(gomock.Any(), gomock.Any()).Return(genSecretTestCase(), nil).AnyTimes()
-	_, err = cs.Create(registry.Namespace, registry)
+	mockObject.secret.EXPECT().CreateSecret(gomock.Any(), gomock.Any(), gomock.Any()).Return(genSecretTestCase(), nil).AnyTimes()
+	_, err = cs.Create(nil, registry.Namespace, registry)
 	assert.NoError(t, err)
 }
 func TestDefaultRegistryService_Update(t *testing.T) {

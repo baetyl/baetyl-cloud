@@ -13,26 +13,26 @@ import (
 func TestDefaultIndexService_RefreshIndex(t *testing.T) {
 	namespace := "default"
 	mockObject := InitMockEnvironment(t)
-	mockObject.index.EXPECT().RefreshIndex(namespace, common.Config, common.Application, "123", []string{}).Return(nil).AnyTimes()
+	mockObject.index.EXPECT().RefreshIndex(nil, namespace, common.Config, common.Application, "123", []string{}).Return(nil).AnyTimes()
 	is, err := NewIndexService(mockObject.conf)
 	assert.NoError(t, err)
-	err = is.RefreshIndex(namespace, common.Config, common.Application, "123", []string{})
+	err = is.RefreshIndex(nil, namespace, common.Config, common.Application, "123", []string{})
 	assert.NoError(t, err)
 	mockObject.Close()
 
 	mockObject = InitMockEnvironment(t)
-	mockObject.index.EXPECT().RefreshIndex(namespace, common.Config, common.Node, "123", []string{}).Return(fmt.Errorf("delete : table not exist")).AnyTimes()
+	mockObject.index.EXPECT().RefreshIndex(nil, namespace, common.Config, common.Node, "123", []string{}).Return(fmt.Errorf("delete : table not exist")).AnyTimes()
 	is, err = NewIndexService(mockObject.conf)
 	assert.NoError(t, err)
-	err = is.RefreshIndex(namespace, common.Config, common.Node, "123", []string{})
+	err = is.RefreshIndex(nil, namespace, common.Config, common.Node, "123", []string{})
 	assert.Error(t, err, "delete : table not exist")
 	mockObject.Close()
 
 	mockObject = InitMockEnvironment(t)
-	mockObject.index.EXPECT().RefreshIndex(namespace, common.Config, common.Node, "123", []string{}).Return(fmt.Errorf("create : table not exist")).AnyTimes()
+	mockObject.index.EXPECT().RefreshIndex(nil, namespace, common.Config, common.Node, "123", []string{}).Return(fmt.Errorf("create : table not exist")).AnyTimes()
 	is, err = NewIndexService(mockObject.conf)
 	assert.NoError(t, err)
-	err = is.RefreshIndex(namespace, common.Config, common.Node, "123", []string{})
+	err = is.RefreshIndex(nil, namespace, common.Config, common.Node, "123", []string{})
 	assert.Error(t, err, "create : table not exist")
 	mockObject.Close()
 }
@@ -83,19 +83,19 @@ func TestResourceRefresh(t *testing.T) {
 	arr := []string{"r0", "r1", "r2"}
 	namespace := "default"
 
-	mockObject.index.EXPECT().RefreshIndex(namespace, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockObject.index.EXPECT().RefreshIndex(nil, namespace, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 	is, err := NewIndexService(mockObject.conf)
 	assert.NoError(t, err)
-	err = is.RefreshAppIndexByConfig(namespace, data, arr)
+	err = is.RefreshAppIndexByConfig(nil, namespace, data, arr)
 	assert.NoError(t, err)
-	err = is.RefreshConfigIndexByApp(namespace, data, arr)
-	assert.NoError(t, err)
-
-	err = is.RefreshNodesIndexByApp(namespace, data, arr)
-
-	err = is.RefreshSecretIndexByApp(namespace, data, arr)
+	err = is.RefreshConfigIndexByApp(nil, namespace, data, arr)
 	assert.NoError(t, err)
 
-	err = is.RefreshAppsIndexByNode(namespace, data, arr)
+	err = is.RefreshNodesIndexByApp(nil, namespace, data, arr)
+
+	err = is.RefreshSecretIndexByApp(nil, namespace, data, arr)
+	assert.NoError(t, err)
+
+	err = is.RefreshAppsIndexByNode(nil, namespace, data, arr)
 	assert.NoError(t, err)
 }

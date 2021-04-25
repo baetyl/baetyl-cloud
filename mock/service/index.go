@@ -124,85 +124,85 @@ func (mr *MockIndexServiceMockRecorder) ListNodesByApp(arg0, arg1 interface{}) *
 }
 
 // RefreshAppIndexByConfig mocks base method
-func (m *MockIndexService) RefreshAppIndexByConfig(arg0, arg1 string, arg2 []string) error {
+func (m *MockIndexService) RefreshAppIndexByConfig(arg0 interface{}, arg1, arg2 string, arg3 []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RefreshAppIndexByConfig", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "RefreshAppIndexByConfig", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RefreshAppIndexByConfig indicates an expected call of RefreshAppIndexByConfig
-func (mr *MockIndexServiceMockRecorder) RefreshAppIndexByConfig(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockIndexServiceMockRecorder) RefreshAppIndexByConfig(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshAppIndexByConfig", reflect.TypeOf((*MockIndexService)(nil).RefreshAppIndexByConfig), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshAppIndexByConfig", reflect.TypeOf((*MockIndexService)(nil).RefreshAppIndexByConfig), arg0, arg1, arg2, arg3)
 }
 
 // RefreshAppsIndexByNode mocks base method
-func (m *MockIndexService) RefreshAppsIndexByNode(arg0, arg1 string, arg2 []string) error {
+func (m *MockIndexService) RefreshAppsIndexByNode(arg0 interface{}, arg1, arg2 string, arg3 []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RefreshAppsIndexByNode", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "RefreshAppsIndexByNode", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RefreshAppsIndexByNode indicates an expected call of RefreshAppsIndexByNode
-func (mr *MockIndexServiceMockRecorder) RefreshAppsIndexByNode(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockIndexServiceMockRecorder) RefreshAppsIndexByNode(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshAppsIndexByNode", reflect.TypeOf((*MockIndexService)(nil).RefreshAppsIndexByNode), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshAppsIndexByNode", reflect.TypeOf((*MockIndexService)(nil).RefreshAppsIndexByNode), arg0, arg1, arg2, arg3)
 }
 
 // RefreshConfigIndexByApp mocks base method
-func (m *MockIndexService) RefreshConfigIndexByApp(arg0, arg1 string, arg2 []string) error {
+func (m *MockIndexService) RefreshConfigIndexByApp(arg0 interface{}, arg1, arg2 string, arg3 []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RefreshConfigIndexByApp", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "RefreshConfigIndexByApp", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RefreshConfigIndexByApp indicates an expected call of RefreshConfigIndexByApp
-func (mr *MockIndexServiceMockRecorder) RefreshConfigIndexByApp(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockIndexServiceMockRecorder) RefreshConfigIndexByApp(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshConfigIndexByApp", reflect.TypeOf((*MockIndexService)(nil).RefreshConfigIndexByApp), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshConfigIndexByApp", reflect.TypeOf((*MockIndexService)(nil).RefreshConfigIndexByApp), arg0, arg1, arg2, arg3)
 }
 
 // RefreshIndex mocks base method
-func (m *MockIndexService) RefreshIndex(arg0 string, arg1, arg2 common.Resource, arg3 string, arg4 []string) error {
+func (m *MockIndexService) RefreshIndex(arg0 interface{}, arg1 string, arg2, arg3 common.Resource, arg4 string, arg5 []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RefreshIndex", arg0, arg1, arg2, arg3, arg4)
+	ret := m.ctrl.Call(m, "RefreshIndex", arg0, arg1, arg2, arg3, arg4, arg5)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RefreshIndex indicates an expected call of RefreshIndex
-func (mr *MockIndexServiceMockRecorder) RefreshIndex(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+func (mr *MockIndexServiceMockRecorder) RefreshIndex(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshIndex", reflect.TypeOf((*MockIndexService)(nil).RefreshIndex), arg0, arg1, arg2, arg3, arg4)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshIndex", reflect.TypeOf((*MockIndexService)(nil).RefreshIndex), arg0, arg1, arg2, arg3, arg4, arg5)
 }
 
 // RefreshNodesIndexByApp mocks base method
-func (m *MockIndexService) RefreshNodesIndexByApp(arg0, arg1 string, arg2 []string) error {
+func (m *MockIndexService) RefreshNodesIndexByApp(arg0 interface{}, arg1, arg2 string, arg3 []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RefreshNodesIndexByApp", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "RefreshNodesIndexByApp", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RefreshNodesIndexByApp indicates an expected call of RefreshNodesIndexByApp
-func (mr *MockIndexServiceMockRecorder) RefreshNodesIndexByApp(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockIndexServiceMockRecorder) RefreshNodesIndexByApp(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshNodesIndexByApp", reflect.TypeOf((*MockIndexService)(nil).RefreshNodesIndexByApp), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshNodesIndexByApp", reflect.TypeOf((*MockIndexService)(nil).RefreshNodesIndexByApp), arg0, arg1, arg2, arg3)
 }
 
 // RefreshSecretIndexByApp mocks base method
-func (m *MockIndexService) RefreshSecretIndexByApp(arg0, arg1 string, arg2 []string) error {
+func (m *MockIndexService) RefreshSecretIndexByApp(arg0 interface{}, arg1, arg2 string, arg3 []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RefreshSecretIndexByApp", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "RefreshSecretIndexByApp", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RefreshSecretIndexByApp indicates an expected call of RefreshSecretIndexByApp
-func (mr *MockIndexServiceMockRecorder) RefreshSecretIndexByApp(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockIndexServiceMockRecorder) RefreshSecretIndexByApp(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshSecretIndexByApp", reflect.TypeOf((*MockIndexService)(nil).RefreshSecretIndexByApp), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshSecretIndexByApp", reflect.TypeOf((*MockIndexService)(nil).RefreshSecretIndexByApp), arg0, arg1, arg2, arg3)
 }

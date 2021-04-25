@@ -35,18 +35,18 @@ func (m *MockConfigService) EXPECT() *MockConfigServiceMockRecorder {
 }
 
 // Create mocks base method
-func (m *MockConfigService) Create(arg0 string, arg1 *v1.Configuration) (*v1.Configuration, error) {
+func (m *MockConfigService) Create(arg0 interface{}, arg1 string, arg2 *v1.Configuration) (*v1.Configuration, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0, arg1)
+	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Configuration)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockConfigServiceMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockConfigServiceMockRecorder) Create(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockConfigService)(nil).Create), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockConfigService)(nil).Create), arg0, arg1, arg2)
 }
 
 // Delete mocks base method

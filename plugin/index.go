@@ -20,6 +20,6 @@ type Index interface {
 	CreateIndexTx(tx *sqlx.Tx, namespace string, keyA, keyB common.Resource, valueA, valueB string) (sql.Result, error)
 	ListIndexTx(tx *sqlx.Tx, namespace string, keyA, byKeyB common.Resource, valueB string) ([]string, error)
 	DeleteIndexTx(tx *sqlx.Tx, namespace string, keyA, byKeyB common.Resource, valueB string) (sql.Result, error)
-	RefreshIndex(namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error
+	RefreshIndex(tx interface{}, namespace string, keyA, keyB common.Resource, valueA string, valueBs []string) error
 	io.Closer
 }

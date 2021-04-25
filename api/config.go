@@ -76,7 +76,7 @@ func (api *API) CreateConfig(c *common.Context) (interface{}, error) {
 			common.Field("error", "this name is already in use"))
 	}
 
-	config, err = api.Config.Create(ns, config)
+	config, err = api.Config.Create(nil, ns, config)
 	if err != nil {
 		return nil, err
 	}

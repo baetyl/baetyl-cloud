@@ -18,7 +18,7 @@ import (
 type ConfigService interface {
 	Get(namespace, name, version string) (*specV1.Configuration, error)
 	List(namespace string, listOptions *models.ListOptions) (*models.ConfigurationList, error)
-	Create(namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
+	Create(tx interface{}, namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
 	Update(namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
 	Upsert(namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
 	Delete(namespace, name string) error
@@ -41,7 +41,7 @@ func NewConfigService(config *config.CloudConfig) (ConfigService, error) {
 
 // Get get a config
 func (s *configService) Get(namespace, name, version string) (*specV1.Configuration, error) {
-	res, err := s.config.GetConfig(namespace, name, version)
+	res, err := s.config.GetConfig(nil, namespace, name, version)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "config"),
 			common.Field("name", name))
@@ -55,8 +55,8 @@ func (s *configService) List(namespace string, listOptions *models.ListOptions) 
 }
 
 // Create Create a config
-func (s *configService) Create(namespace string, config *specV1.Configuration) (*specV1.Configuration, error) {
-	return s.config.CreateConfig(namespace, config)
+func (s *configService) Create(tx interface{}, namespace string, config *specV1.Configuration) (*specV1.Configuration, error) {
+	return s.config.CreateConfig(tx, namespace, config)
 }
 
 // Update update a config
@@ -66,9 +66,9 @@ func (s *configService) Update(namespace string, config *specV1.Configuration) (
 
 // Upsert update a config or create a config if not exist
 func (s *configService) Upsert(namespace string, config *specV1.Configuration) (*specV1.Configuration, error) {
-	res, err := s.config.GetConfig(namespace, config.Name, "")
+	res, err := s.config.GetConfig(nil, namespace, config.Name, "")
 	if err != nil {
-		return s.config.CreateConfig(namespace, config)
+		return s.config.CreateConfig(nil, namespace, config)
 	}
 
 	if models.EqualConfig(res, config) {

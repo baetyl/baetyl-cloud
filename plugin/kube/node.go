@@ -141,7 +141,7 @@ func (c *client) GetNode(namespace, name string) (*specV1.Node, error) {
 	return toNodeModel(node), nil
 }
 
-func (c *client) CreateNode(namespace string, node *specV1.Node) (*specV1.Node, error) {
+func (c *client) CreateNode(tx interface{}, namespace string, node *specV1.Node) (*specV1.Node, error) {
 	n, err := fromNodeModel(node)
 	if err != nil {
 		return nil, err

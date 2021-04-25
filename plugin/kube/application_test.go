@@ -238,12 +238,12 @@ func TestCreateApplication(t *testing.T) {
 		Name:      "test_name_2",
 		Namespace: "default",
 	}
-	cfg2, err := c.CreateApplication(cfg.Namespace, cfg)
+	cfg2, err := c.CreateApplication(nil, cfg.Namespace, cfg)
 	assert.NoError(t, err)
 	assert.Equal(t, cfg.Name, cfg2.Name)
 
 	cfg.Name = "test_name"
-	_, err = c.CreateApplication(cfg.Namespace, cfg)
+	_, err = c.CreateApplication(nil, cfg.Namespace, cfg)
 	assert.NotNil(t, err)
 }
 
@@ -271,7 +271,7 @@ func TestDeleteApplication(t *testing.T) {
 
 func TestListListApplication(t *testing.T) {
 	c := initApplicationClient()
-	l, err := c.ListApplication("default", &models.ListOptions{})
+	l, err := c.ListApplication(nil, "default", &models.ListOptions{})
 	assert.NoError(t, err)
 	assert.Equal(t, l.Total, 1)
 }

@@ -79,17 +79,17 @@ func (n *namespaceProcessor) DeleteIndexByNamespace(task *models.Task) error {
 	}
 
 	for _, v := range apps.Items {
-		err = n.indexService.RefreshConfigIndexByApp(task.Namespace, v.Name, []string{})
+		err = n.indexService.RefreshConfigIndexByApp(nil, task.Namespace, v.Name, []string{})
 		if err != nil {
 			return err
 		}
 
-		err = n.indexService.RefreshNodesIndexByApp(task.Namespace, v.Name, []string{})
+		err = n.indexService.RefreshNodesIndexByApp(nil, task.Namespace, v.Name, []string{})
 		if err != nil {
 			return err
 		}
 
-		err = n.indexService.RefreshSecretIndexByApp(task.Namespace, v.Name, []string{})
+		err = n.indexService.RefreshSecretIndexByApp(nil, task.Namespace, v.Name, []string{})
 		if err != nil {
 			return err
 		}
