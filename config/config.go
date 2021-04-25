@@ -41,6 +41,7 @@ type CloudConfig struct {
 		Locker     string   `yaml:"locker" json:"locker" default:"defaultlocker"`
 		Task       string   `yaml:"task" json:"task" default:"database"`
 		DM         string   `yaml:"dm" json:"dm" default:"databaseext"`
+		Tx         string   `yaml:"tx" json:"tx" default:"defaulttx"`
 	} `yaml:"plugin" json:"plugin"`
 }
 

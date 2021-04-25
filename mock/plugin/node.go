@@ -35,18 +35,18 @@ func (m *MockNode) EXPECT() *MockNodeMockRecorder {
 }
 
 // CreateNode mocks base method
-func (m *MockNode) CreateNode(arg0 string, arg1 *v1.Node) (*v1.Node, error) {
+func (m *MockNode) CreateNode(arg0 interface{}, arg1 string, arg2 *v1.Node) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateNode", arg0, arg1)
+	ret := m.ctrl.Call(m, "CreateNode", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateNode indicates an expected call of CreateNode
-func (mr *MockNodeMockRecorder) CreateNode(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockNodeMockRecorder) CreateNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNode", reflect.TypeOf((*MockNode)(nil).CreateNode), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNode", reflect.TypeOf((*MockNode)(nil).CreateNode), arg0, arg1, arg2)
 }
 
 // DeleteNode mocks base method

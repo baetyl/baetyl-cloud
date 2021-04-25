@@ -170,7 +170,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	if n.Accelerator == v1.NVAccelerator {
 		n.SysApps = append(n.SysApps, v1.BaetylGPUMetrics)
 	}
-	node, err := api.Node.Create(n.Namespace, n)
+	node, err := api.Node.Create(nil, n.Namespace, n)
 	if err != nil {
 		if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
 			log.L().Error("ReleaseQuota error", log.Error(e))
@@ -275,7 +275,7 @@ func (api *API) deleteAllSysAppsOfNode(node *v1.Node) (interface{}, error) {
 	api.deleteSysApps(node.Namespace, sysAppNames)
 
 	for _, v := range sysAppNames {
-		if err := api.Index.RefreshNodesIndexByApp(node.Namespace, v, make([]string, 0)); err != nil {
+		if err := api.Index.RefreshNodesIndexByApp(nil, node.Namespace, v, make([]string, 0)); err != nil {
 			common.LogDirtyData(err,
 				log.Any("type", common.Index),
 				log.Any(common.KeyContextNamespace, node.Namespace),
@@ -671,7 +671,7 @@ func (api *API) updateAddedSysApps(ns, node string, freshAppAlias []string) erro
 		return nil
 	}
 
-	freshApps, err := api.SysApp.GenOptionalApps(ns, node, freshAppAlias)
+	freshApps, err := api.SysApp.GenOptionalApps(nil, ns, node, freshAppAlias)
 	if err != nil {
 		return err
 	}
@@ -712,7 +712,7 @@ func (api *API) deleteDeletedSysApps(node *v1.Node, obsoleteAppAlias []string) e
 	}
 
 	for _, v := range obsoleteAppNames {
-		if err := api.Index.RefreshNodesIndexByApp(node.Namespace, v, make([]string, 0)); err != nil {
+		if err := api.Index.RefreshNodesIndexByApp(nil, node.Namespace, v, make([]string, 0)); err != nil {
 			common.LogDirtyData(err,
 				log.Any("type", common.Index),
 				log.Any(common.KeyContextNamespace, node.Namespace),

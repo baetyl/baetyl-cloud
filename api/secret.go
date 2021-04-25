@@ -58,7 +58,7 @@ func (api *API) CreateSecret(c *common.Context) (interface{}, error) {
 	if sd != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
-	res, err := api.Secret.Create(ns, cfg.ToSecret())
+	res, err := api.Secret.Create(nil, ns, cfg.ToSecret())
 	if err != nil {
 		return nil, err
 	}

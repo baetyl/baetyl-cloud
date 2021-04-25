@@ -129,7 +129,7 @@ tu5nww5RdjCz4Uks08P2GNmZjLO81MgYkhR7B9wi3KDNxg==
 		Version:           "1234",
 	}
 	mkSecretService.EXPECT().Get(gomock.Any(), cert1.Name, gomock.Any()).Return(nil, nil).Times(1)
-	mkSecretService.EXPECT().Create(gomock.Any(), temp1).Return(res1, nil).Times(1)
+	mkSecretService.EXPECT().Create(gomock.Any(), gomock.Any(), temp1).Return(res1, nil).Times(1)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(cert1)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/certificates", bytes.NewReader(body))
@@ -196,7 +196,7 @@ RcKyjhh1
 		Version:           "1234",
 	}
 	mkSecretService.EXPECT().Get(gomock.Any(), cert2.Name, gomock.Any()).Return(nil, nil).Times(1)
-	mkSecretService.EXPECT().Create(gomock.Any(), temp2).Return(res2, nil).Times(1)
+	mkSecretService.EXPECT().Create(gomock.Any(), gomock.Any(), temp2).Return(res2, nil).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(cert2)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/certificates", bytes.NewReader(body))
@@ -357,7 +357,7 @@ RcKyjhh1
 	temp8 := cert8.ToSecret()
 
 	mkSecretService.EXPECT().Get(gomock.Any(), cert8.Name, gomock.Any()).Return(nil, nil).Times(1)
-	mkSecretService.EXPECT().Create(gomock.Any(), temp8).Return(nil, fmt.Errorf("error")).Times(1)
+	mkSecretService.EXPECT().Create(gomock.Any(), gomock.Any(), temp8).Return(nil, fmt.Errorf("error")).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(cert8)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/certificates", bytes.NewReader(body))

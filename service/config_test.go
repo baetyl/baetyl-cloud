@@ -18,10 +18,10 @@ func TestDefaultConfigService_Create(t *testing.T) {
 	namespace := "default"
 	name := "ConfigService-Create"
 	mConf := &specV1.Configuration{Name: name}
-	mockObject.configuration.EXPECT().CreateConfig(namespace, mConf).Return(mConf, nil)
+	mockObject.configuration.EXPECT().CreateConfig(nil, namespace, mConf).Return(mConf, nil)
 	cs, err := NewConfigService(mockObject.conf)
 	assert.NoError(t, err)
-	res, err := cs.Create(namespace, mConf)
+	res, err := cs.Create(nil, namespace, mConf)
 	assert.NoError(t, err)
 	assert.Equal(t, name, res.Name)
 }
@@ -37,7 +37,7 @@ func TestDefaultConfigService_Get(t *testing.T) {
 		Version: "get.0.0.1",
 	}
 
-	mockObject.configuration.EXPECT().GetConfig(namespace, name, "").Return(mConf, nil)
+	mockObject.configuration.EXPECT().GetConfig(nil, namespace, name, "").Return(mConf, nil)
 
 	cs, err := NewConfigService(mockObject.conf)
 	assert.NoError(t, err)
@@ -114,12 +114,12 @@ func TestDefaultConfigService_Upsert(t *testing.T) {
 		Version: "1243",
 	}
 
-	mockObject.configuration.EXPECT().GetConfig(namespace, mConf.Name, "").Return(nil, fmt.Errorf("error"))
-	mockObject.configuration.EXPECT().CreateConfig(namespace, mConf).Return(mConf, nil)
+	mockObject.configuration.EXPECT().GetConfig(nil, namespace, mConf.Name, "").Return(nil, fmt.Errorf("error"))
+	mockObject.configuration.EXPECT().CreateConfig(nil, namespace, mConf).Return(mConf, nil)
 	_, err := cs.Upsert(namespace, mConf)
 	assert.NoError(t, err)
 
-	mockObject.configuration.EXPECT().GetConfig(namespace, mConf.Name, "").Return(mConf, nil)
+	mockObject.configuration.EXPECT().GetConfig(nil, namespace, mConf.Name, "").Return(mConf, nil)
 	_, err = cs.Upsert(namespace, mConf)
 	assert.NoError(t, err)
 }

@@ -10,7 +10,7 @@ import (
 
 type Node interface {
 	GetNode(namespace, name string) (*v1.Node, error)
-	CreateNode(namespace string, node *v1.Node) (*v1.Node, error)
+	CreateNode(tx interface{}, namespace string, node *v1.Node) (*v1.Node, error)
 	UpdateNode(namespace string, node *v1.Node) (*v1.Node, error)
 	DeleteNode(namespace, name string) error
 	ListNode(namespace string, listOptions *models.ListOptions) (*models.NodeList, error)

@@ -140,15 +140,15 @@ func (mr *MockIndexMockRecorder) ListIndexTx(arg0, arg1, arg2, arg3, arg4 interf
 }
 
 // RefreshIndex mocks base method
-func (m *MockIndex) RefreshIndex(arg0 string, arg1, arg2 common.Resource, arg3 string, arg4 []string) error {
+func (m *MockIndex) RefreshIndex(arg0 interface{}, arg1 string, arg2, arg3 common.Resource, arg4 string, arg5 []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RefreshIndex", arg0, arg1, arg2, arg3, arg4)
+	ret := m.ctrl.Call(m, "RefreshIndex", arg0, arg1, arg2, arg3, arg4, arg5)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RefreshIndex indicates an expected call of RefreshIndex
-func (mr *MockIndexMockRecorder) RefreshIndex(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+func (mr *MockIndexMockRecorder) RefreshIndex(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshIndex", reflect.TypeOf((*MockIndex)(nil).RefreshIndex), arg0, arg1, arg2, arg3, arg4)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshIndex", reflect.TypeOf((*MockIndex)(nil).RefreshIndex), arg0, arg1, arg2, arg3, arg4, arg5)
 }

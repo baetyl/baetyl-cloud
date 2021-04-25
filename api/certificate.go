@@ -61,7 +61,7 @@ func (api *API) CreateCertificate(c *common.Context) (interface{}, error) {
 	if err = cfg.ParseCertInfo(); err != nil {
 		return nil, err
 	}
-	res, err := api.Secret.Create(ns, cfg.ToSecret())
+	res, err := api.Secret.Create(nil, ns, cfg.ToSecret())
 	if err != nil {
 		return nil, err
 	}

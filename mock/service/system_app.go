@@ -34,33 +34,33 @@ func (m *MockSystemAppService) EXPECT() *MockSystemAppServiceMockRecorder {
 }
 
 // GenApps mocks base method
-func (m *MockSystemAppService) GenApps(arg0 string, arg1 *v1.Node) ([]*v1.Application, error) {
+func (m *MockSystemAppService) GenApps(arg0 interface{}, arg1 string, arg2 *v1.Node) ([]*v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenApps", arg0, arg1)
+	ret := m.ctrl.Call(m, "GenApps", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]*v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GenApps indicates an expected call of GenApps
-func (mr *MockSystemAppServiceMockRecorder) GenApps(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockSystemAppServiceMockRecorder) GenApps(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenApps", reflect.TypeOf((*MockSystemAppService)(nil).GenApps), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenApps", reflect.TypeOf((*MockSystemAppService)(nil).GenApps), arg0, arg1, arg2)
 }
 
 // GenOptionalApps mocks base method
-func (m *MockSystemAppService) GenOptionalApps(arg0, arg1 string, arg2 []string) ([]*v1.Application, error) {
+func (m *MockSystemAppService) GenOptionalApps(arg0 interface{}, arg1, arg2 string, arg3 []string) ([]*v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenOptionalApps", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GenOptionalApps", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].([]*v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GenOptionalApps indicates an expected call of GenOptionalApps
-func (mr *MockSystemAppServiceMockRecorder) GenOptionalApps(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockSystemAppServiceMockRecorder) GenOptionalApps(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenOptionalApps", reflect.TypeOf((*MockSystemAppService)(nil).GenOptionalApps), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenOptionalApps", reflect.TypeOf((*MockSystemAppService)(nil).GenOptionalApps), arg0, arg1, arg2, arg3)
 }
 
 // GetOptionalApps mocks base method

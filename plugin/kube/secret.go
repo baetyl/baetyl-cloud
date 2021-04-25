@@ -78,7 +78,7 @@ func (c *client) fromSecretModel(secret *specV1.Secret) (*v1alpha1.Secret, error
 	return res, nil
 }
 
-func (c *client) GetSecret(namespace, name, version string) (*specV1.Secret, error) {
+func (c *client) GetSecret(tx interface{}, namespace, name, version string) (*specV1.Secret, error) {
 	options := metav1.GetOptions{ResourceVersion: version}
 	defer utils.Trace(c.log.Debug, "GetSecret")()
 	Secret, err := c.customClient.CloudV1alpha1().Secrets(namespace).Get(name, options)
@@ -88,7 +88,7 @@ func (c *client) GetSecret(namespace, name, version string) (*specV1.Secret, err
 	return c.toSecretModel(Secret), nil
 }
 
-func (c *client) CreateSecret(namespace string, secretModel *specV1.Secret) (*specV1.Secret, error) {
+func (c *client) CreateSecret(tx interface{}, namespace string, secretModel *specV1.Secret) (*specV1.Secret, error) {
 	secretModel.UpdateTimestamp = time.Now()
 
 	model, err := c.fromSecretModel(secretModel)

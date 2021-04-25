@@ -59,15 +59,15 @@ func TestInitService_GenApps(t *testing.T) {
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-init-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sPKI.EXPECT().SignClientCertificate("ns.abc", gomock.Any()).Return(cert, nil)
 	sPKI.EXPECT().GetCA().Return([]byte("RootCA"), nil)
-	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(3)
-	sSecret.EXPECT().Create("ns", gomock.Any()).Return(secret, nil).Times(1)
-	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(3)
+	sConfig.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(config, nil).Times(3)
+	sSecret.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(secret, nil).Times(1)
+	sApp.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(app, nil).Times(3)
 
 	node := &v1.Node{
 		Namespace: "ns",
 		Name:      "abc",
 	}
-	out, err := is.GenApps("ns", node)
+	out, err := is.GenApps(gomock.Any(), "ns", node)
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(out))
 }
@@ -105,8 +105,8 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-app.yml", gomock.Any(), gomock.Any()).Return(nil)
-	sConfig.EXPECT().Create("ns", gomock.Any()).Return(config, nil).Times(2)
-	sApp.EXPECT().Create("ns", gomock.Any()).Return(app, nil).Times(2)
+	sConfig.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(config, nil).Times(2)
+	sApp.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(app, nil).Times(2)
 
 	node := &v1.Node{
 		Namespace: "ns",
@@ -122,7 +122,7 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 		"baetyl-rule":     is.genRuleApp,
 	}
 
-	out, err := is.GenOptionalApps("ns", node.Name, node.SysApps)
+	out, err := is.GenOptionalApps(gomock.Any(), "ns", node.Name, node.SysApps)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(out))
 }

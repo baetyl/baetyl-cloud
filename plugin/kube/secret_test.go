@@ -75,9 +75,9 @@ func initSecretMapClient() *client {
 
 func TestGetSecret(t *testing.T) {
 	c := initSecretMapClient()
-	_, err := c.GetSecret("default", "test", "")
+	_, err := c.GetSecret(nil, "default", "test", "")
 	assert.NotNil(t, err)
-	secret, err := c.GetSecret("default", "test-get", "")
+	secret, err := c.GetSecret(nil, "default", "test-get", "")
 	assert.Equal(t, secret.Name, "test-get")
 	assert.Equal(t, secret.Annotations["prefix/certId"], "certId")
 }
@@ -101,7 +101,7 @@ func TestCreateSecret(t *testing.T) {
 		Description: "test",
 		Version:     "2",
 	}
-	secret2, err := c.CreateSecret(secret.Namespace, secret)
+	secret2, err := c.CreateSecret(nil, secret.Namespace, secret)
 	assert.NoError(t, err)
 	assert.Equal(t, secret2.Name, secret.Name)
 	assert.Equal(t, secret2.Namespace, secret.Namespace)

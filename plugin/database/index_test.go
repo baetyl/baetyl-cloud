@@ -146,8 +146,8 @@ func TestDBConnection_RefreshIndex(t *testing.T) {
 
 	valueA := "nodeName"
 	valueB := "application"
-	db.RefreshIndex(namespace, common.Node, common.Application, valueA, []string{valueB})
-	db.RefreshIndex(namespace, common.Application, common.Node, valueB, []string{valueA})
-	db.RefreshIndex(namespace, common.Node, common.Application, valueB, []string{valueA})
-	db.RefreshIndex(namespace, common.Application, common.Node, valueA, []string{valueB})
+	db.RefreshIndex(nil, namespace, common.Node, common.Application, valueA, []string{valueB})
+	db.RefreshIndex(nil, namespace, common.Application, common.Node, valueB, []string{valueA})
+	db.RefreshIndex(nil, namespace, common.Node, common.Application, valueB, []string{valueA})
+	db.RefreshIndex(nil, namespace, common.Application, common.Node, valueA, []string{valueB})
 }

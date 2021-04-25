@@ -123,7 +123,7 @@ func TestCreateSecret(t *testing.T) {
 		},
 	}
 	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
-	sSecret.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(mConf2, nil)
+	sSecret.EXPECT().Create(nil, mConf.Namespace, gomock.Any()).Return(mConf2, nil)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(mConf)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/secrets", bytes.NewReader(body))

@@ -67,7 +67,7 @@ func fromConfigurationModel(config *specV1.Configuration) *v1alpha1.Configuratio
 	return res
 }
 
-func (c *client) GetConfig(namespace, name, version string) (*specV1.Configuration, error) {
+func (c *client) GetConfig(tx interface{}, namespace, name, version string) (*specV1.Configuration, error) {
 	options := metav1.GetOptions{ResourceVersion: version}
 	defer utils.Trace(c.log.Debug, "GetConfig")()
 	config, err := c.customClient.CloudV1alpha1().Configurations(namespace).Get(name, options)
@@ -77,7 +77,7 @@ func (c *client) GetConfig(namespace, name, version string) (*specV1.Configurati
 	return toConfigurationModel(config), nil
 }
 
-func (c *client) CreateConfig(namespace string, configModel *specV1.Configuration) (*specV1.Configuration, error) {
+func (c *client) CreateConfig(tx interface{}, namespace string, configModel *specV1.Configuration) (*specV1.Configuration, error) {
 	configModel.UpdateTimestamp = time.Now()
 	defer utils.Trace(c.log.Debug, "CreateConfig")()
 	config, err := c.customClient.CloudV1alpha1().

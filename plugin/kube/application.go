@@ -107,7 +107,7 @@ func (c *client) GetApplication(namespace, name, version string) (*specV1.Applic
 	return toAppModel(app), nil
 }
 
-func (c *client) CreateApplication(namespace string, application *specV1.Application) (*specV1.Application, error) {
+func (c *client) CreateApplication(tx interface{}, namespace string, application *specV1.Application) (*specV1.Application, error) {
 	app := fromAppModel(namespace, application)
 	defer utils.Trace(c.log.Debug, "CreateApplication")()
 	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Create(app)
@@ -134,7 +134,7 @@ func (c *client) DeleteApplication(namespace, name string) error {
 	return err
 }
 
-func (c *client) ListApplication(namespace string, listOptions *models.ListOptions) (*models.ApplicationList, error) {
+func (c *client) ListApplication(tx interface{}, namespace string, listOptions *models.ListOptions) (*models.ApplicationList, error) {
 	defer utils.Trace(c.log.Debug, "ListApplication")()
 	list, err := c.customClient.CloudV1alpha1().Applications(namespace).List(*fromListOptionsModel(listOptions))
 	listOptions.Continue = list.Continue

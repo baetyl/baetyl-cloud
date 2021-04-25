@@ -5,9 +5,10 @@
 package plugin
 
 import (
+	reflect "reflect"
+
 	models "github.com/baetyl/baetyl-cloud/v2/models"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockShadow is a mock of Shadow interface
@@ -48,18 +49,18 @@ func (mr *MockShadowMockRecorder) Close() *gomock.Call {
 }
 
 // Create mocks base method
-func (m *MockShadow) Create(arg0 *models.Shadow) (*models.Shadow, error) {
+func (m *MockShadow) Create(arg0 interface{}, arg1 *models.Shadow) (*models.Shadow, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0)
+	ret := m.ctrl.Call(m, "Create", arg0, arg1)
 	ret0, _ := ret[0].(*models.Shadow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockShadowMockRecorder) Create(arg0 interface{}) *gomock.Call {
+func (mr *MockShadowMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockShadow)(nil).Create), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockShadow)(nil).Create), arg0, arg1)
 }
 
 // Delete mocks base method
@@ -77,18 +78,18 @@ func (mr *MockShadowMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // Get mocks base method
-func (m *MockShadow) Get(arg0, arg1 string) (*models.Shadow, error) {
+func (m *MockShadow) Get(arg0 interface{}, arg1, arg2 string) (*models.Shadow, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0, arg1)
+	ret := m.ctrl.Call(m, "Get", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*models.Shadow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get
-func (mr *MockShadowMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockShadowMockRecorder) Get(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockShadow)(nil).Get), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockShadow)(nil).Get), arg0, arg1, arg2)
 }
 
 // List mocks base method
@@ -107,18 +108,18 @@ func (mr *MockShadowMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // UpdateDesire mocks base method
-func (m *MockShadow) UpdateDesire(arg0 *models.Shadow) (*models.Shadow, error) {
+func (m *MockShadow) UpdateDesire(arg0 interface{}, arg1 *models.Shadow) (*models.Shadow, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateDesire", arg0)
+	ret := m.ctrl.Call(m, "UpdateDesire", arg0, arg1)
 	ret0, _ := ret[0].(*models.Shadow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateDesire indicates an expected call of UpdateDesire
-func (mr *MockShadowMockRecorder) UpdateDesire(arg0 interface{}) *gomock.Call {
+func (mr *MockShadowMockRecorder) UpdateDesire(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDesire", reflect.TypeOf((*MockShadow)(nil).UpdateDesire), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDesire", reflect.TypeOf((*MockShadow)(nil).UpdateDesire), arg0, arg1)
 }
 
 // UpdateReport mocks base method

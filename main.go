@@ -21,6 +21,7 @@ import (
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/license"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/lock"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/pki"
+	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/transaction"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/kube"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/link/httplink"
 )

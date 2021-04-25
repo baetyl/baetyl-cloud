@@ -348,7 +348,7 @@ func (api *API) UpdateNodeAndAppIndex(namespace string, app *specV1.Application)
 	if err != nil {
 		return err
 	}
-	return api.Index.RefreshNodesIndexByApp(namespace, app.Name, nodes)
+	return api.Index.RefreshNodesIndexByApp(nil, namespace, app.Name, nodes)
 }
 
 func (api *API) DeleteNodeAndAppIndex(namespace string, app *specV1.Application) error {
@@ -357,7 +357,7 @@ func (api *API) DeleteNodeAndAppIndex(namespace string, app *specV1.Application)
 		return err
 	}
 
-	return api.Index.RefreshNodesIndexByApp(namespace, app.Name, make([]string, 0))
+	return api.Index.RefreshNodesIndexByApp(nil, namespace, app.Name, make([]string, 0))
 }
 
 func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationView, error) {

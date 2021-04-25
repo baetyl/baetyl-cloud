@@ -291,7 +291,7 @@ func TestCreateConfig(t *testing.T) {
 		System:            false,
 	}
 	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
-	sConfig.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Create(nil, mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf)
@@ -377,7 +377,7 @@ func TestCreateConfig(t *testing.T) {
 		System:            false,
 	}
 	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
-	sConfig.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Create(nil, mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf)
@@ -429,7 +429,7 @@ func TestCreateConfig(t *testing.T) {
 		System:            false,
 	}
 	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
-	sConfig.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Create(nil, mConf.Namespace, gomock.Any()).Return(res, nil).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf)
@@ -466,7 +466,7 @@ func TestCreateConfig(t *testing.T) {
 	}
 
 	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, gomock.Any()).Return(nil, nil).Times(1)
-	sConfig.EXPECT().Create(mConf.Namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
+	sConfig.EXPECT().Create(nil, mConf.Namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf)

@@ -35,18 +35,18 @@ func (m *MockSecretService) EXPECT() *MockSecretServiceMockRecorder {
 }
 
 // Create mocks base method
-func (m *MockSecretService) Create(arg0 string, arg1 *v1.Secret) (*v1.Secret, error) {
+func (m *MockSecretService) Create(arg0 interface{}, arg1 string, arg2 *v1.Secret) (*v1.Secret, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0, arg1)
+	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Secret)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockSecretServiceMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockSecretServiceMockRecorder) Create(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockSecretService)(nil).Create), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockSecretService)(nil).Create), arg0, arg1, arg2)
 }
 
 // Delete mocks base method

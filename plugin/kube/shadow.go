@@ -16,7 +16,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
 )
 
-func (c *client) Get(namespace, name string) (*models.Shadow, error) {
+func (c *client) Get(tx interface{}, namespace, name string) (*models.Shadow, error) {
 	defer utils.Trace(c.log.Debug, "shadow Get")()
 	nodeDesire, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
@@ -33,7 +33,7 @@ func (c *client) Get(namespace, name string) (*models.Shadow, error) {
 	return shd, nil
 }
 
-func (c *client) Create(shadow *models.Shadow) (*models.Shadow, error) {
+func (c *client) Create(tx interface{}, shadow *models.Shadow) (*models.Shadow, error) {
 	namespace := shadow.Namespace
 	name := shadow.Name
 	desire, err := toDesire(shadow)
@@ -122,7 +122,7 @@ func (c *client) Delete(namespace, name string) error {
 	return err
 }
 
-func (c *client) UpdateDesire(shadow *models.Shadow) (*models.Shadow, error) {
+func (c *client) UpdateDesire(tx interface{}, shadow *models.Shadow) (*models.Shadow, error) {
 	desire, err := toDesire(shadow)
 	if err != nil {
 		return nil, err

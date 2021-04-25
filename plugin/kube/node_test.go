@@ -215,10 +215,10 @@ func TestCreateNode(t *testing.T) {
 		Name:      "test-create",
 		Namespace: "default",
 	}
-	_, err := c.CreateNode(node.Namespace, node)
+	_, err := c.CreateNode(nil, node.Namespace, node)
 	assert.NotNil(t, err)
 	node.Name += "new"
-	node2, err := c.CreateNode(node.Namespace, node)
+	node2, err := c.CreateNode(nil, node.Namespace, node)
 	assert.NoError(t, err)
 	assert.Equal(t, node.Name, node2.Name)
 
@@ -229,7 +229,7 @@ func TestCreateNode(t *testing.T) {
 			"brand": "ZTC",
 		},
 	}
-	node3, err := c.CreateNode(node.Namespace, node)
+	node3, err := c.CreateNode(nil, node.Namespace, node)
 	assert.Nil(t, err)
 	assert.Equal(t, node.Name, node3.Name)
 }
@@ -288,7 +288,7 @@ func TestUpdateNodeDesire(t *testing.T) {
 		Name:      name,
 		Desire:    genDesire(),
 	}
-	_, err := c.UpdateDesire(shadow)
+	_, err := c.UpdateDesire(nil, shadow)
 	assert.Error(t, err)
 
 	shadow = &models.Shadow{
@@ -296,7 +296,7 @@ func TestUpdateNodeDesire(t *testing.T) {
 		Name:      "test-update",
 		Desire:    genDesire(),
 	}
-	_, err = c.UpdateDesire(shadow)
+	_, err = c.UpdateDesire(nil, shadow)
 	assert.Error(t, err)
 
 	shadow = &models.Shadow{
@@ -304,7 +304,7 @@ func TestUpdateNodeDesire(t *testing.T) {
 		Name:      "test-create01",
 		Desire:    genDesire(),
 	}
-	n, err := c.UpdateDesire(shadow)
+	n, err := c.UpdateDesire(nil, shadow)
 	assert.NoError(t, err)
 	assert.Equal(t, shadow.Name, n.Name)
 

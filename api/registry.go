@@ -64,7 +64,7 @@ func (api *API) CreateRegistry(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	secret, err := api.Secret.Create(ns, cfg.ToSecret())
+	secret, err := api.Secret.Create(nil, ns, cfg.ToSecret())
 	if err != nil {
 		return nil, err
 	}

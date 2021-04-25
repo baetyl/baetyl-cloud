@@ -71,9 +71,9 @@ func initConfigurationClient() *client {
 
 func TestGetConfig(t *testing.T) {
 	c := initConfigurationClient()
-	_, err := c.GetConfig("default", "test", "")
+	_, err := c.GetConfig(nil, "default", "test", "")
 	assert.NotNil(t, err)
-	cfg, err := c.GetConfig("default", "test-get", "")
+	cfg, err := c.GetConfig(nil, "default", "test-get", "")
 	assert.Equal(t, cfg.Name, "test-get")
 }
 
@@ -86,7 +86,7 @@ func TestCreateConfig(t *testing.T) {
 			"key": "value",
 		},
 	}
-	cfg2, err := c.CreateConfig(cfg.Namespace, cfg)
+	cfg2, err := c.CreateConfig(nil, cfg.Namespace, cfg)
 	assert.NoError(t, err)
 	assert.Equal(t, cfg.Name, cfg2.Name)
 	assert.Equal(t, "value", cfg2.Data["key"])
