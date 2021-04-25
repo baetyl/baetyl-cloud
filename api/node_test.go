@@ -21,6 +21,7 @@ import (
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/transaction"
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
@@ -445,6 +446,11 @@ func TestCreateNode(t *testing.T) {
 	sModule := ms.NewMockModuleService(mockCtl)
 	api.Module = sModule
 
+	cfg := &config.CloudConfig{}
+	cfg.Plugin.Tx = "defaulttx"
+	wrpper, _ := service.NewWrapperService(cfg)
+	api.Wrapper = wrpper
+
 	mNode := getMockNode2()
 
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
@@ -550,6 +556,11 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 
 	sModule := ms.NewMockModuleService(mockCtl)
 	api.Module = sModule
+
+	cfg := &config.CloudConfig{}
+	cfg.Plugin.Tx = "defaulttx"
+	wrpper, _ := service.NewWrapperService(cfg)
+	api.Wrapper = wrpper
 
 	mNode := &specV1.Node{
 		Namespace: "default",

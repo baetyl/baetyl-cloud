@@ -170,7 +170,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	if n.Accelerator == v1.NVAccelerator {
 		n.SysApps = append(n.SysApps, v1.BaetylGPUMetrics)
 	}
-	node, err := api.Node.Create(nil, n.Namespace, n)
+	node, err := api.Wrapper.CreateNodeTx(api.Node.Create)(nil, n.Namespace, n)
 	if err != nil {
 		if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
 			log.L().Error("ReleaseQuota error", log.Error(e))
