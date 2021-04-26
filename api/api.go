@@ -25,6 +25,7 @@ type API struct {
 	Task     service.TaskService
 	Locker   service.LockerService
 	SysApp   service.SystemAppService
+	Wrapper  service.WrapperService
 	*service.AppCombinedService
 	log *log.Logger
 }
@@ -100,6 +101,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
+	wrapper, err := service.NewWrapperService(config)
 	return &API{
 		NS:                 namespaceService,
 		Node:               nodeService,
@@ -116,6 +118,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		Task:               taskService,
 		Locker:             lockerService,
 		SysApp:             sysApp,
+		Wrapper:            wrapper,
 		AppCombinedService: acs,
 		log:                log.L().With(log.Any("api", "admin")),
 	}, nil
