@@ -72,7 +72,7 @@ func TestInitService_GetResource(t *testing.T) {
 	//good case : setup
 	tp.EXPECT().ParseTemplate(templateInitDeploymentYaml, gomock.Any()).Return([]byte("init"), nil).Times(1)
 	ns.EXPECT().GetDesire("default", "node1").Return(desire, nil)
-	ns.EXPECT().Get("default", "node1").Return(node, nil)
+	ns.EXPECT().Get(nil, "default", "node1").Return(node, nil)
 	sApp.EXPECT().Get("default", "baetyl-init-node01", "").Return(app, nil)
 	sc.EXPECT().Get("default", "agent-conf", "").Return(sec, nil)
 

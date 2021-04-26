@@ -86,7 +86,7 @@ func (t *SyncServiceImpl) Report(namespace, name string, report specV1.Report) (
 		return nil, err
 	}
 
-	node, err := t.NodeService.Get(namespace, name)
+	node, err := t.NodeService.Get(nil, namespace, name)
 	if err != nil {
 		log.L().Error("failed to get node",
 			log.Any(common.KeyContextNamespace, namespace),

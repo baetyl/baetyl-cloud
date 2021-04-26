@@ -24,7 +24,7 @@ func TestReport(t *testing.T) {
 	name := "node01"
 
 	ns.EXPECT().UpdateReport(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
-	ns.EXPECT().Get(gomock.Any(), gomock.Any()).Return(&specV1.Node{}, nil)
+	ns.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(&specV1.Node{}, nil)
 
 	sync := SyncServiceImpl{
 		NodeService: ns,

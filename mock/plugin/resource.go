@@ -239,18 +239,18 @@ func (mr *MockResourceMockRecorder) GetNamespace(arg0 interface{}) *gomock.Call 
 }
 
 // GetNode mocks base method
-func (m *MockResource) GetNode(arg0, arg1 string) (*v1.Node, error) {
+func (m *MockResource) GetNode(arg0 interface{}, arg1, arg2 string) (*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNode", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetNode", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetNode indicates an expected call of GetNode
-func (mr *MockResourceMockRecorder) GetNode(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) GetNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNode", reflect.TypeOf((*MockResource)(nil).GetNode), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNode", reflect.TypeOf((*MockResource)(nil).GetNode), arg0, arg1, arg2)
 }
 
 // GetSecret mocks base method

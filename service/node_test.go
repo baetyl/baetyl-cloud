@@ -56,18 +56,18 @@ func TestDefaultNodeService_Get(t *testing.T) {
 
 	mockObject.shadow.EXPECT().Get(nil, node.Namespace, node.Name).Return(shadow, nil).AnyTimes()
 	cs, err := NewNodeService(mockObject.conf)
-	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, node.Namespace, node.Name).Return(node, nil)
 	assert.NoError(t, err)
-	_, err = cs.Get(node.Namespace, node.Name)
+	_, err = cs.Get(nil, node.Namespace, node.Name)
 	assert.NoError(t, err)
 
-	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(nil, fmt.Errorf("node not found"))
-	n, err := cs.Get(node.Namespace, node.Name)
+	mockObject.node.EXPECT().GetNode(nil, node.Namespace, node.Name).Return(nil, fmt.Errorf("node not found"))
+	n, err := cs.Get(nil, node.Namespace, node.Name)
 	assert.Error(t, err)
 	assert.Nil(t, n)
 
-	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(nil, fmt.Errorf("err"))
-	_, err = cs.Get(node.Namespace, node.Name)
+	mockObject.node.EXPECT().GetNode(nil, node.Namespace, node.Name).Return(nil, fmt.Errorf("err"))
+	_, err = cs.Get(nil, node.Namespace, node.Name)
 	assert.Error(t, err)
 }
 
@@ -394,7 +394,7 @@ func TestUpdateNodeAppVersion(t *testing.T) {
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(&shadowList.Items[2], nil).AnyTimes()
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
 	mockObject.node.EXPECT().ListNode(node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(&nodeList.Items[0], nil).AnyTimes()
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(&nodeList.Items[0], nil).AnyTimes()
 	_, err = ss.UpdateNodeAppVersion(node.Namespace, app)
 	assert.NoError(t, err)
 
@@ -586,13 +586,13 @@ func TestUpdateReport(t *testing.T) {
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
 	//mockObject.dbStorage.EXPECT().Create(gomock.Any()).Return(nil, nil)
 
-	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(nil, fmt.Errorf("error"))
+	mockObject.node.EXPECT().GetNode(nil, node.Namespace, node.Name).Return(nil, fmt.Errorf("error"))
 	_, err := ss.UpdateReport(node.Namespace, node.Name, node.Report)
 	assert.NotNil(t, err)
 
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil)
 	//mockObject.dbStorage.EXPECT().Create(gomock.Any()).Return(Shadow, nil)
-	mockObject.node.EXPECT().GetNode(node.Namespace, node.Name).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, node.Namespace, node.Name).Return(node, nil)
 	mockObject.node.EXPECT().UpdateNode(node.Namespace, gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().UpdateReport(gomock.Any()).Return(shadow, nil)
 	shad, err := ss.UpdateReport(node.Namespace, node.Name, report)
@@ -876,7 +876,7 @@ func TestGetNodeProperties(t *testing.T) {
 			common.NodeProps: map[string]interface{}{"a": "2"},
 		},
 	}
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil)
 	res, err := ns.GetNodeProperties("default", "abc")
 	assert.NoError(t, err)
@@ -892,11 +892,11 @@ func TestGetNodeProperties(t *testing.T) {
 	}
 	assert.Equal(t, expect, res)
 
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get node"))
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get node"))
 	_, err = ns.GetNodeProperties("default", "abc")
 	assert.Error(t, err)
 
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get Shadow"))
 	_, err = ns.GetNodeProperties("default", "abc")
 	assert.Error(t, err)
@@ -936,7 +936,7 @@ func TestUpdateNodeProperties(t *testing.T) {
 		},
 	}
 
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil)
 	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil, nil)
 	mockObject.node.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, nil)
@@ -967,7 +967,7 @@ func TestUpdateNodeProperties(t *testing.T) {
 			Desire: map[string]interface{}{},
 		},
 	}
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil)
 	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil, nil)
 	mockObject.node.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, nil)
@@ -989,23 +989,23 @@ func TestUpdateNodeProperties(t *testing.T) {
 	}
 	assert.Equal(t, expect, res)
 
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get node"))
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get node"))
 	_, err = ns.UpdateNodeProperties("default", "abc", nodeProps)
 	assert.Error(t, err)
 
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get Shadow"))
 	_, err = ns.UpdateNodeProperties("default", "abc", nodeProps)
 	assert.Error(t, err)
 
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil)
 	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to update desire"))
 	//mockObject.node.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, nil)
 	_, err = ns.UpdateNodeProperties("default", "abc", nodeProps)
 	assert.Error(t, err)
 
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil)
 	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil, nil)
 	mockObject.node.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to update node"))
@@ -1018,7 +1018,7 @@ func TestUpdateNodeMode(t *testing.T) {
 	defer mockObject.Close()
 
 	node := &v1.Node{}
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.node.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, nil)
 
 	ns := NodeServiceImpl{
@@ -1027,11 +1027,11 @@ func TestUpdateNodeMode(t *testing.T) {
 	err := ns.UpdateNodeMode("default", "abc", "cloud")
 	assert.NoError(t, err)
 
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get node"))
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to get node"))
 	err = ns.UpdateNodeMode("default", "abc", "cloud")
 	assert.Error(t, err)
 
-	mockObject.node.EXPECT().GetNode(gomock.Any(), gomock.Any()).Return(node, nil)
+	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(node, nil)
 	mockObject.node.EXPECT().UpdateNode(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to update node"))
 	err = ns.UpdateNodeMode("default", "abc", "cloud")
 	assert.Error(t, err)

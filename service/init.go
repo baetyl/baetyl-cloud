@@ -145,7 +145,7 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 		return nil, errors.Trace(err)
 	}
 
-	node, err := s.NodeService.Get(ns, nodeName)
+	node, err := s.NodeService.Get(nil, ns, nodeName)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

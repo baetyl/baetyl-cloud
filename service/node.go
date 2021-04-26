@@ -24,7 +24,7 @@ const casRetryTimes = 3
 
 // NodeService NodeService
 type NodeService interface {
-	Get(namespace, name string) (*specV1.Node, error)
+	Get(tx interface{}, namespace, name string) (*specV1.Node, error)
 	List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error)
 	Count(namespace string) (map[string]int, error)
 	Create(tx interface{}, amespace string, node *specV1.Node) (*specV1.Node, error)
@@ -91,8 +91,8 @@ func NewNodeService(config *config.CloudConfig) (NodeService, error) {
 }
 
 // Get get the node
-func (n *NodeServiceImpl) Get(namespace, name string) (*specV1.Node, error) {
-	node, err := n.node.GetNode(namespace, name)
+func (n *NodeServiceImpl) Get(tx interface{}, namespace, name string) (*specV1.Node, error) {
+	node, err := n.node.GetNode(tx, namespace, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
@@ -101,7 +101,7 @@ func (n *NodeServiceImpl) Get(namespace, name string) (*specV1.Node, error) {
 		return nil, err
 	}
 
-	shadow, err := n.Shadow.Get(nil, namespace, name)
+	shadow, err := n.Shadow.Get(tx, namespace, name)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +244,7 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 	}
 
 	if shadow == nil {
-		_, err = n.node.GetNode(namespace, name)
+		_, err = n.node.GetNode(nil, namespace, name)
 		if err != nil {
 			return nil, err
 		}
@@ -274,7 +274,7 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 }
 
 func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report specV1.Report, shad *models.Shadow) error {
-	node, err := n.node.GetNode(ns, name)
+	node, err := n.node.GetNode(nil, ns, name)
 	if err != nil {
 		return err
 	}
@@ -549,7 +549,7 @@ func toShadowMap(shadowList *models.ShadowList) map[string]*models.Shadow {
 }
 
 func (n *NodeServiceImpl) GetNodeProperties(namespace, name string) (*models.NodeProperties, error) {
-	node, err := n.node.GetNode(namespace, name)
+	node, err := n.node.GetNode(nil, namespace, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
@@ -586,7 +586,7 @@ func (n *NodeServiceImpl) GetNodeProperties(namespace, name string) (*models.Nod
 // UpdateNodeProperties update desire of node properties
 // and can not update report of node properties
 func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *models.NodeProperties) (*models.NodeProperties, error) {
-	node, err := n.node.GetNode(namespace, name)
+	node, err := n.node.GetNode(nil, namespace, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
@@ -638,7 +638,7 @@ func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *mo
 }
 
 func (n *NodeServiceImpl) UpdateNodeMode(ns, name, mode string) error {
-	node, err := n.node.GetNode(ns, name)
+	node, err := n.node.GetNode(nil, ns, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))

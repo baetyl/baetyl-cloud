@@ -132,7 +132,7 @@ func TestGetNode(t *testing.T) {
 
 	mNode := getMockNode()
 
-	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil)
+	sNode.EXPECT().Get(nil, mNode.Namespace, mNode.Name).Return(mNode, nil)
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc", nil)
@@ -142,14 +142,14 @@ func TestGetNode(t *testing.T) {
 	bytes := w.Body.Bytes()
 	assert.Equal(t, string(bytes), "{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"cluster\":false,\"ready\":false,\"mode\":\"cloud\"}\n")
 
-	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, common.Error(common.ErrResourceNotFound))
+	sNode.EXPECT().Get(nil, mNode.Namespace, mNode.Name).Return(nil, common.Error(common.ErrResourceNotFound))
 	// 404
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc", nil)
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req)
 	assert.Equal(t, http.StatusNotFound, w2.Code)
 
-	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, fmt.Errorf("error"))
+	sNode.EXPECT().Get(nil, mNode.Namespace, mNode.Name).Return(nil, fmt.Errorf("error"))
 	// 500
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc", nil)
 	w2 = httptest.NewRecorder()
@@ -169,8 +169,8 @@ func TestGetNodes(t *testing.T) {
 	mNode2.Labels[common.LabelNodeName] = "abc2"
 
 	// 200
-	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
-	sNode.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
+	sNode.EXPECT().Get(nil, mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Get(nil, mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
 	nodeNames := &models.NodeNames{
 		Names: []string{"abc", "abc2"},
 	}
@@ -183,9 +183,9 @@ func TestGetNodes(t *testing.T) {
 	assert.Equal(t, string(w.Body.Bytes()), "{\"total\":2,\"items\":[{\"namespace\":\"default\",\"name\":\"abc\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"cluster\":false,\"ready\":false,\"mode\":\"cloud\"},{\"namespace\":\"default\",\"name\":\"abc2\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"baetyl-node-name\":\"abc2\",\"tag\":\"baidu\"},\"sysApps\":[\"a\"],\"cluster\":false,\"ready\":false,\"mode\":\"cloud\"}]}\n")
 
 	// 200 ResourceNotFound
-	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
-	sNode.EXPECT().Get(mNode.Namespace, "err_abc").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	sNode.EXPECT().Get(mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
+	sNode.EXPECT().Get(nil, mNode.Namespace, mNode.Name).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Get(nil, mNode.Namespace, "err_abc").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sNode.EXPECT().Get(nil, mNode.Namespace, mNode2.Name).Return(mNode2, nil).Times(1)
 	nodeNames = &models.NodeNames{
 		Names: []string{"abc", "err_abc", "abc2"},
 	}
@@ -222,7 +222,7 @@ func TestGetNodes(t *testing.T) {
 	}
 	body, err = json.Marshal(nodeNames)
 	assert.NoError(t, err)
-	sNode.EXPECT().Get(mNode.Namespace, mNode.Name).Return(nil, fmt.Errorf("error")).Times(1)
+	sNode.EXPECT().Get(nil, mNode.Namespace, mNode.Name).Return(nil, fmt.Errorf("error")).Times(1)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/nodes?batch", bytes.NewReader(body))
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -237,21 +237,21 @@ func TestGetNodeStats(t *testing.T) {
 
 	mNode := getMockNode()
 
-	sNode.EXPECT().Get(mNode.Namespace, gomock.Any()).Return(mNode, nil)
+	sNode.EXPECT().Get(nil, mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	sNode.EXPECT().Get(mNode.Namespace, "cba").Return(nil, common.Error(common.ErrResourceNotFound))
+	sNode.EXPECT().Get(nil, mNode.Namespace, "cba").Return(nil, common.Error(common.ErrResourceNotFound))
 	// 404
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/cba/stats", nil)
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req)
 	assert.Equal(t, http.StatusNotFound, w2.Code)
 
-	sNode.EXPECT().Get(mNode.Namespace, "cba").Return(nil, fmt.Errorf("error"))
+	sNode.EXPECT().Get(nil, mNode.Namespace, "cba").Return(nil, fmt.Errorf("error"))
 	// 500
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/cba/stats", nil)
 	w2 = httptest.NewRecorder()
@@ -273,7 +273,7 @@ func TestGetNodeStats(t *testing.T) {
 		},
 		"time": "2020-04-13T10:07:12.267728Z",
 	}
-	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(nil, mNode.Namespace, "abc").Return(mNode, nil)
 	// 200
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
@@ -294,7 +294,7 @@ func TestGetNodeStats(t *testing.T) {
 			},
 		},
 	}
-	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(nil, mNode.Namespace, "abc").Return(mNode, nil)
 	// 200
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
@@ -315,7 +315,7 @@ func TestGetNodeStats(t *testing.T) {
 			},
 		},
 	}
-	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(nil, mNode.Namespace, "abc").Return(mNode, nil)
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -336,7 +336,7 @@ func TestGetNodeStats(t *testing.T) {
 			},
 		},
 	}
-	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(nil, mNode.Namespace, "abc").Return(mNode, nil)
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -357,7 +357,7 @@ func TestGetNodeStats(t *testing.T) {
 			},
 		},
 	}
-	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(nil, mNode.Namespace, "abc").Return(mNode, nil)
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -377,7 +377,7 @@ func TestGetNodeStats(t *testing.T) {
 		"appstats":  nil,
 	}
 
-	sNode.EXPECT().Get(mNode.Namespace, "abc").Return(mNode, nil)
+	sNode.EXPECT().Get(nil, mNode.Namespace, "abc").Return(mNode, nil)
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/stats", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -454,7 +454,7 @@ func TestCreateNode(t *testing.T) {
 	mNode := getMockNode2()
 
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	m := &models.Module{
 		Name:    "baetyl",
@@ -472,7 +472,7 @@ func TestCreateNode(t *testing.T) {
 	mNode.Name = "node-test"
 	mNode.Labels[common.LabelNodeName] = mNode.Name
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 
@@ -482,7 +482,7 @@ func TestCreateNode(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(nil, fmt.Errorf("create node error"))
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
@@ -492,7 +492,7 @@ func TestCreateNode(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(fmt.Errorf("quota error"))
 
 	w = httptest.NewRecorder()
@@ -501,7 +501,7 @@ func TestCreateNode(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	mNode.Name = "node-baetyl-test"
 	mNode.Labels[common.LabelNodeName] = mNode.Name
 	w = httptest.NewRecorder()
@@ -510,7 +510,7 @@ func TestCreateNode(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil)
 	mNode.Name = "node-baetyl-test"
 	mNode.Labels[common.LabelNodeName] = mNode.Name
 	w = httptest.NewRecorder()
@@ -580,7 +580,7 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 	sNode.EXPECT().UpdateNodeAppVersion(mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	m := &models.Module{
 		Name:    "core",
@@ -598,7 +598,7 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 	mNode.Name = "node-test"
 	mNode.Labels[common.LabelNodeName] = mNode.Name
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 
@@ -608,7 +608,7 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(nil, fmt.Errorf("create node error"))
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
@@ -618,7 +618,7 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, nil)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(fmt.Errorf("quota error"))
 
 	w = httptest.NewRecorder()
@@ -627,7 +627,7 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	mNode.Name = "node-baetyl-test"
 	mNode.Labels[common.LabelNodeName] = mNode.Name
 	w = httptest.NewRecorder()
@@ -636,7 +636,7 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil)
 	mNode.Name = "node-baetyl-test"
 	mNode.Labels[common.LabelNodeName] = mNode.Name
 	w = httptest.NewRecorder()
@@ -770,7 +770,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		},
 	}
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Update(mNode.Namespace, mNode).Return(mNode, nil)
 	// equal case
 	w := httptest.NewRecorder()
@@ -795,7 +795,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		SysApps: []string{"a"},
 	}
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode2, nil).Times(1)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode2, nil).Times(1)
 	modules := []models.Module{
 		{
 			Name:  "a",
@@ -845,7 +845,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		},
 	}
 
-	sNode.EXPECT().Get(mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
+	sNode.EXPECT().Get(nil, mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
 	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
 	sSysApp.EXPECT().GenOptionalApps(nil, mNode.Namespace, mNode.Name, []string{"a"}).Times(1)
 	nodeList := []string{"abc"}
@@ -933,7 +933,7 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 		Desire:  desire,
 	}
 
-	sNode.EXPECT().Get(mNode7.Namespace, mNode7.Name).Return(mNode7, nil).Times(1)
+	sNode.EXPECT().Get(nil, mNode7.Namespace, mNode7.Name).Return(mNode7, nil).Times(1)
 
 	appRule := &specV1.Application{
 		Name:      "rule-node12",
@@ -1109,7 +1109,7 @@ func TestDeleteNode(t *testing.T) {
 		},
 	}
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
 	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, "").Return(nil).Times(1)
@@ -1144,19 +1144,19 @@ func TestDeleteNode(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, errors.New("error")).Times(1)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, errors.New("error")).Times(1)
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(errors.New("error"))
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/nodes/abc", nil)
 	w = httptest.NewRecorder()
@@ -1248,7 +1248,7 @@ func TestDeleteNodeError(t *testing.T) {
 		},
 	}
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
@@ -1274,7 +1274,7 @@ func TestDeleteNodeError(t *testing.T) {
 		},
 	}
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
 	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, "").Return(errors.New("error")).Times(1)
@@ -1305,7 +1305,7 @@ func TestDeleteNodeError(t *testing.T) {
 	router.ServeHTTP(w2, req2)
 	assert.Equal(t, http.StatusOK, w2.Code)
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, errors.New("error")).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
@@ -1381,7 +1381,7 @@ func TestGenInitCmdFromNode(t *testing.T) {
 	}
 	var expect interface{} = []byte("setup")
 	sInit.EXPECT().GetResource("default", "abc", service.TemplateBaetylInitCommand, params).Return(expect, nil).Times(1)
-	sNode.EXPECT().Get(node.Namespace, node.Name).Return(node, nil).Times(1)
+	sNode.EXPECT().Get(nil, node.Namespace, node.Name).Return(node, nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/init", nil)
 	w := httptest.NewRecorder()
@@ -1397,7 +1397,7 @@ func TestGenInitCmdFromNode_ErrNode(t *testing.T) {
 
 	node := getMockNode()
 
-	nMock.EXPECT().Get(node.Namespace, node.Name).Return(nil,
+	nMock.EXPECT().Get(nil, node.Namespace, node.Name).Return(nil,
 		common.Error(common.ErrResourceNotFound,
 			common.Field("type", "nodes"),
 			common.Field("name", node.Name))).Times(1)
@@ -1495,7 +1495,7 @@ func TestGetAppByNode(t *testing.T) {
 		Desire:      specV1.Desire{},
 	}
 
-	sNode.EXPECT().Get(gomock.Any(), gomock.Any()).Return(node, nil).AnyTimes()
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(node, nil).AnyTimes()
 
 	w4 := httptest.NewRecorder()
 	req4, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/apps", nil)
@@ -1697,7 +1697,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Desire: map[string]interface{}{"2": "2"},
 	}
 
-	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(node, nil).Times(1)
 
 	appList := []string{
 		"baetyl-core-1",
@@ -1756,7 +1756,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(node, nil).Times(1)
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
 	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(module, nil).Times(1)
@@ -1806,7 +1806,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	assert.EqualValues(t, "baetyl-core:v2.0.0", res.Services[0].Image)
 	assert.EqualValues(t, int32(30000), res.Services[0].Ports[0].HostPort)
 
-	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(node, nil).Times(1)
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
 	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(nil, errors.New("err")).Times(1)
@@ -1832,7 +1832,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	data, err = json.Marshal(coreConfig)
 	assert.NoError(t, err)
 
-	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(node, nil).Times(1)
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
 	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(module, nil).Times(1)
@@ -1843,7 +1843,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(node, nil).Times(1)
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(appList, nil).Times(1)
 	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
 	mockModule.EXPECT().GetModuleByImage(BaetylModule, "baetyl-core:v2.0.0").Return(module, nil).Times(1)
@@ -1906,7 +1906,7 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 		Desire: map[string]interface{}{"2": "2"},
 	}
 
-	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(node, nil).Times(1)
 	module := &models.Module{
 		Name:    "baetyl-core",
 		Version: "v2.0.0",
@@ -1957,13 +1957,13 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mockNode.EXPECT().Get(ns, n).Return(nil, errors.New("err")).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(nil, errors.New("err")).Times(1)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/test/core/configs", nil)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(node, nil).Times(1)
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(nil, errors.New("err")).Times(1)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/test/core/configs", nil)
@@ -2004,7 +2004,7 @@ func TestAPI_GetCoreAppVersions(t *testing.T) {
 		Desire: map[string]interface{}{"2": "2"},
 	}
 
-	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(node, nil).Times(1)
 
 	appList := []string{
 		"baetyl-core-1",
@@ -2063,13 +2063,13 @@ func TestAPI_GetCoreAppVersions(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	mockNode.EXPECT().Get(ns, n).Return(nil, errors.New("err")).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(nil, errors.New("err")).Times(1)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/test/core/versions", nil)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	mockNode.EXPECT().Get(ns, n).Return(node, nil).Times(1)
+	mockNode.EXPECT().Get(nil, ns, n).Return(node, nil).Times(1)
 	mockIndex.EXPECT().ListAppsByNode(ns, n).Return(nil, errors.New("err")).Times(1)
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes/test/core/versions", nil)
