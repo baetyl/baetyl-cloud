@@ -34,7 +34,7 @@ const (
 // GetNode get a node
 func (api *API) GetNode(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	node, err := api.Node.Get(ns, n)
+	node, err := api.Node.Get(nil, ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 		Items: make([]v1.NodeView, 0),
 	}
 	for _, name := range nodeNames.Names {
-		node, err := api.Node.Get(ns, name)
+		node, err := api.Node.Get(nil, ns, name)
 		if err != nil {
 			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 				continue
@@ -75,7 +75,7 @@ func (api *API) GetNodes(c *common.Context) (interface{}, error) {
 func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 
-	node, err := api.Node.Get(ns, n)
+	node, err := api.Node.Get(nil, ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		common.LabelNodeName: n.Name,
 	})
 
-	oldNode, err := api.Node.Get(n.Namespace, n.Name)
+	oldNode, err := api.Node.Get(nil, n.Namespace, n.Name)
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
 			return nil, err
@@ -195,7 +195,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	oldNode, err := api.Node.Get(ns, n)
+	oldNode, err := api.Node.Get(nil, ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 // DeleteNode delete the node
 func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	node, err := api.Node.Get(ns, n)
+	node, err := api.Node.Get(nil, ns, n)
 	if err != nil {
 		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 			return nil, nil
@@ -289,7 +289,7 @@ func (api *API) deleteAllSysAppsOfNode(node *v1.Node) (interface{}, error) {
 func (api *API) GetAppByNode(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 
-	node, err := api.Node.Get(ns, n)
+	node, err := api.Node.Get(nil, ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -314,7 +314,7 @@ func (api *API) GetAppByNode(c *common.Context) (interface{}, error) {
 // GenInitCmdFromNode generate install command
 func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	ns, name := c.GetNamespace(), c.Param("name")
-	_, err := api.Node.Get(ns, name)
+	_, err := api.Node.Get(nil, ns, name)
 	if err != nil {
 		return nil, err
 	}
@@ -459,7 +459,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	// get node
-	node, err := api.Node.Get(ns, n)
+	node, err := api.Node.Get(nil, ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -537,7 +537,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 
 func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	node, err := api.Node.Get(ns, n)
+	node, err := api.Node.Get(nil, ns, n)
 	if err != nil {
 		return nil, err
 	}
@@ -575,7 +575,7 @@ func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
 
 func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	node, err := api.Node.Get(ns, n)
+	node, err := api.Node.Get(nil, ns, n)
 	if err != nil {
 		return nil, err
 	}

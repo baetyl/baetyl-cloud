@@ -131,7 +131,7 @@ func fromNodeModel(node *specV1.Node) (*v1alpha1.Node, error) {
 	return n, nil
 }
 
-func (c *client) GetNode(namespace, name string) (*specV1.Node, error) {
+func (c *client) GetNode(tx interface{}, namespace, name string) (*specV1.Node, error) {
 	defer utils.Trace(c.log.Debug, "GetNode")()
 	node, err := c.customClient.CloudV1alpha1().Nodes(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {

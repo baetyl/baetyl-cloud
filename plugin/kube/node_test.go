@@ -196,16 +196,16 @@ func initNodeClient() *client {
 
 func TestGetNode(t *testing.T) {
 	c := initNodeClient()
-	_, err := c.GetNode("default", "test")
+	_, err := c.GetNode(nil, "default", "test")
 	assert.NotNil(t, err)
 
-	cfg, err := c.GetNode("default", "test-get")
+	cfg, err := c.GetNode(nil, "default", "test-get")
 	assert.Equal(t, cfg.Name, "test-get")
 
-	_, err = c.GetNode("default", "test-get01")
+	_, err = c.GetNode(nil, "default", "test-get01")
 	assert.Nil(t, err)
 
-	_, err = c.GetNode("default", "test-get02")
+	_, err = c.GetNode(nil, "default", "test-get02")
 	assert.Nil(t, err)
 }
 
