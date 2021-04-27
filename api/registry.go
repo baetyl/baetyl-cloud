@@ -28,7 +28,7 @@ func (api *API) GetRegistry(c *common.Context) (interface{}, error) {
 // ListRegistry list Registry
 func (api *API) ListRegistry(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	params, err := api.parseListOptionsAppendSystemLabel(c)
+	params, err := api.ParseListOptionsAppendSystemLabel(c)
 	if err != nil {
 		return nil, err
 	}

@@ -44,7 +44,7 @@ func (api *API) GetApplication(c *common.Context) (interface{}, error) {
 // ListApplication list application
 func (api *API) ListApplication(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	params, err := api.parseListOptionsAppendSystemLabel(c)
+	params, err := api.ParseListOptionsAppendSystemLabel(c)
 	if err != nil {
 		return nil, err
 	}
@@ -317,7 +317,7 @@ func (api *API) getBaseAppIfSet(c *common.Context) (*specV1.Application, error) 
 	return nil, nil
 }
 
-func (api *API) parseListOptions(c *common.Context) (*models.ListOptions, error) {
+func (api *API) ParseListOptions(c *common.Context) (*models.ListOptions, error) {
 	params := &models.ListOptions{}
 	if err := c.Bind(params); err != nil {
 		return nil, err
@@ -325,8 +325,8 @@ func (api *API) parseListOptions(c *common.Context) (*models.ListOptions, error)
 	return params, nil
 }
 
-func (api *API) parseListOptionsAppendSystemLabel(c *common.Context) (*models.ListOptions, error) {
-	opt, err := api.parseListOptions(c)
+func (api *API) ParseListOptionsAppendSystemLabel(c *common.Context) (*models.ListOptions, error) {
+	opt, err := api.ParseListOptions(c)
 	if err != nil {
 		return nil, err
 	}

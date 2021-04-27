@@ -8,7 +8,7 @@ import (
 
 //go:generate mockgen -destination=../mock/service/wrapper.go -package=service github.com/baetyl/baetyl-cloud/v2/service WrapperService
 
-type CreateNodeFunc func (tx interface{}, namespace string, node *specV1.Node) (*specV1.Node, error)
+type CreateNodeFunc func(tx interface{}, namespace string, node *specV1.Node) (*specV1.Node, error)
 
 type WrapperService interface {
 	CreateNodeTx(CreateNodeFunc) CreateNodeFunc
