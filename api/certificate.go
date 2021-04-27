@@ -25,7 +25,7 @@ func (api *API) GetCertificate(c *common.Context) (interface{}, error) {
 // ListCertificate list Certificate
 func (api *API) ListCertificate(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	params, err := api.parseListOptionsAppendSystemLabel(c)
+	params, err := api.ParseListOptionsAppendSystemLabel(c)
 	if err != nil {
 		return nil, err
 	}

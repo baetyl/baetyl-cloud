@@ -92,7 +92,7 @@ func (api *API) GetNodeStats(c *common.Context) (interface{}, error) {
 // ListNode list node
 func (api *API) ListNode(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	params, err := api.parseListOptions(c)
+	params, err := api.ParseListOptions(c)
 	if err != nil {
 		return nil, err
 	}

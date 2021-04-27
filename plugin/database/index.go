@@ -54,13 +54,13 @@ func (d *DB) RefreshIndex(tx interface{}, namespace string, keyA, keyB common.Re
 	}
 	if len(res) > 0 {
 		if _, err = d.DeleteIndexTx(transaction, namespace, keyB, keyA, valueA); err != nil {
-				return err
-			}
+			return err
+		}
 	}
 	for _, b := range valueBs {
 		if _, err = d.CreateIndexTx(transaction, namespace, keyA, keyB, valueA, b); err != nil {
-				return err
-			}
+			return err
+		}
 	}
 	return nil
 }

@@ -37,7 +37,7 @@ func (api *API) GetConfig(c *common.Context) (interface{}, error) {
 // ListConfig list config
 func (api *API) ListConfig(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	params, err := api.parseListOptionsAppendSystemLabel(c)
+	params, err := api.ParseListOptionsAppendSystemLabel(c)
 	if err != nil {
 		return nil, err
 	}

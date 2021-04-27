@@ -8,7 +8,7 @@ func init() {
 	plugin.RegisterFactory("defaulttx", New)
 }
 
-type defaultTxFactory struct {}
+type defaultTxFactory struct{}
 
 func New() (plugin.Plugin, error) {
 	return &defaultTxFactory{}, nil
