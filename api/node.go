@@ -750,17 +750,21 @@ func (api *API) filterSysApps(newSysApps, oldSysApps []string) ([]string, []stri
 	return fresh, obsolete
 }
 
+func logResourceError(err error, resource common.Resource, name, ns string)  {
+	if e, ok := err.(errors.Coder); ok && e.Code() != common.ErrResourceNotFound {
+		common.LogDirtyData(err,
+			log.Any("type", resource),
+			log.Any(common.KeyContextNamespace, ns),
+			log.Any("name", name))
+	}
+}
+
 func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 	var appList []*v1.Application
 	for _, appName := range sysApps {
 		app, err := api.App.Get(ns, appName, "")
 		if err != nil {
-			if e, ok := err.(errors.Coder); ok && e.Code() != common.ErrResourceNotFound {
-				common.LogDirtyData(err,
-					log.Any("type", common.Application),
-					log.Any(common.KeyContextNamespace, ns),
-					log.Any("name", appName))
-			}
+			logResourceError(err, common.Application, appName, ns)
 			continue
 		}
 
@@ -769,10 +773,7 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 			if v.Config != nil {
 				config, err := api.Config.Get(ns, v.Config.Name, "")
 				if err != nil {
-					common.LogDirtyData(err,
-						log.Any("type", common.Config),
-						log.Any(common.KeyContextNamespace, ns),
-						log.Any("name", v.Config.Name))
+					logResourceError(err, common.Config, v.Config.Name, ns)
 					continue
 				}
 
@@ -781,20 +782,14 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 				}
 
 				if err := api.Config.Delete(ns, v.Config.Name); err != nil {
-					common.LogDirtyData(err,
-						log.Any("type", common.Config),
-						log.Any("namespace", ns),
-						log.Any("name", v.Config.Name))
+					logResourceError(err, common.Config, v.Config.Name, ns)
 				}
 			}
 			// Clean Secret
 			if v.Secret != nil {
 				secret, err := api.Secret.Get(ns, v.Secret.Name, "")
 				if err != nil {
-					common.LogDirtyData(err,
-						log.Any("type", common.Secret),
-						log.Any(common.KeyContextNamespace, ns),
-						log.Any("name", v.Secret.Name))
+					logResourceError(err, common.Secret, v.Secret.Name, ns)
 					continue
 				}
 
@@ -815,18 +810,12 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 					}
 				}
 				if err := api.Secret.Delete(ns, v.Secret.Name); err != nil {
-					common.LogDirtyData(err,
-						log.Any("type", common.Secret),
-						log.Any(common.KeyContextNamespace, ns),
-						log.Any("name", v.Secret.Name))
+					logResourceError(err, common.Secret, v.Secret.Name, ns)
 				}
 			}
 		}
 		if err := api.App.Delete(ns, appName, ""); err != nil {
-			common.LogDirtyData(err,
-				log.Any("type", common.Application),
-				log.Any(common.KeyContextNamespace, ns),
-				log.Any("name", appName))
+			logResourceError(err, common.Application, appName, ns)
 		}
 		appList = append(appList, app)
 	}
