@@ -152,7 +152,6 @@ func TestDefaultNodeService_Create(t *testing.T) {
 		app:           mockObject.app,
 	}
 	node := genNodeTestCase()
-	shadow := genShadowTestCase()
 	apps := &models.ApplicationList{
 		Items: []models.AppItem{
 			{Namespace: node.Namespace, Name: "app01", Version: "1", Selector: "test=example"},
@@ -169,13 +168,6 @@ func TestDefaultNodeService_Create(t *testing.T) {
 	assert.NotNil(t, err)
 
 	mockObject.node.EXPECT().CreateNode(nil, node.Namespace, node).Return(node, nil).AnyTimes()
-	mockObject.shadow.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
-	_, err = ns.Create(nil, node.Namespace, node)
-	assert.NotNil(t, err)
-
-	mockObject.shadow.EXPECT().Create(gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
-
 	mockSysAppService.EXPECT().GenApps(nil, node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = ns.Create(nil, node.Namespace, node)
 	assert.NotNil(t, err)
@@ -186,11 +178,11 @@ func TestDefaultNodeService_Create(t *testing.T) {
 	assert.NotNil(t, err)
 
 	mockObject.app.EXPECT().ListApplication(nil, node.Namespace, gomock.Any()).Return(apps, nil).AnyTimes()
-	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	mockObject.shadow.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = ns.Create(nil, node.Namespace, node)
 	assert.NotNil(t, err)
 
-	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
+	mockObject.shadow.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("error"))
 	_, err = ns.Create(nil, node.Namespace, node)
 	assert.NotNil(t, err)
