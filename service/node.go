@@ -121,17 +121,12 @@ func (n *NodeServiceImpl) Create(tx interface{}, namespace string, node *specV1.
 		return nil, err
 	}
 
-	shadow, err := n.Shadow.Create(tx, models.NewShadowFromNode(res))
-	if err != nil {
-		return nil, err
-	}
-
 	_, err = n.SysAppService.GenApps(tx, namespace, node)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = n.updateNodeAndAppIndex(tx, namespace, res, shadow); err != nil {
+	if err = n.insertOrUpdateNodeAndAppIndex(tx, namespace, res, models.NewShadowFromNode(res), true); err != nil {
 		return nil, err
 	}
 	return res, err
@@ -154,7 +149,7 @@ func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.N
 		return nil, err
 	}
 
-	if err = n.updateNodeAndAppIndex(nil, namespace, res, shadow); err != nil {
+	if err = n.insertOrUpdateNodeAndAppIndex(nil, namespace, res, shadow, false); err != nil {
 		return nil, err
 	}
 	return res, nil
@@ -363,7 +358,7 @@ func (n *NodeServiceImpl) GetDesire(namespace, name string) (*specV1.Desire, err
 	return &shadow.Desire, nil
 }
 
-func (n *NodeServiceImpl) updateNodeAndAppIndex(tx interface{}, namespace string, node *specV1.Node, shadow *models.Shadow) error {
+func (n *NodeServiceImpl) insertOrUpdateNodeAndAppIndex(tx interface{}, namespace string, node *specV1.Node, shadow *models.Shadow, flag bool) error {
 	apps, err := n.app.ListApplication(tx, namespace, &models.ListOptions{})
 	if err != nil {
 		log.L().Error("list application error", log.Error(err))
@@ -374,9 +369,16 @@ func (n *NodeServiceImpl) updateNodeAndAppIndex(tx interface{}, namespace string
 
 	node.Desire = desire
 
-	if _, err = n.updateDesire(tx, shadow, desire); err != nil {
-		log.L().Error("update node desired node failed", log.Error(err))
-		return err
+	if flag {
+		shadow.Desire = desire
+		if _, err = n.Shadow.Create(tx, shadow); err != nil {
+			return err
+		}
+	} else {
+		if _, err = n.updateDesire(tx, shadow, desire); err != nil {
+			log.L().Error("update node desired node failed", log.Error(err))
+			return err
+		}
 	}
 
 	if err = n.indexService.RefreshAppsIndexByNode(tx, namespace, node.Name, appNames); err != nil {
