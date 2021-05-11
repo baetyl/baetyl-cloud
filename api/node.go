@@ -167,9 +167,9 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	n.Attributes["BaetylCoreVersion"] = version
-	if n.Accelerator == v1.NVAccelerator {
-		n.SysApps = append(n.SysApps, v1.BaetylGPUMetrics)
-	}
+
+	n.SysApps = updateSysAppByAccelerator(n.Accelerator, n.SysApps)
+
 	node, err := api.Wrapper.CreateNodeTx(api.Node.Create)(nil, n.Namespace, n)
 	if err != nil {
 		if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
@@ -210,6 +210,8 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	node.Cluster = oldNode.Cluster
 	node.Accelerator = oldNode.Accelerator
 	node.Mode = oldNode.Mode
+
+	node.SysApps = updateSysAppByAccelerator(node.Accelerator, node.SysApps)
 
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
 		err = api.UpdateNodeOptionedSysApps(oldNode, node.SysApps)
@@ -620,6 +622,28 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 	return coreVersions, nil
 }
 
+func updateSysAppByAccelerator(accelerator string, sysApps []string) []string {
+	found := false
+	index := 0
+	for i, app := range sysApps {
+		if strings.Contains(app, v1.BaetylGPUMetrics) {
+			found = true
+			index = i
+			break
+		}
+	}
+	if accelerator == v1.NVAccelerator {
+		if !found {
+			sysApps = append(sysApps, v1.BaetylGPUMetrics)
+		}
+	} else {
+		if found {
+			sysApps = append(sysApps[:index], sysApps[index+1:]...)
+		}
+	}
+	return sysApps
+}
+
 func (api *API) UpdateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string) error {
 	ns, name, oldSysApps := oldNode.Namespace, oldNode.Name, oldNode.SysApps
 
@@ -750,7 +774,7 @@ func (api *API) filterSysApps(newSysApps, oldSysApps []string) ([]string, []stri
 	return fresh, obsolete
 }
 
-func logResourceError(err error, resource common.Resource, name, ns string)  {
+func logResourceError(err error, resource common.Resource, name, ns string) {
 	if e, ok := err.(errors.Coder); ok && e.Code() != common.ErrResourceNotFound {
 		common.LogDirtyData(err,
 			log.Any("type", resource),
