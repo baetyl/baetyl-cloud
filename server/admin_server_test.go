@@ -94,11 +94,6 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 		return mockIndex, nil
 	})
 
-	mockAppHis := mockPlugin.NewMockAppHistory(mockCtl)
-	plugin.RegisterFactory(c.Plugin.AppHistory, func() (plugin.Plugin, error) {
-		return mockAppHis, nil
-	})
-
 	mockTask := mockPlugin.NewMockTask(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Task, func() (plugin.Plugin, error) {
 		return mockTask, nil
