@@ -21,7 +21,6 @@ type MockServices struct {
 	secret         *mockPlugin.MockResource
 	app            *mockPlugin.MockResource
 	index          *mockPlugin.MockIndex
-	appHis         *mockPlugin.MockAppHistory
 	objectStorage  *mockPlugin.MockObject
 	functionPlugin *mockPlugin.MockFunction
 	pki            *mockPlugin.MockPKI
@@ -109,13 +108,6 @@ func mockIndex(mock plugin.Index) plugin.Factory {
 	return factory
 }
 
-func mockAppHis(mock plugin.AppHistory) plugin.Factory {
-	factory := func() (plugin.Plugin, error) {
-		return mock, nil
-	}
-	return factory
-}
-
 func mockTask(task plugin.Task) plugin.Factory {
 	factory := func() (plugin.Plugin, error) {
 		return task, nil
@@ -182,9 +174,6 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 	mIndex := mockPlugin.NewMockIndex(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Index, mockIndex(mIndex))
 
-	mAppHis := mockPlugin.NewMockAppHistory(mockCtl)
-	plugin.RegisterFactory(conf.Plugin.AppHistory, mockAppHis(mAppHis))
-
 	mTask := mockPlugin.NewMockTask(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Task, mockTask(mTask))
 
@@ -201,7 +190,6 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 		secret:         mResource,
 		app:            mResource,
 		index:          mIndex,
-		appHis:         mAppHis,
 		objectStorage:  mockObjectStorage,
 		functionPlugin: mockFunctionPlugin,
 		pki:            mPKI,

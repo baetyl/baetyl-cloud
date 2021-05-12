@@ -64,10 +64,6 @@ func TestNewAdminAPI(t *testing.T) {
 	plugin.RegisterFactory(c.Plugin.Index, func() (plugin.Plugin, error) {
 		return mockIndex, nil
 	})
-	mockAppHistory := mockPlugin.NewMockAppHistory(mockCtl)
-	plugin.RegisterFactory(c.Plugin.AppHistory, func() (plugin.Plugin, error) {
-		return mockAppHistory, nil
-	})
 	mockProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
 		return mockProperty, nil

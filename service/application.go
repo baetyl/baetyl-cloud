@@ -29,7 +29,6 @@ type applicationService struct {
 	config       plugin.Configuration
 	secret       plugin.Secret
 	app          plugin.Application
-	appHis       plugin.AppHistory
 	indexService IndexService
 }
 
@@ -47,10 +46,6 @@ func NewApplicationService(config *config.CloudConfig) (ApplicationService, erro
 	if err != nil {
 		return nil, err
 	}
-	appHis, err := plugin.GetPlugin(config.Plugin.AppHistory)
-	if err != nil {
-		return nil, err
-	}
 
 	is, err := NewIndexService(config)
 	if err != nil {
@@ -61,7 +56,6 @@ func NewApplicationService(config *config.CloudConfig) (ApplicationService, erro
 		config:       cfg.(plugin.Configuration),
 		secret:       secret.(plugin.Secret),
 		app:          app.(plugin.Application),
-		appHis:       appHis.(plugin.AppHistory),
 	}, nil
 }
 
@@ -95,16 +89,6 @@ func (a *applicationService) Create(tx interface{}, namespace string, app *specV
 		return nil, err
 	}
 
-	// TODO: is it necessary ?
-	// store application history to db
-	if _, err := a.appHis.CreateApplicationHis(app); err != nil {
-		log.L().Error("store application to db error",
-			log.Any("name", app.Name),
-			log.Any("namespace", app.Namespace),
-			log.Any("version", app.Version),
-			log.Error(err))
-	}
-
 	return app, nil
 }
 
@@ -132,16 +116,6 @@ func (a *applicationService) Update(namespace string, app *specV1.Application) (
 		return nil, err
 	}
 
-	// store app history to db
-	if app.Version != newApp.Version {
-		if _, err := a.appHis.CreateApplicationHis(newApp); err != nil {
-			log.L().Error("store application to db error",
-				log.Any("name", newApp.Name),
-				log.Any("namespace", newApp.Namespace),
-				log.Any("version", newApp.Version), log.Error(err))
-		}
-	}
-
 	return newApp, nil
 }
 
@@ -159,14 +133,6 @@ func (a *applicationService) Delete(namespace, name, version string) error {
 		log.L().Error("Application clean secret index error", log.Error(err))
 	}
 
-	// mark the application was deleted. err can ignore
-	if _, err := a.appHis.DeleteApplicationHis(namespace, name, version); err != nil {
-		log.L().Error("delete application history error",
-			log.Any("name", name),
-			log.Any("namespace", namespace),
-			log.Any("version", version),
-			log.Error(err))
-	}
 	return nil
 }
 
