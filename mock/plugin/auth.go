@@ -6,6 +6,7 @@ package plugin
 
 import (
 	common "github.com/baetyl/baetyl-cloud/v2/common"
+	plugin "github.com/baetyl/baetyl-cloud/v2/plugin"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -31,6 +32,20 @@ func NewMockAuth(ctrl *gomock.Controller) *MockAuth {
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockAuth) EXPECT() *MockAuthMockRecorder {
 	return m.recorder
+}
+
+// AuthAndVerify mocks base method
+func (m *MockAuth) AuthAndVerify(arg0 *common.Context, arg1 *plugin.PermissionRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AuthAndVerify", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AuthAndVerify indicates an expected call of AuthAndVerify
+func (mr *MockAuthMockRecorder) AuthAndVerify(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthAndVerify", reflect.TypeOf((*MockAuth)(nil).AuthAndVerify), arg0, arg1)
 }
 
 // Authenticate mocks base method
@@ -74,6 +89,20 @@ func (m *MockAuth) SignToken(arg0 []byte) ([]byte, error) {
 func (mr *MockAuthMockRecorder) SignToken(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignToken", reflect.TypeOf((*MockAuth)(nil).SignToken), arg0)
+}
+
+// Verify mocks base method
+func (m *MockAuth) Verify(arg0 *common.Context, arg1 *plugin.PermissionRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Verify", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Verify indicates an expected call of Verify
+func (mr *MockAuthMockRecorder) Verify(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verify", reflect.TypeOf((*MockAuth)(nil).Verify), arg0, arg1)
 }
 
 // VerifyToken mocks base method
