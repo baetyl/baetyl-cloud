@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
@@ -14,9 +13,7 @@ import (
 //go:generate mockgen -destination=../mock/service/auth.go -package=service github.com/baetyl/baetyl-cloud/v2/service AuthService
 
 type AuthService interface {
-	Authenticate(c *common.Context) error
-	SignToken(meta []byte) ([]byte, error)
-	VerifyToken(meta, sign []byte) bool
+	plugin.Auth
 	GenToken(map[string]interface{}) (string, error)
 }
 

@@ -51,6 +51,14 @@ func (d *defaultAuth) VerifyToken(meta, sign []byte) bool {
 	return util.VerifyPKCS1v15(meta, sign, &d.priv.PublicKey)
 }
 
+func (d *defaultAuth) AuthAndVerify(c *common.Context, pr *plugin.PermissionRequest) error {
+	return nil
+}
+
+func (d *defaultAuth) Verify(c *common.Context, pr *plugin.PermissionRequest) error {
+	return nil
+}
+
 // Close Close
 func (d *defaultAuth) Close() error {
 	return nil
