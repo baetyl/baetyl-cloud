@@ -50,17 +50,17 @@ func (mr *MockConfigServiceMockRecorder) Create(arg0, arg1, arg2 interface{}) *g
 }
 
 // Delete mocks base method
-func (m *MockConfigService) Delete(arg0, arg1 string) error {
+func (m *MockConfigService) Delete(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
+	ret := m.ctrl.Call(m, "Delete", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockConfigServiceMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockConfigServiceMockRecorder) Delete(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockConfigService)(nil).Delete), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockConfigService)(nil).Delete), arg0, arg1, arg2)
 }
 
 // Get mocks base method
@@ -94,31 +94,31 @@ func (mr *MockConfigServiceMockRecorder) List(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // Update mocks base method
-func (m *MockConfigService) Update(arg0 string, arg1 *v1.Configuration) (*v1.Configuration, error) {
+func (m *MockConfigService) Update(arg0 interface{}, arg1 string, arg2 *v1.Configuration) (*v1.Configuration, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", arg0, arg1)
+	ret := m.ctrl.Call(m, "Update", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Configuration)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update
-func (mr *MockConfigServiceMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockConfigServiceMockRecorder) Update(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockConfigService)(nil).Update), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockConfigService)(nil).Update), arg0, arg1, arg2)
 }
 
 // Upsert mocks base method
-func (m *MockConfigService) Upsert(arg0 string, arg1 *v1.Configuration) (*v1.Configuration, error) {
+func (m *MockConfigService) Upsert(arg0 interface{}, arg1 string, arg2 *v1.Configuration) (*v1.Configuration, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Upsert", arg0, arg1)
+	ret := m.ctrl.Call(m, "Upsert", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Configuration)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Upsert indicates an expected call of Upsert
-func (mr *MockConfigServiceMockRecorder) Upsert(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockConfigServiceMockRecorder) Upsert(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upsert", reflect.TypeOf((*MockConfigService)(nil).Upsert), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upsert", reflect.TypeOf((*MockConfigService)(nil).Upsert), arg0, arg1, arg2)
 }

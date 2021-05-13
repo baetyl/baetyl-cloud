@@ -19,9 +19,9 @@ type ConfigService interface {
 	Get(namespace, name, version string) (*specV1.Configuration, error)
 	List(namespace string, listOptions *models.ListOptions) (*models.ConfigurationList, error)
 	Create(tx interface{}, namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
-	Update(namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
-	Upsert(namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
-	Delete(namespace, name string) error
+	Update(tx interface{}, namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
+	Upsert(tx interface{}, namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
+	Delete(tx interface{}, namespace, name string) error
 }
 
 type configService struct {
@@ -60,15 +60,15 @@ func (s *configService) Create(tx interface{}, namespace string, config *specV1.
 }
 
 // Update update a config
-func (s *configService) Update(namespace string, config *specV1.Configuration) (*specV1.Configuration, error) {
-	return s.config.UpdateConfig(namespace, config)
+func (s *configService) Update(tx interface{}, namespace string, config *specV1.Configuration) (*specV1.Configuration, error) {
+	return s.config.UpdateConfig(tx, namespace, config)
 }
 
 // Upsert update a config or create a config if not exist
-func (s *configService) Upsert(namespace string, config *specV1.Configuration) (*specV1.Configuration, error) {
-	res, err := s.config.GetConfig(nil, namespace, config.Name, "")
+func (s *configService) Upsert(tx interface{}, namespace string, config *specV1.Configuration) (*specV1.Configuration, error) {
+	res, err := s.config.GetConfig(tx, namespace, config.Name, "")
 	if err != nil {
-		return s.config.CreateConfig(nil, namespace, config)
+		return s.config.CreateConfig(tx, namespace, config)
 	}
 
 	if models.EqualConfig(res, config) {
@@ -77,10 +77,10 @@ func (s *configService) Upsert(namespace string, config *specV1.Configuration) (
 
 	config.Version = res.Version
 	config.UpdateTimestamp = time.Now()
-	return s.config.UpdateConfig(namespace, config)
+	return s.config.UpdateConfig(tx, namespace, config)
 }
 
 // Delete Delete a config
-func (s *configService) Delete(namespace, name string) error {
-	return s.config.DeleteConfig(namespace, name)
+func (s *configService) Delete(tx interface{}, namespace, name string) error {
+	return s.config.DeleteConfig(tx, namespace, name)
 }

@@ -572,7 +572,7 @@ func TestUpdateConfig(t *testing.T) {
 
 	res2 := &specV1.Configuration{}
 	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res2, nil).Times(1)
-	sConfig.EXPECT().Update(namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
+	sConfig.EXPECT().Update(nil, namespace, gomock.Any()).Return(nil, errors.New("err")).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf2)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/configs/abc", bytes.NewReader(body))
@@ -591,7 +591,7 @@ func TestUpdateConfig(t *testing.T) {
 		Description: "diff",
 	}
 	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
-	sConfig.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Update(nil, namespace, gomock.Any()).Return(res, nil).Times(1)
 	sIndex.EXPECT().ListAppIndexByConfig(mConf2.Namespace, "abc").Return(nil, errors.New("err")).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf2)
@@ -601,7 +601,7 @@ func TestUpdateConfig(t *testing.T) {
 
 	appNames := make([]string, 0)
 	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
-	sConfig.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Update(nil, namespace, gomock.Any()).Return(res, nil).Times(1)
 	sIndex.EXPECT().ListAppIndexByConfig(namespace, name).Return(appNames, nil).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mConf2)
@@ -611,7 +611,7 @@ func TestUpdateConfig(t *testing.T) {
 
 	appNames = []string{"app01", "app02", "app03"}
 	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
-	sConfig.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Update(nil, namespace, gomock.Any()).Return(res, nil).Times(1)
 	sIndex.EXPECT().ListAppIndexByConfig(namespace, name).Return(appNames, nil).Times(1)
 	sApp.EXPECT().Get(namespace, "app01", "").Return(nil, errors.New("err")).Times(1)
 	w = httptest.NewRecorder()
@@ -662,7 +662,7 @@ func TestUpdateConfig(t *testing.T) {
 	}
 
 	sConfig.EXPECT().Get(namespace, name, gomock.Any()).Return(res3, nil).Times(1)
-	sConfig.EXPECT().Update(namespace, gomock.Any()).Return(res, nil).Times(1)
+	sConfig.EXPECT().Update(nil, namespace, gomock.Any()).Return(res, nil).Times(1)
 	sIndex.EXPECT().ListAppIndexByConfig(namespace, name).Return(appNames, nil).Times(1)
 	sApp.EXPECT().Get(namespace, appNames[0], "").Return(apps[0], nil).Times(1)
 	sApp.EXPECT().Get(namespace, appNames[1], "").Return(apps[1], nil).Times(1)
@@ -801,7 +801,7 @@ func TestDeleteConfig(t *testing.T) {
 	// 200
 	sConfig.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConf, nil)
 	sIndex.EXPECT().ListAppIndexByConfig(gomock.Any(), gomock.Any()).Return(nil, nil)
-	sConfig.EXPECT().Delete(mConf.Namespace, mConf.Name).Return(nil)
+	sConfig.EXPECT().Delete(nil, mConf.Namespace, mConf.Name).Return(nil)
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/configs/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)

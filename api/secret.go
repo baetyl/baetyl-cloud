@@ -187,7 +187,7 @@ func (api *API) updateAppSecret(namespace string, secret *specV1.Secret) error {
 		if err != nil {
 			return err
 		}
-		_, err = api.Node.UpdateNodeAppVersion(namespace, app)
+		_, err = api.Node.UpdateNodeAppVersion(nil, namespace, app)
 		if err != nil {
 			return err
 		}

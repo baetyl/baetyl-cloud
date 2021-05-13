@@ -5,27 +5,29 @@ import (
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
+	"github.com/baetyl/baetyl-cloud/v2/facade"
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 // API baetyl api server
 type API struct {
-	NS       service.NamespaceService
-	Node     service.NodeService
-	Index    service.IndexService
-	Func     service.FunctionService
-	Obj      service.ObjectService
-	PKI      service.PKIService
-	Auth     service.AuthService
-	Prop     service.PropertyService
-	Module   service.ModuleService
-	Init     service.InitService
-	License  service.LicenseService
-	Template service.TemplateService
-	Task     service.TaskService
-	Locker   service.LockerService
-	SysApp   service.SystemAppService
-	Wrapper  service.WrapperService
+	NS        service.NamespaceService
+	Node      service.NodeService
+	Index     service.IndexService
+	Func      service.FunctionService
+	Obj       service.ObjectService
+	PKI       service.PKIService
+	Auth      service.AuthService
+	Prop      service.PropertyService
+	Module    service.ModuleService
+	Init      service.InitService
+	License   service.LicenseService
+	Template  service.TemplateService
+	Task      service.TaskService
+	Locker    service.LockerService
+	SysApp    service.SystemAppService
+	Wrapper   service.WrapperService
+	AppFacade facade.ApplicationFacade
 	*service.AppCombinedService
 	log *log.Logger
 }
@@ -102,6 +104,13 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		return nil, err
 	}
 	wrapper, err := service.NewWrapperService(config)
+	if err != nil {
+		return nil, err
+	}
+	appFacade, err := facade.NewApplicationFacade(config)
+	if err != nil {
+		return nil, err
+	}
 	return &API{
 		NS:                 namespaceService,
 		Node:               nodeService,
@@ -120,6 +129,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		SysApp:             sysApp,
 		Wrapper:            wrapper,
 		AppCombinedService: acs,
+		AppFacade:          appFacade,
 		log:                log.L().With(log.Any("api", "admin")),
 	}, nil
 }

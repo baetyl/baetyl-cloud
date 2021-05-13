@@ -524,7 +524,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	_, err = api.Node.UpdateNodeAppVersion(ns, res)
+	_, err = api.Node.UpdateNodeAppVersion(nil, ns, res)
 	if err != nil {
 		return nil, err
 	}
@@ -726,7 +726,7 @@ func (api *API) deleteDeletedSysApps(node *v1.Node, obsoleteAppAlias []string) e
 	apps := api.deleteSysApps(node.Namespace, obsoleteAppNames)
 
 	for _, app := range apps {
-		if _, err := api.Node.DeleteNodeAppVersion(node.Namespace, app); err != nil {
+		if _, err := api.Node.DeleteNodeAppVersion(nil, node.Namespace, app); err != nil {
 			common.LogDirtyData(err,
 				log.Any("type", "NodeAppVersion"),
 				log.Any(common.KeyContextNamespace, node.Namespace),
@@ -805,7 +805,7 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 					continue
 				}
 
-				if err := api.Config.Delete(ns, v.Config.Name); err != nil {
+				if err := api.Config.Delete(nil, ns, v.Config.Name); err != nil {
 					logResourceError(err, common.Config, v.Config.Name, ns)
 				}
 			}
@@ -969,7 +969,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int
 
 	newConf.Name = config.Name
 	newConf.Version = config.Version
-	_, err = api.Config.Update(config.Namespace, &newConf)
+	_, err = api.Config.Update(nil, config.Namespace, &newConf)
 	if err != nil {
 		return err
 	}

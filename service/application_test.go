@@ -167,13 +167,13 @@ func TestDefaultApplicationService_CreateWithBase(t *testing.T) {
 	mockObject.app.EXPECT().CreateApplication(gomock.Any(), gomock.Any(), gomock.Any()).Return(newApp, nil).Times(1)
 	mockObject.configuration.EXPECT().GetConfig(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(config, nil).Times(2)
 	mockObject.secret.EXPECT().GetSecret(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(secret2, nil)
-	_, err := as.CreateWithBase(newApp.Namespace, newApp, baseApp)
+	_, err := as.CreateWithBase(nil, newApp.Namespace, newApp, baseApp)
 	assert.NoError(t, err)
 
 	mockObject.configuration.EXPECT().CreateConfig(gomock.Any(), gomock.Any(), gomock.Any()).Return(config, nil).AnyTimes()
 	mockObject.configuration.EXPECT().GetConfig(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(config, fmt.Errorf("error")).Times(1)
 	baseApp.Namespace = "test01"
-	_, err = as.CreateWithBase(newApp.Namespace, newApp, baseApp)
+	_, err = as.CreateWithBase(nil, newApp.Namespace, newApp, baseApp)
 	assert.NotNil(t, err)
 
 	newApp, baseApp = genAppTestCase()
@@ -183,25 +183,25 @@ func TestDefaultApplicationService_CreateWithBase(t *testing.T) {
 	mockObject.configuration.EXPECT().GetConfig(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(config, nil).AnyTimes()
 	mockObject.secret.EXPECT().GetSecret(gomock.Any(), gomock.Any(), secret2.Name, gomock.Any()).Return(secret2, nil)
 	baseApp.Namespace = "test02"
-	_, err = as.CreateWithBase(newApp.Namespace, newApp, baseApp)
+	_, err = as.CreateWithBase(nil, newApp.Namespace, newApp, baseApp)
 	assert.NoError(t, err)
 
 	newApp, baseApp = genAppTestCase()
 	mockObject.secret.EXPECT().GetSecret(gomock.Any(), gomock.Any(), secret2.Name, gomock.Any()).Return(secret2, nil)
 	baseApp.Namespace = "test02"
-	_, err = as.CreateWithBase(newApp.Namespace, newApp, baseApp)
+	_, err = as.CreateWithBase(nil, newApp.Namespace, newApp, baseApp)
 	assert.NoError(t, err)
 
 	newApp, baseApp = genAppTestCase()
 	newApp.Volumes = append(newApp.Volumes, specV1.Volume{Name: "test"})
 	baseApp.Namespace = "test02"
-	_, err = as.CreateWithBase(newApp.Namespace, newApp, baseApp)
+	_, err = as.CreateWithBase(nil, newApp.Namespace, newApp, baseApp)
 	assert.Error(t, err)
 
 	newApp, baseApp = genAppTestCase()
 	newApp.Services = append(newApp.Services, specV1.Service{Name: "Agent"})
 	baseApp.Namespace = "test02"
-	_, err = as.CreateWithBase(newApp.Namespace, newApp, baseApp)
+	_, err = as.CreateWithBase(nil, newApp.Namespace, newApp, baseApp)
 	assert.Error(t, err)
 
 	newApp, baseApp = genAppTestCase()
@@ -211,7 +211,7 @@ func TestDefaultApplicationService_CreateWithBase(t *testing.T) {
 			MountPath: "mountPath",
 		})
 	baseApp.Namespace = "test02"
-	_, err = as.CreateWithBase(newApp.Namespace, newApp, baseApp)
+	_, err = as.CreateWithBase(nil, newApp.Namespace, newApp, baseApp)
 	assert.Error(t, err)
 }
 
@@ -268,7 +268,7 @@ func TestDefaultApplicationService_constuctConfig(t *testing.T) {
 
 	_, baseApp := genAppTestCase()
 	mockObject.configuration.EXPECT().GetConfig(nil, baseApp.Namespace, baseApp.Volumes[0].Config.Name, "").Return(nil, fmt.Errorf("error")).Times(1)
-	err := cs.constuctConfig("default", baseApp)
+	err := cs.constructConfig(nil, "default", baseApp)
 	assert.NotNil(t, err)
 
 	config := &specV1.Configuration{Name: "agent-conf"}
@@ -278,7 +278,7 @@ func TestDefaultApplicationService_constuctConfig(t *testing.T) {
 		Return(config, nil)
 	mockObject.configuration.EXPECT().CreateConfig(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	mockObject.configuration.EXPECT().CreateConfig(gomock.Any(), gomock.Any(), gomock.Any()).Return(config, nil)
-	err = cs.constuctConfig("default", baseApp)
+	err = cs.constructConfig(nil, "default", baseApp)
 	assert.NoError(t, err)
 }
 

@@ -109,7 +109,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 	config.Version = res.Version
 	config.UpdateTimestamp = time.Now()
 	config.CreationTimestamp = res.CreationTimestamp
-	res, err = api.Config.Update(ns, config)
+	res, err = api.Config.Update(nil, ns, config)
 	if err != nil {
 		log.L().Error("Update config failed", log.Error(err))
 		return nil, err
@@ -154,7 +154,7 @@ func (api *API) DeleteConfig(c *common.Context) (interface{}, error) {
 	}
 
 	//TODO: should remove file(bos/aws) of a function Config
-	return nil, api.Config.Delete(c.GetNamespace(), c.GetNameFromParam())
+	return nil, api.Config.Delete(nil, c.GetNamespace(), c.GetNameFromParam())
 }
 
 func (api *API) GetAppByConfig(c *common.Context) (interface{}, error) {
@@ -242,7 +242,7 @@ func (api *API) updateNodeAndApp(namespace string, config *specV1.Configuration,
 		if err != nil {
 			return err
 		}
-		_, err = api.Node.UpdateNodeAppVersion(namespace, app)
+		_, err = api.Node.UpdateNodeAppVersion(nil, namespace, app)
 		if err != nil {
 			return err
 		}

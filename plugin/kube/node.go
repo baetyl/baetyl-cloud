@@ -175,7 +175,7 @@ func (c *client) DeleteNode(namespace, name string) error {
 	return c.customClient.CloudV1alpha1().Nodes(namespace).Delete(name, &metav1.DeleteOptions{})
 }
 
-func (c *client) ListNode(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
+func (c *client) ListNode(tx interface{}, namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
 	defer utils.Trace(c.log.Debug, "ListNode")()
 	list, err := c.customClient.CloudV1alpha1().Nodes(namespace).List(*fromListOptionsModel(listOptions))
 	if err != nil {

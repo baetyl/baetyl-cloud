@@ -13,5 +13,5 @@ type Node interface {
 	CreateNode(tx interface{}, namespace string, node *v1.Node) (*v1.Node, error)
 	UpdateNode(namespace string, node *v1.Node) (*v1.Node, error)
 	DeleteNode(namespace, name string) error
-	ListNode(namespace string, listOptions *models.ListOptions) (*models.NodeList, error)
+	ListNode(tx interface{}, namespace string, listOptions *models.ListOptions) (*models.NodeList, error)
 }
