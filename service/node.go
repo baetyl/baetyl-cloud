@@ -27,17 +27,17 @@ type NodeService interface {
 	Get(tx interface{}, namespace, name string) (*specV1.Node, error)
 	List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error)
 	Count(namespace string) (map[string]int, error)
-	Create(tx interface{}, amespace string, node *specV1.Node) (*specV1.Node, error)
+	Create(tx interface{}, namespace string, node *specV1.Node) (*specV1.Node, error)
 	Update(namespace string, node *specV1.Node) (*specV1.Node, error)
 	Delete(namespace, name string) error
 
 	UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error)
-	UpdateDesire(namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) (*models.Shadow, error)
+	UpdateDesire(tx interface{}, namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) (*models.Shadow, error)
 
 	GetDesire(namespace, name string) (*specV1.Desire, error)
 
-	UpdateNodeAppVersion(namespace string, app *specV1.Application) ([]string, error)
-	DeleteNodeAppVersion(namespace string, app *specV1.Application) ([]string, error)
+	UpdateNodeAppVersion(tx interface{}, namespace string, app *specV1.Application) ([]string, error)
+	DeleteNodeAppVersion(tx interface{}, namespace string, app *specV1.Application) ([]string, error)
 
 	GetNodeProperties(ns, name string) (*models.NodeProperties, error)
 	UpdateNodeProperties(ns, name string, props *models.NodeProperties) (*models.NodeProperties, error)
@@ -162,7 +162,7 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 		// in order to get all node data
 		listOptions.PageSize = 0
 	}
-	list, err := n.node.ListNode(namespace, listOptions)
+	list, err := n.node.ListNode(nil, namespace, listOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +243,7 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 		if err != nil {
 			return nil, err
 		}
-		return n.createShadow(namespace, name, nil, report)
+		return n.createShadow(nil, namespace, name, nil, report)
 	}
 
 	if shadow.Report == nil {
@@ -306,22 +306,22 @@ func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report spe
 
 // UpdateDesire Update Desire
 // Parameter f can be RefreshNodeDesireByApp or DeleteNodeDesireByApp
-func (n *NodeServiceImpl) UpdateDesire(namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) (*models.Shadow, error) {
+func (n *NodeServiceImpl) UpdateDesire(tx interface{}, namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) (*models.Shadow, error) {
 	// Retry times
 	var count = 0
 	for {
-		newShadow, err := n.Shadow.Get(nil, namespace, name)
+		newShadow, err := n.Shadow.Get(tx, namespace, name)
 		if err != nil {
 			return nil, err
 		}
 
 		if newShadow == nil {
-			newShadow, err = n.createShadow(namespace, name, specV1.Desire{}, nil)
+			newShadow, err = n.createShadow(tx, namespace, name, specV1.Desire{}, nil)
 		}
 
 		// Refresh desire in Shadow by app
 		f(newShadow, app)
-		updatedShadow, err := n.Shadow.UpdateDesire(nil, newShadow)
+		updatedShadow, err := n.Shadow.UpdateDesire(tx, newShadow)
 		if err == nil || err.Error() != common.ErrUpdateCas {
 			return updatedShadow, err
 		}
@@ -427,13 +427,13 @@ func (n *NodeServiceImpl) rematchApplicationsForNode(apps *models.ApplicationLis
 }
 
 // UpdateNodeAppVersion update the node desire's appVersion for app changed
-func (n *NodeServiceImpl) UpdateNodeAppVersion(namespace string, app *specV1.Application) ([]string, error) {
+func (n *NodeServiceImpl) UpdateNodeAppVersion(tx interface{}, namespace string, app *specV1.Application) ([]string, error) {
 	if app.Selector == "" {
 		return nil, nil
 	}
 
 	// list nodes
-	nodeList, err := n.node.ListNode(namespace, &models.ListOptions{LabelSelector: app.Selector})
+	nodeList, err := n.node.ListNode(tx, namespace, &models.ListOptions{LabelSelector: app.Selector})
 	if err != nil {
 		return nil, err
 	}
@@ -442,7 +442,7 @@ func (n *NodeServiceImpl) UpdateNodeAppVersion(namespace string, app *specV1.App
 	for idx := range nodeList.Items {
 		node := &nodeList.Items[idx]
 		nodes = append(nodes, node.Name)
-		_, err := n.UpdateDesire(node.Namespace, node.Name, app, RefreshNodeDesireByApp)
+		_, err := n.UpdateDesire(tx, node.Namespace, node.Name, app, RefreshNodeDesireByApp)
 		if err != nil {
 			return nil, err
 		}
@@ -450,7 +450,7 @@ func (n *NodeServiceImpl) UpdateNodeAppVersion(namespace string, app *specV1.App
 	return nodes, nil
 }
 
-func (n *NodeServiceImpl) createShadow(namespace, name string, desire specV1.Desire, report specV1.Report) (*models.Shadow, error) {
+func (n *NodeServiceImpl) createShadow(tx interface{}, namespace, name string, desire specV1.Desire, report specV1.Report) (*models.Shadow, error) {
 	shadow := models.NewShadow(namespace, name)
 
 	if desire != nil {
@@ -461,17 +461,17 @@ func (n *NodeServiceImpl) createShadow(namespace, name string, desire specV1.Des
 		shadow.Report = report
 	}
 
-	return n.Shadow.Create(nil, shadow)
+	return n.Shadow.Create(tx, shadow)
 }
 
 // DeleteNodeAppVersion delete the node desire's appVersion for app deleted
-func (n *NodeServiceImpl) DeleteNodeAppVersion(namespace string, app *specV1.Application) ([]string, error) {
+func (n *NodeServiceImpl) DeleteNodeAppVersion(tx interface{}, namespace string, app *specV1.Application) ([]string, error) {
 	if app.Selector == "" {
 		return nil, nil
 	}
 
 	// list nodes
-	nodeList, err := n.node.ListNode(namespace, &models.ListOptions{LabelSelector: app.Selector})
+	nodeList, err := n.node.ListNode(tx, namespace, &models.ListOptions{LabelSelector: app.Selector})
 	if err != nil {
 		return nil, err
 	}
@@ -482,7 +482,7 @@ func (n *NodeServiceImpl) DeleteNodeAppVersion(namespace string, app *specV1.App
 		node := &nodeList.Items[idx]
 		nodes = append(nodes, node.Name)
 
-		_, err = n.UpdateDesire(node.Namespace, node.Name, app, DeleteNodeDesireByApp)
+		_, err = n.UpdateDesire(tx, node.Namespace, node.Name, app, DeleteNodeDesireByApp)
 		if err != nil {
 			return nil, err
 		}

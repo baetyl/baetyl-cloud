@@ -270,7 +270,7 @@ func TestUpdateSecret(t *testing.T) {
 	sApp.EXPECT().Get(mConf2.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
 	sApp.EXPECT().Get(mConf2.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()
 	sApp.EXPECT().Update(mConf2.Namespace, gomock.Any()).Return(apps[0], nil).AnyTimes()
-	sNode.EXPECT().UpdateNodeAppVersion(mConf2.Namespace, gomock.Any()).Return(nil, nil).AnyTimes()
+	sNode.EXPECT().UpdateNodeAppVersion(nil, mConf2.Namespace, gomock.Any()).Return(nil, nil).AnyTimes()
 
 	w4 := httptest.NewRecorder()
 	body4, _ := json.Marshal(mConf)

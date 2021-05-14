@@ -89,7 +89,7 @@ func (c *client) CreateConfig(tx interface{}, namespace string, configModel *spe
 	return toConfigurationModel(config), err
 }
 
-func (c *client) UpdateConfig(namespace string, configurationModel *specV1.Configuration) (*specV1.Configuration, error) {
+func (c *client) UpdateConfig(tx interface{}, namespace string, configurationModel *specV1.Configuration) (*specV1.Configuration, error) {
 	defer utils.Trace(c.log.Debug, "UpdateConfig")()
 	configuration, err := c.customClient.CloudV1alpha1().
 		Configurations(namespace).
@@ -100,7 +100,7 @@ func (c *client) UpdateConfig(namespace string, configurationModel *specV1.Confi
 	return toConfigurationModel(configuration), err
 }
 
-func (c *client) DeleteConfig(namespace, name string) error {
+func (c *client) DeleteConfig(tx interface{}, namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "DeleteConfig")()
 	return c.customClient.CloudV1alpha1().Configurations(namespace).Delete(name, &metav1.DeleteOptions{})
 }

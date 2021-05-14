@@ -138,17 +138,17 @@ func (mr *MockResourceMockRecorder) DeleteApplication(arg0, arg1 interface{}) *g
 }
 
 // DeleteConfig mocks base method
-func (m *MockResource) DeleteConfig(arg0, arg1 string) error {
+func (m *MockResource) DeleteConfig(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteConfig", arg0, arg1)
+	ret := m.ctrl.Call(m, "DeleteConfig", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteConfig indicates an expected call of DeleteConfig
-func (mr *MockResourceMockRecorder) DeleteConfig(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) DeleteConfig(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConfig", reflect.TypeOf((*MockResource)(nil).DeleteConfig), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConfig", reflect.TypeOf((*MockResource)(nil).DeleteConfig), arg0, arg1, arg2)
 }
 
 // DeleteNamespace mocks base method
@@ -314,18 +314,18 @@ func (mr *MockResourceMockRecorder) ListNamespace(arg0 interface{}) *gomock.Call
 }
 
 // ListNode mocks base method
-func (m *MockResource) ListNode(arg0 string, arg1 *models.ListOptions) (*models.NodeList, error) {
+func (m *MockResource) ListNode(arg0 interface{}, arg1 string, arg2 *models.ListOptions) (*models.NodeList, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListNode", arg0, arg1)
+	ret := m.ctrl.Call(m, "ListNode", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*models.NodeList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListNode indicates an expected call of ListNode
-func (mr *MockResourceMockRecorder) ListNode(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) ListNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNode", reflect.TypeOf((*MockResource)(nil).ListNode), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNode", reflect.TypeOf((*MockResource)(nil).ListNode), arg0, arg1, arg2)
 }
 
 // ListSecret mocks base method
@@ -359,18 +359,18 @@ func (mr *MockResourceMockRecorder) UpdateApplication(arg0, arg1 interface{}) *g
 }
 
 // UpdateConfig mocks base method
-func (m *MockResource) UpdateConfig(arg0 string, arg1 *v1.Configuration) (*v1.Configuration, error) {
+func (m *MockResource) UpdateConfig(arg0 interface{}, arg1 string, arg2 *v1.Configuration) (*v1.Configuration, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateConfig", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateConfig", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Configuration)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateConfig indicates an expected call of UpdateConfig
-func (mr *MockResourceMockRecorder) UpdateConfig(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) UpdateConfig(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfig", reflect.TypeOf((*MockResource)(nil).UpdateConfig), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfig", reflect.TypeOf((*MockResource)(nil).UpdateConfig), arg0, arg1, arg2)
 }
 
 // UpdateNode mocks base method

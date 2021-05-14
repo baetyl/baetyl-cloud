@@ -271,11 +271,11 @@ func TestDeleteNode(t *testing.T) {
 
 func TestListNode(t *testing.T) {
 	c := initNodeClient()
-	list, err := c.ListNode("default", &models.ListOptions{})
+	list, err := c.ListNode(nil, "default", &models.ListOptions{})
 	assert.NoError(t, err)
 	assert.True(t, true, len(list.Items) > 0)
 
-	_, err = c.ListNode("baetyl-cloud", &models.ListOptions{LabelSelector: "node=test"})
+	_, err = c.ListNode(nil, "baetyl-cloud", &models.ListOptions{LabelSelector: "node=test"})
 	assert.NoError(t, err)
 }
 

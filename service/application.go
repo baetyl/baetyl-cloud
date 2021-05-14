@@ -22,7 +22,7 @@ type ApplicationService interface {
 	Update(namespace string, app *specV1.Application) (*specV1.Application, error)
 	Delete(namespace, name, version string) error
 	List(namespace string, listOptions *models.ListOptions) (*models.ApplicationList, error)
-	CreateWithBase(namespace string, app, base *specV1.Application) (*specV1.Application, error)
+	CreateWithBase(tx interface{}, namespace string, app, base *specV1.Application) (*specV1.Application, error)
 }
 
 type applicationService struct {
@@ -142,11 +142,11 @@ func (a *applicationService) List(namespace string,
 	return a.app.ListApplication(nil, namespace, listOptions)
 }
 
-// CreateBaseOther create application with base
-func (a *applicationService) CreateWithBase(namespace string, app, base *specV1.Application) (*specV1.Application, error) {
+// CreateWithBase create application with base
+func (a *applicationService) CreateWithBase(tx interface{}, namespace string, app, base *specV1.Application) (*specV1.Application, error) {
 	if base != nil {
 		if namespace != base.Namespace {
-			err := a.constuctConfig(namespace, base)
+			err := a.constructConfig(tx, namespace, base)
 			if err != nil {
 				return nil, err
 			}
@@ -160,13 +160,13 @@ func (a *applicationService) CreateWithBase(namespace string, app, base *specV1.
 		return nil, err
 	}
 
-	return a.Create(nil, namespace, app)
+	return a.Create(tx, namespace, app)
 }
 
-func (a *applicationService) constuctConfig(namespace string, base *specV1.Application) error {
+func (a *applicationService) constructConfig(tx interface{}, namespace string, base *specV1.Application) error {
 	for _, v := range base.Volumes {
 		if v.Config != nil {
-			cfg, err := a.config.GetConfig(nil, base.Namespace, v.Config.Name, "")
+			cfg, err := a.config.GetConfig(tx, base.Namespace, v.Config.Name, "")
 			if err != nil {
 				log.L().Error("failed to get system config",
 					log.Any(common.KeyContextNamespace, base.Namespace),
@@ -177,13 +177,13 @@ func (a *applicationService) constuctConfig(namespace string, base *specV1.Appli
 					common.Field("name", v.Config.Name))
 			}
 
-			config, err := a.config.CreateConfig(nil, namespace, cfg)
+			config, err := a.config.CreateConfig(tx, namespace, cfg)
 			if err != nil {
 				log.L().Error("failed to create user config",
 					log.Any(common.KeyContextNamespace, namespace),
 					log.Any("name", v.Config.Name))
 				cfg.Name = cfg.Name + "-" + common.RandString(9)
-				config, err = a.config.CreateConfig(nil, namespace, cfg)
+				config, err = a.config.CreateConfig(tx, namespace, cfg)
 				if err != nil {
 					return err
 				}

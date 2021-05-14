@@ -50,18 +50,18 @@ func (mr *MockApplicationServiceMockRecorder) Create(arg0, arg1, arg2 interface{
 }
 
 // CreateWithBase mocks base method
-func (m *MockApplicationService) CreateWithBase(arg0 string, arg1, arg2 *v1.Application) (*v1.Application, error) {
+func (m *MockApplicationService) CreateWithBase(arg0 interface{}, arg1 string, arg2, arg3 *v1.Application) (*v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateWithBase", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "CreateWithBase", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(*v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateWithBase indicates an expected call of CreateWithBase
-func (mr *MockApplicationServiceMockRecorder) CreateWithBase(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockApplicationServiceMockRecorder) CreateWithBase(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWithBase", reflect.TypeOf((*MockApplicationService)(nil).CreateWithBase), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWithBase", reflect.TypeOf((*MockApplicationService)(nil).CreateWithBase), arg0, arg1, arg2, arg3)
 }
 
 // Delete mocks base method

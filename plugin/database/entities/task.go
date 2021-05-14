@@ -2,9 +2,10 @@ package entities
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/jinzhu/copier"
-	"time"
 )
 
 type Task struct {

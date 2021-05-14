@@ -50,17 +50,17 @@ func (mr *MockConfigurationMockRecorder) CreateConfig(arg0, arg1, arg2 interface
 }
 
 // DeleteConfig mocks base method
-func (m *MockConfiguration) DeleteConfig(arg0, arg1 string) error {
+func (m *MockConfiguration) DeleteConfig(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteConfig", arg0, arg1)
+	ret := m.ctrl.Call(m, "DeleteConfig", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteConfig indicates an expected call of DeleteConfig
-func (mr *MockConfigurationMockRecorder) DeleteConfig(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockConfigurationMockRecorder) DeleteConfig(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConfig", reflect.TypeOf((*MockConfiguration)(nil).DeleteConfig), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConfig", reflect.TypeOf((*MockConfiguration)(nil).DeleteConfig), arg0, arg1, arg2)
 }
 
 // GetConfig mocks base method
@@ -94,16 +94,16 @@ func (mr *MockConfigurationMockRecorder) ListConfig(arg0, arg1 interface{}) *gom
 }
 
 // UpdateConfig mocks base method
-func (m *MockConfiguration) UpdateConfig(arg0 string, arg1 *v1.Configuration) (*v1.Configuration, error) {
+func (m *MockConfiguration) UpdateConfig(arg0 interface{}, arg1 string, arg2 *v1.Configuration) (*v1.Configuration, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateConfig", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateConfig", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Configuration)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateConfig indicates an expected call of UpdateConfig
-func (mr *MockConfigurationMockRecorder) UpdateConfig(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockConfigurationMockRecorder) UpdateConfig(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfig", reflect.TypeOf((*MockConfiguration)(nil).UpdateConfig), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfig", reflect.TypeOf((*MockConfiguration)(nil).UpdateConfig), arg0, arg1, arg2)
 }

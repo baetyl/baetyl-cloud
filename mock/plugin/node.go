@@ -79,18 +79,18 @@ func (mr *MockNodeMockRecorder) GetNode(arg0, arg1, arg2 interface{}) *gomock.Ca
 }
 
 // ListNode mocks base method
-func (m *MockNode) ListNode(arg0 string, arg1 *models.ListOptions) (*models.NodeList, error) {
+func (m *MockNode) ListNode(arg0 interface{}, arg1 string, arg2 *models.ListOptions) (*models.NodeList, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListNode", arg0, arg1)
+	ret := m.ctrl.Call(m, "ListNode", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*models.NodeList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListNode indicates an expected call of ListNode
-func (mr *MockNodeMockRecorder) ListNode(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockNodeMockRecorder) ListNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNode", reflect.TypeOf((*MockNode)(nil).ListNode), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNode", reflect.TypeOf((*MockNode)(nil).ListNode), arg0, arg1, arg2)
 }
 
 // UpdateNode mocks base method

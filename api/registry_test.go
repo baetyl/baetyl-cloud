@@ -275,7 +275,7 @@ func TestRefreshRegistryPassword(t *testing.T) {
 	sApp.EXPECT().Get(mConf2.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
 	sApp.EXPECT().Get(mConf2.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()
 	sApp.EXPECT().Update(mConf2.Namespace, gomock.Any()).Return(apps[0], nil).AnyTimes()
-	sNode.EXPECT().UpdateNodeAppVersion(mConf2.Namespace, gomock.Any()).Return(nil, nil).AnyTimes()
+	sNode.EXPECT().UpdateNodeAppVersion(nil, mConf2.Namespace, gomock.Any()).Return(nil, nil).AnyTimes()
 	w3 := httptest.NewRecorder()
 	body3, _ := json.Marshal(mConf2)
 	req3, _ := http.NewRequest(http.MethodPost, "/v1/registries/cba/refresh", bytes.NewReader(body3))
