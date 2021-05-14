@@ -95,7 +95,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	app, err = api.AppFacade.Create(ns, baseApp, app, configs)
+	app, err = api.Facade.CreateApp(ns, baseApp, app, configs)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	app, err = api.AppFacade.Update(ns, oldApp, app, configs)
+	app, err = api.Facade.UpdateApp(ns, oldApp, app, configs)
 
 	return api.ToApplicationView(app)
 }
@@ -162,7 +162,7 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrAppReferencedByNode, common.Field("name", name))
 	}
 
-	err = api.AppFacade.Delete(ns, name, app)
+	err = api.Facade.DeleteApp(ns, name, app)
 	return nil, err
 }
 

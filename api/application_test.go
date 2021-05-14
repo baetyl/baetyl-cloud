@@ -409,8 +409,8 @@ func TestCreateContainerApplication(t *testing.T) {
 
 	sNode := ms.NewMockNodeService(mockCtl)
 	sIndex := ms.NewMockIndexService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 	api.Index = sIndex
 	api.Node = sNode
 
@@ -583,7 +583,7 @@ func TestCreateContainerApplication(t *testing.T) {
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
@@ -596,7 +596,7 @@ func TestCreateContainerApplication(t *testing.T) {
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Return(eden2, nil).Times(1)
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(mApp, nil).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(mApp, nil).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
@@ -619,8 +619,8 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 
 	sNode := ms.NewMockNodeService(mockCtl)
 	sIndex := ms.NewMockIndexService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 	api.Index = sIndex
 	api.Node = sNode
 
@@ -788,7 +788,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	fApp.EXPECT().Create(appView.Namespace, nil, app, gomock.Any()).Return(app, nil)
+	fApp.EXPECT().CreateApp(appView.Namespace, nil, app, gomock.Any()).Return(app, nil)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secretRegistry, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secretCertificate, nil).Times(1)
@@ -823,8 +823,8 @@ func TestUpdateContainerApplication(t *testing.T) {
 
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sNode := ms.NewMockNodeService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 	api.Index = sIndex
 	api.Node = sNode
 
@@ -850,14 +850,14 @@ func TestUpdateContainerApplication(t *testing.T) {
 	mApp2.Selector = "name = test"
 
 	sApp.EXPECT().Get(gomock.Any(), "abc", gomock.Any()).Return(mApp, nil).AnyTimes()
-	fApp.EXPECT().Update(mApp.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(mApp2, nil)
+	fApp.EXPECT().UpdateApp(mApp.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(mApp2, nil)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mApp2)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/apps/abc", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	fApp.EXPECT().Update(mApp.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+	fApp.EXPECT().UpdateApp(mApp.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mApp2)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/apps/abc", bytes.NewReader(body))
@@ -880,8 +880,8 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 
 	sNode := ms.NewMockNodeService(mockCtl)
 	sIndex := ms.NewMockIndexService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 	api.Index = sIndex
 	api.Node = sNode
 
@@ -1011,7 +1011,7 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "test-program", "").Return(programConfig, nil).Times(2)
 	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app1, nil)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app1, nil)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(appView)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
@@ -1153,7 +1153,7 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "test-program2", "").Return(programConfig2, nil).Times(2)
 	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app12, nil)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app12, nil)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView12)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
@@ -1274,7 +1274,7 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "test-program2", "").Return(programConfig2, nil).Times(2)
 
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(app1, nil).Times(1)
-	fApp.EXPECT().Update(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app2, nil)
+	fApp.EXPECT().UpdateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app2, nil)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView2)
@@ -1418,8 +1418,8 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sNode := ms.NewMockNodeService(mockCtl)
 	sFunc := ms.NewMockFunctionService(mockCtl)
 	sTempalte := ms.NewMockTemplateService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 
 	api.App = sApp
 	api.Index = sIndex
@@ -1608,7 +1608,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 		"python36": "image",
 	}
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errors.New("err")).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -1622,7 +1622,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	// one more for program config
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
 	sConfig.EXPECT().Get(appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
 
 	w = httptest.NewRecorder()
@@ -1649,8 +1649,8 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sNode := ms.NewMockNodeService(mockCtl)
 	sFunc := ms.NewMockFunctionService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 	api.Index = sIndex
 	api.Node = sNode
 	api.Func = sFunc
@@ -2072,7 +2072,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 		"python36": "image",
 	}
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(2)
-	fApp.EXPECT().Update(namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(newApp, nil)
+	fApp.EXPECT().UpdateApp(namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(newApp, nil)
 	sConfig.EXPECT().Get(namespace, "baetyl-function-config-app-service-2", "").Return(config2, nil).Times(1)
 	sConfig.EXPECT().Get(namespace, "baetyl-function-config-app-service-3", "").Return(config2, nil).Times(1)
 	sConfig.EXPECT().Get(namespace, "baetyl-function-program-config-app-service-bbbb", "").Return(config2, nil).Times(1)
@@ -2100,8 +2100,8 @@ func TestDeleteApplication(t *testing.T) {
 
 	sIndex := ms.NewMockIndexService(mockCtl)
 	sNode := ms.NewMockNodeService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 	api.Index = sIndex
 	api.Node = sNode
 
@@ -2112,7 +2112,7 @@ func TestDeleteApplication(t *testing.T) {
 
 	// 500
 	sApp.EXPECT().Get(gomock.Any(), "abc", gomock.Any()).Return(app, nil).Times(1)
-	fApp.EXPECT().Delete(app.Namespace, app.Name, gomock.Any()).Return(fmt.Errorf("error")).Times(1)
+	fApp.EXPECT().DeleteApp(app.Namespace, app.Name, gomock.Any()).Return(fmt.Errorf("error")).Times(1)
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/apps/abc", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -2120,7 +2120,7 @@ func TestDeleteApplication(t *testing.T) {
 
 	// 200
 	sApp.EXPECT().Get(gomock.Any(), "abc", gomock.Any()).Return(app, nil).Times(1)
-	fApp.EXPECT().Delete(app.Namespace, app.Name, gomock.Any()).Return(nil).Times(1)
+	fApp.EXPECT().DeleteApp(app.Namespace, app.Name, gomock.Any()).Return(nil).Times(1)
 	req, _ = http.NewRequest(http.MethodDelete, "/v1/apps/abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -2165,8 +2165,8 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 	sNode := ms.NewMockNodeService(mockCtl)
 	sFunc := ms.NewMockFunctionService(mockCtl)
 	sTemplate := ms.NewMockTemplateService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 
 	api.App = sApp
 	api.Index = sIndex
@@ -2358,7 +2358,7 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 		"python36": "image",
 	}
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errors.New("err")).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -2372,7 +2372,7 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	// one more for program config
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
 	sConfig.EXPECT().Get(appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
 
 	w = httptest.NewRecorder()
@@ -2397,8 +2397,8 @@ func TestCreateKubeNotFunctionApplication(t *testing.T) {
 
 	sNode := ms.NewMockNodeService(mockCtl)
 	sIndex := ms.NewMockIndexService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 	api.Index = sIndex
 	api.Node = sNode
 
@@ -2489,7 +2489,7 @@ func TestCreateKubeNotFunctionApplication(t *testing.T) {
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Return(eden2, nil).Times(1)
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(appView)
@@ -2515,8 +2515,8 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 	sNode := ms.NewMockNodeService(mockCtl)
 	sFunc := ms.NewMockFunctionService(mockCtl)
 	sTempalte := ms.NewMockTemplateService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 
 	api.App = sApp
 	api.Index = sIndex
@@ -2705,7 +2705,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 		"python36": "image",
 	}
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errors.New("err")).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -2719,7 +2719,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	// one more for program config
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
 	sConfig.EXPECT().Get(appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
 
 	w = httptest.NewRecorder()
@@ -2744,8 +2744,8 @@ func TestCreateNativeNotFunctionApplication(t *testing.T) {
 
 	sNode := ms.NewMockNodeService(mockCtl)
 	sIndex := ms.NewMockIndexService(mockCtl)
-	fApp := mf.NewMockApplicationFacade(mockCtl)
-	api.AppFacade = fApp
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 	api.Index = sIndex
 	api.Node = sNode
 
@@ -2850,7 +2850,7 @@ func TestCreateNativeNotFunctionApplication(t *testing.T) {
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Return(eden2, nil).Times(1)
-	fApp.EXPECT().Create(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(appView)
