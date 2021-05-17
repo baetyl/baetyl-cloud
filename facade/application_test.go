@@ -3,43 +3,17 @@ package facade
 import (
 	"testing"
 
-	"github.com/baetyl/baetyl-go/v2/errors"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
-	mp "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
-	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 )
-
-var (
-	unknownErr = errors.New("unknown")
-)
-
-type MockAppFacade struct {
-	sNode     *ms.MockNodeService
-	sApp      *ms.MockApplicationService
-	sConfig   *ms.MockConfigService
-	sIndex    *ms.MockIndexService
-	txFactory *mp.MockTransactionFactory
-}
-
-func initMockEnvironment(t *testing.T) (*MockAppFacade, *gomock.Controller) {
-	mockCtl := gomock.NewController(t)
-	return &MockAppFacade{
-		sNode:     ms.NewMockNodeService(mockCtl),
-		sApp:      ms.NewMockApplicationService(mockCtl),
-		sConfig:   ms.NewMockConfigService(mockCtl),
-		sIndex:    ms.NewMockIndexService(mockCtl),
-		txFactory: mp.NewMockTransactionFactory(mockCtl),
-	}, mockCtl
-}
 
 func TestCreateApplication(t *testing.T) {
-	mAppFacade, mCtl := initMockEnvironment(t)
+	mAppFacade, mCtl := InitMockEnvironment(t)
 	defer mCtl.Finish()
-	appFacade := &applicationFacade{
+	appFacade := &facade{
 		node:      mAppFacade.sNode,
 		app:       mAppFacade.sApp,
 		config:    mAppFacade.sConfig,
@@ -57,30 +31,30 @@ func TestCreateApplication(t *testing.T) {
 	ns := "baetyl-cloud"
 
 	mAppFacade.sConfig.EXPECT().Upsert(nil, ns, gomock.Any()).Return(nil, unknownErr)
-	_, err := appFacade.Create(ns, app, app, configs)
+	_, err := appFacade.CreateApp(ns, app, app, configs)
 	assert.Error(t, err, unknownErr)
 
 	mAppFacade.sConfig.EXPECT().Upsert(nil, ns, gomock.Any()).Return(nil, nil).AnyTimes()
 	mAppFacade.sApp.EXPECT().CreateWithBase(nil, ns, gomock.Any(), gomock.Any()).Return(nil, unknownErr).Times(1)
-	_, err = appFacade.Create(ns, app, app, configs)
+	_, err = appFacade.CreateApp(ns, app, app, configs)
 	assert.Error(t, err, unknownErr)
 
 	mAppFacade.sApp.EXPECT().CreateWithBase(nil, ns, gomock.Any(), gomock.Any()).Return(app, nil).AnyTimes()
 	mAppFacade.sNode.EXPECT().UpdateNodeAppVersion(nil, ns, gomock.Any()).Return(nil, unknownErr).Times(1)
-	_, err = appFacade.Create(ns, app, app, configs)
+	_, err = appFacade.CreateApp(ns, app, app, configs)
 	assert.Error(t, err, unknownErr)
 
 	mAppFacade.txFactory.EXPECT().Commit(nil).Return().AnyTimes()
 	mAppFacade.sNode.EXPECT().UpdateNodeAppVersion(nil, ns, gomock.Any()).Return(nil, nil)
 	mAppFacade.sIndex.EXPECT().RefreshNodesIndexByApp(nil, ns, gomock.Any(), gomock.Any()).Return(nil)
-	_, err = appFacade.Create(ns, app, app, configs)
+	_, err = appFacade.CreateApp(ns, app, app, configs)
 	assert.NoError(t, err)
 }
 
 func TestDeleteApplication(t *testing.T) {
-	mAppFacade, mCtl := initMockEnvironment(t)
+	mAppFacade, mCtl := InitMockEnvironment(t)
 	defer mCtl.Finish()
-	appFacade := &applicationFacade{
+	appFacade := &facade{
 		node:      mAppFacade.sNode,
 		app:       mAppFacade.sApp,
 		config:    mAppFacade.sConfig,
@@ -147,25 +121,25 @@ func TestDeleteApplication(t *testing.T) {
 		},
 	}
 	mAppFacade.sApp.EXPECT().Delete(ns, app.Name, "").Return(unknownErr).Times(1)
-	err := appFacade.Delete(ns, app.Name, app)
+	err := appFacade.DeleteApp(ns, app.Name, app)
 	assert.Error(t, err, unknownErr)
 
 	mAppFacade.sApp.EXPECT().Delete(ns, app.Name, "").Return(nil).AnyTimes()
 	mAppFacade.sNode.EXPECT().DeleteNodeAppVersion(nil, ns, app).Return(nil, unknownErr).Times(1)
-	err = appFacade.Delete(ns, app.Name, app)
+	err = appFacade.DeleteApp(ns, app.Name, app)
 	assert.Error(t, err, unknownErr)
 
 	mAppFacade.sNode.EXPECT().DeleteNodeAppVersion(nil, ns, app).Return(nil, nil).Times(1)
 	mAppFacade.sIndex.EXPECT().RefreshNodesIndexByApp(nil, ns, app.Name, gomock.Any()).Return(nil).AnyTimes()
 	mAppFacade.sConfig.EXPECT().Delete(nil, ns, gomock.Any()).Return(unknownErr)
-	err = appFacade.Delete(ns, app.Name, app)
+	err = appFacade.DeleteApp(ns, app.Name, app)
 	assert.NoError(t, err)
 }
 
 func TestUpdateApplication(t *testing.T) {
-	mAppFacade, mCtl := initMockEnvironment(t)
+	mAppFacade, mCtl := InitMockEnvironment(t)
 	defer mCtl.Finish()
-	appFacade := &applicationFacade{
+	appFacade := &facade{
 		node:      mAppFacade.sNode,
 		app:       mAppFacade.sApp,
 		config:    mAppFacade.sConfig,
@@ -226,12 +200,12 @@ func TestUpdateApplication(t *testing.T) {
 	ns := "baetyl-cloud"
 
 	mAppFacade.sConfig.EXPECT().Upsert(nil, ns, gomock.Any()).Return(nil, unknownErr).Times(1)
-	_, err := appFacade.Update(ns, app, app, configs)
+	_, err := appFacade.UpdateApp(ns, app, app, configs)
 	assert.Error(t, err, unknownErr)
 
 	mAppFacade.sConfig.EXPECT().Upsert(nil, ns, gomock.Any()).Return(nil, nil).AnyTimes()
 	mAppFacade.sApp.EXPECT().Update(ns, app).Return(nil, unknownErr).Times(1)
-	_, err = appFacade.Update(ns, app, app, configs)
+	_, err = appFacade.UpdateApp(ns, app, app, configs)
 	assert.Error(t, err, unknownErr)
 
 	mAppFacade.sApp.EXPECT().Update(ns, app).Return(app, nil).AnyTimes()
@@ -239,16 +213,16 @@ func TestUpdateApplication(t *testing.T) {
 		Selector: "test",
 	}
 	mAppFacade.sNode.EXPECT().DeleteNodeAppVersion(nil, ns, oldApp).Return(nil, unknownErr).Times(1)
-	_, err = appFacade.Update(ns, oldApp, app, configs)
+	_, err = appFacade.UpdateApp(ns, oldApp, app, configs)
 	assert.Error(t, err, unknownErr)
 
 	mAppFacade.sNode.EXPECT().UpdateNodeAppVersion(nil, ns, gomock.Any()).Return(nil, unknownErr).Times(1)
-	_, err = appFacade.Update(ns, app, app, configs)
+	_, err = appFacade.UpdateApp(ns, app, app, configs)
 	assert.Error(t, err, unknownErr)
 
 	mAppFacade.sNode.EXPECT().UpdateNodeAppVersion(nil, ns, gomock.Any()).Return(nil, nil).AnyTimes()
 	mAppFacade.sIndex.EXPECT().RefreshNodesIndexByApp(nil, ns, app.Name, gomock.Any()).Return(nil).AnyTimes()
 	mAppFacade.sConfig.EXPECT().Delete(nil, ns, gomock.Any()).Return(nil).AnyTimes()
-	_, err = appFacade.Update(ns, app, app, configs)
+	_, err = appFacade.UpdateApp(ns, app, app, configs)
 	assert.NoError(t, err)
 }

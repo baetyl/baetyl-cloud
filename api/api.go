@@ -27,7 +27,7 @@ type API struct {
 	Locker    service.LockerService
 	SysApp    service.SystemAppService
 	Wrapper   service.WrapperService
-	AppFacade facade.ApplicationFacade
+	Facade    facade.Facade
 	*service.AppCombinedService
 	log *log.Logger
 }
@@ -107,7 +107,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
-	appFacade, err := facade.NewApplicationFacade(config)
+	appFacade, err := facade.NewFacade(config)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		SysApp:             sysApp,
 		Wrapper:            wrapper,
 		AppCombinedService: acs,
-		AppFacade:          appFacade,
+		Facade:             appFacade,
 		log:                log.L().With(log.Any("api", "admin")),
 	}, nil
 }
