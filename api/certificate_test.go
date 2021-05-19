@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
+	mf "github.com/baetyl/baetyl-cloud/v2/mock/facade"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/service"
@@ -42,6 +43,8 @@ func TestCreateCertificate(t *testing.T) {
 	api, router, mockCtl := initCertificateAPI(t)
 	defer mockCtl.Finish()
 	mkSecretService := ms.NewMockSecretService(mockCtl)
+	fSecret := mf.NewMockFacade(mockCtl)
+	api.Facade = fSecret
 	api.AppCombinedService = &service.AppCombinedService{
 		Secret: mkSecretService,
 	}
@@ -129,7 +132,7 @@ tu5nww5RdjCz4Uks08P2GNmZjLO81MgYkhR7B9wi3KDNxg==
 		Version:           "1234",
 	}
 	mkSecretService.EXPECT().Get(gomock.Any(), cert1.Name, gomock.Any()).Return(nil, nil).Times(1)
-	mkSecretService.EXPECT().Create(gomock.Any(), gomock.Any(), temp1).Return(res1, nil).Times(1)
+	fSecret.EXPECT().CreateSecret(gomock.Any(), temp1).Return(res1, nil).Times(1)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(cert1)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/certificates", bytes.NewReader(body))
@@ -196,7 +199,7 @@ RcKyjhh1
 		Version:           "1234",
 	}
 	mkSecretService.EXPECT().Get(gomock.Any(), cert2.Name, gomock.Any()).Return(nil, nil).Times(1)
-	mkSecretService.EXPECT().Create(gomock.Any(), gomock.Any(), temp2).Return(res2, nil).Times(1)
+	fSecret.EXPECT().CreateSecret(gomock.Any(), temp2).Return(res2, nil).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(cert2)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/certificates", bytes.NewReader(body))
@@ -357,7 +360,7 @@ RcKyjhh1
 	temp8 := cert8.ToSecret()
 
 	mkSecretService.EXPECT().Get(gomock.Any(), cert8.Name, gomock.Any()).Return(nil, nil).Times(1)
-	mkSecretService.EXPECT().Create(gomock.Any(), gomock.Any(), temp8).Return(nil, fmt.Errorf("error")).Times(1)
+	fSecret.EXPECT().CreateSecret(gomock.Any(), temp8).Return(nil, fmt.Errorf("error")).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(cert8)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/certificates", bytes.NewReader(body))
@@ -609,6 +612,8 @@ func TestDeleteCertificate(t *testing.T) {
 	defer mockCtl.Finish()
 
 	mkSecretService := ms.NewMockSecretService(mockCtl)
+	fSecret := mf.NewMockFacade(mockCtl)
+	api.Facade = fSecret
 	api.AppCombinedService = &service.AppCombinedService{
 		Secret: mkSecretService,
 	}
@@ -628,7 +633,7 @@ func TestDeleteCertificate(t *testing.T) {
 		},
 	}
 	mkSecretService.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil).AnyTimes()
-	mkSecretService.EXPECT().Delete(ns, name).Return(nil)
+	fSecret.EXPECT().DeleteSecret(ns, name).Return(nil)
 	mkIndexService.EXPECT().ListAppIndexBySecret(gomock.Any(), gomock.Any()).Return(nil, nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/certificates/"+name, nil)

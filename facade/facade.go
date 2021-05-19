@@ -19,12 +19,17 @@ type Facade interface {
 	CreateConfig(ns string, config *specV1.Configuration) (*specV1.Configuration, error)
 	UpdateConfig(ns string, config *specV1.Configuration) (*specV1.Configuration, error)
 	DeleteConfig(ns, name string) error
+
+	CreateSecret(ns string, secret *specV1.Secret) (*specV1.Secret, error)
+	UpdateSecret(ns string, secret *specV1.Secret) (*specV1.Secret, error)
+	DeleteSecret(ns, name string) error
 }
 
 type facade struct {
 	node      service.NodeService
 	app       service.ApplicationService
 	config    service.ConfigService
+	secret    service.SecretService
 	index     service.IndexService
 	txFactory plugin.TransactionFactory
 	log       *log.Logger
@@ -43,6 +48,10 @@ func NewFacade(config *config.CloudConfig) (Facade, error) {
 	if err != nil {
 		return nil, err
 	}
+	secret, err := service.NewSecretService(config)
+	if err != nil {
+		return nil, err
+	}
 	index, err := service.NewIndexService(config)
 	if err != nil {
 		return nil, err
@@ -56,6 +65,7 @@ func NewFacade(config *config.CloudConfig) (Facade, error) {
 		node:      node,
 		app:       app,
 		config:    cfg,
+		secret:    secret,
 		index:     index,
 		txFactory: tx.(plugin.TransactionFactory),
 		log:       log.L().With(log.Any("level", "facade")),
