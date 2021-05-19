@@ -18,6 +18,7 @@ type MockAppFacade struct {
 	sNode     *ms.MockNodeService
 	sApp      *ms.MockApplicationService
 	sConfig   *ms.MockConfigService
+	sSecret   *ms.MockSecretService
 	sIndex    *ms.MockIndexService
 	txFactory *mp.MockTransactionFactory
 }
@@ -28,6 +29,7 @@ func InitMockEnvironment(t *testing.T) (*MockAppFacade, *gomock.Controller) {
 		sNode:     ms.NewMockNodeService(mockCtl),
 		sApp:      ms.NewMockApplicationService(mockCtl),
 		sConfig:   ms.NewMockConfigService(mockCtl),
+		sSecret:   ms.NewMockSecretService(mockCtl),
 		sIndex:    ms.NewMockIndexService(mockCtl),
 		txFactory: mp.NewMockTransactionFactory(mockCtl),
 	}, mockCtl

@@ -10,8 +10,6 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
-//go:generate mockgen -destination=../mock/facade/config.go -package=facade github.com/baetyl/baetyl-cloud/v2/facade ConfigFacade
-
 func (a *facade) CreateConfig(ns string, config *specV1.Configuration) (*specV1.Configuration, error) {
 	tx, errTx := a.txFactory.BeginTx()
 	if errTx != nil {

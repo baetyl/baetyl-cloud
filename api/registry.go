@@ -63,8 +63,7 @@ func (api *API) CreateRegistry(c *common.Context) (interface{}, error) {
 	if err = api.validateRegistryModel(cfg); err != nil {
 		return nil, err
 	}
-
-	secret, err := api.Secret.Create(nil, ns, cfg.ToSecret())
+	secret, err := api.Facade.CreateSecret(ns, cfg.ToSecret())
 	if err != nil {
 		return nil, err
 	}
@@ -115,20 +114,15 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 	sd := api.ToRegistryView(secret)
 	sd.UpdateTimestamp = time.Now()
 	sd.Password = cfg.Password
+	if err = api.validateRegistryModel(sd); err != nil {
+		return nil, err
+	}
 
-	secret, err = api.Secret.Update(ns, sd.ToSecret())
+	secret, err = api.Facade.UpdateSecret(ns, sd.ToSecret())
 	if err != nil {
 		return nil, err
 	}
-	res := api.ToRegistryView(secret)
-	if err = api.validateRegistryModel(res); err != nil {
-		return nil, err
-	}
-	err = api.updateAppSecret(ns, secret)
-	if err != nil {
-		return nil, err
-	}
-	return hidePwd(res), nil
+	return hidePwd(api.ToRegistryView(secret)), nil
 }
 
 // DeleteRegistry delete the Registry

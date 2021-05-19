@@ -63,6 +63,21 @@ func (mr *MockFacadeMockRecorder) CreateConfig(arg0, arg1 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateConfig", reflect.TypeOf((*MockFacade)(nil).CreateConfig), arg0, arg1)
 }
 
+// CreateSecret mocks base method
+func (m *MockFacade) CreateSecret(arg0 string, arg1 *v1.Secret) (*v1.Secret, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateSecret", arg0, arg1)
+	ret0, _ := ret[0].(*v1.Secret)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateSecret indicates an expected call of CreateSecret
+func (mr *MockFacadeMockRecorder) CreateSecret(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSecret", reflect.TypeOf((*MockFacade)(nil).CreateSecret), arg0, arg1)
+}
+
 // DeleteApp mocks base method
 func (m *MockFacade) DeleteApp(arg0, arg1 string, arg2 *v1.Application) error {
 	m.ctrl.T.Helper()
@@ -89,6 +104,20 @@ func (m *MockFacade) DeleteConfig(arg0, arg1 string) error {
 func (mr *MockFacadeMockRecorder) DeleteConfig(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConfig", reflect.TypeOf((*MockFacade)(nil).DeleteConfig), arg0, arg1)
+}
+
+// DeleteSecret mocks base method
+func (m *MockFacade) DeleteSecret(arg0, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSecret", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSecret indicates an expected call of DeleteSecret
+func (mr *MockFacadeMockRecorder) DeleteSecret(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSecret", reflect.TypeOf((*MockFacade)(nil).DeleteSecret), arg0, arg1)
 }
 
 // UpdateApp mocks base method
@@ -119,4 +148,19 @@ func (m *MockFacade) UpdateConfig(arg0 string, arg1 *v1.Configuration) (*v1.Conf
 func (mr *MockFacadeMockRecorder) UpdateConfig(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfig", reflect.TypeOf((*MockFacade)(nil).UpdateConfig), arg0, arg1)
+}
+
+// UpdateSecret mocks base method
+func (m *MockFacade) UpdateSecret(arg0 string, arg1 *v1.Secret) (*v1.Secret, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSecret", arg0, arg1)
+	ret0, _ := ret[0].(*v1.Secret)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateSecret indicates an expected call of UpdateSecret
+func (mr *MockFacadeMockRecorder) UpdateSecret(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSecret", reflect.TypeOf((*MockFacade)(nil).UpdateSecret), arg0, arg1)
 }
