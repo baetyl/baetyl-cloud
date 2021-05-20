@@ -557,7 +557,7 @@ func TestUpdateReport(t *testing.T) {
 				{
 					Name:    "appTest",
 					Version: "1245",
-								},
+				},
 			},
 		},
 	}

@@ -17,6 +17,7 @@ func TestNewAdminAPI(t *testing.T) {
 	c.Plugin.Pubsub = common.RandString(9)
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Auth = common.RandString(9)
+	c.Plugin.Sign = common.RandString(9)
 	c.Plugin.License = common.RandString(9)
 	c.Plugin.Resource = common.RandString(9)
 	c.Plugin.Shadow = common.RandString(9)
@@ -48,6 +49,10 @@ func TestNewAdminAPI(t *testing.T) {
 	mockAuth := mockPlugin.NewMockAuth(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Auth, func() (plugin.Plugin, error) {
 		return mockAuth, nil
+	})
+	mockSign := mockPlugin.NewMockSign(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Sign, func() (plugin.Plugin, error) {
+		return mockSign, nil
 	})
 	mockLicense := mockPlugin.NewMockLicense(mockCtl)
 	plugin.RegisterFactory(c.Plugin.License, func() (plugin.Plugin, error) {

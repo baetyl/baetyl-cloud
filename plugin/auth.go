@@ -13,10 +13,6 @@ type Auth interface {
 	Authenticate(c *common.Context) error
 	AuthAndVerify(c *common.Context, pr *PermissionRequest) error
 	Verify(c *common.Context, pr *PermissionRequest) error
-
-	SignToken(meta []byte) ([]byte, error)
-	VerifyToken(meta, sign []byte) bool
-
 	io.Closer
 }
 

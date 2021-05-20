@@ -16,7 +16,7 @@ import (
 
 type InitAPI struct {
 	Init service.InitService
-	Auth service.AuthService
+	Sign service.SignService
 }
 
 func NewInitAPI(cfg *config.CloudConfig) (*InitAPI, error) {
@@ -24,13 +24,13 @@ func NewInitAPI(cfg *config.CloudConfig) (*InitAPI, error) {
 	if err != nil {
 		return nil, err
 	}
-	authService, err := service.NewAuthService(cfg)
+	signService, err := service.NewSignService(cfg)
 	if err != nil {
 		return nil, err
 	}
 	return &InitAPI{
 		Init: initService,
-		Auth: authService,
+		Sign: signService,
 	}, nil
 }
 
@@ -48,7 +48,7 @@ func (api *InitAPI) GetResource(c *common.Context) (interface{}, error) {
 			common.ErrRequestParamInvalid,
 			common.Field("error", err))
 	}
-	data, err := CheckAndParseToken(query.Token, api.Auth.GenToken)
+	data, err := CheckAndParseToken(query.Token, api.Sign.GenToken)
 	if err != nil {
 		return nil, common.Error(
 			common.ErrRequestParamInvalid,

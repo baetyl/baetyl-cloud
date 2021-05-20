@@ -1,11 +1,6 @@
 package service
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
@@ -14,7 +9,6 @@ import (
 
 type AuthService interface {
 	plugin.Auth
-	GenToken(map[string]interface{}) (string, error)
 }
 
 type authService struct {
@@ -27,19 +21,4 @@ func NewAuthService(config *config.CloudConfig) (AuthService, error) {
 		return nil, err
 	}
 	return &authService{auth.(plugin.Auth)}, nil
-}
-
-func (a *authService) GenToken(data map[string]interface{}) (string, error) {
-	signData, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-	dataStr := hex.EncodeToString(signData)
-	sign, err := a.SignToken(signData)
-	if err != nil {
-		return "", err
-	}
-	hashed := md5.Sum(sign)
-	signStr := hex.EncodeToString(hashed[:])
-	return fmt.Sprintf("%s%s", signStr[:10], dataStr), nil
 }

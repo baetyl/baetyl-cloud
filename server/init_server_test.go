@@ -28,6 +28,7 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9)}
 	c.Plugin.License = common.RandString(9)
+	c.Plugin.Sign = common.RandString(9)
 	c.Plugin.Property = common.RandString(9)
 	c.InitServer.Certificate.CA = "../scripts/demo/native/certs/client_ca.crt"
 	c.InitServer.Certificate.Cert = "../scripts/demo/native/certs/server.crt"
@@ -50,6 +51,11 @@ func initInitServerMock(t *testing.T) (*InitServer, *gomock.Controller, *config.
 	mockAuth := mockPlugin.NewMockAuth(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Auth, func() (plugin.Plugin, error) {
 		return mockAuth, nil
+	})
+
+	mockSign := mockPlugin.NewMockSign(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Sign, func() (plugin.Plugin, error) {
+		return mockSign, nil
 	})
 
 	mPKI := mockPlugin.NewMockPKI(mockCtl)

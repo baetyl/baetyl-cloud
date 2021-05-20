@@ -160,11 +160,11 @@ func TestInitService_GenCmd(t *testing.T) {
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
 
-	sAuth := service.NewMockAuthService(mockCtl)
+	sSign := service.NewMockSignService(mockCtl)
 	sTemplate := service.NewMockTemplateService(mockCtl)
 	sProp := service.NewMockPropertyService(mockCtl)
 	as := InitServiceImpl{}
-	as.AuthService = sAuth
+	as.SignService = sSign
 	as.TemplateService = sTemplate
 	as.Property = sProp
 	info := map[string]interface{}{
@@ -177,7 +177,7 @@ func TestInitService_GenCmd(t *testing.T) {
 		"InitApplyYaml": "baetyl-init-deployment.yml",
 		"mode":          "",
 	}
-	sAuth.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)
+	sSign.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)
 	sProp.EXPECT().GetPropertyValue(TemplateBaetylInitCommand).Return(TemplateBaetylInitCommand, nil)
 	sTemplate.EXPECT().Execute("setup-command", TemplateBaetylInitCommand, gomock.Any()).Return([]byte(expect), nil).Times(1)
 

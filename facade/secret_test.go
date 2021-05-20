@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateSecret(t *testing.T)  {
+func TestCreateSecret(t *testing.T) {
 	mFacade, mCtl := InitMockEnvironment(t)
 	defer mCtl.Finish()
 	sFacade := &facade{
@@ -44,7 +44,7 @@ func TestUpdateSecret(t *testing.T) {
 		txFactory: mFacade.txFactory,
 	}
 	ns, name := "default", "abc"
-	mConf := &specV1.Secret {
+	mConf := &specV1.Secret{
 		Namespace:   "default",
 		Name:        "abc",
 		Description: "haha",
@@ -135,7 +135,7 @@ func TestUpdateSecret(t *testing.T) {
 	assert.Error(t, err, unknownErr)
 }
 
-func TestDeleteSecret(t *testing.T)  {
+func TestDeleteSecret(t *testing.T) {
 	mFacade, mCtl := InitMockEnvironment(t)
 	defer mCtl.Finish()
 	sFacade := &facade{
