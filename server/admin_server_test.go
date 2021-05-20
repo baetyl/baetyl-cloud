@@ -41,6 +41,7 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	c.Plugin.Task = common.RandString(9)
 	c.Plugin.Locker = common.RandString(9)
 	c.Plugin.Tx = common.RandString(9)
+	c.Plugin.Sign = common.RandString(9)
 	mockCtl := gomock.NewController(t)
 
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
@@ -59,6 +60,11 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	mockAuth := mockPlugin.NewMockAuth(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Auth, func() (plugin.Plugin, error) {
 		return mockAuth, nil
+	})
+
+	mockSign := mockPlugin.NewMockSign(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Sign, func() (plugin.Plugin, error) {
+		return mockSign, nil
 	})
 
 	mPKI := mockPlugin.NewMockPKI(mockCtl)

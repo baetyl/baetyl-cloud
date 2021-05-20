@@ -76,36 +76,6 @@ func (mr *MockAuthServiceMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockAuthService)(nil).Close))
 }
 
-// GenToken mocks base method
-func (m *MockAuthService) GenToken(arg0 map[string]interface{}) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenToken", arg0)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GenToken indicates an expected call of GenToken
-func (mr *MockAuthServiceMockRecorder) GenToken(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenToken", reflect.TypeOf((*MockAuthService)(nil).GenToken), arg0)
-}
-
-// SignToken mocks base method
-func (m *MockAuthService) SignToken(arg0 []byte) ([]byte, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SignToken", arg0)
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SignToken indicates an expected call of SignToken
-func (mr *MockAuthServiceMockRecorder) SignToken(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignToken", reflect.TypeOf((*MockAuthService)(nil).SignToken), arg0)
-}
-
 // Verify mocks base method
 func (m *MockAuthService) Verify(arg0 *common.Context, arg1 *plugin.PermissionRequest) error {
 	m.ctrl.T.Helper()
@@ -118,18 +88,4 @@ func (m *MockAuthService) Verify(arg0 *common.Context, arg1 *plugin.PermissionRe
 func (mr *MockAuthServiceMockRecorder) Verify(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verify", reflect.TypeOf((*MockAuthService)(nil).Verify), arg0, arg1)
-}
-
-// VerifyToken mocks base method
-func (m *MockAuthService) VerifyToken(arg0, arg1 []byte) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyToken", arg0, arg1)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// VerifyToken indicates an expected call of VerifyToken
-func (mr *MockAuthServiceMockRecorder) VerifyToken(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyToken", reflect.TypeOf((*MockAuthService)(nil).VerifyToken), arg0, arg1)
 }

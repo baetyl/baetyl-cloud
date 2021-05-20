@@ -20,6 +20,7 @@ import (
 func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	c := &config.CloudConfig{}
 	c.Plugin.Auth = common.RandString(9)
+	c.Plugin.Sign = common.RandString(9)
 	c.Plugin.Resource = common.RandString(9)
 	c.Plugin.Shadow = common.RandString(9)
 	c.Plugin.Index = common.RandString(9)
@@ -50,6 +51,11 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	mockAuth := mockPlugin.NewMockAuth(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Auth, func() (plugin.Plugin, error) {
 		return mockAuth, nil
+	})
+
+	mockSign := mockPlugin.NewMockSign(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Sign, func() (plugin.Plugin, error) {
+		return mockSign, nil
 	})
 
 	mPKI := mockPlugin.NewMockPKI(mockCtl)

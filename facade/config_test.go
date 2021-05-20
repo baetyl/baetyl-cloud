@@ -12,7 +12,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
-func TestCreateConfig(t *testing.T)  {
+func TestCreateConfig(t *testing.T) {
 	mFacade, mCtl := InitMockEnvironment(t)
 	defer mCtl.Finish()
 	cfgFacade := &facade{
@@ -166,7 +166,7 @@ func TestUpdateConfig(t *testing.T) {
 	assert.Error(t, err, unknownErr)
 }
 
-func TestDeleteConfig(t *testing.T)  {
+func TestDeleteConfig(t *testing.T) {
 	mFacade, mCtl := InitMockEnvironment(t)
 	defer mCtl.Finish()
 	cfgFacade := &facade{

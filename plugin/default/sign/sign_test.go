@@ -1,6 +1,7 @@
-package auth
+package sign
 
 import (
+	"encoding/base64"
 	"io/ioutil"
 	"os"
 	"path"
@@ -8,21 +9,19 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 const (
 	confData = `
-defaultauth:
-  namespace: testns
+defaultsign:
 `
 )
 
 func setUp() *config.CloudConfig {
 	conf := &config.CloudConfig{}
-	conf.Plugin.Auth = "defaultauth"
+	conf.Plugin.Sign = "defaultsign"
 	return conf
 }
 
@@ -36,18 +35,22 @@ func genConfig(workspace string) error {
 	return nil
 }
 
-func TestDefaultAuth_Authenticate(t *testing.T) {
+func TestDefaultSign_Sign_Verify(t *testing.T) {
 	err := genConfig("etc/baetyl")
 	assert.NoError(t, err)
 	defer os.RemoveAll(path.Dir("etc/baetyl"))
 
-	iam, err := plugin.GetPlugin("defaultauth")
+	cfg := setUp()
+	iam, err := plugin.GetPlugin(cfg.Plugin.Sign)
 	assert.NoError(t, err)
-	auth := iam.(plugin.Auth)
+	auth := iam.(plugin.Sign)
 
-	ctx := common.NewContextEmpty()
-	err = auth.Authenticate(ctx)
+	meta := []byte("test")
+	sign, err := auth.Signature(meta)
+	assert.Nil(t, err)
+	res := "dGVzdA=="
+	assert.Equal(t, res, base64.StdEncoding.EncodeToString(sign))
 
-	assert.NoError(t, err)
-	assert.Equal(t, "testns", ctx.GetNamespace())
+	inc := auth.Verify(meta, sign)
+	assert.Equal(t, true, inc)
 }

@@ -76,21 +76,6 @@ func (mr *MockAuthMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockAuth)(nil).Close))
 }
 
-// SignToken mocks base method
-func (m *MockAuth) SignToken(arg0 []byte) ([]byte, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SignToken", arg0)
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SignToken indicates an expected call of SignToken
-func (mr *MockAuthMockRecorder) SignToken(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignToken", reflect.TypeOf((*MockAuth)(nil).SignToken), arg0)
-}
-
 // Verify mocks base method
 func (m *MockAuth) Verify(arg0 *common.Context, arg1 *plugin.PermissionRequest) error {
 	m.ctrl.T.Helper()
@@ -103,18 +88,4 @@ func (m *MockAuth) Verify(arg0 *common.Context, arg1 *plugin.PermissionRequest) 
 func (mr *MockAuthMockRecorder) Verify(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verify", reflect.TypeOf((*MockAuth)(nil).Verify), arg0, arg1)
-}
-
-// VerifyToken mocks base method
-func (m *MockAuth) VerifyToken(arg0, arg1 []byte) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyToken", arg0, arg1)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// VerifyToken indicates an expected call of VerifyToken
-func (mr *MockAuthMockRecorder) VerifyToken(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyToken", reflect.TypeOf((*MockAuth)(nil).VerifyToken), arg0, arg1)
 }

@@ -55,6 +55,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Lock.ExpireTime = 5
 	expect.Plugin.DM = "databaseext"
 	expect.Plugin.Tx = "defaulttx"
+	expect.Plugin.Sign = "defaultsign"
 
 	expect.Template.Path = "/etc/baetyl/templates"
 

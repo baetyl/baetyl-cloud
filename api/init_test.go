@@ -43,8 +43,8 @@ func TestInitAPIImpl_GetResource(t *testing.T) {
 	defer mockCtl.Finish()
 	mInit := ms.NewMockInitService(mockCtl)
 	api.Init = mInit
-	auth := ms.NewMockAuthService(mockCtl)
-	api.Auth = auth
+	mSign := ms.NewMockSignService(mockCtl)
+	api.Sign = mSign
 	// 构造token
 	info := map[string]interface{}{
 		service.InfoName:      "n0",
@@ -64,7 +64,7 @@ func TestInitAPIImpl_GetResource(t *testing.T) {
 
 	// ResourceSetup
 	mInit.EXPECT().GetResource("default", "n0", "kube-init-setup.sh", gomock.Any()).Return([]byte("setup"), nil)
-	auth.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(3)
+	mSign.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(3)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, sendUrl.String(), nil)
 
@@ -102,8 +102,8 @@ func TestInitAPIImpl_CheckAndParseToken(t *testing.T) {
 	as := InitAPI{}
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
-	auth := ms.NewMockAuthService(mockCtl)
-	as.Auth = auth
+	mSign := ms.NewMockSignService(mockCtl)
+	as.Sign = mSign
 	info := map[string]interface{}{
 		service.InfoName:      "n0",
 		service.InfoNamespace: "default",
@@ -115,9 +115,9 @@ func TestInitAPIImpl_CheckAndParseToken(t *testing.T) {
 	sign := "0123456789"
 	token := sign + encode
 
-	auth.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(1)
+	mSign.EXPECT().GenToken(gomock.Any()).Return(token, nil).Times(1)
 
-	res, err := CheckAndParseToken(token, as.Auth.GenToken)
+	res, err := CheckAndParseToken(token, as.Sign.GenToken)
 	assert.NoError(t, err)
 	assert.Equal(t, info[service.InfoName], res[service.InfoName].(string))
 	assert.Equal(t, info[service.InfoNamespace], res[service.InfoNamespace].(string))

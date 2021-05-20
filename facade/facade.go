@@ -61,7 +61,7 @@ func NewFacade(config *config.CloudConfig) (Facade, error) {
 		return nil, err
 	}
 
-	return &facade {
+	return &facade{
 		node:      node,
 		app:       app,
 		config:    cfg,

@@ -11,23 +11,24 @@ import (
 
 // API baetyl api server
 type API struct {
-	NS        service.NamespaceService
-	Node      service.NodeService
-	Index     service.IndexService
-	Func      service.FunctionService
-	Obj       service.ObjectService
-	PKI       service.PKIService
-	Auth      service.AuthService
-	Prop      service.PropertyService
-	Module    service.ModuleService
-	Init      service.InitService
-	License   service.LicenseService
-	Template  service.TemplateService
-	Task      service.TaskService
-	Locker    service.LockerService
-	SysApp    service.SystemAppService
-	Wrapper   service.WrapperService
-	Facade    facade.Facade
+	NS       service.NamespaceService
+	Node     service.NodeService
+	Index    service.IndexService
+	Func     service.FunctionService
+	Obj      service.ObjectService
+	PKI      service.PKIService
+	Auth     service.AuthService
+	Prop     service.PropertyService
+	Module   service.ModuleService
+	Init     service.InitService
+	License  service.LicenseService
+	Template service.TemplateService
+	Task     service.TaskService
+	Locker   service.LockerService
+	SysApp   service.SystemAppService
+	Sign     service.SignService
+	Wrapper  service.WrapperService
+	Facade   facade.Facade
 	*service.AppCombinedService
 	log *log.Logger
 }
@@ -63,6 +64,10 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		return nil, err
 	}
 	authService, err := service.NewAuthService(config)
+	if err != nil {
+		return nil, err
+	}
+	signService, err := service.NewSignService(config)
 	if err != nil {
 		return nil, err
 	}
@@ -119,6 +124,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		Func:               functionService,
 		PKI:                pkiService,
 		Auth:               authService,
+		Sign:               signService,
 		Prop:               propertyService,
 		Module:             moduleService,
 		Init:               initService,
