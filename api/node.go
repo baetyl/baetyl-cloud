@@ -29,6 +29,7 @@ const (
 	BaetylModule            = "baetyl"
 	DefaultMode             = "kube"
 	BaetylCoreAPIPort       = "BaetylCoreAPIPort"
+	BaetylDeviceSimulator   = "device-simulator"
 )
 
 // GetNode get a node
@@ -263,6 +264,15 @@ func (api *API) ToNodeView(node *v1.Node) (*v1.NodeView, error) {
 		return nil, err
 	}
 	t := time.Duration(frequency+OfflineDuration) * time.Second
+	var sysAppsView []string
+	for _, sysApp := range node.SysApps {
+		if strings.Contains(sysApp, BaetylDeviceSimulator) {
+			node.Simulators = append(node.Simulators, sysApp)
+		} else {
+			sysAppsView = append(sysAppsView, sysApp)
+		}
+	}
+	node.SysApps = sysAppsView
 	return node.View(t)
 }
 
@@ -361,6 +371,8 @@ func (api *API) ParseAndCheckNode(c *common.Context) (*v1.Node, error) {
 	if node.Name == "" {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is required"))
 	}
+	node.SysApps = append(node.SysApps, node.Simulators...)
+	node.Simulators = nil
 	err = api.checkNodeOptionalSysApps(node.SysApps)
 	if err != nil {
 		return nil, err
