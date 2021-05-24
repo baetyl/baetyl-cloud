@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS baetyl_module
   programs    varchar(2048)    NOT NULL DEFAULT '',
   version     varchar(36)      NOT NULL DEFAULT '',
   type        varchar(36)      NOT NULL DEFAULT '',
+  flag        int(8)           NOT NULL DEFAULT '0',
   is_latest   int(1)           NOT NULL DEFAULT '0',
   description varchar(1024)    NOT NULL DEFAULT '',
   create_time timestamp        NOT NULL DEFAULT CURRENT_TIMESTAMP,
