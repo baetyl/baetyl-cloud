@@ -95,7 +95,7 @@ func (d *DB) GetLatestModuleProgram(name, platform string) (string, error) {
 func (d *DB) GetModuleTx(tx *sqlx.Tx, name string) ([]models.Module, error) {
 	selectSQL := `
 SELECT  
-id, name, image, programs, version, type, is_latest, description, create_time, update_time
+id, name, image, programs, version, type, flag, is_latest, description, create_time, update_time
 FROM baetyl_module 
 WHERE name=? ORDER BY create_time DESC
 `
@@ -115,7 +115,7 @@ WHERE name=? ORDER BY create_time DESC
 func (d *DB) GetLatestModuleTx(tx *sqlx.Tx, name string) (*models.Module, error) {
 	selectSQL := `
 SELECT  
-id, name, image, programs, version, type, is_latest, description, create_time, update_time
+id, name, image, programs, version, type, flag, is_latest, description, create_time, update_time
 FROM baetyl_module 
 WHERE name=? AND is_latest=?
 `
@@ -125,7 +125,7 @@ WHERE name=? AND is_latest=?
 func (d *DB) GetModuleByVersionTx(tx *sqlx.Tx, name, version string) (*models.Module, error) {
 	selectSQL := `
 SELECT  
-id, name, image, programs, version, type, is_latest, description, create_time, update_time
+id, name, image, programs, version, type, flag, is_latest, description, create_time, update_time
 FROM baetyl_module 
 WHERE name=? AND version=?
 `
@@ -135,7 +135,7 @@ WHERE name=? AND version=?
 func (d *DB) GetModuleByImageTx(tx *sqlx.Tx, name, image string) (*models.Module, error) {
 	selectSQL := `
 SELECT  
-id, name, image, programs, version, type, is_latest, description, create_time, update_time
+id, name, image, programs, version, type, flag, is_latest, description, create_time, update_time
 FROM baetyl_module 
 WHERE name=? AND image=?
 `
@@ -144,28 +144,28 @@ WHERE name=? AND image=?
 
 func (d *DB) CreateModuleTx(tx *sqlx.Tx, module *models.Module) error {
 	insertSQL := `
-INSERT INTO baetyl_module (name, image, programs, version, type, is_latest, description)
-VALUES (?, ?, ?, ?, ?, ?, ?)
+INSERT INTO baetyl_module (name, image, programs, version, type, flag, is_latest, description)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `
 	res, err := entities.FromModuleModel(module)
 	if err != nil {
 		return err
 	}
-	_, err = d.Exec(tx, insertSQL, res.Name, res.Image, res.Programs, res.Version, res.Type, res.IsLatest, res.Description)
+	_, err = d.Exec(tx, insertSQL, res.Name, res.Image, res.Programs, res.Version, res.Type, res.Flag, res.IsLatest, res.Description)
 	return err
 }
 
 func (d *DB) UpdateModuleByVersionTx(tx *sqlx.Tx, module *models.Module) error {
 	updateSQL := `
 UPDATE baetyl_module
-SET image=?, programs=?, version=?, type=?, is_latest=?, description=? 
+SET image=?, programs=?, version=?, type=?, flag=?, is_latest=?, description=? 
 WHERE name=? AND version=?
 `
 	res, err := entities.FromModuleModel(module)
 	if err != nil {
 		return err
 	}
-	_, err = d.Exec(tx, updateSQL, res.Image, res.Programs, res.Version, res.Type, res.IsLatest, res.Description, res.Name, res.Version)
+	_, err = d.Exec(tx, updateSQL, res.Image, res.Programs, res.Version, res.Type, res.Flag, res.IsLatest, res.Description, res.Name, res.Version)
 	return err
 }
 
@@ -190,7 +190,7 @@ WHERE name=? AND version=?
 func (d *DB) ListModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error) {
 	selectSQL := `
 SELECT 
-id, name, image, programs, version, type, is_latest, description, create_time, update_time
+id, name, image, programs, version, type, flag, is_latest, description, create_time, update_time
 FROM baetyl_module WHERE name LIKE ? ORDER BY create_time DESC
 `
 	args := []interface{}{filter.GetFuzzyName()}
@@ -238,7 +238,7 @@ func (d *DB) GetLatestModuleProgramTx(tx *sqlx.Tx, name, platform string) (strin
 func (d *DB) listModulesByTypeTx(tx *sqlx.Tx, tp common.ModuleType, filter *models.Filter) ([]models.Module, error) {
 	selectSQL := `
 SELECT 
-id, name, image, programs, version, type, is_latest, description, create_time, update_time
+id, name, image, programs, version, type, flag, is_latest, description, create_time, update_time
 FROM baetyl_module WHERE name LIKE ? AND type=? AND is_latest=? ORDER BY create_time DESC
 `
 

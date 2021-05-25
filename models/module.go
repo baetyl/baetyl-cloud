@@ -10,7 +10,7 @@ type Module struct {
 	Image             string            `json:"image,omitempty"`
 	Programs          map[string]string `json:"programs,omitempty"`
 	Type              string            `json:"type,omitempty"`
-	Flag              int               `json:"flag,omitempty"`
+	Flag              int               `json:"flag"`
 	IsLatest          bool              `json:"isLatest,omitempty"`
 	Description       string            `json:"description,omitempty"`
 	CreationTimestamp time.Time         `json:"createTime,omitempty"`

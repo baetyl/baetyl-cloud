@@ -16,6 +16,7 @@ type Module struct {
 	Image       string    `db:"image"`
 	Programs    string    `db:"programs"`
 	Type        string    `db:"type"`
+	Flag        int       `db:"flag"`
 	IsLatest    bool      `db:"is_latest"`
 	Description string    `db:"description"`
 	CreateTime  time.Time `db:"create_time"`
@@ -29,6 +30,7 @@ func ToModuleModel(module *Module) (*models.Module, error) {
 		Image:             module.Image,
 		Programs:          make(map[string]string),
 		Type:              module.Type,
+		Flag:              module.Flag,
 		IsLatest:          module.IsLatest,
 		Description:       module.Description,
 		CreationTimestamp: module.CreateTime,
@@ -62,6 +64,7 @@ func FromModuleModel(module *models.Module) (*Module, error) {
 		Image:       module.Image,
 		Programs:    string(s),
 		Type:        module.Type,
+		Flag:        module.Flag,
 		IsLatest:    module.IsLatest,
 		Description: module.Description,
 		CreateTime:  time.Time{},
