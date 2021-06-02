@@ -28,7 +28,7 @@ const (
 	ErrResourceNotFound        = "ErrResourceNotFound"
 	ErrResourceAccessForbidden = "ErrResourceAccessForbidden"
 	ErrResourceConflict        = "ErrResourceConflict"
-	ErrResourceDeleteForbidden  = "ErrResourceDeleteForbidden"
+	ErrResourceDeleteForbidden = "ErrResourceDeleteForbidden"
 	ErrResourceHasBeenUsed     = "ErrResourceHasBeenUsed"
 	ErrNodeNotReady            = "ErrNodeNotReady"
 	ErrInvalidToken            = "ErrInvalidToken"
