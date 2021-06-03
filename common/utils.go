@@ -3,6 +3,7 @@ package common
 import (
 	"strings"
 
+	"github.com/baetyl/baetyl-go/v2/spec/v1"
 	uuid2 "github.com/google/uuid"
 )
 
@@ -49,4 +50,26 @@ func AddSystemLabel(labels map[string]string, infos map[string]string) map[strin
 	}
 
 	return labels
+}
+
+func UpdateSysAppByAccelerator(accelerator string, sysApps []string) []string {
+	found := false
+	index := 0
+	for i, app := range sysApps {
+		if strings.Contains(app, v1.BaetylGPUMetrics) {
+			found = true
+			index = i
+			break
+		}
+	}
+	if accelerator == v1.NVAccelerator {
+		if !found {
+			sysApps = append(sysApps, v1.BaetylGPUMetrics)
+		}
+	} else {
+		if found {
+			sysApps = append(sysApps[:index], sysApps[index+1:]...)
+		}
+	}
+	return sysApps
 }
