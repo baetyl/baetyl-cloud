@@ -16,13 +16,15 @@ import (
 
 // AdminServer admin server
 type AdminServer struct {
-	cfg              *config.CloudConfig
-	router           *gin.Engine
-	server           *http.Server
-	api              *api.API
-	auth             service.AuthService
-	license          service.LicenseService
+	Auth             service.AuthService
+	License          service.LicenseService
 	ExternalHandlers []gin.HandlerFunc
+
+	cfg    *config.CloudConfig
+	router *gin.Engine
+	server *http.Server
+	api    *api.API
+	log    *log.Logger
 }
 
 // NewAdminServer create admin server
@@ -49,8 +51,9 @@ func NewAdminServer(config *config.CloudConfig) (*AdminServer, error) {
 		cfg:     config,
 		router:  router,
 		server:  server,
-		auth:    auth,
-		license: ls,
+		Auth:    auth,
+		License: ls,
+		log:     log.L().With(log.Any("server", "AdminServer")),
 	}, nil
 }
 
@@ -245,9 +248,9 @@ func (s *AdminServer) GetRoute() *gin.Engine {
 // auth handler
 func (s *AdminServer) AuthHandler(c *gin.Context) {
 	cc := common.NewContext(c)
-	err := s.auth.Authenticate(cc)
+	err := s.Auth.Authenticate(cc)
 	if err != nil {
-		log.L().Error("request authenticate failed",
+		s.log.Error("request authenticate failed",
 			log.Any(cc.GetTrace()),
 			log.Any("namespace", cc.GetNamespace()),
 			log.Any("authorization", c.Request.Header.Get("Authorization")),
@@ -260,7 +263,7 @@ func (s *AdminServer) NodeQuotaHandler(c *gin.Context) {
 	cc := common.NewContext(c)
 	namespace := cc.GetNamespace()
 	if err := s.api.License.CheckQuota(namespace, s.api.NodeNumberCollector); err != nil {
-		log.L().Error("quota out of limit",
+		s.log.Error("quota out of limit",
 			log.Any(cc.GetTrace()),
 			log.Any("namespace", cc.GetNamespace()),
 			log.Error(err))

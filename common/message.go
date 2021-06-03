@@ -28,6 +28,7 @@ const (
 	ErrResourceNotFound        = "ErrResourceNotFound"
 	ErrResourceAccessForbidden = "ErrResourceAccessForbidden"
 	ErrResourceConflict        = "ErrResourceConflict"
+	ErrResourceDeleteForbidden = "ErrResourceDeleteForbidden"
 	ErrResourceHasBeenUsed     = "ErrResourceHasBeenUsed"
 	ErrNodeNotReady            = "ErrNodeNotReady"
 	ErrInvalidToken            = "ErrInvalidToken"
@@ -107,9 +108,10 @@ var templates = map[Code]string{
 	ErrRequestParamInvalid:   "The request parameter is invalid.{{if .error}} ({{.error}}){{end}}",
 	// * resource
 	ErrResourceNotFound:        `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} is not found{{if .namespace}} in namespace({{.namespace}}){{end}}.`,
-	ErrResourceAccessForbidden: `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} connot be accessed{{if .namespace}} in namespace({{.namespace}}){{end}}.`,
+	ErrResourceAccessForbidden: `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} can not be accessed{{if .namespace}} in namespace({{.namespace}}){{end}}.`,
 	ErrResourceConflict:        `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} already exist.`,
 	ErrResourceHasBeenUsed:     `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} has been used.`,
+	ErrResourceDeleteForbidden: `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} can not be deleted{{if .namespace}} in namespace({{.namespace}}){{end}}`,
 	// * volumes
 	ErrVolumeType: "The volume{{if .name}} ({{.name}}){{end}} type should be{{if .type}} ({{.type}}){{end}}.",
 	// * unknown

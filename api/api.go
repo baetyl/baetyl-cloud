@@ -5,6 +5,7 @@ import (
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
+	"github.com/baetyl/baetyl-cloud/v2/facade"
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
@@ -25,7 +26,9 @@ type API struct {
 	Task     service.TaskService
 	Locker   service.LockerService
 	SysApp   service.SystemAppService
+	Sign     service.SignService
 	Wrapper  service.WrapperService
+	Facade   facade.Facade
 	*service.AppCombinedService
 	log *log.Logger
 }
@@ -61,6 +64,10 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		return nil, err
 	}
 	authService, err := service.NewAuthService(config)
+	if err != nil {
+		return nil, err
+	}
+	signService, err := service.NewSignService(config)
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +109,13 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		return nil, err
 	}
 	wrapper, err := service.NewWrapperService(config)
+	if err != nil {
+		return nil, err
+	}
+	appFacade, err := facade.NewFacade(config)
+	if err != nil {
+		return nil, err
+	}
 	return &API{
 		NS:                 namespaceService,
 		Node:               nodeService,
@@ -110,6 +124,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		Func:               functionService,
 		PKI:                pkiService,
 		Auth:               authService,
+		Sign:               signService,
 		Prop:               propertyService,
 		Module:             moduleService,
 		Init:               initService,
@@ -120,6 +135,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		SysApp:             sysApp,
 		Wrapper:            wrapper,
 		AppCombinedService: acs,
+		Facade:             appFacade,
 		log:                log.L().With(log.Any("api", "admin")),
 	}, nil
 }

@@ -1,12 +1,13 @@
 package task
 
 import (
+	"testing"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/golang/mock/gomock"
-	"testing"
 )
 
 type MockServices struct {
@@ -20,7 +21,6 @@ type MockServices struct {
 	index         *mockPlugin.MockIndex
 	license       *mockPlugin.MockLicense
 	task          *mockPlugin.MockTask
-	appHis        *mockPlugin.MockAppHistory
 	Lock          *mockPlugin.MockLocker
 }
 
@@ -100,13 +100,6 @@ func mockIndex(mock plugin.Index) plugin.Factory {
 	return factory
 }
 
-func mockAppHis(mock plugin.AppHistory) plugin.Factory {
-	factory := func() (plugin.Plugin, error) {
-		return mock, nil
-	}
-	return factory
-}
-
 func mockTask(task plugin.Task) plugin.Factory {
 	factory := func() (plugin.Plugin, error) {
 		return task, nil
@@ -138,9 +131,6 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 	mIndex := mockPlugin.NewMockIndex(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Index, mockIndex(mIndex))
 
-	mAppHis := mockPlugin.NewMockAppHistory(mockCtl)
-	plugin.RegisterFactory(conf.Plugin.AppHistory, mockAppHis(mAppHis))
-
 	mTask := mockPlugin.NewMockTask(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Task, mockTask(mTask))
 
@@ -157,7 +147,6 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 		index:         mIndex,
 		license:       mLicense,
 		task:          mTask,
-		appHis:        mAppHis,
 		Lock:          mLock,
 	}
 }

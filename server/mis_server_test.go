@@ -20,6 +20,7 @@ import (
 func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	c := &config.CloudConfig{}
 	c.Plugin.Auth = common.RandString(9)
+	c.Plugin.Sign = common.RandString(9)
 	c.Plugin.Resource = common.RandString(9)
 	c.Plugin.Shadow = common.RandString(9)
 	c.Plugin.Index = common.RandString(9)
@@ -32,6 +33,7 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	c.Plugin.Module = common.RandString(9)
 	c.Plugin.Task = common.RandString(9)
 	c.Plugin.Locker = common.RandString(9)
+	c.Plugin.Tx = common.RandString(9)
 	mockCtl := gomock.NewController(t)
 
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
@@ -49,6 +51,11 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	mockAuth := mockPlugin.NewMockAuth(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Auth, func() (plugin.Plugin, error) {
 		return mockAuth, nil
+	})
+
+	mockSign := mockPlugin.NewMockSign(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Sign, func() (plugin.Plugin, error) {
+		return mockSign, nil
 	})
 
 	mPKI := mockPlugin.NewMockPKI(mockCtl)
@@ -97,10 +104,6 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	plugin.RegisterFactory(c.Plugin.Index, func() (plugin.Plugin, error) {
 		return mockIndex, nil
 	})
-	mockAppHis := mockPlugin.NewMockAppHistory(mockCtl)
-	plugin.RegisterFactory(c.Plugin.AppHistory, func() (plugin.Plugin, error) {
-		return mockAppHis, nil
-	})
 
 	mockTask := mockPlugin.NewMockTask(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Task, func() (plugin.Plugin, error) {
@@ -110,6 +113,11 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	mockLocker := mockPlugin.NewMockLocker(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Locker, func() (plugin.Plugin, error) {
 		return mockLocker, nil
+	})
+
+	mockTx := mockPlugin.NewMockTransactionFactory(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Tx, func() (plugin.Plugin, error) {
+		return mockTx, nil
 	})
 	mockAPI, err := api.NewAPI(c)
 	assert.NoError(t, err)

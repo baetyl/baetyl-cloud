@@ -398,7 +398,7 @@ func toObjectList(objectsResult *s3.ListObjectsOutput) (*models.ListObjectsResul
 	if err != nil {
 		panic(fmt.Sprintf("copier exception: %s", err.Error()))
 	}
-	for i, _ := range res.Contents {
+	for i := range res.Contents {
 		res.Contents[i].ETag, _ = strconv.Unquote(res.Contents[i].ETag)
 	}
 	return res, nil

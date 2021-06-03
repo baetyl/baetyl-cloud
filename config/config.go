@@ -40,6 +40,7 @@ type CloudConfig struct {
 		SyncLinks  []string `yaml:"synclinks" json:"synclinks" default:"[\"httplink\"]"`
 		Locker     string   `yaml:"locker" json:"locker" default:"defaultlocker"`
 		Task       string   `yaml:"task" json:"task" default:"database"`
+		Sign       string   `yaml:"sign" json:"sign" default:"defaultsign"`
 		DM         string   `yaml:"dm" json:"dm" default:"databaseext"`
 		Tx         string   `yaml:"tx" json:"tx" default:"defaulttx"`
 	} `yaml:"plugin" json:"plugin"`

@@ -43,7 +43,7 @@ type InitService interface {
 
 type InitServiceImpl struct {
 	cfg             *config.CloudConfig
-	AuthService     AuthService
+	SignService     SignService
 	NodeService     NodeService
 	Property        PropertyService
 	TemplateService TemplateService
@@ -55,7 +55,7 @@ type InitServiceImpl struct {
 
 // NewSyncService new SyncService
 func NewInitService(config *config.CloudConfig) (InitService, error) {
-	authService, err := NewAuthService(config)
+	signService, err := NewSignService(config)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -91,7 +91,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	}
 	initService := &InitServiceImpl{
 		cfg:                config,
-		AuthService:        authService,
+		SignService:        signService,
 		NodeService:        nodeService,
 		Property:           propertyService,
 		TemplateService:    templateService,
@@ -204,7 +204,7 @@ func (s *InitServiceImpl) GetInitCommand(ns, nodeName string, params map[string]
 	if err != nil {
 		return nil, err
 	}
-	token, err := s.AuthService.GenToken(info)
+	token, err := s.SignService.GenToken(info)
 	if err != nil {
 		return nil, err
 	}

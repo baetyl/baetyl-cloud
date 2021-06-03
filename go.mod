@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/aws/aws-sdk-go v1.32.8
-	github.com/baetyl/baetyl-go/v2 v2.1.50
+	github.com/baetyl/baetyl-go/v2 v2.1.51-0.20210521093022-902ec1499b5e
 	github.com/gin-contrib/cache v1.1.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-sql-driver/mysql v1.5.0

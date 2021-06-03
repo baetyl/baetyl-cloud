@@ -76,7 +76,7 @@ func (api *API) CreateConfig(c *common.Context) (interface{}, error) {
 			common.Field("error", "this name is already in use"))
 	}
 
-	config, err = api.Config.Create(nil, ns, config)
+	config, err = api.Facade.CreateConfig(ns, config)
 	if err != nil {
 		return nil, err
 	}
@@ -109,20 +109,9 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 	config.Version = res.Version
 	config.UpdateTimestamp = time.Now()
 	config.CreationTimestamp = res.CreationTimestamp
-	res, err = api.Config.Update(ns, config)
-	if err != nil {
-		log.L().Error("Update config failed", log.Error(err))
-		return nil, err
-	}
 
-	appNames, err := api.Index.ListAppIndexByConfig(ns, res.Name)
+	res, err = api.Facade.UpdateConfig(ns, config)
 	if err != nil {
-		log.L().Error("list app index by config failed", log.Error(err))
-		return nil, err
-	}
-
-	if err := api.updateNodeAndApp(ns, res, appNames); err != nil {
-		log.L().Error("update node and app failed", log.Error(err))
 		return nil, err
 	}
 
@@ -154,7 +143,7 @@ func (api *API) DeleteConfig(c *common.Context) (interface{}, error) {
 	}
 
 	//TODO: should remove file(bos/aws) of a function Config
-	return nil, api.Config.Delete(c.GetNamespace(), c.GetNameFromParam())
+	return nil, api.Facade.DeleteConfig(ns, n)
 }
 
 func (api *API) GetAppByConfig(c *common.Context) (interface{}, error) {
@@ -222,46 +211,6 @@ func (api *API) parseAndCheckConfigView(c *common.Context) (*specV1.Configuratio
 	}
 
 	return config, nil
-}
-
-func (api *API) updateNodeAndApp(namespace string, config *specV1.Configuration, appNames []string) error {
-	for _, appName := range appNames {
-		app, err := api.App.Get(namespace, appName, "")
-		if err != nil {
-			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
-				continue
-			}
-			return err
-		}
-
-		if !needUpdateApp(config, app) {
-			continue
-		}
-		// Todo remove by list watch
-		app, err = api.App.Update(namespace, app)
-		if err != nil {
-			return err
-		}
-		_, err = api.Node.UpdateNodeAppVersion(namespace, app)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func needUpdateApp(config *specV1.Configuration, app *specV1.Application) bool {
-	appNeedUpdate := false
-	for _, volume := range app.Volumes {
-		if volume.Config != nil &&
-			volume.Config.Name == config.Name &&
-			// config's version must increment
-			strings.Compare(config.Version, volume.Config.Version) > 0 {
-			volume.Config.Version = config.Version
-			appNeedUpdate = true
-		}
-	}
-	return appNeedUpdate
 }
 
 func (api *API) ToConfigurationView(config *specV1.Configuration) (*models.ConfigurationView, error) {

@@ -101,20 +101,20 @@ func TestUpdateConfig(t *testing.T) {
 			"service.yml": "test",
 		},
 	}
-	cfg2, err := c.UpdateConfig(cfg.Namespace, cfg)
+	cfg2, err := c.UpdateConfig(nil, cfg.Namespace, cfg)
 	assert.NoError(t, err)
 	assert.Equal(t, cfg.Name, cfg2.Name)
 	v, _ := cfg2.Data["service.yml"]
 	assert.Equal(t, v, "test")
 
 	cfg.Name = cfg.Name + "NULL"
-	_, err = c.UpdateConfig(cfg.Namespace, cfg)
+	_, err = c.UpdateConfig(nil, cfg.Namespace, cfg)
 	assert.NotNil(t, err)
 }
 
 func TestDeleteConfig(t *testing.T) {
 	c := initConfigurationClient()
-	err := c.DeleteConfig("default", "test-delete")
+	err := c.DeleteConfig(nil, "default", "test-delete")
 	assert.NoError(t, err)
 }
 

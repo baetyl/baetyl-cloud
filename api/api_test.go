@@ -17,6 +17,7 @@ func TestNewAdminAPI(t *testing.T) {
 	c.Plugin.Pubsub = common.RandString(9)
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Auth = common.RandString(9)
+	c.Plugin.Sign = common.RandString(9)
 	c.Plugin.License = common.RandString(9)
 	c.Plugin.Resource = common.RandString(9)
 	c.Plugin.Shadow = common.RandString(9)
@@ -32,6 +33,7 @@ func TestNewAdminAPI(t *testing.T) {
 	c.Plugin.SyncLinks = []string{common.RandString(9), common.RandString(9)}
 	c.Plugin.Task = common.RandString(9)
 	c.Plugin.Locker = common.RandString(9)
+	c.Plugin.Tx = common.RandString(9)
 
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
@@ -48,6 +50,10 @@ func TestNewAdminAPI(t *testing.T) {
 	plugin.RegisterFactory(c.Plugin.Auth, func() (plugin.Plugin, error) {
 		return mockAuth, nil
 	})
+	mockSign := mockPlugin.NewMockSign(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Sign, func() (plugin.Plugin, error) {
+		return mockSign, nil
+	})
 	mockLicense := mockPlugin.NewMockLicense(mockCtl)
 	plugin.RegisterFactory(c.Plugin.License, func() (plugin.Plugin, error) {
 		return mockLicense, nil
@@ -63,10 +69,6 @@ func TestNewAdminAPI(t *testing.T) {
 	mockIndex := mockPlugin.NewMockIndex(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Index, func() (plugin.Plugin, error) {
 		return mockIndex, nil
-	})
-	mockAppHistory := mockPlugin.NewMockAppHistory(mockCtl)
-	plugin.RegisterFactory(c.Plugin.AppHistory, func() (plugin.Plugin, error) {
-		return mockAppHistory, nil
 	})
 	mockProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
@@ -98,6 +100,11 @@ func TestNewAdminAPI(t *testing.T) {
 	mockLocker := mockPlugin.NewMockLocker(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Locker, func() (plugin.Plugin, error) {
 		return mockLocker, nil
+	})
+
+	mockTx := mockPlugin.NewMockTransactionFactory(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Tx, func() (plugin.Plugin, error) {
+		return mockTx, nil
 	})
 	api, err := NewAPI(c)
 	assert.NoError(t, err)

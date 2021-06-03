@@ -8,12 +8,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/baetyl/baetyl-go/v2/errors"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
+	mf "github.com/baetyl/baetyl-cloud/v2/mock/facade"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/service"
@@ -106,6 +108,8 @@ func TestCreateRegistry(t *testing.T) {
 	defer mockCtl.Finish()
 
 	sSecret := ms.NewMockSecretService(mockCtl)
+	fSecret := mf.NewMockFacade(mockCtl)
+	api.Facade = fSecret
 	api.AppCombinedService = &service.AppCombinedService{
 		Secret: sSecret,
 	}
@@ -130,12 +134,20 @@ func TestCreateRegistry(t *testing.T) {
 		},
 	}
 	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
-	sSecret.EXPECT().Create(nil, mConf.Namespace, gomock.Any()).Return(mConf2, nil)
+	fSecret.EXPECT().CreateSecret(mConf.Namespace, gomock.Any()).Return(mConf2, nil)
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(mConf)
 	req, _ := http.NewRequest(http.MethodPost, "/v1/registries", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
+	fSecret.EXPECT().CreateSecret(mConf.Namespace, gomock.Any()).Return(nil, errors.New("create failed"))
+	w3 := httptest.NewRecorder()
+	body3, _ := json.Marshal(mConf)
+	req3, _ := http.NewRequest(http.MethodPost, "/v1/registries", bytes.NewReader(body3))
+	router.ServeHTTP(w3, req3)
+	assert.Equal(t, http.StatusInternalServerError, w3.Code)
 
 	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConf2, nil)
 	w2 := httptest.NewRecorder()
@@ -214,6 +226,8 @@ func TestRefreshRegistryPassword(t *testing.T) {
 	}
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
+	fSecret := mf.NewMockFacade(mockCtl)
+	api.Facade = fSecret
 	api.Node, api.Index = sNode, sIndex
 
 	mConf := &models.Registry{
@@ -228,25 +242,6 @@ func TestRefreshRegistryPassword(t *testing.T) {
 	req2, _ := http.NewRequest(http.MethodPut, "/v1/registries/abc", bytes.NewReader(body2))
 	router.ServeHTTP(w2, req2)
 	assert.Equal(t, http.StatusInternalServerError, w2.Code)
-
-	appNames := []string{"app1", "app2", "app3"}
-	apps := []*specV1.Application{
-		{
-			Namespace: "default",
-			Name:      appNames[0],
-			Selector:  "tag=abc",
-		},
-		{
-			Namespace: "default",
-			Name:      appNames[1],
-			Selector:  "tag=abc",
-		},
-		{
-			Namespace: "default",
-			Name:      appNames[2],
-			Selector:  "tag=abc",
-		},
-	}
 
 	mConfSecret := &specV1.Secret{
 		Namespace:   "default",
@@ -269,13 +264,7 @@ func TestRefreshRegistryPassword(t *testing.T) {
 		Password:  "haha",
 	}
 	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil)
-	sSecret.EXPECT().Update(mConf2.Namespace, gomock.Any()).Return(mConfSecret, nil)
-	sIndex.EXPECT().ListAppIndexBySecret(mConf2.Namespace, mConf2.Name).Return(appNames, nil).Times(1)
-	sApp.EXPECT().Get(mConf2.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
-	sApp.EXPECT().Get(mConf2.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
-	sApp.EXPECT().Get(mConf2.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()
-	sApp.EXPECT().Update(mConf2.Namespace, gomock.Any()).Return(apps[0], nil).AnyTimes()
-	sNode.EXPECT().UpdateNodeAppVersion(mConf2.Namespace, gomock.Any()).Return(nil, nil).AnyTimes()
+	fSecret.EXPECT().UpdateSecret(mConf2.Namespace, gomock.Any()).Return(mConfSecret, nil)
 	w3 := httptest.NewRecorder()
 	body3, _ := json.Marshal(mConf2)
 	req3, _ := http.NewRequest(http.MethodPost, "/v1/registries/cba/refresh", bytes.NewReader(body3))
@@ -290,6 +279,8 @@ func TestDeleteRegistry(t *testing.T) {
 	sApp := ms.NewMockApplicationService(mockCtl)
 	sConfig := ms.NewMockConfigService(mockCtl)
 	sSecret := ms.NewMockSecretService(mockCtl)
+	fSecret := mf.NewMockFacade(mockCtl)
+	api.Facade = fSecret
 	api.AppCombinedService = &service.AppCombinedService{
 		App:    sApp,
 		Config: sConfig,
@@ -308,7 +299,7 @@ func TestDeleteRegistry(t *testing.T) {
 		},
 	}
 	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret, nil)
-	sSecret.EXPECT().Delete(mConfSecret.Namespace, mConfSecret.Name).Return(nil)
+	fSecret.EXPECT().DeleteSecret(mConfSecret.Namespace, mConfSecret.Name).Return(nil).AnyTimes()
 	sIndex.EXPECT().ListAppIndexBySecret(gomock.Any(), gomock.Any()).Return(nil, nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/registries/abc", nil)

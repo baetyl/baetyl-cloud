@@ -95,17 +95,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	err = api.updateGenConfigsOfFunctionApp(ns, configs)
-	if err != nil {
-		return nil, err
-	}
-
-	app, err = api.App.CreateWithBase(ns, app, baseApp)
-	if err != nil {
-		return nil, err
-	}
-
-	err = api.UpdateNodeAndAppIndex(ns, app)
+	app, err = api.Facade.CreateApp(ns, baseApp, app, configs)
 	if err != nil {
 		return nil, err
 	}
@@ -150,29 +140,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	err = api.updateGenConfigsOfFunctionApp(ns, configs)
-	if err != nil {
-		return nil, err
-	}
-
-	app, err = api.App.Update(ns, app)
-	if err != nil {
-		return nil, err
-	}
-
-	if oldApp != nil && oldApp.Selector != app.Selector {
-		// delete old nodes
-		if err := api.DeleteNodeAndAppIndex(ns, oldApp); err != nil {
-			return nil, err
-		}
-	}
-
-	// update nodes
-	if err := api.UpdateNodeAndAppIndex(ns, app); err != nil {
-		return nil, err
-	}
-
-	api.cleanGenConfigsOfFunctionApp(configs, oldApp)
+	app, err = api.Facade.UpdateApp(ns, oldApp, app, configs)
 
 	return api.ToApplicationView(app)
 }
@@ -194,17 +162,8 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrAppReferencedByNode, common.Field("name", name))
 	}
 
-	if err := api.App.Delete(ns, c.GetNameFromParam(), ""); err != nil {
-		return nil, err
-	}
-
-	//delete the app from node
-	if err := api.DeleteNodeAndAppIndex(ns, app); err != nil {
-		return nil, err
-	}
-
-	api.cleanGenConfigsOfFunctionApp(nil, app)
-	return nil, nil
+	err = api.Facade.DeleteApp(ns, name, app)
+	return nil, err
 }
 
 func (api *API) GetSysAppConfigs(c *common.Context) (interface{}, error) {
@@ -344,20 +303,11 @@ func (api *API) ParseListOptionsAppendSystemLabel(c *common.Context) (*models.Li
 }
 
 func (api *API) UpdateNodeAndAppIndex(namespace string, app *specV1.Application) error {
-	nodes, err := api.Node.UpdateNodeAppVersion(namespace, app)
+	nodes, err := api.Node.UpdateNodeAppVersion(nil, namespace, app)
 	if err != nil {
 		return err
 	}
 	return api.Index.RefreshNodesIndexByApp(nil, namespace, app.Name, nodes)
-}
-
-func (api *API) DeleteNodeAndAppIndex(namespace string, app *specV1.Application) error {
-	_, err := api.Node.DeleteNodeAppVersion(namespace, app)
-	if err != nil {
-		return err
-	}
-
-	return api.Index.RefreshNodesIndexByApp(nil, namespace, app.Name, make([]string, 0))
 }
 
 func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationView, error) {
@@ -682,39 +632,6 @@ func (api *API) isAppCanDelete(namesapce, name string) (bool, error) {
 		}
 	}
 	return true, nil
-}
-
-func (api *API) updateGenConfigsOfFunctionApp(namespace string, configs []specV1.Configuration) error {
-	for _, config := range configs {
-		_, err := api.Config.Upsert(namespace, &config)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (api *API) cleanGenConfigsOfFunctionApp(configs []specV1.Configuration, oldApp *specV1.Application) {
-	m := map[string]bool{}
-	for _, config := range configs {
-		m[config.Name] = true
-	}
-
-	for _, v := range oldApp.Volumes {
-		if v.VolumeSource.Config != nil {
-			if _, ok := m[v.VolumeSource.Config.Name]; !ok && (strings.HasPrefix(v.VolumeSource.Config.Name, FunctionConfigPrefix) ||
-				strings.HasPrefix(v.VolumeSource.Config.Name, FunctionProgramConfigPrefix)) {
-				err := api.Config.Delete(oldApp.Namespace, v.VolumeSource.Config.Name)
-				if err != nil {
-					common.LogDirtyData(err,
-						log.Any("type", common.Config),
-						log.Any(common.KeyContextNamespace, oldApp.Namespace),
-						log.Any("name", v.VolumeSource.Config.Name))
-					continue
-				}
-			}
-		}
-	}
 }
 
 func getGenConfigNameOfFunctionService(app *specV1.Application, serviceName string) (string, error) {

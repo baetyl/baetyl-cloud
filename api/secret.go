@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -58,7 +57,7 @@ func (api *API) CreateSecret(c *common.Context) (interface{}, error) {
 	if sd != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
-	res, err := api.Secret.Create(nil, ns, cfg.ToSecret())
+	res, err := api.Facade.CreateSecret(ns, cfg.ToSecret())
 	if err != nil {
 		return nil, err
 	}
@@ -84,11 +83,7 @@ func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
 
 	cfg.Version = sd.Version
 	cfg.UpdateTimestamp = time.Now()
-	secret, err := api.Secret.Update(ns, cfg.ToSecret())
-	if err != nil {
-		return nil, err
-	}
-	err = api.updateAppSecret(ns, secret)
+	secret, err := api.Facade.UpdateSecret(ns, cfg.ToSecret())
 	if err != nil {
 		return nil, err
 	}
@@ -164,49 +159,7 @@ func (api *API) deleteSecret(namespace, secret, secretType string) (interface{},
 	if len(appNames) > 0 {
 		return nil, common.Error(common.ErrResourceHasBeenUsed, common.Field("type", secretType), common.Field("name", secret))
 	}
-	return nil, api.Secret.Delete(namespace, secret)
-}
-
-func (api *API) updateAppSecret(namespace string, secret *specV1.Secret) error {
-	appNames, err := api.Index.ListAppIndexBySecret(namespace, secret.Name)
-	if err != nil {
-		return err
-	}
-	for _, appName := range appNames {
-		app, err := api.App.Get(namespace, appName, "")
-		if err != nil {
-			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
-				continue
-			}
-			return err
-		}
-		if !needUpdateAppSecret(secret, app) {
-			continue
-		}
-		app, err = api.App.Update(namespace, app)
-		if err != nil {
-			return err
-		}
-		_, err = api.Node.UpdateNodeAppVersion(namespace, app)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func needUpdateAppSecret(secret *specV1.Secret, app *specV1.Application) bool {
-	appNeedUpdate := false
-	for _, volume := range app.Volumes {
-		if volume.Secret != nil &&
-			volume.Secret.Name == secret.Name &&
-			// secret's version must increment
-			strings.Compare(secret.Version, volume.Secret.Version) > 0 {
-			volume.Secret.Version = secret.Version
-			appNeedUpdate = true
-		}
-	}
-	return appNeedUpdate
+	return nil, api.Facade.DeleteSecret(namespace, secret)
 }
 
 func (api *API) listAppBySecret(namespace, secret string) (*models.ApplicationList, error) {

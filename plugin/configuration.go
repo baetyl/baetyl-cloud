@@ -11,7 +11,7 @@ import (
 type Configuration interface {
 	GetConfig(tx interface{}, namespace, name, version string) (*v1.Configuration, error)
 	CreateConfig(tx interface{}, namespace string, configModel *v1.Configuration) (*v1.Configuration, error)
-	UpdateConfig(namespace string, configurationModel *v1.Configuration) (*v1.Configuration, error)
-	DeleteConfig(namespace, name string) error
+	UpdateConfig(tx interface{}, namespace string, configurationModel *v1.Configuration) (*v1.Configuration, error)
+	DeleteConfig(tx interface{}, namespace, name string) error
 	ListConfig(namespace string, listOptions *models.ListOptions) (*models.ConfigurationList, error)
 }

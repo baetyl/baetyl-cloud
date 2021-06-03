@@ -34,7 +34,7 @@ func (api *API) ListFunctions(c *common.Context) (interface{}, error) {
 	}
 	var filter []models.Function
 	for _, v := range res {
-		for runtime, _ := range runtimes {
+		for runtime := range runtimes {
 			if strings.ToLower(v.Runtime) == runtime {
 				filter = append(filter, v)
 				break

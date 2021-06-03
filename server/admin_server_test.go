@@ -40,6 +40,8 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	c.Plugin.Module = common.RandString(9)
 	c.Plugin.Task = common.RandString(9)
 	c.Plugin.Locker = common.RandString(9)
+	c.Plugin.Tx = common.RandString(9)
+	c.Plugin.Sign = common.RandString(9)
 	mockCtl := gomock.NewController(t)
 
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
@@ -58,6 +60,11 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	mockAuth := mockPlugin.NewMockAuth(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Auth, func() (plugin.Plugin, error) {
 		return mockAuth, nil
+	})
+
+	mockSign := mockPlugin.NewMockSign(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Sign, func() (plugin.Plugin, error) {
+		return mockSign, nil
 	})
 
 	mPKI := mockPlugin.NewMockPKI(mockCtl)
@@ -94,11 +101,6 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 		return mockIndex, nil
 	})
 
-	mockAppHis := mockPlugin.NewMockAppHistory(mockCtl)
-	plugin.RegisterFactory(c.Plugin.AppHistory, func() (plugin.Plugin, error) {
-		return mockAppHis, nil
-	})
-
 	mockTask := mockPlugin.NewMockTask(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Task, func() (plugin.Plugin, error) {
 		return mockTask, nil
@@ -107,6 +109,11 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	mockLocker := mockPlugin.NewMockLocker(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Locker, func() (plugin.Plugin, error) {
 		return mockLocker, nil
+	})
+
+	mockTx := mockPlugin.NewMockTransactionFactory(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Tx, func() (plugin.Plugin, error) {
+		return mockTx, nil
 	})
 
 	mockAPI, err := api.NewAPI(c)
