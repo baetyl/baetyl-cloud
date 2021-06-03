@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,4 +49,51 @@ func TestAddSystemLabel(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, v, l)
 	}
+}
+
+func TestUpdateSysAppByAccelerator(t *testing.T) {
+	sysApps := []string{
+		specV1.BaetylGPUMetrics,
+		specV1.BaetylFunction,
+	}
+	accelerator := specV1.NVAccelerator
+	resApps := UpdateSysAppByAccelerator(accelerator, sysApps)
+	expectedApps := []string{
+		specV1.BaetylGPUMetrics,
+		specV1.BaetylFunction,
+	}
+	assert.Equal(t, expectedApps, resApps)
+
+	sysApps = []string{
+		specV1.BaetylFunction,
+	}
+	accelerator = specV1.NVAccelerator
+	resApps = UpdateSysAppByAccelerator(accelerator, sysApps)
+	expectedApps = []string{
+		specV1.BaetylFunction,
+		specV1.BaetylGPUMetrics,
+	}
+	assert.Equal(t, expectedApps, resApps)
+
+	accelerator = ""
+	sysApps = []string{
+		specV1.BaetylFunction,
+	}
+	resApps = UpdateSysAppByAccelerator(accelerator, sysApps)
+	expectedApps = []string{
+		specV1.BaetylFunction,
+	}
+	assert.Equal(t, expectedApps, resApps)
+
+	accelerator = ""
+	sysApps = []string{
+		specV1.BaetylGPUMetrics,
+		specV1.BaetylFunction,
+	}
+	resApps = UpdateSysAppByAccelerator(accelerator, sysApps)
+	expectedApps = []string{
+		specV1.BaetylFunction,
+	}
+	assert.Equal(t, expectedApps, resApps)
+
 }

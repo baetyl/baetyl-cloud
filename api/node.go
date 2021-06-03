@@ -168,7 +168,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	}
 	n.Attributes["BaetylCoreVersion"] = version
 
-	n.SysApps = updateSysAppByAccelerator(n.Accelerator, n.SysApps)
+	n.SysApps = common.UpdateSysAppByAccelerator(n.Accelerator, n.SysApps)
 
 	node, err := api.Wrapper.CreateNodeTx(api.Node.Create)(nil, n.Namespace, n)
 	if err != nil {
@@ -211,7 +211,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	node.Accelerator = oldNode.Accelerator
 	node.Mode = oldNode.Mode
 
-	node.SysApps = updateSysAppByAccelerator(node.Accelerator, node.SysApps)
+	node.SysApps = common.UpdateSysAppByAccelerator(node.Accelerator, node.SysApps)
 
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
 		err = api.UpdateNodeOptionedSysApps(oldNode, node.SysApps)
@@ -620,28 +620,6 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 		coreVersions.Versions = append(coreVersions.Versions, latestVersion)
 	}
 	return coreVersions, nil
-}
-
-func updateSysAppByAccelerator(accelerator string, sysApps []string) []string {
-	found := false
-	index := 0
-	for i, app := range sysApps {
-		if strings.Contains(app, v1.BaetylGPUMetrics) {
-			found = true
-			index = i
-			break
-		}
-	}
-	if accelerator == v1.NVAccelerator {
-		if !found {
-			sysApps = append(sysApps, v1.BaetylGPUMetrics)
-		}
-	} else {
-		if found {
-			sysApps = append(sysApps[:index], sysApps[index+1:]...)
-		}
-	}
-	return sysApps
 }
 
 func (api *API) UpdateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string) error {
