@@ -41,7 +41,7 @@ func New() (plugin.Plugin, error) {
 		return new(awss3Storage), nil
 	}
 
-	sessionProvider, err := newS3Session(cfg.AWSS3.Endpoint, cfg.AWSS3.Ak, cfg.AWSS3.Sk, cfg.AWSS3.Region)
+	sessionProvider, err := newS3Session(cfg.AWSS3.Endpoint, cfg.AWSS3.Ak, cfg.AWSS3.Sk, cfg.AWSS3.Region, cfg.AWSS3.PathStyle)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +261,7 @@ func (c *awss3Storage) GenInternalObjectURL(_, bucket, object string) (*models.O
 
 // ListExternalBuckets ListExternalBuckets
 func (c *awss3Storage) ListExternalBuckets(info models.ExternalObjectInfo) ([]models.Bucket, error) {
-	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "")
+	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.PathStyle)
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +271,7 @@ func (c *awss3Storage) ListExternalBuckets(info models.ExternalObjectInfo) ([]mo
 
 // HeadExternalBucket HeadExternalBucket
 func (c *awss3Storage) HeadExternalBucket(info models.ExternalObjectInfo, bucket string) error {
-	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "")
+	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.PathStyle)
 	if err != nil {
 		return err
 	}
@@ -281,7 +281,7 @@ func (c *awss3Storage) HeadExternalBucket(info models.ExternalObjectInfo, bucket
 
 // ListExternalBucketObjects ListExternalBucketObjects
 func (c *awss3Storage) ListExternalBucketObjects(info models.ExternalObjectInfo, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error) {
-	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "")
+	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.PathStyle)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +298,7 @@ func (c *awss3Storage) ListExternalBucketObjects(info models.ExternalObjectInfo,
 
 // GenExternalObjectURL GenExternalObjectURL
 func (c *awss3Storage) GenExternalObjectURL(info models.ExternalObjectInfo, bucket, object string) (*models.ObjectURL, error) {
-	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "")
+	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.PathStyle)
 	if err != nil {
 		return nil, err
 	}
@@ -325,7 +325,7 @@ func (c *awss3Storage) checkInternalSupported() error {
 	return nil
 }
 
-func newS3Session(endpoint, ak, sk, region string) (*session.Session, error) {
+func newS3Session(endpoint, ak, sk, region string, pathStyle bool) (*session.Session, error) {
 	if region == "" {
 		region = "us-east-1"
 	}
@@ -335,7 +335,7 @@ func newS3Session(endpoint, ak, sk, region string) (*session.Session, error) {
 		Endpoint:         aws.String(endpoint),
 		Region:           aws.String(region),
 		DisableSSL:       aws.Bool(!strings.HasPrefix(endpoint, "https")),
-		S3ForcePathStyle: aws.Bool(true),
+		S3ForcePathStyle: aws.Bool(pathStyle),
 	}
 	s, err := session.NewSession(s3Config)
 	if err != nil {
