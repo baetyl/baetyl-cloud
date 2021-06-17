@@ -62,6 +62,7 @@ func (api *API) ListBucketObjectsV2(c *common.Context) (interface{}, error) {
 
 func (api *API) parseObject(c *common.Context) (*models.ObjectRequestParams, error) {
 	params := &models.ObjectRequestParams{}
+	params.ExternalObjectInfo.PathStyle = true
 	if err := c.Bind(params); err != nil {
 		return nil, err
 	}

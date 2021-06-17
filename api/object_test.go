@@ -83,9 +83,10 @@ func TestListBucketsV2(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	info := models.ExternalObjectInfo{
-		Endpoint: "x",
-		Ak:       "xx",
-		Sk:       "xxx",
+		Endpoint:  "x",
+		Ak:        "xx",
+		Sk:        "xxx",
+		PathStyle: true,
 	}
 	mkObjectService.EXPECT().ListExternalBuckets(info, "baidubos").Return(buckets, nil).Times(1)
 	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets?account=other&endpoint=x&ak=xx&sk=xxx", nil)
@@ -185,9 +186,10 @@ func TestListBucketObjectsV2(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, w4.Code)
 
 	info := models.ExternalObjectInfo{
-		Endpoint: "x",
-		Ak:       "xx",
-		Sk:       "xxx",
+		Endpoint:  "x",
+		Ak:        "xx",
+		Sk:        "xxx",
+		PathStyle: true,
 	}
 	mkObjectService.EXPECT().ListExternalBucketObjects(info, "baetyl-test", "baidubos").Return(objectsResult, nil).Times(1)
 	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?account=other&endpoint=x&ak=xx&sk=xxx", nil)
