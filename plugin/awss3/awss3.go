@@ -21,6 +21,10 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
+const (
+	VirtualHost = "virtualHost"
+)
+
 type awss3Storage struct {
 	s3Client *s3.S3
 	cfg      *S3Config
@@ -41,7 +45,7 @@ func New() (plugin.Plugin, error) {
 		return new(awss3Storage), nil
 	}
 
-	sessionProvider, err := newS3Session(cfg.AWSS3.Endpoint, cfg.AWSS3.Ak, cfg.AWSS3.Sk, cfg.AWSS3.Region, cfg.AWSS3.PathStyle)
+	sessionProvider, err := newS3Session(cfg.AWSS3.Endpoint, cfg.AWSS3.Ak, cfg.AWSS3.Sk, cfg.AWSS3.Region, cfg.AWSS3.AddressFormat)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +265,7 @@ func (c *awss3Storage) GenInternalObjectURL(_, bucket, object string) (*models.O
 
 // ListExternalBuckets ListExternalBuckets
 func (c *awss3Storage) ListExternalBuckets(info models.ExternalObjectInfo) ([]models.Bucket, error) {
-	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.PathStyle)
+	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.AddressFormat)
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +275,7 @@ func (c *awss3Storage) ListExternalBuckets(info models.ExternalObjectInfo) ([]mo
 
 // HeadExternalBucket HeadExternalBucket
 func (c *awss3Storage) HeadExternalBucket(info models.ExternalObjectInfo, bucket string) error {
-	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.PathStyle)
+	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.AddressFormat)
 	if err != nil {
 		return err
 	}
@@ -281,7 +285,7 @@ func (c *awss3Storage) HeadExternalBucket(info models.ExternalObjectInfo, bucket
 
 // ListExternalBucketObjects ListExternalBucketObjects
 func (c *awss3Storage) ListExternalBucketObjects(info models.ExternalObjectInfo, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error) {
-	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.PathStyle)
+	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.AddressFormat)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +302,7 @@ func (c *awss3Storage) ListExternalBucketObjects(info models.ExternalObjectInfo,
 
 // GenExternalObjectURL GenExternalObjectURL
 func (c *awss3Storage) GenExternalObjectURL(info models.ExternalObjectInfo, bucket, object string) (*models.ObjectURL, error) {
-	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.PathStyle)
+	sessionProvider, err := newS3Session(info.Endpoint, info.Ak, info.Sk, "", info.AddressFormat)
 	if err != nil {
 		return nil, err
 	}
@@ -325,11 +329,15 @@ func (c *awss3Storage) checkInternalSupported() error {
 	return nil
 }
 
-func newS3Session(endpoint, ak, sk, region string, pathStyle bool) (*session.Session, error) {
+func newS3Session(endpoint, ak, sk, region, addressFormat string) (*session.Session, error) {
 	if region == "" {
 		region = "us-east-1"
 	}
 
+	pathStyle := true
+	if addressFormat == VirtualHost {
+		pathStyle = false
+	}
 	s3Config := &aws.Config{
 		Credentials:      credentials.NewStaticCredentials(ak, sk, ""),
 		Endpoint:         aws.String(endpoint),

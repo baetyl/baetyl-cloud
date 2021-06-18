@@ -40,15 +40,16 @@ type ConfigFunctionItem struct {
 }
 
 type ConfigObjectItem struct {
-	Source   string `json:"source,omitempty"`
-	Account  string `json:"account,omitempty"`
-	Endpoint string `json:"endpoint,omitempty"`
-	Bucket   string `json:"bucket,omitempty"`
-	Object   string `json:"object,omitempty"`
-	Unpack   string `json:"unpack,omitempty"`
-	MD5      string `json:"md5,omitempty"`
-	Ak       string `json:"ak,omitempty"`
-	Sk       string `json:"sk,omitempty"`
+	Source        string `json:"source,omitempty"`
+	Account       string `json:"account,omitempty"`
+	Endpoint      string `json:"endpoint,omitempty"`
+	Bucket        string `json:"bucket,omitempty"`
+	Object        string `json:"object,omitempty"`
+	Unpack        string `json:"unpack,omitempty"`
+	MD5           string `json:"md5,omitempty"`
+	Ak            string `json:"ak,omitempty"`
+	Sk            string `json:"sk,omitempty"`
+	AddressFormat string `json:"addressFormat,omitempty" default:"pathStyle"`
 }
 
 func EqualConfig(config1, config2 *specV1.Configuration) bool {
