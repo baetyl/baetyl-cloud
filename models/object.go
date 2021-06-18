@@ -93,8 +93,8 @@ type ObjectRequestParams struct {
 }
 
 type ExternalObjectInfo struct {
-	Endpoint  string `form:"endpoint,omitempty"`
-	Ak        string `form:"ak,omitempty"`
-	Sk        string `form:"sk,omitempty"`
-	PathStyle bool   `form:"pathStyle,omitempty"`
+	Endpoint      string `form:"endpoint,omitempty"`
+	Ak            string `form:"ak,omitempty"`
+	Sk            string `form:"sk,omitempty"`
+	AddressFormat string `form:"addressFormat,omitempty"`
 }

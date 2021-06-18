@@ -212,9 +212,10 @@ func (t *SyncServiceImpl) PopulateConfigObject(k, v string, cfg *specV1.Configur
 		res, err = t.ObjectService.GenInternalObjectURL(obj.Metadata["userID"], item.Bucket, item.Object, item.Source)
 	} else {
 		res, err = t.ObjectService.GenExternalObjectURL(models.ExternalObjectInfo{
-			Endpoint: item.Endpoint,
-			Ak:       item.Ak,
-			Sk:       item.Sk,
+			Endpoint:      item.Endpoint,
+			Ak:            item.Ak,
+			Sk:            item.Sk,
+			AddressFormat: item.AddressFormat,
 		}, item.Bucket, item.Object, item.Source)
 	}
 	if err != nil {
