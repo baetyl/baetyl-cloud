@@ -117,7 +117,8 @@ Enter the directory where the baetyl-cloud project is located and execute the fo
 
 ```shell
 # helm 3
-helm install baetyl-cloud ./scripts/demo/charts/baetyl-cloud/
+cd scripts/charts/baetyl-cloud
+helm install baetyl-cloud .
 ```
 Make sure that baetyl-cloud is in the Running state, and you can also check the log for errors.
 
