@@ -1,21 +1,5 @@
 CREATE DATABASE IF NOT EXISTS `baetyl_cloud` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `baetyl_cloud`;
-
-CREATE TABLE IF NOT EXISTS `baetyl_application_history` (
-  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID,主键',
-  `namespace` varchar(64) NOT NULL DEFAULT '' COMMENT '命名空间',
-  `name` varchar(128) NOT NULL DEFAULT '' COMMENT 'app名称',
-  `version` varchar(36) NOT NULL DEFAULT '' COMMENT 'app版本',
-  `is_deleted` smallint(6) NOT NULL DEFAULT '0' COMMENT '删除标记1:删除',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `content` mediumtext COMMENT 'app详情',
-  PRIMARY KEY (`id`),
-  KEY `idx_app_history` (`namespace`,`name`,`version`),
-  KEY `idx_app_date` (`namespace`,`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='application历史信息表';
-
-
 CREATE TABLE IF NOT EXISTS `baetyl_batch` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID,主键',
   `name` varchar(128) NOT NULL DEFAULT '' COMMENT '批号',
@@ -23,10 +7,13 @@ CREATE TABLE IF NOT EXISTS `baetyl_batch` (
   `description` varchar(1024) NOT NULL DEFAULT '' COMMENT '型号描述信息',
   `quota_num` int(11) NOT NULL DEFAULT '200' COMMENT '数量',
   `enable_whitelist` int(11) NOT NULL DEFAULT '1' COMMENT '是否启用白名单',
+  `cluster` int(11) NOT NULL DEFAULT '0' COMMENT '是否支持集群部署',
   `security_type` varchar(32) NOT NULL DEFAULT 'Token' COMMENT '安全等级 None/Token/Cert/Dongle',
   `security_key` varchar(64) NOT NULL DEFAULT '' COMMENT 'null/token/cert_id/dongle_id',
   `callback_name` varchar(64) NOT NULL DEFAULT '' COMMENT 'callback name',
   `labels` varchar(2048) NOT NULL DEFAULT '{}' COMMENT '标签，json格式字符串,会设置到激活的node上',
+  `accelerator` varchar(32) NOT NULL DEFAULT '' COMMENT 'AI加速器',
+  `sys_apps` varchar(1024) NOT NULL DEFAULT '' COMMENT '可选官方模块',
   `fingerprint` varchar(1024) NOT NULL DEFAULT '{}' COMMENT '设备指纹信息，json格式字符串，包含类型等数据',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
@@ -112,7 +99,9 @@ CREATE TABLE IF NOT EXISTS `baetyl_node_shadow` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `report` text COMMENT '上报内容',
   `desire` text COMMENT '期望内容',
-  `desire_version` varchar(36) NOT NULL DEFAULT '' COMMENT 'desire版本，用于CAS',
+  `report_meta` text COMMENT '上报内容元数据',
+  `desire_meta` text COMMENT '期望内容元数据',
+  `desire_version` varchar(36) NOT NULL DEFAULT '' COMMENT 'desire版本号，用于CAS',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_name` (`namespace`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='节点影子';
