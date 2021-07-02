@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS `baetyl_module` (
   `image` varchar(1024) NOT NULL DEFAULT '' COMMENT '镜像',
   `programs` varchar(2048) NOT NULL DEFAULT '' COMMENT '进程模式程序包',
   `type` varchar(36) NOT NULL DEFAULT '0' COMMENT '应用类型，user:用户类型模块，runtime_user: 函数运行时类型的用户模块，system:系统类型模块，opt_system: 可选系统类型模块',
-  `flag` int(10) NOT NULL DEFAULT '0' COMMENT '应用标识'
+  `flag` int(10) NOT NULL DEFAULT '0' COMMENT '应用标识',
   `is_latest` int(1) NOT NULL DEFAULT '0' COMMENT '是否是最新版本',
   `description` varchar(1024) NOT NULL DEFAULT '' COMMENT '描述',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',

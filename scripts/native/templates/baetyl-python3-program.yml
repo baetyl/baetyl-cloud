@@ -1,0 +1,15 @@
+name: "{{.ConfigName}}"
+namespace: "{{.Namespace}}"
+system: true
+labels:
+  baetyl-cloud-system: "true"
+  baetyl-config-type: "baetyl-program"
+data:
+  _object_baetyl-python3_darwin-amd64.zip: |-
+    {"url":"{{GetModuleProgram "python3" "darwin-amd64"}}","unpack":"zip"}
+  _object_baetyl-python3_linux-amd64.zip: |-
+    {"url":"{{GetModuleProgram "python3" "linux-amd64"}}","unpack":"zip"}
+  _object_baetyl-python3_linux-arm64-v8.zip: |-
+    {"url":"{{GetModuleProgram "python3" "linux-arm64-v8"}}","unpack":"zip"}
+  _object_baetyl-python3_linux-arm-v7.zip: |-
+    {"url":"{{GetModuleProgram "python3" "linux-arm-v7"}}","unpack":"zip"}

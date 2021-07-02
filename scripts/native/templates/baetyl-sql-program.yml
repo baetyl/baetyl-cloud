@@ -1,0 +1,15 @@
+name: "{{.ConfigName}}"
+namespace: "{{.Namespace}}"
+system: true
+labels:
+  baetyl-cloud-system: "true"
+  baetyl-config-type: "baetyl-program"
+data:
+  _object_baetyl-sql_darwin-amd64.zip: |-
+    {"url":"{{GetModuleProgram "sql" "darwin-amd64"}}","unpack":"zip"}
+  _object_baetyl-sql_linux-amd64.zip: |-
+    {"url":"{{GetModuleProgram "sql" "linux-amd64"}}","unpack":"zip"}
+  _object_baetyl-sql_linux-arm64-v8.zip: |-
+    {"url":"{{GetModuleProgram "sql" "linux-arm64-v8"}}","unpack":"zip"}
+  _object_baetyl-sql_linux-arm-v7.zip: |-
+    {"url":"{{GetModuleProgram "sql" "linux-arm-v7"}}","unpack":"zip"}
