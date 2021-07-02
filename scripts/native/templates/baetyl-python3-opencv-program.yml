@@ -1,0 +1,15 @@
+name: "{{.ConfigName}}"
+namespace: "{{.Namespace}}"
+system: true
+labels:
+  baetyl-cloud-system: "true"
+  baetyl-config-type: "baetyl-program"
+data:
+  _object_baetyl-python3-opencv_darwin-amd64.zip: |-
+    {"url":"{{GetModuleProgram "python3-opencv" "darwin-amd64"}}","unpack":"zip"}
+  _object_baetyl-python3-opencv_linux-amd64.zip: |-
+    {"url":"{{GetModuleProgram "python3-opencv" "linux-amd64"}}","unpack":"zip"}
+  _object_baetyl-python3-opencv_linux-arm64-v8.zip: |-
+    {"url":"{{GetModuleProgram "python3-opencv" "linux-arm64-v8"}}","unpack":"zip"}
+  _object_baetyl-python3-opencv_linux-arm-v7.zip: |-
+    {"url":"{{GetModuleProgram "python3-opencv" "linux-arm-v7"}}","unpack":"zip"}
