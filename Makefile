@@ -32,7 +32,7 @@ all: build
 
 .PHONY: build
 build: $(SRC_FILES)
-	env GO111MODULE=on GOPROXY=https://goproxy.baidu.com CGO_ENABLED=0 go build -o output/$(MODULE) $(GO_FLAGS) .
+	env GO111MODULE=on GOPROXY=https://goproxy.baidu-int.com/ CGO_ENABLED=0 go build -o output/$(MODULE) $(GO_FLAGS) .
 
 .PHONY: image
 image:
