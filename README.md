@@ -118,6 +118,7 @@ Enter the directory where the baetyl-cloud project is located and execute the fo
 ```shell
 # helm 3
 cd scripts/charts/baetyl-cloud
+kubectl apply -f ./apply/
 helm install baetyl-cloud .
 ```
 Make sure that baetyl-cloud is in the Running state, and you can also check the log for errors.
@@ -163,8 +164,9 @@ Check the status of the edge node. Eventually, two edge services will be in the 
 ```shell
 kubectl get pod -A
 # NAMESPACE            NAME                                      READY   STATUS    RESTARTS   AGE
-# baetyl-edge-system   baetyl-core-8668765797-4kt7r              1/1     Running   0          2m15s
-# baetyl-edge-system   baetyl-function-5c5748957-nhn88           1/1     Running   0          114s
+  baetyl-edge-system   baetyl-broker-78f897dd65-dg5hp            1/1     Running       0      75s
+  baetyl-edge-system   baetyl-core-77976446d9-pzbt7              1/1     Running       0      89s
+  baetyl-edge-system   baetyl-init-7fdd9bcf96-klbpt              1/1     Running       0      102s
 
 curl http://0.0.0.0:30004/v1/nodes/demo-node
 # {"namespace":"baetyl-cloud","name":"demo-node","version":"1939112",...,"report":{"time":"2020-07-22T07:25:27.495362661Z","sysapps":...,"node":...,"nodestats":...,"ready":true}

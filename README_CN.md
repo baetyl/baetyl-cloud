@@ -111,7 +111,9 @@ kubectl port-forward --namespace default svc/phpmyadmin 8080:80
 
 ```shell
 # helm 3
-helm install baetyl-cloud ./scripts/demo/charts/baetyl-cloud/
+cd scripts/charts/baetyl-cloud
+kubectl apply -f ./apply/
+helm install baetyl-cloud .
 ```
 
 确认 baetyl-cloud 处于 Running 状态，也可查看日志是否报错。
@@ -157,8 +159,9 @@ curl -skfL 'https://0.0.0.0:30003/v1/active/setup.sh?token=f6d21baa9b7b2265223a3
 ```shell
 kubectl get pod -A
 # NAMESPACE            NAME                                      READY   STATUS    RESTARTS   AGE
-# baetyl-edge-system   baetyl-core-8668765797-4kt7r              1/1     Running   0          2m15s
-# baetyl-edge-system   baetyl-function-5c5748957-nhn88           1/1     Running   0          114s
+  baetyl-edge-system   baetyl-broker-78f897dd65-dg5hp            1/1     Running       0      75s
+  baetyl-edge-system   baetyl-core-77976446d9-pzbt7              1/1     Running       0      89s
+  baetyl-edge-system   baetyl-init-7fdd9bcf96-klbpt              1/1     Running       0      102s
 
 curl http://0.0.0.0:30004/v1/nodes/demo-node
 # {"namespace":"baetyl-cloud","name":"demo-node","version":"1939112",...,"report":{"time":"2020-07-22T07:25:27.495362661Z","sysapps":...,"node":...,"nodestats":...,"ready":true}
