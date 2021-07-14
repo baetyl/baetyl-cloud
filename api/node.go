@@ -25,6 +25,7 @@ const (
 	BaetylNodeNameKey       = "baetyl-node-name"
 	BaetylAppNameKey        = "baetyl-app-name"
 	BaetylCoreConfPrefix    = "baetyl-core-conf"
+	BaetylInitConfPrefix    = "baetyl-init-conf"
 	BaetylCoreContainerPort = 80
 	BaetylModule            = "baetyl"
 	DefaultMode             = "kube"
@@ -210,7 +211,13 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	node.Cluster = oldNode.Cluster
 	node.Mode = oldNode.Mode
 
-	node.SysApps = common.UpdateSysAppByAccelerator(node.Accelerator, node.SysApps)
+	if node.Accelerator != oldNode.Accelerator {
+		node.SysApps = common.UpdateSysAppByAccelerator(node.Accelerator, node.SysApps)
+		err = api.updateConfigByAccelerator(ns, node)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
 		err = api.UpdateNodeOptionedSysApps(oldNode, node.SysApps)
@@ -885,9 +892,9 @@ func (api *API) getCoreAppService(app *v1.Application) (*v1.Service, error) {
 	return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "service"), common.Field("name", v1.BaetylCore), common.Field("namespace", app.Namespace))
 }
 
-func (api *API) getCoreAppConfig(app *v1.Application) (*v1.Configuration, error) {
+func (api *API) getAppConfig(app *v1.Application, confPrefix string) (*v1.Configuration, error) {
 	for _, volume := range app.Volumes {
-		if volume.Config == nil || !strings.Contains(volume.Config.Name, BaetylCoreConfPrefix) {
+		if volume.Config == nil || !strings.Contains(volume.Config.Name, confPrefix) {
 			continue
 		}
 		conf, err := api.Config.Get(app.Namespace, volume.Config.Name, "")
@@ -913,19 +920,15 @@ func (api *API) updateCoreVersions(node *v1.Node, currentVersion, updateVersion 
 }
 
 func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int) error {
-	config, err := api.getCoreAppConfig(app)
+	config, err := api.getAppConfig(app, BaetylCoreConfPrefix)
 	if err != nil {
 		return err
-	}
-	var accelerator string
-	if node.Attributes != nil {
-		accelerator, _ = node.Attributes[v1.KeyAccelerator].(string)
 	}
 	params := map[string]interface{}{
 		"CoreConfName":  config.Name,
 		"CoreAppName":   app.Name,
 		"CoreFrequency": fmt.Sprintf("%ds", freq),
-		"GPUStats":      accelerator == v1.NVAccelerator,
+		"GPUStats":      node.Accelerator == v1.NVAccelerator,
 	}
 	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateCoreConfYaml, params)
 	if err != nil {
@@ -936,6 +939,42 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int
 	var ok bool
 	if data, ok = res.([]byte); !ok {
 		return common.Error(common.ErrConvertConflict, common.Field("name", "BaetylCoreConfig"), common.Field("error", "failed to convert to []byte`"))
+	}
+
+	var newConf v1.Configuration
+	err = yaml.Unmarshal(data, &newConf)
+	if err != nil {
+		return common.Error(common.ErrTemplate, common.Field("error", err))
+	}
+
+	newConf.Name = config.Name
+	newConf.Version = config.Version
+	_, err = api.Config.Update(nil, config.Namespace, &newConf)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node) error {
+	config, err := api.getAppConfig(app, BaetylInitConfPrefix)
+	if err != nil {
+		return err
+	}
+	params := map[string]interface{}{
+		"InitConfName": config.Name,
+		"InitAppName":  app.Name,
+		"GPUStats":     node.Accelerator == v1.NVAccelerator,
+	}
+	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateInitConfYaml, params)
+	if err != nil {
+		return err
+	}
+
+	var data []byte
+	var ok bool
+	if data, ok = res.([]byte); !ok {
+		return common.Error(common.ErrConvertConflict, common.Field("name", "BaetylInitConfig"), common.Field("error", "failed to convert to []byte`"))
 	}
 
 	var newConf v1.Configuration
@@ -1003,16 +1042,59 @@ func (api *API) getCoreAppFrequency(node *v1.Node) (int, error) {
 	if node.Attributes == nil {
 		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
 	}
-	if _, ok := node.Attributes[v1.BaetylCoreFrequency]; !ok {
-		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", v1.BaetylCoreFrequency), common.Field("namespace", node.Namespace))
-	}
 	freq, ok := node.Attributes[v1.BaetylCoreFrequency].(string)
 	if !ok {
-		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreFrequency), common.Field("error", "failed to convert to string`"))
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", v1.BaetylCoreFrequency), common.Field("namespace", node.Namespace))
 	}
-	res, err := strconv.Atoi(freq)
+	return strconv.Atoi(freq)
+}
+
+func (api *API) updateConfigByAccelerator(ns string, node *v1.Node) error {
+	sysApps := node.Desire.AppInfos(true)
+	var coreName string
+	var initName string
+	for _, item := range sysApps {
+		if strings.Contains(item.Name, v1.BaetylCore) {
+			coreName = item.Name
+		} else if strings.Contains(item.Name, v1.BaetylInit) {
+			initName = item.Name
+		}
+	}
+	core, err := api.App.Get(ns, coreName, "")
 	if err != nil {
-		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreFrequency), common.Field("error", err.Error()))
+		return err
 	}
-	return res, nil
+	freq, err := api.getCoreAppFrequency(node)
+	if err != nil {
+		return err
+	}
+	err = api.updateCoreAppConfig(core, node, freq)
+	if err != nil {
+		return err
+	}
+	res, err := api.App.Update(ns, core)
+	if err != nil {
+		return err
+	}
+	_, err = api.Node.UpdateNodeAppVersion(nil, ns, res)
+	if err != nil {
+		return err
+	}
+	init, err := api.App.Get(ns, initName, "")
+	if err != nil {
+		return err
+	}
+	err = api.updateInitAppConfig(init, node)
+	if err != nil {
+		return err
+	}
+	res, err = api.App.Update(ns, init)
+	if err != nil {
+		return err
+	}
+	_, err = api.Node.UpdateNodeAppVersion(nil, ns, res)
+	if err != nil {
+		return err
+	}
+	return nil
 }

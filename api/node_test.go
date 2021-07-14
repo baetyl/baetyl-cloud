@@ -1002,6 +1002,134 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestUpdateNodeAccelerator(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+	sNode := ms.NewMockNodeService(mockCtl)
+	sInit := ms.NewMockInitService(mockCtl)
+	sProp := ms.NewMockPropertyService(mockCtl)
+	sIndex := ms.NewMockIndexService(mockCtl)
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sModule := ms.NewMockModuleService(mockCtl)
+	sSysApp := ms.NewMockSystemAppService(mockCtl)
+	api.Node = sNode
+	api.Init = sInit
+	api.Prop = sProp
+	api.Index = sIndex
+	api.App = sApp
+	api.Config = sConfig
+	api.Module = sModule
+	api.SysApp = sSysApp
+
+	mNode := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+		},
+		Desire: specV1.Desire{
+			specV1.KeySysApps: []interface{}{
+				map[string]interface{}{
+					"name":    specV1.BaetylCore,
+					"version": "v1",
+				},
+				map[string]interface{}{
+					"name":    specV1.BaetylInit,
+					"version": "v1",
+				},
+			},
+		},
+	}
+	modules := []models.Module{
+		{
+			Name:  specV1.BaetylGPUMetrics,
+			Image: "gpu",
+		},
+	}
+	newNode := &specV1.Node{
+		Namespace: "default",
+		Name:      "abc",
+		Labels: map[string]string{
+			"tag":                "baidu",
+			common.LabelNodeName: "abc",
+			"test":               "test",
+		},
+		Accelerator: specV1.NVAccelerator,
+		Attributes: map[string]interface{}{
+			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+		},
+		Desire: specV1.Desire{
+			specV1.KeySysApps: []interface{}{
+				map[string]interface{}{
+					"name":    specV1.BaetylCore,
+					"version": "v1",
+				},
+				map[string]interface{}{
+					"name":    specV1.BaetylInit,
+					"version": "v1",
+				},
+				map[string]interface{}{
+					"name":    specV1.BaetylGPUMetrics,
+					"version": "v1",
+				},
+			},
+		},
+		SysApps: []string{specV1.BaetylGPUMetrics},
+	}
+
+	coreApp := &specV1.Application{
+		Namespace: "default",
+		Name:      specV1.BaetylCore,
+		Volumes:   []specV1.Volume{{Name: BaetylCoreConfPrefix, VolumeSource: specV1.VolumeSource{Config: &specV1.ObjectReference{Name: BaetylCoreConfPrefix}}}},
+	}
+	initApp := &specV1.Application{
+		Namespace: "default",
+		Name:      specV1.BaetylInit,
+		Volumes:   []specV1.Volume{{Name: BaetylInitConfPrefix, VolumeSource: specV1.VolumeSource{Config: &specV1.ObjectReference{Name: BaetylInitConfPrefix}}}},
+	}
+	coreConf := &specV1.Configuration{
+		Name:      specV1.BaetylCore,
+		Namespace: "default",
+	}
+	initConf := &specV1.Configuration{
+		Name:      specV1.BaetylInit,
+		Namespace: "default",
+	}
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
+	sSysApp.EXPECT().GenOptionalApps(nil, mNode.Namespace, mNode.Name, []string{specV1.BaetylGPUMetrics}).Times(1)
+	nodeList := []string{"abc"}
+	sNode.EXPECT().UpdateNodeAppVersion(nil, mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
+
+	sApp.EXPECT().Get("default", gomock.Any(), gomock.Any()).Return(coreApp, nil)
+	sConfig.EXPECT().Get(coreApp.Namespace, gomock.Any(), gomock.Any()).Return(coreConf, nil)
+	sApp.EXPECT().Get("default", gomock.Any(), gomock.Any()).Return(initApp, nil)
+	sConfig.EXPECT().Get(initApp.Namespace, gomock.Any(), gomock.Any()).Return(initConf, nil)
+	coreConfBs, _ := json.Marshal(coreConf)
+	sInit.EXPECT().GetResource(gomock.Any(), mNode.Name, service.TemplateCoreConfYaml, gomock.Any()).Return(coreConfBs, nil)
+	sConfig.EXPECT().Update(nil, coreConf.Namespace, coreConf).Return(coreConf, nil)
+	sApp.EXPECT().Update(gomock.Any(), coreApp).Return(coreApp, nil)
+	initConfBs, _ := json.Marshal(initConf)
+	sInit.EXPECT().GetResource(gomock.Any(), mNode.Name, service.TemplateInitConfYaml, gomock.Any()).Return(initConfBs, nil)
+	sConfig.EXPECT().Update(nil, initConf.Namespace, initConf).Return(initConf, nil)
+	sApp.EXPECT().Update(gomock.Any(), initApp).Return(initApp, nil)
+
+	sNode.EXPECT().Update(newNode.Namespace, newNode).Return(newNode, nil)
+	// equal case
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(newNode)
+	req, _ := http.NewRequest(http.MethodPut, "/v1/nodes/abc", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
 func TestDeleteNode(t *testing.T) {
 	api, router, mockCtl := initNodeAPI(t)
 	defer mockCtl.Finish()

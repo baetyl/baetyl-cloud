@@ -27,6 +27,7 @@ const (
 	templateBaetylInstallShell = "baetyl-install.sh"
 
 	TemplateCoreConfYaml      = "baetyl-core-conf.yml"
+	TemplateInitConfYaml      = "baetyl-init-conf.yml"
 	TemplateBaetylInitCommand = "baetyl-init-command"
 )
 
@@ -104,6 +105,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	initService.ResourceMapFunc[TemplateBaetylInitCommand] = initService.GetInitCommand
 	initService.ResourceMapFunc[TemplateCoreConfYaml] = initService.getCoreConfig
 	initService.ResourceMapFunc[templateBaetylInstallShell] = initService.getInstallShell
+	initService.ResourceMapFunc[TemplateInitConfYaml] = initService.getInitConfig
 
 	return initService, nil
 }
@@ -238,4 +240,10 @@ func (s *InitServiceImpl) getCoreConfig(ns, nodeName string, params map[string]i
 	params["Namespace"] = ns
 	params["NodeName"] = nodeName
 	return s.TemplateService.ParseTemplate(TemplateCoreConfYaml, params)
+}
+
+func (s *InitServiceImpl) getInitConfig(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
+	params["Namespace"] = ns
+	params["NodeName"] = nodeName
+	return s.TemplateService.ParseTemplate(TemplateInitConfYaml, params)
 }
