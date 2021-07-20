@@ -39,7 +39,7 @@ func LoggerHandler(c *gin.Context) {
 		log.Any("url", cc.Request.URL.Path),
 		log.Any("clientip", cc.ClientIP()),
 	)
-	if c.Request.Body != nil {
+	if c.Request.Header.Get("Content-type") == "application/json" && c.Request.Body != nil {
 		if buf, err := ioutil.ReadAll(c.Request.Body); err == nil {
 			c.Request.Body = ioutil.NopCloser(bytes.NewReader(buf[:]))
 			log.L().Info("request body",
