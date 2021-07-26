@@ -10,6 +10,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -90,6 +91,23 @@ func (c *Context) GetTrace() (k string, v string) {
 // LoadBody loads json data from body into object and set defaults
 func (c *Context) LoadBody(obj interface{}) error {
 	err := c.BindJSON(obj)
+	if err != nil {
+		return err
+	}
+	err = validate.Struct(obj)
+	if err != nil {
+		if es, ok := err.(validator.ValidationErrors); ok {
+			for _, v := range es {
+				return Error(Code(v.Tag()), Field(v.Tag(), v.Field()), Field("error", err.Error()))
+			}
+		}
+		return err
+	}
+	return utils.SetDefaults(obj)
+}
+
+func (c *Context) LoadBodyMulti(obj interface{}) error {
+	err := c.ShouldBindBodyWith(obj, binding.JSON)
 	if err != nil {
 		return err
 	}

@@ -210,6 +210,47 @@ func TestContext_LoadBody2(t *testing.T) {
 	assert.NoError(t, err2)
 }
 
+func TestContext_LoadBodyMulti(t *testing.T) {
+	var model struct {
+		Names []struct {
+			Name string `json:"name" validate:"required"`
+			Age  int    `json:"age"`
+		} `json:"names" default:"[]" validate:"dive"`
+	}
+	gCtx := &gin.Context{
+		Request: &http.Request{
+			Body: newStringReaderColser(`{
+    "names":[
+        {
+            "age":12
+        }
+    ]
+}`),
+		},
+	}
+	ctx := NewContext(gCtx)
+	err := ctx.LoadBodyMulti(&model)
+	assert.Error(t, err)
+
+	gCtx2 := &gin.Context{
+		Request: &http.Request{
+			Body: newStringReaderColser(`{
+    "names":[
+        {
+			"name": "baetyl",
+            "age":12
+        }
+    ]
+}`),
+		},
+	}
+	ctx2 := NewContext(gCtx2)
+	err2 := ctx2.LoadBodyMulti(&model)
+	assert.NoError(t, err2)
+	err3 := ctx2.LoadBodyMulti(&model)
+	assert.NoError(t, err3)
+}
+
 type stringReaderCloser struct {
 	reader *strings.Reader
 	io.Closer
