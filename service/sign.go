@@ -1,7 +1,7 @@
 package service
 
 import (
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -39,7 +39,7 @@ func (s *signService) GenToken(data map[string]interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	hashed := md5.Sum(sign)
+	hashed := sha256.Sum256(sign)
 	signStr := hex.EncodeToString(hashed[:])
 	return fmt.Sprintf("%s%s", signStr[:10], dataStr), nil
 }
