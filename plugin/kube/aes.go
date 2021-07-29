@@ -47,9 +47,11 @@ func Encrypt(plaintext, key []byte) ([]byte, error) {
 	}
 	blockSize := block.BlockSize()
 	plaintext = PKCS7Padding(plaintext, blockSize)
-	blockMode := cipher.NewCBCEncrypter(block, key[:blockSize])
-	crypted := make([]byte, len(plaintext))
-	blockMode.CryptBlocks(crypted, plaintext)
+	aesgcm, err := cipher.NewGCMWithNonceSize(block, blockSize)
+	if err != nil {
+		return nil, err
+	}
+	crypted := aesgcm.Seal(nil, key[:blockSize], plaintext, nil)
 	return crypted, nil
 }
 
@@ -58,10 +60,16 @@ func Decrypt(ciphertext, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	blockSize := block.BlockSize()
-	blockMode := cipher.NewCBCDecrypter(block, key[:blockSize])
-	origData := make([]byte, len(ciphertext))
-	blockMode.CryptBlocks(origData, ciphertext)
+	aesgcm, err := cipher.NewGCMWithNonceSize(block, blockSize)
+	if err != nil {
+		return nil, err
+	}
+	origData, err := aesgcm.Open(nil, key[:blockSize], ciphertext, nil)
+	if err != nil {
+		return nil, err
+	}
 	origData = PKCS7UnPadding(origData)
 	return origData, nil
 }

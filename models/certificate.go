@@ -2,7 +2,7 @@ package models
 
 import (
 	"bytes"
-	"crypto/sha1"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
@@ -129,7 +129,7 @@ func (r *Certificate) ParseCertInfo() error {
 }
 
 func fingerprint(data []byte) string {
-	digest := sha1.Sum(data)
+	digest := sha256.Sum256(data)
 	buf := &bytes.Buffer{}
 	for i := 0; i < len(digest); i++ {
 		if buf.Len() > 0 {
