@@ -3,14 +3,14 @@ package database
 import (
 	"database/sql"
 	"io"
+	"strings"
 	"time"
-
-	"github.com/baetyl/baetyl-go/v2/errors"
-	"github.com/baetyl/baetyl-go/v2/log"
-	"github.com/jmoiron/sqlx"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"github.com/baetyl/baetyl-go/v2/errors"
+	"github.com/baetyl/baetyl-go/v2/log"
+	"github.com/jmoiron/sqlx"
 )
 
 // DBStorage
@@ -46,6 +46,14 @@ func New() (plugin.Plugin, error) {
 }
 
 func NewDB(cfg CloudConfig) (*DB, error) {
+	if cfg.Database.Decryption {
+		decryptedURL, err := genDecryptedURL(cfg.Database.URL)
+		if decryptedURL == "" || err != nil {
+			return nil, err
+		}
+		cfg.Database.URL = decryptedURL
+	}
+
 	db, err := sqlx.Open(cfg.Database.Type, cfg.Database.URL)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -62,6 +70,26 @@ func NewDB(cfg CloudConfig) (*DB, error) {
 		cfg: cfg,
 		Log: log.With(log.Any("plugin", "database")),
 	}, nil
+}
+
+func genDecryptedURL(originURL string) (string, error) {
+	var decryptedURL string
+	decrypt, err := plugin.GetPlugin("decryption")
+	if err != nil {
+		return "", err
+	}
+	dec, ok := decrypt.(plugin.Decrypt)
+	if !ok {
+		return "", errors.New("plugin type conversion error")
+	}
+	oriPassword := originURL[strings.Index(originURL, ":")+1 : strings.LastIndex(originURL, "@")]
+	newPassword, err := dec.Decrypt(oriPassword)
+	if newPassword == "" || err != nil {
+		return "", err
+	}
+	decryptedURL = strings.Replace(originURL, oriPassword, newPassword, -1)
+
+	return decryptedURL, nil
 }
 
 // Close Close
