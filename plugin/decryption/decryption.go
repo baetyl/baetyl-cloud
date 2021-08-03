@@ -12,7 +12,7 @@ import (
 
 type Decryption struct {
 	cfg CloudConfig
-	Log *log.Logger
+	log *log.Logger
 }
 
 func init() {
@@ -26,7 +26,7 @@ func New() (plugin.Plugin, error) {
 	}
 	return &Decryption{
 		cfg: cfg,
-		Log: log.With(log.Any("plugin", "decryption")),
+		log: log.With(log.Any("plugin", "decryption")),
 	}, nil
 }
 
@@ -35,33 +35,33 @@ func (d *Decryption) Decrypt(cipherText string) (string, error) {
 	var err error
 	switch d.cfg.Decryption.Type {
 	case "sm4":
-		url, err = sm4Decryption(cipherText, d.cfg.Decryption.Sm4Key)
+		url, err = d.sm4Decryption(cipherText, d.cfg.Decryption.Sm4Key, d.cfg.Decryption.IV)
 	default:
 		url = cipherText
 	}
-	return url, err
+	return url, errors.Trace(err)
 }
 
 // 注意：sm4解密需提供密文及密钥，以hex string形式提供
-func sm4Decryption(cipherText, sm4Key string) (string, error) {
+func (d *Decryption) sm4Decryption(cipherText, sm4Key, iv string) (string, error) {
 	decCipherText, err := hex.DecodeString(cipherText)
 	if err != nil {
-		log.L().Error("fail to decode cipherText", log.Any("cipherText", cipherText), log.Any("error", err))
-		return "", err
+		d.log.Error("fail to decode cipherText", log.Any("cipherText", cipherText), log.Any("error", err))
+		return "", errors.Trace(err)
 	}
 	decKey, err := hex.DecodeString(sm4Key)
 	if err != nil {
-		log.L().Error("fail to decode sm4Key", log.Any("sm4Key", sm4Key), log.Any("error", err))
-		return "", err
+		d.log.Error("fail to decode sm4Key", log.Any("sm4Key", sm4Key), log.Any("error", err))
+		return "", errors.Trace(err)
 	}
 
-	iv := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-	_ = sm4.SetIV(iv)
+	decIV, err := hex.DecodeString(iv)
+	_ = sm4.SetIV(decIV)
 
 	plaintext, err := sm4.Sm4Cbc(decKey, decCipherText, false)
 	if err != nil {
-		log.L().Error("fail to decrypt cipherText", log.Any("decCipherText", decCipherText), log.Any("error", err))
-		return "", err
+		d.log.Error("fail to decrypt cipherText", log.Any("decCipherText", decCipherText), log.Any("error", err))
+		return "", errors.Trace(err)
 	}
 	return string(plaintext), nil
 }

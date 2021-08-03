@@ -49,7 +49,7 @@ func NewDB(cfg CloudConfig) (*DB, error) {
 	if cfg.Database.Decryption {
 		decryptedURL, err := genDecryptedURL(cfg.Database.URL)
 		if decryptedURL == "" || err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 		cfg.Database.URL = decryptedURL
 	}
@@ -76,16 +76,16 @@ func genDecryptedURL(originURL string) (string, error) {
 	var decryptedURL string
 	decrypt, err := plugin.GetPlugin("decryption")
 	if err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 	dec, ok := decrypt.(plugin.Decrypt)
 	if !ok {
-		return "", errors.New("plugin type conversion error")
+		return "", errors.Trace(errors.New("plugin type conversion error"))
 	}
 	oriPassword := originURL[strings.Index(originURL, ":")+1 : strings.LastIndex(originURL, "@")]
 	newPassword, err := dec.Decrypt(oriPassword)
 	if newPassword == "" || err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 	decryptedURL = strings.Replace(originURL, oriPassword, newPassword, -1)
 
