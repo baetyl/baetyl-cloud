@@ -5,7 +5,13 @@ import (
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
+	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
+)
+
+var (
+	ErrInvalidCsrfReferrer = errors.New("illegal referer host")
+	ErrInvalidCsrfToken    = errors.New("wrong csrf token value")
 )
 
 type defaultCsrf struct {
@@ -31,7 +37,7 @@ func New() (plugin.Plugin, error) {
 func (d *defaultCsrf) Verify(c *common.Context) error {
 	referer, err := url.Parse(c.Request.Referer())
 	if err != nil {
-		return common.Error(common.ErrRequestAccessDenied)
+		return errors.Trace(err)
 	}
 	var inList bool
 	for _, host := range d.cfg.CsrfConfig.Whitelist {
@@ -45,13 +51,13 @@ func (d *defaultCsrf) Verify(c *common.Context) error {
 		d.log.Error("referer host not in whitelist",
 			log.Any(c.GetTrace()),
 			log.Any("referer host", referer.Host))
-		return common.Error(common.ErrRequestAccessDenied)
+		return errors.Trace(ErrInvalidCsrfReferrer)
 	}
 
 	csrfCookieValue, err := c.Cookie(d.cfg.CsrfConfig.CookieName)
-	if err != nil || csrfCookieValue == "" {
-		d.log.Error("fetch csrf cookie failed", log.Any(c.GetTrace()))
-		return common.Error(common.ErrRequestAccessDenied)
+	if err != nil {
+		d.log.Error("fetch csrf cookie failed", log.Any(c.GetTrace()), log.Error(err))
+		return errors.Trace(err)
 	}
 	csrfHeaderValue := c.GetHeader(d.cfg.CsrfConfig.HeaderName)
 	if csrfCookieValue != csrfHeaderValue {
@@ -59,7 +65,7 @@ func (d *defaultCsrf) Verify(c *common.Context) error {
 			log.Any(c.GetTrace()),
 			log.Any("header value", csrfHeaderValue),
 			log.Any("cookie value", csrfCookieValue))
-		return common.Error(common.ErrRequestAccessDenied)
+		return errors.Trace(ErrInvalidCsrfToken)
 	}
 	return nil
 }
