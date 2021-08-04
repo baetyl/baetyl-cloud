@@ -19,6 +19,7 @@ import (
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/database"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/decryption"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/auth"
+	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/csrf"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/license"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/lock"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/pki"

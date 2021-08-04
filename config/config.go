@@ -43,6 +43,7 @@ type CloudConfig struct {
 		Sign       string   `yaml:"sign" json:"sign" default:"defaultsign"`
 		DM         string   `yaml:"dm" json:"dm" default:"databaseext"`
 		Tx         string   `yaml:"tx" json:"tx" default:"defaulttx"`
+		Csrf       string   `yaml:"csrf" json:"csrf" default:"defaultcsrf"`
 	} `yaml:"plugin" json:"plugin"`
 }
 
