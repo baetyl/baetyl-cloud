@@ -120,6 +120,21 @@ func (mr *MockFacadeMockRecorder) DeleteSecret(arg0, arg1 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSecret", reflect.TypeOf((*MockFacade)(nil).DeleteSecret), arg0, arg1)
 }
 
+// GetApp mocks base method
+func (m *MockFacade) GetApp(arg0, arg1, arg2 string) (*v1.Application, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetApp", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*v1.Application)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetApp indicates an expected call of GetApp
+func (mr *MockFacadeMockRecorder) GetApp(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetApp", reflect.TypeOf((*MockFacade)(nil).GetApp), arg0, arg1, arg2)
+}
+
 // UpdateApp mocks base method
 func (m *MockFacade) UpdateApp(arg0 string, arg1, arg2 *v1.Application, arg3 []v1.Configuration) (*v1.Application, error) {
 	m.ctrl.T.Helper()

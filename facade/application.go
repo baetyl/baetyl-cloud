@@ -3,16 +3,33 @@ package facade
 import (
 	"strings"
 
+	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 const (
 	FunctionConfigPrefix        = "baetyl-function-config"
 	FunctionProgramConfigPrefix = "baetyl-function-program-config"
 )
+
+func (a *facade) GetApp(ns, name, version string) (*specV1.Application, error) {
+	app, err := a.app.Get(ns, name, version)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	if app != nil && app.CronStatus == specV1.CronWait {
+		cronApp, err := a.cron.GetCron(name, ns)
+		if err == nil {
+			app.Selector = cronApp.Selector
+		}
+	}
+	return app, nil
+}
 
 func (a *facade) CreateApp(ns string, baseApp, app *specV1.Application, configs []specV1.Configuration) (*specV1.Application, error) {
 	tx, errTx := a.txFactory.BeginTx()
@@ -35,6 +52,19 @@ func (a *facade) CreateApp(ns string, baseApp, app *specV1.Application, configs 
 		return nil, err
 	}
 
+	if app.CronStatus == specV1.CronWait {
+		err = a.cron.CreateCron(&models.Cron{
+			Name: app.Name,
+			Namespace: app.Namespace,
+			Selector: app.Selector,
+			CronTime: app.CronTime,
+		})
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		app.Selector = ""
+	}
+
 	app, err = a.app.CreateWithBase(tx, ns, app, baseApp)
 	if err != nil {
 		return nil, err
@@ -52,6 +82,19 @@ func (a *facade) UpdateApp(ns string, oldApp, app *specV1.Application, configs [
 	err = a.updateGenConfigsOfFunctionApp(nil, ns, configs)
 	if err != nil {
 		return nil, err
+	}
+
+	if app.CronStatus == specV1.CronWait {
+		err = a.cron.UpdateCron(&models.Cron{
+			Name: app.Name,
+			Namespace: app.Namespace,
+			Selector: app.Selector,
+			CronTime: app.CronTime,
+		})
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		app.Selector = ""
 	}
 
 	app, err = a.app.Update(ns, app)
@@ -77,6 +120,13 @@ func (a *facade) UpdateApp(ns string, oldApp, app *specV1.Application, configs [
 
 func (a *facade) DeleteApp(ns, name string, app *specV1.Application) error {
 	var err error
+	if app.CronStatus == specV1.CronWait {
+		err = a.cron.DeleteCron(name, ns)
+		if err != nil {
+			return errors.Trace(err)
+		}
+	}
+
 	if err = a.app.Delete(ns, name, ""); err != nil {
 		return err
 	}

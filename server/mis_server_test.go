@@ -34,6 +34,7 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	c.Plugin.Task = common.RandString(9)
 	c.Plugin.Locker = common.RandString(9)
 	c.Plugin.Tx = common.RandString(9)
+	c.Plugin.Cron = common.RandString(9)
 	mockCtl := gomock.NewController(t)
 
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
@@ -118,6 +119,10 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	mockTx := mockPlugin.NewMockTransactionFactory(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Tx, func() (plugin.Plugin, error) {
 		return mockTx, nil
+	})
+	mockCronApp := mockPlugin.NewMockCron(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Cron, func() (plugin.Plugin, error) {
+		return mockCronApp, nil
 	})
 	mockAPI, err := api.NewAPI(c)
 	assert.NoError(t, err)

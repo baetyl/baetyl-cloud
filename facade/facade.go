@@ -1,6 +1,7 @@
 package facade
 
 import (
+	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
@@ -12,6 +13,7 @@ import (
 //go:generate mockgen -destination=../mock/facade/facade.go -package=facade github.com/baetyl/baetyl-cloud/v2/facade Facade
 
 type Facade interface {
+	GetApp(ns, name, version string) (*specV1.Application, error)
 	CreateApp(ns string, baseApp, app *specV1.Application, configs []specV1.Configuration) (*specV1.Application, error)
 	UpdateApp(ns string, oldApp, app *specV1.Application, configs []specV1.Configuration) (*specV1.Application, error)
 	DeleteApp(ns, name string, app *specV1.Application) error
@@ -31,6 +33,7 @@ type facade struct {
 	config    service.ConfigService
 	secret    service.SecretService
 	index     service.IndexService
+	cron      service.CronService
 	txFactory plugin.TransactionFactory
 	log       *log.Logger
 }
@@ -53,6 +56,10 @@ func NewFacade(config *config.CloudConfig) (Facade, error) {
 		return nil, err
 	}
 	index, err := service.NewIndexService(config)
+	cron, err := service.NewCronService(config)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +74,7 @@ func NewFacade(config *config.CloudConfig) (Facade, error) {
 		config:    cfg,
 		secret:    secret,
 		index:     index,
+		cron:      cron,
 		txFactory: tx.(plugin.TransactionFactory),
 		log:       log.L().With(log.Any("level", "facade")),
 	}, nil

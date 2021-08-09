@@ -15,6 +15,7 @@ type CloudConfig struct {
 	LogInfo     log.Config `yaml:"logger" json:"logger"`
 	Task        Task       `yaml:"task" json:"task"`
 	Lock        Lock       `yaml:"lock" json:"lock"`
+	CronJobs    []CronJob  `yaml:"cronJobs" json:"cronJobs" default:"[]"`
 	Cache       struct {
 		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
 	} `yaml:"cache" json:"cache"`
@@ -43,8 +44,14 @@ type CloudConfig struct {
 		Sign       string   `yaml:"sign" json:"sign" default:"defaultsign"`
 		DM         string   `yaml:"dm" json:"dm" default:"databaseext"`
 		Tx         string   `yaml:"tx" json:"tx" default:"defaulttx"`
+		Cron       string   `yaml:"cron" json:"cron" default:"database"`
 		Csrf       string   `yaml:"csrf" json:"csrf" default:"defaultcsrf"`
 	} `yaml:"plugin" json:"plugin"`
+}
+
+type CronJob struct {
+	CronName string `yaml:"cronName" json:"cronName"`
+	CronGap  string `yaml:"cronGap" json:"cronGap" default:"20s"`
 }
 
 type MisServer struct {

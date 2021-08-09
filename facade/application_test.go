@@ -2,12 +2,14 @@ package facade
 
 import (
 	"testing"
+	"time"
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func TestCreateApplication(t *testing.T) {
@@ -18,6 +20,7 @@ func TestCreateApplication(t *testing.T) {
 		app:       mAppFacade.sApp,
 		config:    mAppFacade.sConfig,
 		index:     mAppFacade.sIndex,
+		cron:      mAppFacade.sCron,
 		txFactory: mAppFacade.txFactory,
 	}
 	mAppFacade.txFactory.EXPECT().BeginTx().Return(nil, nil).AnyTimes()
@@ -44,6 +47,8 @@ func TestCreateApplication(t *testing.T) {
 	_, err = appFacade.CreateApp(ns, app, app, configs)
 	assert.Error(t, err, unknownErr)
 
+	app.CronStatus = specV1.CronWait
+	mAppFacade.sCron.EXPECT().CreateCron(gomock.Any()).Return(nil)
 	mAppFacade.txFactory.EXPECT().Commit(nil).Return().AnyTimes()
 	mAppFacade.sNode.EXPECT().UpdateNodeAppVersion(nil, ns, gomock.Any()).Return(nil, nil)
 	mAppFacade.sIndex.EXPECT().RefreshNodesIndexByApp(nil, ns, gomock.Any(), gomock.Any()).Return(nil)
@@ -59,6 +64,7 @@ func TestDeleteApplication(t *testing.T) {
 		app:       mAppFacade.sApp,
 		config:    mAppFacade.sConfig,
 		index:     mAppFacade.sIndex,
+		cron:      mAppFacade.sCron,
 		txFactory: mAppFacade.txFactory,
 	}
 	ns := "baetyl-cloud"
@@ -129,6 +135,8 @@ func TestDeleteApplication(t *testing.T) {
 	err = appFacade.DeleteApp(ns, app.Name, app)
 	assert.Error(t, err, unknownErr)
 
+	app.CronStatus = specV1.CronWait
+	mAppFacade.sCron.EXPECT().DeleteCron(app.Name, ns).Return(nil)
 	mAppFacade.sNode.EXPECT().DeleteNodeAppVersion(nil, ns, app).Return(nil, nil).Times(1)
 	mAppFacade.sIndex.EXPECT().RefreshNodesIndexByApp(nil, ns, app.Name, gomock.Any()).Return(nil).AnyTimes()
 	mAppFacade.sConfig.EXPECT().Delete(nil, ns, gomock.Any()).Return(unknownErr)
@@ -144,6 +152,7 @@ func TestUpdateApplication(t *testing.T) {
 		app:       mAppFacade.sApp,
 		config:    mAppFacade.sConfig,
 		index:     mAppFacade.sIndex,
+		cron:      mAppFacade.sCron,
 		txFactory: mAppFacade.txFactory,
 	}
 
@@ -220,9 +229,41 @@ func TestUpdateApplication(t *testing.T) {
 	_, err = appFacade.UpdateApp(ns, app, app, configs)
 	assert.Error(t, err, unknownErr)
 
+	app.CronStatus = specV1.CronWait
+	mAppFacade.sCron.EXPECT().UpdateCron(gomock.Any()).Return(nil)
 	mAppFacade.sNode.EXPECT().UpdateNodeAppVersion(nil, ns, gomock.Any()).Return(nil, nil).AnyTimes()
 	mAppFacade.sIndex.EXPECT().RefreshNodesIndexByApp(nil, ns, app.Name, gomock.Any()).Return(nil).AnyTimes()
 	mAppFacade.sConfig.EXPECT().Delete(nil, ns, gomock.Any()).Return(nil).AnyTimes()
 	_, err = appFacade.UpdateApp(ns, app, app, configs)
+	assert.NoError(t, err)
+}
+
+func TestGetApplication(t *testing.T) {
+	mAppFacade, mCtl := InitMockEnvironment(t)
+	defer mCtl.Finish()
+	appFacade := &facade{
+		app:     mAppFacade.sApp,
+		cron:    mAppFacade.sCron,
+	}
+	name, ns := "baetyl", "cloud"
+	mAppFacade.sApp.EXPECT().Get(ns, name, "").Return(nil, unknownErr).Times(1)
+	_, err := appFacade.GetApp(ns, name, "")
+	assert.Error(t, err, unknownErr)
+
+	app := &specV1.Application{
+		Namespace: ns,
+		Name: name,
+		CronStatus: specV1.CronWait,
+		CronTime: time.Now(),
+	}
+	cronApp := &models.Cron{
+		Namespace: ns,
+		Name: name,
+		Selector: "",
+		CronTime: time.Now(),
+	}
+	mAppFacade.sApp.EXPECT().Get(ns, name, "").Return(app, nil).Times(1)
+	mAppFacade.sCron.EXPECT().GetCron(name, ns).Return(cronApp, nil).Times(1)
+	_, err = appFacade.GetApp(ns, name, "")
 	assert.NoError(t, err)
 }
