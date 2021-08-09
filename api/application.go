@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/errors"
@@ -29,7 +30,7 @@ const (
 // GetApplication get a application
 func (api *API) GetApplication(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	app, err := api.App.Get(ns, n, "")
+	app, err := api.Facade.GetApp(ns, n, "")
 	if err != nil {
 		return nil, err
 	}
@@ -131,6 +132,10 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	if checkIsSysResources(oldApp.Labels) &&
 		(oldApp.Selector != appView.Selector || !reflect.DeepEqual(oldApp.Labels, appView.Labels) || !appView.System) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "selector，labels or system field can't be modified of sys apps"))
+	}
+
+	if appView.CronStatus >= specV1.CronWait && oldApp.CronStatus != specV1.CronWait {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "failed to add cron, can't set up a cron job which has been deployed"))
 	}
 
 	appView.Version = oldApp.Version
@@ -608,6 +613,9 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 				return err
 			}
 		}
+	}
+	if app.CronStatus == specV1.CronWait && app.CronTime.Before(time.Now()) {
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "failed to add cron job, time should be set after now"))
 	}
 	return nil
 }

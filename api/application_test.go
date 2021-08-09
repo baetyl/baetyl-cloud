@@ -182,6 +182,8 @@ func TestGetInvisibleApplication(t *testing.T) {
 	sApp := ms.NewMockApplicationService(mockCtl)
 	sConfig := ms.NewMockConfigService(mockCtl)
 	sSecret := ms.NewMockSecretService(mockCtl)
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 	api.AppCombinedService = &service.AppCombinedService{
 		App:    sApp,
 		Config: sConfig,
@@ -246,7 +248,7 @@ func TestGetInvisibleApplication(t *testing.T) {
 			},
 		},
 	}
-	sApp.EXPECT().Get(mApp.Namespace, "cba", "").Return(mApp, nil).Times(1)
+	fApp.EXPECT().GetApp(mApp.Namespace, "cba", "").Return(mApp, nil).Times(1)
 	req, _ := http.NewRequest(http.MethodGet, "/v1/apps/cba", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -265,9 +267,11 @@ func TestGetContainerApplication(t *testing.T) {
 		Config: sConfig,
 		Secret: sSecret,
 	}
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 
 	mApp := getMockContainerApp()
-	sApp.EXPECT().Get(mApp.Namespace, "cba", "").Return(nil, errors.New("err")).Times(1)
+	fApp.EXPECT().GetApp(mApp.Namespace, "cba", "").Return(nil, errors.New("err")).Times(1)
 	req, _ := http.NewRequest(http.MethodGet, "/v1/apps/cba", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -280,7 +284,7 @@ func TestGetContainerApplication(t *testing.T) {
 			specV1.SecretLabel: specV1.SecretRegistry,
 		},
 	}
-	sApp.EXPECT().Get(mApp.Namespace, mApp.Name, "").Return(mApp, nil).Times(1)
+	fApp.EXPECT().GetApp(mApp.Namespace, mApp.Name, "").Return(mApp, nil).Times(1)
 	sSecret.EXPECT().Get(mApp.Namespace, secret.Name, "").Return(secret, nil).Times(1)
 
 	// 200
@@ -306,10 +310,12 @@ func TestGetFunctionApplication(t *testing.T) {
 		Config: sConfig,
 		Secret: sSecret,
 	}
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
 
 	mApp := getMockFunctionApp()
 
-	sApp.EXPECT().Get(mApp.Namespace, "cba", "").Return(nil, errors.New("err")).Times(1)
+	fApp.EXPECT().GetApp(mApp.Namespace, "cba", "").Return(nil, errors.New("err")).Times(1)
 	req, _ := http.NewRequest(http.MethodGet, "/v1/apps/cba", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -331,7 +337,7 @@ func TestGetFunctionApplication(t *testing.T) {
 			"service.yml": string(data),
 		},
 	}
-	sApp.EXPECT().Get(mApp.Namespace, mApp.Name, "").Return(mApp, nil).Times(1)
+	fApp.EXPECT().GetApp(mApp.Namespace, mApp.Name, "").Return(mApp, nil).Times(1)
 	sConfig.EXPECT().Get(mApp.Namespace, "baetyl-function-app-service-xxxxxxxxx", "").Return(config, nil).Times(1)
 	sConfig.EXPECT().Get(mApp.Namespace, "baetyl-function-program-config-x3-xs3-uwredcfxb", "").Return(config, nil).Times(1)
 

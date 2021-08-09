@@ -5,16 +5,12 @@ import (
 
 	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/log"
+	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/baetyl/baetyl-cloud/v2/api"
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"github.com/baetyl/baetyl-cloud/v2/server"
-	"github.com/baetyl/baetyl-cloud/v2/task"
-
-	_ "github.com/go-sql-driver/mysql"
-
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/awss3"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/database"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/decryption"
@@ -28,6 +24,7 @@ import (
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/kube"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/link/httplink"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/sign"
+	"github.com/baetyl/baetyl-cloud/v2/server"
 )
 
 func main() {
@@ -85,12 +82,7 @@ func main() {
 		go as.Run()
 		defer as.Close()
 		ctx.Log().Info("init  server starting")
-		tm, tErr := task.NewTaskManager(&cfg)
-		if tErr != nil {
-			return err
-		}
-		task.RegisterNamespaceProcessor(&cfg)
-		tm.Start()
+
 		ctx.Wait()
 		return nil
 	})

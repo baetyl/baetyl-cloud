@@ -56,12 +56,14 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.DM = "databaseext"
 	expect.Plugin.Tx = "defaulttx"
 	expect.Plugin.Sign = "defaultsign"
+	expect.Plugin.Cron = "database"
 	expect.Plugin.Csrf = "defaultcsrf"
 
 	expect.Template.Path = "/etc/baetyl/templates"
 
 	expect.Cache.ExpirationDuration = time.Minute * 10
 
+	expect.CronJobs = []CronJob{}
 	expect.Task.ScheduleTime = 30
 	expect.Task.ConcurrentNum = 10
 	expect.Task.QueueLength = 100

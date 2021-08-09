@@ -21,6 +21,8 @@ type ApplicationView struct {
 	Description       string            `json:"description,omitempty"`
 	System            bool              `json:"system,omitempty"`
 	Registries        []RegistryView    `json:"registries,omitempty"`
+	CronStatus        specV1.CronStatusCode `json:"cronStatus,omitempty" default:"0"`
+	CronTime          time.Time         `json:"cronTime,omitempty"`
 }
 
 // VolumeView volume view
@@ -34,17 +36,19 @@ type VolumeView struct {
 }
 
 type AppItem struct {
-	Name              string            `json:"name,omitempty" validate:"omitempty,resourceName"`
-	Mode              string            `json:"mode,omitempty" default:"kube"`
-	Type              string            `json:"type,omitempty" default:"container"`
-	Labels            map[string]string `json:"labels,omitempty"`
-	Selector          string            `json:"selector"`
-	NodeSelector      string            `json:"nodeSelector"`
-	Version           string            `json:"version,omitempty"`
-	Namespace         string            `json:"namespace,omitempty"`
-	CreationTimestamp time.Time         `json:"createTime,omitempty"`
-	Description       string            `json:"description,omitempty"`
-	System            bool              `json:"system,omitempty"`
+	Name              string                `json:"name,omitempty" validate:"omitempty,resourceName"`
+	Mode              string                `json:"mode,omitempty" default:"kube"`
+	Type              string                `json:"type,omitempty" default:"container"`
+	Labels            map[string]string     `json:"labels,omitempty"`
+	Selector          string                `json:"selector"`
+	NodeSelector      string                `json:"nodeSelector"`
+	Version           string                `json:"version,omitempty"`
+	Namespace         string                `json:"namespace,omitempty"`
+	CreationTimestamp time.Time             `json:"createTime,omitempty"`
+	Description       string                `json:"description,omitempty"`
+	System            bool                  `json:"system,omitempty"`
+	CronStatus        specV1.CronStatusCode `json:"cronStatus,omitempty" default:"0"`
+	CronTime          time.Time             `json:"cronTime,omitempty"`
 }
 
 // ApplicationList app List
