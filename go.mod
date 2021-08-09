@@ -3,12 +3,14 @@ module github.com/baetyl/baetyl-cloud/v2
 go 1.13
 
 require (
+	github.com/ZZMarquis/gm v1.3.2
 	github.com/aws/aws-sdk-go v1.32.8
 	github.com/baetyl/baetyl-go/v2 v2.1.51-0.20210805112516-5a838c948c26
 	github.com/gin-contrib/cache v1.1.0
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/mock v1.3.1
+	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/jinzhu/copier v0.1.0
 	github.com/jmoiron/sqlx v1.2.0
@@ -17,9 +19,11 @@ require (
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.5.1
-	github.com/tjfoc/gmsm v1.4.1
+	golang.org/x/crypto v0.0.0-20201012173705-84dcc777aaee // indirect
+	golang.org/x/net v0.0.0-20201010224723-4f7140c49acb // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
+	google.golang.org/grpc v1.31.0 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gopkg.in/yaml.v2 v2.2.8
