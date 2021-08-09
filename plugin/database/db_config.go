@@ -3,7 +3,7 @@ package database
 // CloudConfig baetyl-cloud config
 type CloudConfig struct {
 	Database struct {
-		Decryption      bool   `yaml:"decryption" json:"decryption"  default:false`
+		Decryption      bool   `yaml:"decryption" json:"decryption"`
 		Type            string `yaml:"type" json:"type" validate:"nonzero"`
 		URL             string `yaml:"url" json:"url" validate:"nonzero"`
 		MaxConns        int    `yaml:"maxConns" json:"maxConns" default:20`

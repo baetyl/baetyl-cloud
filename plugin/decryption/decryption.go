@@ -46,25 +46,25 @@ func (d *Decryption) Decrypt(cipherText string) (string, error) {
 // 注意：sm4解密需提供密文、IV分量及密钥保护分量，密钥加密分量，以hex string形式提供
 func (d *Decryption) sm4Decryption(cipherText, sm4EncKey, iv string, sm4ProtectKey []string) (string, error) {
 	if cipherText == "" || sm4EncKey == "" || iv == "" || sm4ProtectKey == nil {
-		d.log.Error("not enough param provided")
-		return "", errors.Trace(errors.New("not enough param provided"))
+		d.log.Error("failed to decrypt, not enough param provided")
+		return "", errors.Trace(errors.New("failed to decrypt, not enough param provided"))
 	}
 	decCipherText, err := hex.DecodeString(cipherText)
 	if err != nil {
-		d.log.Error("fail to decode cipherText", log.Any("cipherText", cipherText), log.Any("error", err))
+		d.log.Error("failed to decode cipherText", log.Any("cipherText", cipherText), log.Any("error", err))
 		return "", errors.Trace(err)
 	}
 
 	decIV, err := hex.DecodeString(iv)
 	if err != nil {
-		d.log.Error("fail to decode iv", log.Any("iv", iv), log.Any("error", err))
+		d.log.Error("failed to decode iv", log.Any("iv", iv), log.Any("error", err))
 		return "", errors.Trace(err)
 	}
 	var proKey []byte
 	for i, p := range sm4ProtectKey {
 		decP, err := hex.DecodeString(p)
 		if err != nil {
-			d.log.Error("fail to decode sm4ProtectKey", log.Any("sm4ProtectKey", sm4ProtectKey), log.Any("error", err))
+			d.log.Error("failed to decode sm4ProtectKey", log.Any("sm4ProtectKey", sm4ProtectKey), log.Any("error", err))
 			return "", errors.Trace(err)
 		}
 		if i == 0 {
@@ -72,26 +72,26 @@ func (d *Decryption) sm4Decryption(cipherText, sm4EncKey, iv string, sm4ProtectK
 		} else {
 			proKey = XORBytes(proKey, decP)
 			if proKey == nil {
-				d.log.Error("fail to xor sm4ProtectKey", log.Any("error", err))
+				d.log.Error("failed to xor sm4ProtectKey", log.Any("error", err))
 				return "", errors.Trace(err)
 			}
 		}
 	}
 	encKey, err := hex.DecodeString(sm4EncKey)
 	if err != nil {
-		d.log.Error("fail to decode sm4EncKey", log.Any("sm4Key", sm4EncKey), log.Any("error", err))
+		d.log.Error("failed to decode sm4EncKey", log.Any("sm4Key", sm4EncKey), log.Any("error", err))
 		return "", errors.Trace(err)
 	}
 
 	decKey, err := sm4.ECBDecrypt(proKey, encKey)
 	if err != nil {
-		d.log.Error("fail to decode proKey", log.Any("proKey", proKey), log.Any("error", err))
+		d.log.Error("failed to decode proKey", log.Any("proKey", proKey), log.Any("error", err))
 		return "", errors.Trace(err)
 	}
 
 	plaintext, err := sm4.CBCDecrypt(decKey, decIV, decCipherText)
 	if err != nil {
-		d.log.Error("fail to decrypt cipherText", log.Any("decCipherText", decCipherText), log.Any("error", err))
+		d.log.Error("failed to decrypt cipherText", log.Any("decCipherText", decCipherText), log.Any("error", err))
 		return "", errors.Trace(err)
 	}
 	return string(util.PKCS5UnPadding(plaintext)), nil
