@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"errors"
 	"io"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -25,6 +26,10 @@ const (
 	PermissionResourceApp    = "app"
 	PermissionResourceNode   = "node"
 	PermissionResourceBatch  = "batch"
+)
+
+var (
+	ErrGetAuthorizedUserInfo = errors.New("failed to get authorized user info")
 )
 
 type PermissionRequest struct {

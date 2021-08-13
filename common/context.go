@@ -21,7 +21,24 @@ type Context struct {
 }
 
 type User struct {
-	ID string
+	ID   string
+	Name string
+}
+
+type UserInfo struct {
+	User   User
+	Roles  []Role
+	Domain Domain
+}
+
+type Role struct {
+	ID   string
+	Type string
+}
+
+type Domain struct {
+	ID   string
+	Name string
 }
 
 // NewContext create a new context with gin context
@@ -56,6 +73,20 @@ func (c *Context) GetUser() User {
 		return User{}
 	}
 	return user.(User)
+}
+
+// SetUser sets user info into context
+func (c *Context) SetUserInfo(info UserInfo) {
+	c.Set("userInfo", info)
+}
+
+// GetUser gets user info from context if exists
+func (c *Context) GetUserInfo() UserInfo {
+	info, ok := c.Get("userInfo")
+	if !ok {
+		return UserInfo{}
+	}
+	return info.(UserInfo)
 }
 
 // SetName sets name into context

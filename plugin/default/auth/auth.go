@@ -26,11 +26,15 @@ func New() (plugin.Plugin, error) {
 
 func (d *defaultAuth) Authenticate(c *common.Context) error {
 	c.SetNamespace(d.cfg.DefaultAuth.Namespace)
+	c.SetUserInfo(common.UserInfo{
+		User:   common.User{ID: d.cfg.DefaultAuth.Namespace, Name: d.cfg.DefaultAuth.Namespace},
+		Domain: common.Domain{ID: d.cfg.DefaultAuth.Namespace, Name: d.cfg.DefaultAuth.Namespace},
+	})
 	return nil
 }
 
 func (d *defaultAuth) AuthAndVerify(c *common.Context, pr *plugin.PermissionRequest) error {
-	return nil
+	return d.Authenticate(c)
 }
 
 func (d *defaultAuth) Verify(c *common.Context, pr *plugin.PermissionRequest) error {
