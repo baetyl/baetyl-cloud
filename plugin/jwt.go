@@ -18,7 +18,7 @@ type JWT interface {
 }
 
 type JWTInfo struct {
-	Token      string
-	Expire     time.Time
-	MaxRefresh time.Time
+	Token      string    `json:"token"`
+	Expire     time.Time `json:"expire"`
+	MaxRefresh time.Time `json:"maxRefresh"`
 }
