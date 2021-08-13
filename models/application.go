@@ -7,22 +7,22 @@ import (
 )
 
 type ApplicationView struct {
-	Name              string            `json:"name,omitempty" validate:"resourceName"`
-	Mode              string            `json:"mode,omitempty" default:"kube"`
-	Type              string            `json:"type,omitempty" default:"container"`
-	Labels            map[string]string `json:"labels,omitempty"`
-	Namespace         string            `json:"namespace,omitempty"`
-	CreationTimestamp time.Time         `json:"createTime,omitempty"`
-	Version           string            `json:"version,omitempty"`
-	Selector          string            `json:"selector,omitempty"`
-	NodeSelector      string            `json:"nodeSelector,omitempty"`
-	Services          []ServiceView     `json:"services,omitempty" validate:"dive"`
-	Volumes           []VolumeView      `json:"volumes,omitempty" validate:"dive"`
-	Description       string            `json:"description,omitempty"`
-	System            bool              `json:"system,omitempty"`
-	Registries        []RegistryView    `json:"registries,omitempty"`
-	CronStatus        specV1.CronStatusCode `json:"cronStatus,omitempty" default:"0"`
-	CronTime          time.Time         `json:"cronTime,omitempty"`
+	Name              string                `json:"name,omitempty" validate:"resourceName"`
+	Mode              string                `json:"mode,omitempty" default:"kube"`
+	Type              string                `json:"type,omitempty" default:"container"`
+	Labels            map[string]string     `json:"labels,omitempty"`
+	Namespace         string                `json:"namespace,omitempty"`
+	CreationTimestamp time.Time             `json:"createTime,omitempty"`
+	Version           string                `json:"version,omitempty"`
+	Selector          string                `json:"selector,omitempty"`
+	NodeSelector      string                `json:"nodeSelector,omitempty"`
+	Services          []ServiceView         `json:"services,omitempty" validate:"dive"`
+	Volumes           []VolumeView          `json:"volumes,omitempty" validate:"dive"`
+	Description       string                `json:"description,omitempty"`
+	System            bool                  `json:"system,omitempty"`
+	Registries        []RegistryView        `json:"registries,omitempty"`
+	CronStatus        specV1.CronStatusCode `json:"cronStatus" default:"0"`
+	CronTime          time.Time             `json:"cronTime,omitempty"`
 }
 
 // VolumeView volume view
