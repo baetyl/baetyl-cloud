@@ -230,7 +230,17 @@ func TestUpdateApplication(t *testing.T) {
 	assert.Error(t, err, unknownErr)
 
 	app.CronStatus = specV1.CronWait
-	mAppFacade.sCron.EXPECT().UpdateCron(gomock.Any()).Return(nil)
+	appNew := &specV1.Application{
+		Namespace:  "baetyl-cloud",
+		Name:       "abc",
+		Type:       common.FunctionApp,
+		CronStatus: specV1.CronNotSet,
+	}
+	mAppFacade.sCron.EXPECT().UpdateCron(gomock.Any()).Return(nil).AnyTimes()
+	mAppFacade.sCron.EXPECT().DeleteCron(app.Name, ns).Return(unknownErr).Times(1)
+	_, err = appFacade.UpdateApp(ns, app, appNew, configs)
+	assert.Error(t, err, unknownErr)
+
 	mAppFacade.sNode.EXPECT().UpdateNodeAppVersion(nil, ns, gomock.Any()).Return(nil, nil).AnyTimes()
 	mAppFacade.sIndex.EXPECT().RefreshNodesIndexByApp(nil, ns, app.Name, gomock.Any()).Return(nil).AnyTimes()
 	mAppFacade.sConfig.EXPECT().Delete(nil, ns, gomock.Any()).Return(nil).AnyTimes()

@@ -96,6 +96,12 @@ func (a *facade) UpdateApp(ns string, oldApp, app *specV1.Application, configs [
 		}
 		app.Selector = ""
 	}
+	if oldApp.CronStatus == specV1.CronWait && app.CronStatus == specV1.CronNotSet {
+		err = a.cron.DeleteCron(app.Name, ns)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+	}
 
 	app, err = a.app.Update(ns, app)
 	if err != nil {
