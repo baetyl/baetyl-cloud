@@ -58,6 +58,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Sign = "defaultsign"
 	expect.Plugin.Cron = "database"
 	expect.Plugin.Csrf = "defaultcsrf"
+	expect.Plugin.JWT = "defaultjwt"
 
 	expect.Template.Path = "/etc/baetyl/templates"
 
