@@ -36,6 +36,12 @@ func init() {
 	plugin.RegisterFactory("database", New)
 }
 
+var (
+	HookSQL = func(s string) string {
+		return s
+	}
+)
+
 // New New
 func New() (plugin.Plugin, error) {
 	var cfg CloudConfig
@@ -121,6 +127,7 @@ func (d *DB) Transact(handler func(*sqlx.Tx) error) (err error) {
 }
 
 func (d *DB) Exec(tx *sqlx.Tx, sql string, args ...interface{}) (res sql.Result, err error) {
+	sql = HookSQL(sql)
 	if tx == nil {
 		res, err = d.db.Exec(sql, args...)
 	} else {
@@ -131,6 +138,7 @@ func (d *DB) Exec(tx *sqlx.Tx, sql string, args ...interface{}) (res sql.Result,
 }
 
 func (d *DB) Query(tx *sqlx.Tx, sql string, data interface{}, args ...interface{}) (err error) {
+	sql = HookSQL(sql)
 	if tx == nil {
 		err = d.db.Select(data, sql, args...)
 	} else {
