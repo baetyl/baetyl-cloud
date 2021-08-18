@@ -134,8 +134,10 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "selector，labels or system field can't be modified of sys apps"))
 	}
 
-	if appView.CronStatus >= specV1.CronWait && oldApp.CronStatus != specV1.CronWait {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "failed to add cron, can't set up a cron job which has been deployed"))
+	if appView.CronStatus != oldApp.CronStatus {
+		if oldApp.CronStatus != specV1.CronWait || appView.CronStatus != specV1.CronNotSet {
+			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "failed to add cron, can't set up a cron job which has been deployed"))
+		}
 	}
 
 	appView.Version = oldApp.Version
