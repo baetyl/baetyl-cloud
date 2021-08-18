@@ -7,6 +7,10 @@ import (
 	uuid2 "github.com/google/uuid"
 )
 
+const (
+	JSAccelerator = "jetson"
+)
+
 // TODO: use uuid v4
 
 // UUIDPrune generate uuid without '-'
@@ -62,7 +66,7 @@ func UpdateSysAppByAccelerator(accelerator string, sysApps []string) []string {
 			break
 		}
 	}
-	if accelerator == v1.NVAccelerator {
+	if accelerator == v1.NVAccelerator || accelerator == JSAccelerator {
 		if !found {
 			sysApps = append(sysApps, v1.BaetylGPUMetrics)
 		}
