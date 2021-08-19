@@ -14,4 +14,5 @@ type Node interface {
 	UpdateNode(namespace string, node *v1.Node) (*v1.Node, error)
 	DeleteNode(namespace, name string) error
 	ListNode(tx interface{}, namespace string, listOptions *models.ListOptions) (*models.NodeList, error)
+	CountAllNode(tx interface{}) (int, error)
 }

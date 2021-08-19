@@ -34,6 +34,21 @@ func (m *MockNode) EXPECT() *MockNodeMockRecorder {
 	return m.recorder
 }
 
+// CountAllNode mocks base method
+func (m *MockNode) CountAllNode(arg0 interface{}) (int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountAllNode", arg0)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountAllNode indicates an expected call of CountAllNode
+func (mr *MockNodeMockRecorder) CountAllNode(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountAllNode", reflect.TypeOf((*MockNode)(nil).CountAllNode), arg0)
+}
+
 // CreateNode mocks base method
 func (m *MockNode) CreateNode(arg0 interface{}, arg1 string, arg2 *v1.Node) (*v1.Node, error) {
 	m.ctrl.T.Helper()
