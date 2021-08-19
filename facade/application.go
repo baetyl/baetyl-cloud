@@ -54,10 +54,10 @@ func (a *facade) CreateApp(ns string, baseApp, app *specV1.Application, configs 
 
 	if app.CronStatus == specV1.CronWait {
 		err = a.cron.CreateCron(&models.Cron{
-			Name: app.Name,
+			Name:      app.Name,
 			Namespace: app.Namespace,
-			Selector: app.Selector,
-			CronTime: app.CronTime,
+			Selector:  app.Selector,
+			CronTime:  app.CronTime,
 		})
 		if err != nil {
 			return nil, errors.Trace(err)
@@ -86,10 +86,10 @@ func (a *facade) UpdateApp(ns string, oldApp, app *specV1.Application, configs [
 
 	if app.CronStatus == specV1.CronWait {
 		err = a.cron.UpdateCron(&models.Cron{
-			Name: app.Name,
+			Name:      app.Name,
 			Namespace: app.Namespace,
-			Selector: app.Selector,
-			CronTime: app.CronTime,
+			Selector:  app.Selector,
+			CronTime:  app.CronTime,
 		})
 		if err != nil {
 			return nil, errors.Trace(err)
