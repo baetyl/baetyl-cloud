@@ -138,6 +138,8 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 		if oldApp.CronStatus != specV1.CronWait || appView.CronStatus != specV1.CronNotSet {
 			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "failed to add cron, can't set up a cron job which has been deployed"))
 		}
+	} else {
+		appView.CronTime = oldApp.CronTime
 	}
 
 	appView.Version = oldApp.Version

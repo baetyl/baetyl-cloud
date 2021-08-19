@@ -201,6 +201,8 @@ func (api *API) listAppByNames(namespace string, appNames []string) (*models.App
 			NodeSelector:      app.NodeSelector,
 			CreationTimestamp: app.CreationTimestamp,
 			Description:       app.Description,
+			CronStatus:        app.CronStatus,
+			CronTime:          app.CronTime,
 		})
 	}
 	return result, nil
