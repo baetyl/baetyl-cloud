@@ -35,10 +35,10 @@ func TestCronService(t *testing.T) {
 
 	n, ns := "baetyl", "cloud"
 	cronEntity := &models.Cron{
-		Name: n,
+		Name:      n,
 		Namespace: ns,
-		Selector: "baetyl-node-name=node1",
-		CronTime: time.Now(),
+		Selector:  "baetyl-node-name=node1",
+		CronTime:  time.Now(),
 	}
 
 	mCron.EXPECT().GetCron(n, ns).Return(cronEntity, nil)

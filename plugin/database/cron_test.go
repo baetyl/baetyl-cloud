@@ -47,10 +47,10 @@ func TestCronApp(t *testing.T) {
 
 	name, ns, selector := "baetyl", "cloud", "baetyl-node-name=node1"
 	cronApp := &models.Cron{
-		Name: name,
+		Name:      name,
 		Namespace: ns,
-		Selector: selector,
-		CronTime: time.Now(),
+		Selector:  selector,
+		CronTime:  time.Now(),
 	}
 
 	err = db.CreateCron(cronApp)

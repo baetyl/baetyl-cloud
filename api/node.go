@@ -224,16 +224,16 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		}
 	}
 
+	node, err = api.Node.Update(c.GetNamespace(), node)
+	if err != nil {
+		return nil, err
+	}
+
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
 		err = api.UpdateNodeOptionedSysApps(oldNode, node.SysApps)
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	node, err = api.Node.Update(c.GetNamespace(), node)
-	if err != nil {
-		return nil, err
 	}
 
 	view, err := api.ToNodeView(node)
