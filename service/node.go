@@ -27,6 +27,8 @@ type NodeService interface {
 	Get(tx interface{}, namespace, name string) (*specV1.Node, error)
 	List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error)
 	Count(namespace string) (map[string]int, error)
+	CountAll() (map[string]int, error)
+
 	Create(tx interface{}, namespace string, node *specV1.Node) (*specV1.Node, error)
 	Update(namespace string, node *specV1.Node) (*specV1.Node, error)
 	Delete(namespace, name string) error
@@ -194,6 +196,17 @@ func (n *NodeServiceImpl) Count(namespace string) (map[string]int, error) {
 	}
 	return map[string]int{
 		plugin.QuotaNode: len(list.Items),
+	}, nil
+}
+
+// Count get current node number
+func (n *NodeServiceImpl) CountAll() (map[string]int, error) {
+	total, err := n.node.CountAllNode(nil)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]int{
+		plugin.QuotaNode: total,
 	}, nil
 }
 

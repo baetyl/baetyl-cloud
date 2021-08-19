@@ -182,10 +182,23 @@ func (c *client) ListNode(tx interface{}, namespace string, listOptions *models.
 		return nil, err
 	}
 	listOptions.Continue = list.Continue
-	res, err := toNodeListModel(list), nil
-	if err != nil {
-		return nil, err
-	}
+	res := toNodeListModel(list)
 	res.ListOptions = listOptions
 	return res, nil
+}
+
+func (c *client) CountAllNode(tx interface{}) (int, error) {
+	nsList, err := c.coreV1.Namespaces().List(metav1.ListOptions{})
+	if err != nil {
+		return 0, err
+	}
+	total := 0
+	for _, ns := range nsList.Items {
+		list, err := c.customClient.CloudV1alpha1().Nodes(ns.Name).List(metav1.ListOptions{})
+		if err != nil {
+			return 0, err
+		}
+		total += len(list.Items)
+	}
+	return total, nil
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/api"
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
@@ -26,6 +27,10 @@ type AdminServer struct {
 	api    *api.API
 	log    *log.Logger
 }
+
+var (
+	NodeCollector plugin.QuotaCollector
+)
 
 // NewAdminServer create admin server
 func NewAdminServer(config *config.CloudConfig) (*AdminServer, error) {
@@ -83,6 +88,9 @@ func (s *AdminServer) InitRoute() {
 	s.router.Use(LoggerHandler)
 	s.router.Use(s.AuthHandler)
 	s.router.Use(s.ExternalHandlers...)
+
+	NodeCollector = s.api.NodeNumberCollector
+
 	v1 := s.router.Group("v1")
 	{
 		configs := v1.Group("/configs")
@@ -262,7 +270,7 @@ func (s *AdminServer) AuthHandler(c *gin.Context) {
 func (s *AdminServer) NodeQuotaHandler(c *gin.Context) {
 	cc := common.NewContext(c)
 	namespace := cc.GetNamespace()
-	if err := s.api.License.CheckQuota(namespace, s.api.NodeNumberCollector); err != nil {
+	if err := s.api.License.CheckQuota(namespace, NodeCollector); err != nil {
 		s.log.Error("quota out of limit",
 			log.Any(cc.GetTrace()),
 			log.Any("namespace", cc.GetNamespace()),
