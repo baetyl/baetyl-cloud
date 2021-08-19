@@ -252,8 +252,8 @@ func TestGetApplication(t *testing.T) {
 	mAppFacade, mCtl := InitMockEnvironment(t)
 	defer mCtl.Finish()
 	appFacade := &facade{
-		app:     mAppFacade.sApp,
-		cron:    mAppFacade.sCron,
+		app:  mAppFacade.sApp,
+		cron: mAppFacade.sCron,
 	}
 	name, ns := "baetyl", "cloud"
 	mAppFacade.sApp.EXPECT().Get(ns, name, "").Return(nil, unknownErr).Times(1)
@@ -261,16 +261,16 @@ func TestGetApplication(t *testing.T) {
 	assert.Error(t, err, unknownErr)
 
 	app := &specV1.Application{
-		Namespace: ns,
-		Name: name,
+		Namespace:  ns,
+		Name:       name,
 		CronStatus: specV1.CronWait,
-		CronTime: time.Now(),
+		CronTime:   time.Now(),
 	}
 	cronApp := &models.Cron{
 		Namespace: ns,
-		Name: name,
-		Selector: "",
-		CronTime: time.Now(),
+		Name:      name,
+		Selector:  "",
+		CronTime:  time.Now(),
 	}
 	mAppFacade.sApp.EXPECT().Get(ns, name, "").Return(app, nil).Times(1)
 	mAppFacade.sCron.EXPECT().GetCron(name, ns).Return(cronApp, nil).Times(1)
