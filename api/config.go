@@ -9,6 +9,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/jinzhu/copier"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -16,10 +17,11 @@ import (
 )
 
 const (
-	ConfigTypeKV         = "kv"
-	ConfigTypeObject     = "object"
-	ConfigTypeFunction   = "function"
-	ConfigObjectTypeHttp = "http"
+	ConfigTypeKV            = "kv"
+	ConfigTypeObject        = "object"
+	ConfigTypeFunction      = "function"
+	ConfigObjectTypeHttp    = "http"
+	ConfigImageTypeSelector = "baetyl-config-type=baetyl-image"
 )
 
 // TODO: optimize this layer, general abstraction
@@ -46,8 +48,11 @@ func (api *API) ListConfig(c *common.Context) (interface{}, error) {
 		log.L().Error("list config error", log.Error(err))
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 	}
-	for i := range list.Items {
-		list.Items[i].Data = nil
+	for _, cfg := range list.Items {
+		// config type image need return cfg data
+		if ok, matchErr := utils.IsLabelMatch(ConfigImageTypeSelector, cfg.Labels); matchErr == nil && !ok {
+			cfg.Data = nil
+		}
 	}
 	return list, err
 }
