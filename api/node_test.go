@@ -411,7 +411,7 @@ func TestListNode(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	bytes := w.Body.Bytes()
 	fmt.Println(string(bytes))
-	assert.Equal(t, string(bytes), "{\"total\":1,\"items\":[{\"name\":\"node01\",\"createTime\":\"0001-01-01T00:00:00Z\",\"cluster\":false,\"ready\":false,\"mode\":\"\"}]}\n")
+	assert.Equal(t, string(bytes), "{\"total\":1,\"items\":[{\"name\":\"node01\",\"createTime\":\"0001-01-01T00:00:00Z\",\"cluster\":false,\"ready\":2,\"mode\":\"\"}]}\n")
 	nodelist := new(models.NodeList)
 	err := json.Unmarshal(bytes, nodelist)
 	assert.NoError(t, err)
