@@ -18,6 +18,8 @@ github.com/aws/aws-sdk-go v1.32.8 h1:ULxiQqR1eZ+k2/1gqv3GYAjkunlS7ncVU2eL801t08M
 github.com/aws/aws-sdk-go v1.32.8/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/baetyl/baetyl-go/v2 v2.1.51-0.20210805112516-5a838c948c26 h1:rjlz06np3iAB09cghLc3V5qU8rvEPv1NrJH9HO2wY1M=
 github.com/baetyl/baetyl-go/v2 v2.1.51-0.20210805112516-5a838c948c26/go.mod h1:n6jClckOKHICRSFiUbVn5VUwEH6OaiSyQS3z+sW2+UA=
+github.com/baetyl/baetyl-go/v2 v2.1.51-0.20210831090723-aa569151fadb h1:sXcmQeU1w48Nt22Gi6zfx7SQakVyJAYXjVICwFDoxXE=
+github.com/baetyl/baetyl-go/v2 v2.1.51-0.20210831090723-aa569151fadb/go.mod h1:n6jClckOKHICRSFiUbVn5VUwEH6OaiSyQS3z+sW2+UA=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/bradfitz/gomemcache v0.0.0-20170208213004-1952afaa557d/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=
 github.com/bradfitz/gomemcache v0.0.0-20180710155616-bc664df96737 h1:rRISKWyXfVxvoa702s91Zl5oREZTrR3yv+tXrrX7G/g=
