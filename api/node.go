@@ -116,7 +116,7 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 			return nil, err
 		}
 		view.Desire = nil
-		if view.Ready {
+		if view.Ready == v1.NodeOnline {
 			onlineNode = append(onlineNode, *view)
 		} else {
 			offlineNode = append(offlineNode, *view)
