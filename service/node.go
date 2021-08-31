@@ -136,10 +136,11 @@ func (n *NodeServiceImpl) Create(tx interface{}, namespace string, node *specV1.
 
 // Update update node
 func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.Node, error) {
-	res, err := n.node.UpdateNode(namespace, node)
-	if err != nil {
+	list, err := n.node.UpdateNode(namespace, []*specV1.Node{node})
+	if err != nil || len(list) < 1 {
 		return nil, err
 	}
+	res := list[0]
 
 	shadow, err := n.Shadow.Get(nil, namespace, node.Name)
 	if err != nil {
@@ -305,7 +306,7 @@ func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report spe
 		}
 	}
 	updateNodePropertiesMeta(node, meta)
-	if _, err := n.node.UpdateNode(ns, node); err != nil {
+	if _, err := n.node.UpdateNode(ns, []*specV1.Node{node}); err != nil {
 		return err
 	}
 	// since merge won't delete exist key-val, node props should override
@@ -646,7 +647,7 @@ func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *mo
 		return nil, err
 	}
 	updateNodePropertiesMeta(node, meta)
-	if _, err := n.node.UpdateNode(namespace, node); err != nil {
+	if _, err := n.node.UpdateNode(namespace, []*specV1.Node{node}); err != nil {
 		return nil, err
 	}
 	return props, nil
@@ -665,7 +666,7 @@ func (n *NodeServiceImpl) UpdateNodeMode(ns, name, mode string) error {
 		node.Attributes = map[string]interface{}{}
 	}
 	node.Attributes[specV1.KeySyncMode] = specV1.SyncMode(mode)
-	_, err = n.node.UpdateNode(ns, node)
+	_, err = n.node.UpdateNode(ns, []*specV1.Node{node})
 	if err != nil {
 		return err
 	}
