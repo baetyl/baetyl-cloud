@@ -160,12 +160,7 @@ func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.N
 
 // List get list node
 func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
-	pageSize := listOptions.GetLimitNumber()
-	if listOptions.NodeSelector != "" && pageSize > 0 {
-		// in order to get all node data
-		listOptions.PageSize = 0
-	}
-	list, err := n.Node.ListNode(nil, namespace, listOptions)
+	list, err := n.Node.ListNode(nil,namespace,listOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +178,6 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 		}
 	}
 	if listOptions.NodeSelector != "" {
-		listOptions.PageSize = pageSize
 		return filterNodeListByNodeSelector(list), nil
 	}
 	return list, nil
