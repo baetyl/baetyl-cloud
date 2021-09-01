@@ -156,18 +156,28 @@ func (c *client) CreateNode(tx interface{}, namespace string, node *specV1.Node)
 	return toNodeModel(n), nil
 }
 
-func (c *client) UpdateNode(namespace string, node *specV1.Node) (*specV1.Node, error) {
-	n, err := fromNodeModel(node)
-	if err != nil {
-		return nil, err
-	}
+func (c *client) UpdateNode(namespace string, nodes []*specV1.Node) ([]*specV1.Node, error) {
 	defer utils.Trace(c.log.Debug, "UpdateNode")()
-	n, err = c.customClient.CloudV1alpha1().Nodes(namespace).Update(n)
-	if err != nil {
-		log.L().Error("update node error", log.Error(err))
-		return nil, err
+
+	res := []*specV1.Node{}
+	if len(nodes) < 1 {
+		return res, nil
 	}
-	return toNodeModel(n), nil
+
+	for _, node := range nodes {
+		n, err := fromNodeModel(node)
+		if err != nil {
+			return nil, err
+		}
+
+		n, err = c.customClient.CloudV1alpha1().Nodes(namespace).Update(n)
+		if err != nil {
+			log.L().Error("update node error", log.Error(err))
+			return nil, err
+		}
+		res = append(res, toNodeModel(n))
+	}
+	return res, nil
 }
 
 func (c *client) DeleteNode(namespace, name string) error {

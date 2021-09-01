@@ -389,10 +389,10 @@ func (mr *MockResourceMockRecorder) UpdateConfig(arg0, arg1, arg2 interface{}) *
 }
 
 // UpdateNode mocks base method
-func (m *MockResource) UpdateNode(arg0 string, arg1 *v1.Node) (*v1.Node, error) {
+func (m *MockResource) UpdateNode(arg0 string, arg1 []*v1.Node) ([]*v1.Node, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateNode", arg0, arg1)
-	ret0, _ := ret[0].(*v1.Node)
+	ret0, _ := ret[0].([]*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

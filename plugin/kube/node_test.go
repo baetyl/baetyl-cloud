@@ -243,14 +243,14 @@ func TestUpdateNode(t *testing.T) {
 			"tag": "test",
 		},
 	}
-	cfg2, err := c.UpdateNode(cfg.Namespace, cfg)
+	cfg2, err := c.UpdateNode(cfg.Namespace, []*specV1.Node{cfg})
 	assert.NoError(t, err)
-	assert.Equal(t, cfg.Name, cfg2.Name)
-	v, _ := cfg2.Labels["tag"]
+	assert.Equal(t, cfg.Name, cfg2[0].Name)
+	v, _ := cfg2[0].Labels["tag"]
 	assert.Equal(t, v, "test")
 
 	cfg.Name = cfg.Name + "NULL"
-	_, err = c.UpdateNode(cfg.Namespace, cfg)
+	_, err = c.UpdateNode(cfg.Namespace, []*specV1.Node{cfg})
 	assert.NotNil(t, err)
 }
 
