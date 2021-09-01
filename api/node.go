@@ -106,7 +106,7 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 		ListOptions: nodeList.ListOptions,
 		Items:       make([]v1.NodeView, 0, len(nodeList.Items)),
 	}
-	var onlineNode, offlineNode []v1.NodeView
+	var onlineNode, offlineNode, resNode []v1.NodeView
 	for idx := range nodeList.Items {
 		n := &nodeList.Items[idx]
 
@@ -116,14 +116,18 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 			return nil, err
 		}
 		view.Desire = nil
-		if view.Ready {
+		if view.Ready == v1.NodeOnline {
 			onlineNode = append(onlineNode, *view)
 		} else {
 			offlineNode = append(offlineNode, *view)
 		}
 	}
-	nodeViewList.Items = append(nodeViewList.Items, onlineNode...)
-	nodeViewList.Items = append(nodeViewList.Items, offlineNode...)
+	resNode = append(resNode, onlineNode...)
+	resNode = append(resNode, offlineNode...)
+
+	start, end := models.GetPagingParam(params, nodeViewList.Total)
+	nodeViewList.Items = resNode[start:end]
+
 	return nodeViewList, nil
 }
 
