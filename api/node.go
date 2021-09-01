@@ -222,7 +222,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 
 	if node.Accelerator != oldNode.Accelerator {
 		node.SysApps = common.UpdateSysAppByAccelerator(node.Accelerator, node.SysApps)
-		err = api.updateConfigByAccelerator(ns, node)
+		err = api.UpdateConfigByAccelerator(ns, node)
 		if err != nil {
 			return nil, err
 		}
@@ -1058,7 +1058,7 @@ func (api *API) getCoreAppFrequency(node *v1.Node) (int, error) {
 	return strconv.Atoi(freq)
 }
 
-func (api *API) updateConfigByAccelerator(ns string, node *v1.Node) error {
+func (api *API) UpdateConfigByAccelerator(ns string, node *v1.Node) error {
 	sysApps := node.Desire.AppInfos(true)
 	var coreName string
 	var initName string

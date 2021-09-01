@@ -65,17 +65,17 @@ func (mr *MockNodeMockRecorder) CreateNode(arg0, arg1, arg2 interface{}) *gomock
 }
 
 // DeleteNode mocks base method
-func (m *MockNode) DeleteNode(arg0, arg1 string) error {
+func (m *MockNode) DeleteNode(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteNode", arg0, arg1)
+	ret := m.ctrl.Call(m, "DeleteNode", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteNode indicates an expected call of DeleteNode
-func (mr *MockNodeMockRecorder) DeleteNode(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockNodeMockRecorder) DeleteNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNode", reflect.TypeOf((*MockNode)(nil).DeleteNode), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNode", reflect.TypeOf((*MockNode)(nil).DeleteNode), arg0, arg1, arg2)
 }
 
 // GetNode mocks base method
@@ -109,16 +109,16 @@ func (mr *MockNodeMockRecorder) ListNode(arg0, arg1, arg2 interface{}) *gomock.C
 }
 
 // UpdateNode mocks base method
-func (m *MockNode) UpdateNode(arg0 string, arg1 []*v1.Node) ([]*v1.Node, error) {
+func (m *MockNode) UpdateNode(arg0 interface{}, arg1 string, arg2 []*v1.Node) ([]*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateNode", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateNode", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateNode indicates an expected call of UpdateNode
-func (mr *MockNodeMockRecorder) UpdateNode(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockNodeMockRecorder) UpdateNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNode", reflect.TypeOf((*MockNode)(nil).UpdateNode), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNode", reflect.TypeOf((*MockNode)(nil).UpdateNode), arg0, arg1, arg2)
 }

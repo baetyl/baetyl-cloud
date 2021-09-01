@@ -243,29 +243,29 @@ func TestUpdateNode(t *testing.T) {
 			"tag": "test",
 		},
 	}
-	cfg2, err := c.UpdateNode(cfg.Namespace, []*specV1.Node{cfg})
+	cfg2, err := c.UpdateNode(nil, cfg.Namespace, []*specV1.Node{cfg})
 	assert.NoError(t, err)
 	assert.Equal(t, cfg.Name, cfg2[0].Name)
 	v, _ := cfg2[0].Labels["tag"]
 	assert.Equal(t, v, "test")
 
 	cfg.Name = cfg.Name + "NULL"
-	_, err = c.UpdateNode(cfg.Namespace, []*specV1.Node{cfg})
+	_, err = c.UpdateNode(nil, cfg.Namespace, []*specV1.Node{cfg})
 	assert.NotNil(t, err)
 }
 
 func TestDeleteNode(t *testing.T) {
 	c := initNodeClient()
-	err := c.DeleteNode("default", "test-delete")
+	err := c.DeleteNode(nil, "default", "test-delete")
 	assert.NoError(t, err)
 
-	err = c.DeleteNode("default", "test-delete03")
+	err = c.DeleteNode(nil, "default", "test-delete03")
 	assert.Error(t, err)
 
-	err = c.DeleteNode("default", "test-delete01")
+	err = c.DeleteNode(nil, "default", "test-delete01")
 	assert.Nil(t, err)
 
-	err = c.DeleteNode("default", "test-delete02")
+	err = c.DeleteNode(nil, "default", "test-delete02")
 	assert.Nil(t, err)
 }
 
