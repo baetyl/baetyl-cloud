@@ -181,17 +181,17 @@ func (mr *MockResourceMockRecorder) DeleteNamespace(arg0 interface{}) *gomock.Ca
 }
 
 // DeleteNode mocks base method
-func (m *MockResource) DeleteNode(arg0, arg1 string) error {
+func (m *MockResource) DeleteNode(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteNode", arg0, arg1)
+	ret := m.ctrl.Call(m, "DeleteNode", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteNode indicates an expected call of DeleteNode
-func (mr *MockResourceMockRecorder) DeleteNode(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) DeleteNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNode", reflect.TypeOf((*MockResource)(nil).DeleteNode), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNode", reflect.TypeOf((*MockResource)(nil).DeleteNode), arg0, arg1, arg2)
 }
 
 // DeleteSecret mocks base method
@@ -389,18 +389,18 @@ func (mr *MockResourceMockRecorder) UpdateConfig(arg0, arg1, arg2 interface{}) *
 }
 
 // UpdateNode mocks base method
-func (m *MockResource) UpdateNode(arg0 string, arg1 []*v1.Node) ([]*v1.Node, error) {
+func (m *MockResource) UpdateNode(arg0 interface{}, arg1 string, arg2 []*v1.Node) ([]*v1.Node, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateNode", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateNode", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]*v1.Node)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateNode indicates an expected call of UpdateNode
-func (mr *MockResourceMockRecorder) UpdateNode(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) UpdateNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNode", reflect.TypeOf((*MockResource)(nil).UpdateNode), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNode", reflect.TypeOf((*MockResource)(nil).UpdateNode), arg0, arg1, arg2)
 }
 
 // UpdateSecret mocks base method

@@ -156,7 +156,7 @@ func (c *client) CreateNode(tx interface{}, namespace string, node *specV1.Node)
 	return toNodeModel(n), nil
 }
 
-func (c *client) UpdateNode(namespace string, nodes []*specV1.Node) ([]*specV1.Node, error) {
+func (c *client) UpdateNode(tx interface{}, namespace string, nodes []*specV1.Node) ([]*specV1.Node, error) {
 	defer utils.Trace(c.log.Debug, "UpdateNode")()
 
 	res := []*specV1.Node{}
@@ -180,7 +180,7 @@ func (c *client) UpdateNode(namespace string, nodes []*specV1.Node) ([]*specV1.N
 	return res, nil
 }
 
-func (c *client) DeleteNode(namespace, name string) error {
+func (c *client) DeleteNode(tx interface{}, namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "DeleteNode")()
 	return c.customClient.CloudV1alpha1().Nodes(namespace).Delete(name, &metav1.DeleteOptions{})
 }

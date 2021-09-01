@@ -47,9 +47,9 @@ type NodeService interface {
 }
 
 type NodeServiceImpl struct {
-	indexService  IndexService
-	node          plugin.Node
-	app           plugin.Application
+	IndexService  IndexService
+	App           plugin.Application
+	Node          plugin.Node
 	Shadow        plugin.Shadow
 	SysAppService SystemAppService
 	Hooks         map[string]interface{}
@@ -83,18 +83,18 @@ func NewNodeService(config *config.CloudConfig) (NodeService, error) {
 	}
 
 	return &NodeServiceImpl{
-		indexService:  is,
+		IndexService:  is,
 		SysAppService: system,
-		node:          node.(plugin.Node),
+		Node:          node.(plugin.Node),
 		Shadow:        shadow.(plugin.Shadow),
-		app:           app.(plugin.Application),
+		App:           app.(plugin.Application),
 		Hooks:         make(map[string]interface{}),
 	}, nil
 }
 
 // Get get the node
 func (n *NodeServiceImpl) Get(tx interface{}, namespace, name string) (*specV1.Node, error) {
-	node, err := n.node.GetNode(tx, namespace, name)
+	node, err := n.Node.GetNode(tx, namespace, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
@@ -117,7 +117,7 @@ func (n *NodeServiceImpl) Get(tx interface{}, namespace, name string) (*specV1.N
 
 // Create create a node
 func (n *NodeServiceImpl) Create(tx interface{}, namespace string, node *specV1.Node) (*specV1.Node, error) {
-	res, err := n.node.CreateNode(tx, namespace, node)
+	res, err := n.Node.CreateNode(tx, namespace, node)
 	if err != nil {
 		log.L().Error("create node failed", log.Error(err))
 		return nil, err
@@ -128,7 +128,7 @@ func (n *NodeServiceImpl) Create(tx interface{}, namespace string, node *specV1.
 		return nil, err
 	}
 
-	if err = n.insertOrUpdateNodeAndAppIndex(tx, namespace, res, models.NewShadowFromNode(res), true); err != nil {
+	if err = n.InsertOrUpdateNodeAndAppIndex(tx, namespace, res, models.NewShadowFromNode(res), true); err != nil {
 		return nil, err
 	}
 	return res, err
@@ -136,7 +136,7 @@ func (n *NodeServiceImpl) Create(tx interface{}, namespace string, node *specV1.
 
 // Update update node
 func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.Node, error) {
-	list, err := n.node.UpdateNode(namespace, []*specV1.Node{node})
+	list, err := n.Node.UpdateNode(nil, namespace, []*specV1.Node{node})
 	if err != nil || len(list) < 1 {
 		return nil, err
 	}
@@ -148,11 +148,11 @@ func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.N
 	}
 
 	// delete indexes for node and apps
-	if err := n.indexService.RefreshAppsIndexByNode(nil, namespace, res.Name, []string{}); err != nil {
+	if err := n.IndexService.RefreshAppsIndexByNode(nil, namespace, res.Name, []string{}); err != nil {
 		return nil, err
 	}
 
-	if err = n.insertOrUpdateNodeAndAppIndex(nil, namespace, res, shadow, false); err != nil {
+	if err = n.InsertOrUpdateNodeAndAppIndex(nil, namespace, res, shadow, false); err != nil {
 		return nil, err
 	}
 	return res, nil
@@ -160,7 +160,7 @@ func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.N
 
 // List get list node
 func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
-	list, err := n.node.ListNode(nil, namespace, listOptions)
+	list, err := n.Node.ListNode(nil, namespace, listOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +196,7 @@ func (n *NodeServiceImpl) Count(namespace string) (map[string]int, error) {
 
 // Count get current node number
 func (n *NodeServiceImpl) CountAll() (map[string]int, error) {
-	total, err := n.node.CountAllNode(nil)
+	total, err := n.Node.CountAllNode(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func (n *NodeServiceImpl) Delete(namespace, name string) error {
 		}
 	}
 
-	if err := n.node.DeleteNode(namespace, name); err != nil {
+	if err := n.Node.DeleteNode(nil, namespace, name); err != nil {
 		return err
 	}
 
@@ -225,7 +225,7 @@ func (n *NodeServiceImpl) Delete(namespace, name string) error {
 			log.Any("operation", "delete"))
 	}
 
-	if err := n.indexService.RefreshAppsIndexByNode(nil, namespace, name, []string{}); err != nil {
+	if err := n.IndexService.RefreshAppsIndexByNode(nil, namespace, name, []string{}); err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", "app node index"),
 			log.Any("namespace", namespace),
@@ -247,7 +247,7 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 	}
 
 	if shadow == nil {
-		_, err = n.node.GetNode(nil, namespace, name)
+		_, err = n.Node.GetNode(nil, namespace, name)
 		if err != nil {
 			return nil, err
 		}
@@ -277,7 +277,7 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 }
 
 func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report specV1.Report, shad *models.Shadow) error {
-	node, err := n.node.GetNode(nil, ns, name)
+	node, err := n.Node.GetNode(nil, ns, name)
 	if err != nil {
 		return err
 	}
@@ -300,7 +300,7 @@ func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report spe
 		}
 	}
 	updateNodePropertiesMeta(node, meta)
-	if _, err := n.node.UpdateNode(ns, []*specV1.Node{node}); err != nil {
+	if _, err := n.Node.UpdateNode(nil, ns, []*specV1.Node{node}); err != nil {
 		return err
 	}
 	// since merge won't delete exist key-val, node props should override
@@ -366,8 +366,8 @@ func (n *NodeServiceImpl) GetDesire(namespace, name string) (*specV1.Desire, err
 	return &shadow.Desire, nil
 }
 
-func (n *NodeServiceImpl) insertOrUpdateNodeAndAppIndex(tx interface{}, namespace string, node *specV1.Node, shadow *models.Shadow, flag bool) error {
-	apps, err := n.app.ListApplication(tx, namespace, &models.ListOptions{})
+func (n *NodeServiceImpl) InsertOrUpdateNodeAndAppIndex(tx interface{}, namespace string, node *specV1.Node, shadow *models.Shadow, flag bool) error {
+	apps, err := n.App.ListApplication(tx, namespace, &models.ListOptions{})
 	if err != nil {
 		log.L().Error("list application error", log.Error(err))
 		return err
@@ -389,7 +389,7 @@ func (n *NodeServiceImpl) insertOrUpdateNodeAndAppIndex(tx interface{}, namespac
 		}
 	}
 
-	if err = n.indexService.RefreshAppsIndexByNode(tx, namespace, node.Name, appNames); err != nil {
+	if err = n.IndexService.RefreshAppsIndexByNode(tx, namespace, node.Name, appNames); err != nil {
 		log.L().Error("refresh app index by node failed", log.Error(err))
 		return err
 	}
@@ -441,7 +441,7 @@ func (n *NodeServiceImpl) UpdateNodeAppVersion(tx interface{}, namespace string,
 	}
 
 	// list nodes
-	nodeList, err := n.node.ListNode(tx, namespace, &models.ListOptions{LabelSelector: app.Selector})
+	nodeList, err := n.Node.ListNode(tx, namespace, &models.ListOptions{LabelSelector: app.Selector})
 	if err != nil {
 		return nil, err
 	}
@@ -479,7 +479,7 @@ func (n *NodeServiceImpl) DeleteNodeAppVersion(tx interface{}, namespace string,
 	}
 
 	// list nodes
-	nodeList, err := n.node.ListNode(tx, namespace, &models.ListOptions{LabelSelector: app.Selector})
+	nodeList, err := n.Node.ListNode(tx, namespace, &models.ListOptions{LabelSelector: app.Selector})
 	if err != nil {
 		return nil, err
 	}
@@ -559,7 +559,7 @@ func toShadowMap(shadowList *models.ShadowList) map[string]*models.Shadow {
 }
 
 func (n *NodeServiceImpl) GetNodeProperties(namespace, name string) (*models.NodeProperties, error) {
-	node, err := n.node.GetNode(nil, namespace, name)
+	node, err := n.Node.GetNode(nil, namespace, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
@@ -596,7 +596,7 @@ func (n *NodeServiceImpl) GetNodeProperties(namespace, name string) (*models.Nod
 // UpdateNodeProperties update desire of node properties
 // and can not update report of node properties
 func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *models.NodeProperties) (*models.NodeProperties, error) {
-	node, err := n.node.GetNode(nil, namespace, name)
+	node, err := n.Node.GetNode(nil, namespace, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
@@ -641,14 +641,14 @@ func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *mo
 		return nil, err
 	}
 	updateNodePropertiesMeta(node, meta)
-	if _, err := n.node.UpdateNode(namespace, []*specV1.Node{node}); err != nil {
+	if _, err := n.Node.UpdateNode(nil, namespace, []*specV1.Node{node}); err != nil {
 		return nil, err
 	}
 	return props, nil
 }
 
 func (n *NodeServiceImpl) UpdateNodeMode(ns, name, mode string) error {
-	node, err := n.node.GetNode(nil, ns, name)
+	node, err := n.Node.GetNode(nil, ns, name)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
@@ -660,7 +660,7 @@ func (n *NodeServiceImpl) UpdateNodeMode(ns, name, mode string) error {
 		node.Attributes = map[string]interface{}{}
 	}
 	node.Attributes[specV1.KeySyncMode] = specV1.SyncMode(mode)
-	_, err = n.node.UpdateNode(ns, []*specV1.Node{node})
+	_, err = n.Node.UpdateNode(nil, ns, []*specV1.Node{node})
 	if err != nil {
 		return err
 	}
@@ -738,9 +738,10 @@ func filterNodeListByNodeSelector(list *models.NodeList) *models.NodeList {
 			break
 		}
 	}
+	start, end := models.GetPagingParam(list.ListOptions, len(items))
 	return &models.NodeList{
 		Total:       len(items),
 		ListOptions: list.ListOptions,
-		Items:       items,
+		Items:       items[start:end],
 	}
 }
