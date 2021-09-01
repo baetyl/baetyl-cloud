@@ -160,7 +160,7 @@ func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.N
 
 // List get list node
 func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
-	list, err := n.Node.ListNode(nil,namespace,listOptions)
+	list, err := n.Node.ListNode(nil, namespace, listOptions)
 	if err != nil {
 		return nil, err
 	}
