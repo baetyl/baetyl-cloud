@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-go/v2/errors"
-
 	"github.com/jmoiron/sqlx"
 
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
 )
@@ -26,16 +25,25 @@ func (d *DB) Get(tx interface{}, namespace, name string) (*models.Shadow, error)
 
 func (d *DB) Create(tx interface{}, shadow *models.Shadow) (*models.Shadow, error) {
 	var shd *models.Shadow
-	var transaction *sqlx.Tx
-	if tx != nil {
-		transaction = tx.(*sqlx.Tx)
+	var err error
+	if tx == nil {
+		err = d.Transact(func(transaction *sqlx.Tx) error {
+			return d.createAndGetShadow(transaction, shadow, &shd)
+		})
+	} else {
+		transaction := tx.(*sqlx.Tx)
+		err = d.createAndGetShadow(transaction, shadow, &shd)
 	}
-	_, err := d.CreateShadowTx(transaction, shadow)
-	if err != nil {
-		return nil, err
-	}
-	shd, err = d.GetShadowTx(transaction, shadow.Namespace, shadow.Name)
 	return shd, err
+}
+
+func (d *DB) createAndGetShadow(tx *sqlx.Tx, input *models.Shadow, output **models.Shadow) error {
+	_, err := d.CreateShadowTx(tx, input)
+	if err != nil {
+		return err
+	}
+	*output, err = d.GetShadowTx(tx, input.Namespace, input.Name)
+	return err
 }
 
 func (d *DB) List(namespace string, nodeList *models.NodeList) (*models.ShadowList, error) {
@@ -71,20 +79,30 @@ func (d *DB) Delete(namespace, name string) error {
 
 func (d *DB) UpdateDesire(tx interface{}, shadow *models.Shadow) (*models.Shadow, error) {
 	var shd *models.Shadow
-	var transaction *sqlx.Tx
-	if tx != nil {
-		transaction = tx.(*sqlx.Tx)
+	var err error
+	if tx == nil {
+		err = d.Transact(func(transaction *sqlx.Tx) error {
+			return d.updateAndGetShadow(transaction, shadow, &shd)
+		})
+	} else {
+		transaction := tx.(*sqlx.Tx)
+		err = d.updateAndGetShadow(transaction, shadow, &shd)
 	}
-	res, err := d.UpdateShadowDesireTx(transaction, shadow)
-	if err != nil {
-		return nil, err
-	}
-	if rows, _ := res.RowsAffected(); rows == 0 {
-		return nil, errors.New(common.ErrUpdateCas)
-	}
-	shd, err = d.GetShadowTx(transaction, shadow.Namespace, shadow.Name)
 	return shd, err
 }
+
+func (d *DB) updateAndGetShadow(tx *sqlx.Tx, input *models.Shadow, output **models.Shadow) error {
+	res, txErr := d.UpdateShadowDesireTx(tx, input)
+	if txErr != nil {
+		return txErr
+	}
+	if rows, _ := res.RowsAffected(); rows == 0 {
+		return errors.New(common.ErrUpdateCas)
+	}
+	*output, txErr = d.GetShadowTx(tx, input.Namespace, input.Name)
+	return txErr
+}
+
 func (d *DB) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
 	var shd *models.Shadow
 	err := d.Transact(func(tx *sqlx.Tx) error {
