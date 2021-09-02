@@ -41,11 +41,7 @@ func (d *DB) MockCreateShadowTable() {
 func TestShadow(t *testing.T) {
 	db, err := MockNewDB()
 	isSysApp := false
-	if err != nil {
-		fmt.Printf("get mock sqlite3 error = %s", err.Error())
-		t.Fail()
-		return
-	}
+	assert.NoError(t, err)
 	db.MockCreateShadowTable()
 
 	namespace := "test"
@@ -133,4 +129,61 @@ func TestShadow(t *testing.T) {
 	shadow.DesireVersion = "1"
 	result, err = db.UpdateDesire(nil, shadow)
 	assert.Error(t, err, "invalid version")
+}
+
+func TestShadowTx(t *testing.T) {
+	db, err := MockNewDB()
+	assert.NoError(t, err)
+	db.MockCreateShadowTable()
+
+	namespace := "test"
+	shadow := &models.Shadow{
+		Namespace: namespace,
+		Name:      "node01",
+		Desire: v1.Desire{
+			"apps": []v1.AppInfo{
+				{
+					Name:    "app01",
+					Version: "1",
+				},
+			},
+		},
+		Report: v1.Report{
+			"apps": []v1.AppInfo{
+				{
+					Name:    "app01",
+					Version: "1",
+				},
+			},
+		},
+		ReportMeta: map[string]interface{}{},
+		DesireMeta: map[string]interface{}{},
+	}
+
+	tx, err := db.BeginTx()
+	assert.NoError(t, err)
+
+	result, err := db.Create(tx, shadow)
+	assert.NoError(t, err)
+	assert.Equal(t, shadow.Name, result.Name)
+	err = tx.Commit()
+	assert.NoError(t, err)
+
+	desire := v1.Desire{
+		"apps": []v1.AppInfo{
+			{
+				Name:    "app02",
+				Version: "2",
+			},
+		},
+	}
+
+	shadow.Desire = desire
+	tx, err = db.BeginTx()
+	assert.NoError(t, err)
+
+	result, err = db.UpdateDesire(tx, shadow)
+	assert.NoError(t, err)
+	err = tx.Commit()
+	assert.NoError(t, err)
 }
