@@ -5,10 +5,9 @@
 package plugin
 
 import (
-	reflect "reflect"
-
 	models "github.com/baetyl/baetyl-cloud/v2/models"
 	gomock "github.com/golang/mock/gomock"
+	reflect "reflect"
 )
 
 // MockShadow is a mock of Shadow interface
@@ -108,12 +107,11 @@ func (mr *MockShadowMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // UpdateDesire mocks base method
-func (m *MockShadow) UpdateDesire(arg0 interface{}, arg1 *models.Shadow) (*models.Shadow, error) {
+func (m *MockShadow) UpdateDesire(arg0 interface{}, arg1 *models.Shadow) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateDesire", arg0, arg1)
-	ret0, _ := ret[0].(*models.Shadow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // UpdateDesire indicates an expected call of UpdateDesire

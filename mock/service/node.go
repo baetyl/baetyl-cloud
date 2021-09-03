@@ -184,12 +184,11 @@ func (mr *MockNodeServiceMockRecorder) Update(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // UpdateDesire mocks base method
-func (m *MockNodeService) UpdateDesire(arg0 interface{}, arg1, arg2 string, arg3 *v1.Application, arg4 func(*models.Shadow, *v1.Application)) (*models.Shadow, error) {
+func (m *MockNodeService) UpdateDesire(arg0 interface{}, arg1, arg2 string, arg3 *v1.Application, arg4 func(*models.Shadow, *v1.Application)) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateDesire", arg0, arg1, arg2, arg3, arg4)
-	ret0, _ := ret[0].(*models.Shadow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // UpdateDesire indicates an expected call of UpdateDesire
