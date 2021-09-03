@@ -91,6 +91,8 @@ func TestShadow(t *testing.T) {
 	shadow.Report = report
 	result, err = db.UpdateReport(shadow)
 	assert.NoError(t, err)
+	result, err = db.GetShadowTx(nil, shadow.Namespace, shadow.Name)
+	assert.NoError(t, err)
 	assert.Equal(t, report.AppInfos(isSysApp), result.Report.AppInfos(isSysApp))
 	assert.Equal(t, shadow.Desire.AppInfos(isSysApp), result.Desire.AppInfos(isSysApp))
 
@@ -104,7 +106,9 @@ func TestShadow(t *testing.T) {
 	}
 
 	shadow.Desire = desire
-	result, err = db.UpdateDesire(nil, shadow)
+	err = db.UpdateDesire(nil, shadow)
+	assert.NoError(t, err)
+	result, err = db.GetShadowTx(nil, shadow.Namespace, shadow.Name)
 	assert.NoError(t, err)
 	assert.Equal(t, desire.AppInfos(isSysApp), result.Desire.AppInfos(isSysApp))
 	assert.Equal(t, report.AppInfos(isSysApp), result.Report.AppInfos(isSysApp))
@@ -125,10 +129,6 @@ func TestShadow(t *testing.T) {
 
 	err = db.Delete(namespace, shadow.Name)
 	assert.NoError(t, err)
-
-	shadow.DesireVersion = "1"
-	result, err = db.UpdateDesire(nil, shadow)
-	assert.Error(t, err, "invalid version")
 }
 
 func TestShadowTx(t *testing.T) {
@@ -182,7 +182,7 @@ func TestShadowTx(t *testing.T) {
 	tx, err = db.BeginTx()
 	assert.NoError(t, err)
 
-	result, err = db.UpdateDesire(tx, shadow)
+	err = db.UpdateDesire(tx, shadow)
 	assert.NoError(t, err)
 	err = tx.Commit()
 	assert.NoError(t, err)

@@ -34,7 +34,7 @@ type NodeService interface {
 	Delete(namespace, name string) error
 
 	UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error)
-	UpdateDesire(tx interface{}, namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) (*models.Shadow, error)
+	UpdateDesire(tx interface{}, namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) error
 
 	GetDesire(namespace, name string) (*specV1.Desire, error)
 
@@ -314,40 +314,28 @@ func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report spe
 
 // UpdateDesire Update Desire
 // Parameter f can be RefreshNodeDesireByApp or DeleteNodeDesireByApp
-func (n *NodeServiceImpl) UpdateDesire(tx interface{}, namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) (*models.Shadow, error) {
-	// Retry times
-	var count = 0
-	for {
-		newShadow, err := n.Shadow.Get(tx, namespace, name)
-		if err != nil {
-			return nil, err
-		}
-
-		if newShadow == nil {
-			newShadow, err = n.createShadow(tx, namespace, name, specV1.Desire{}, nil)
-		}
-
-		// Refresh desire in Shadow by app
-		f(newShadow, app)
-		updatedShadow, err := n.Shadow.UpdateDesire(tx, newShadow)
-		if err == nil || err.Error() != common.ErrUpdateCas {
-			return updatedShadow, err
-		}
-		count++
-		if count >= casRetryTimes {
-			break
-		}
+func (n *NodeServiceImpl) UpdateDesire(tx interface{}, namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) error {
+	newShadow, err := n.Shadow.Get(tx, namespace, name)
+	if err != nil {
+		return err
 	}
-	return nil, common.Error(common.ErrResourceConflict, common.Field("node", name), common.Field("type", "Shadow"))
+
+	if newShadow == nil {
+		newShadow, err = n.createShadow(tx, namespace, name, specV1.Desire{}, nil)
+	}
+
+	// Refresh desire in Shadow by app
+	f(newShadow, app)
+	return n.Shadow.UpdateDesire(tx, newShadow)
 }
 
-func (n *NodeServiceImpl) updateDesire(tx interface{}, shadow *models.Shadow, desire specV1.Desire) (*models.Shadow, error) {
+func (n *NodeServiceImpl) updateDesire(tx interface{}, shadow *models.Shadow, desire specV1.Desire) error {
 	if shadow.Desire == nil {
 		shadow.Desire = desire
 	} else {
 		err := shadow.Desire.Merge(desire)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
@@ -383,7 +371,7 @@ func (n *NodeServiceImpl) InsertOrUpdateNodeAndAppIndex(tx interface{}, namespac
 			return err
 		}
 	} else {
-		if _, err = n.updateDesire(tx, shadow, desire); err != nil {
+		if err = n.updateDesire(tx, shadow, desire); err != nil {
 			log.L().Error("update node desired node failed", log.Error(err))
 			return err
 		}
@@ -450,7 +438,7 @@ func (n *NodeServiceImpl) UpdateNodeAppVersion(tx interface{}, namespace string,
 	for idx := range nodeList.Items {
 		node := &nodeList.Items[idx]
 		nodes = append(nodes, node.Name)
-		_, err := n.UpdateDesire(tx, node.Namespace, node.Name, app, RefreshNodeDesireByApp)
+		err = n.UpdateDesire(tx, node.Namespace, node.Name, app, RefreshNodeDesireByApp)
 		if err != nil {
 			return nil, err
 		}
@@ -490,7 +478,7 @@ func (n *NodeServiceImpl) DeleteNodeAppVersion(tx interface{}, namespace string,
 		node := &nodeList.Items[idx]
 		nodes = append(nodes, node.Name)
 
-		_, err = n.UpdateDesire(tx, node.Namespace, node.Name, app, DeleteNodeDesireByApp)
+		err = n.UpdateDesire(tx, node.Namespace, node.Name, app, DeleteNodeDesireByApp)
 		if err != nil {
 			return nil, err
 		}
@@ -636,7 +624,7 @@ func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *mo
 	props.Meta.DesireMeta = meta.DesireMeta
 	// cast to map[string]interface{} should not omit
 	shadow.Desire[common.NodeProps] = map[string]interface{}(newDesire)
-	_, err = n.Shadow.UpdateDesire(nil, shadow)
+	err = n.Shadow.UpdateDesire(nil, shadow)
 	if err != nil {
 		return nil, err
 	}

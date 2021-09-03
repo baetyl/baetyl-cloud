@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -77,30 +76,13 @@ func (d *DB) Delete(namespace, name string) error {
 	return err
 }
 
-func (d *DB) UpdateDesire(tx interface{}, shadow *models.Shadow) (*models.Shadow, error) {
-	var shd *models.Shadow
-	var err error
-	if tx == nil {
-		err = d.Transact(func(transaction *sqlx.Tx) error {
-			return d.updateAndGetShadow(transaction, shadow, &shd)
-		})
-	} else {
-		transaction := tx.(*sqlx.Tx)
-		err = d.updateAndGetShadow(transaction, shadow, &shd)
+func (d *DB) UpdateDesire(tx interface{}, shadow *models.Shadow) error {
+	var transaction *sqlx.Tx
+	if tx != nil {
+		transaction = tx.(*sqlx.Tx)
 	}
-	return shd, err
-}
-
-func (d *DB) updateAndGetShadow(tx *sqlx.Tx, input *models.Shadow, output **models.Shadow) error {
-	res, txErr := d.UpdateShadowDesireTx(tx, input)
-	if txErr != nil {
-		return txErr
-	}
-	if rows, _ := res.RowsAffected(); rows == 0 {
-		return errors.New(common.ErrUpdateCas)
-	}
-	*output, txErr = d.GetShadowTx(tx, input.Namespace, input.Name)
-	return txErr
+	_, err := d.UpdateShadowDesireTx(transaction, shadow)
+	return err
 }
 
 func (d *DB) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
