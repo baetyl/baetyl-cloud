@@ -149,8 +149,14 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
 	n.Namespace = ns
 
+	nodeType := "single"
+	if n.Cluster {
+		nodeType = "cluster"
+	}
 	n.Labels = common.AddSystemLabel(n.Labels, map[string]string{
 		common.LabelNodeName: n.Name,
+		common.LabelAccelerator: n.Accelerator,
+		common.LabelNodeType:    nodeType,
 	})
 
 	oldNode, err := api.Node.Get(nil, n.Namespace, n.Name)
@@ -210,8 +216,14 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	nodeType := "single"
+	if node.Cluster {
+		nodeType = "cluster"
+	}
 	node.Labels = common.AddSystemLabel(node.Labels, map[string]string{
 		common.LabelNodeName: node.Name,
+		common.LabelAccelerator: node.Accelerator,
+		common.LabelNodeType:    nodeType,
 	})
 	node.Version = oldNode.Version
 	node.Attributes = oldNode.Attributes
@@ -278,7 +290,17 @@ func (api *API) ToNodeView(node *v1.Node) (*v1.NodeView, error) {
 		return nil, err
 	}
 	t := time.Duration(frequency+OfflineDuration) * time.Second
-	return node.View(t)
+	view, err := node.View(t)
+	if err != nil {
+		return nil, err
+	}
+	// don not show LabelAccelerator LabelNodeType
+	lables := &view.Labels
+	if lables != nil {
+		delete(*lables, common.LabelAccelerator)
+		delete(*lables, common.LabelNodeType)
+	}
+	return view, nil
 }
 
 func (api *API) deleteAllSysAppsOfNode(node *v1.Node) (interface{}, error) {
