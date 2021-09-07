@@ -758,12 +758,15 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	api.SysApp = sSysApp
 
 	mNode := &specV1.Node{
-		Namespace: "default",
-		Name:      "abc",
+		Namespace:   "default",
+		Name:        "abc",
+		Accelerator: "abc",
 		Labels: map[string]string{
-			"tag":                "baidu",
-			common.LabelNodeName: "abc",
-			"test":               "test",
+			"tag":                   "baidu",
+			common.LabelNodeName:    "abc",
+			"test":                  "test",
+			common.LabelAccelerator: "abc",
+			common.LabelCluster:     "false",
 		},
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
@@ -816,6 +819,8 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
 			"test":               "test",
+			common.LabelCluster: "false",
+			common.LabelAccelerator: "",
 		},
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
@@ -860,6 +865,8 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
 			"test":               "test",
+			common.LabelCluster: "false",
+			common.LabelAccelerator: "",
 		},
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
@@ -969,12 +976,14 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode7.Namespace, appRule.Name, gomock.Any()).Return(nil).Times(1)
 
 	mNode9 := &specV1.Node{
-		Namespace: "default",
-		Name:      "abc",
+		Namespace:   "default",
+		Name:        "abc",
 		Labels: map[string]string{
-			"tag":                "baidu",
-			common.LabelNodeName: "abc",
-			"test":               "test",
+			"tag":                   "baidu",
+			common.LabelNodeName:    "abc",
+			"test":                  "test",
+			common.LabelAccelerator: "",
+			common.LabelCluster:     "false",
 		},
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
@@ -1057,9 +1066,11 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 		Namespace: "default",
 		Name:      "abc",
 		Labels: map[string]string{
-			"tag":                "baidu",
-			common.LabelNodeName: "abc",
-			"test":               "test",
+			"tag":                   "baidu",
+			common.LabelNodeName:    "abc",
+			"test":                  "test",
+			common.LabelAccelerator: specV1.NVAccelerator,
+			common.LabelCluster:     "false",
 		},
 		Accelerator: specV1.NVAccelerator,
 		Attributes: map[string]interface{}{
