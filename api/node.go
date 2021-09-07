@@ -28,7 +28,6 @@ const (
 	BaetylInitConfPrefix    = "baetyl-init-conf"
 	BaetylCoreContainerPort = 80
 	BaetylModule            = "baetyl"
-	DefaultMode             = "kube"
 	BaetylCoreAPIPort       = "BaetylCoreAPIPort"
 )
 
@@ -153,6 +152,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		common.LabelNodeName:    n.Name,
 		common.LabelAccelerator: n.Accelerator,
 		common.LabelCluster:     strconv.FormatBool(n.Cluster),
+		common.LabelNodeMode:    n.NodeMode,
 	})
 
 	oldNode, err := api.Node.Get(nil, n.Namespace, n.Name)
@@ -216,6 +216,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		common.LabelNodeName:    node.Name,
 		common.LabelAccelerator: node.Accelerator,
 		common.LabelCluster:     strconv.FormatBool(node.Cluster),
+		common.LabelNodeMode:    node.NodeMode,
 	})
 	node.Version = oldNode.Version
 	node.Attributes = oldNode.Attributes
@@ -223,6 +224,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	// Cluster cannot be updated, Mode can be updated via attribute
 	node.Cluster = oldNode.Cluster
 	node.Mode = oldNode.Mode
+	node.NodeMode = oldNode.NodeMode
 
 	if node.Accelerator != oldNode.Accelerator {
 		node.SysApps = common.UpdateSysAppByAccelerator(node.Accelerator, node.SysApps)
@@ -287,12 +289,10 @@ func (api *API) ToNodeView(node *v1.Node) (*v1.NodeView, error) {
 		return nil, err
 	}
 
-	// don not show LabelAccelerator LabelCluster
-	lables := view.Labels
-	if lables != nil {
-		delete(lables, common.LabelAccelerator)
-		delete(lables, common.LabelCluster)
-	}
+	delete(view.Labels, common.LabelAccelerator)
+	delete(view.Labels, common.LabelCluster)
+	delete(view.Labels, common.LabelNodeMode)
+
 	return view, nil
 }
 
@@ -352,14 +352,14 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	}
 	mode := c.Query("mode")
 	if mode == "" {
-		mode = DefaultMode
+		mode = v1.NodeModeKube
 	}
 	params := map[string]interface{}{
 		"mode": mode,
 	}
-	if mode == "kube" {
+	if mode == v1.NodeModeKube {
 		params["InitApplyYaml"] = "baetyl-init-deployment.yml"
-	} else if mode == "native" {
+	} else if mode == v1.NodeModeNative {
 		params["InitApplyYaml"] = "baetyl-init-apply.json"
 	} else {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("mode", mode))
@@ -392,6 +392,11 @@ func (api *API) ParseAndCheckNode(c *common.Context) (*v1.Node, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is required"))
 	}
 	err = api.checkNodeOptionalSysApps(node.SysApps)
+	if err != nil {
+		return nil, err
+	}
+
+	err = api.nodeModeParamCheck(node)
 	if err != nil {
 		return nil, err
 	}
@@ -653,11 +658,11 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) UpdateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string) error {
-	ns, name, oldSysApps := oldNode.Namespace, oldNode.Name, oldNode.SysApps
+	ns, oldSysApps := oldNode.Namespace, oldNode.SysApps
 
 	fresh, obsolete := api.filterSysApps(newSysApps, oldSysApps)
 
-	err := api.updateAddedSysApps(ns, name, fresh)
+	err := api.updateAddedSysApps(ns, oldNode, fresh)
 	if err != nil {
 		return err
 	}
@@ -686,6 +691,26 @@ func (api *API) checkNodeOptionalSysApps(apps []string) error {
 	return nil
 }
 
+func (api *API) nodeModeParamCheck(node *v1.Node) error {
+	if node.NodeMode == "" {
+		// if not set, default kube mode
+		node.NodeMode = v1.NodeModeKube
+		return nil
+	}
+	if node.NodeMode != v1.NodeModeKube && node.NodeMode != v1.NodeModeNative {
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "only kube or native is surpported with nodemode"))
+	}
+	if node.NodeMode == v1.NodeModeNative {
+		if node.Cluster {
+			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "cluster is not supported with native nodeMode"))
+		}
+		if node.Accelerator != "" {
+			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "accelerator is not supported with native nodeMode"))
+		}
+	}
+	return nil
+}
+
 func (api *API) getOptionalSysAppsInMap() (map[string]bool, error) {
 	supportApps, err := api.Module.ListOptionalSysModules(&models.Filter{})
 	if err != nil {
@@ -698,7 +723,7 @@ func (api *API) getOptionalSysAppsInMap() (map[string]bool, error) {
 	return m, nil
 }
 
-func (api *API) updateAddedSysApps(ns, node string, freshAppAlias []string) error {
+func (api *API) updateAddedSysApps(ns string, node *v1.Node, freshAppAlias []string) error {
 	if len(freshAppAlias) == 0 {
 		return nil
 	}

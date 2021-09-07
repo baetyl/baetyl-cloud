@@ -35,7 +35,7 @@ var (
 type SystemAppService interface {
 	GenApps(tx interface{}, ns string, nodeName *specV1.Node) ([]*specV1.Application, error)
 	GetOptionalApps() []string
-	GenOptionalApps(tx interface{}, ns string, nodeName string, apps []string) ([]*specV1.Application, error)
+	GenOptionalApps(tx interface{}, ns string, node *specV1.Node, apps []string) ([]*specV1.Application, error)
 }
 
 type GenAppsByOption func(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) ([]*specV1.Application, error)
@@ -97,8 +97,11 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 	params := map[string]interface{}{
 		"Namespace":                  ns,
 		"NodeName":                   node.Name,
+		"NodeMode":                   node.NodeMode,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
 		"GPUStats":                   node.Accelerator == specV1.NVAccelerator,
+		"DiskNetStats":               node.NodeMode == specV1.NodeModeKube,
+		"QPSStats":                   node.NodeMode == specV1.NodeModeKube,
 	}
 	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
 		err := handler.(HandlerPopulateParams)(tx, ns, params)
@@ -122,7 +125,7 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 	}
 	apps = append(apps, ca, ia, ba)
 
-	optionalSysApps, err := s.GenOptionalApps(tx, ns, node.Name, node.SysApps)
+	optionalSysApps, err := s.GenOptionalApps(tx, ns, node, node.SysApps)
 	if err != nil {
 		return nil, err
 	}
@@ -146,10 +149,11 @@ func (s *SystemAppServiceImpl) GetOptionalApps() []string {
 	return res
 }
 
-func (s *SystemAppServiceImpl) GenOptionalApps(tx interface{}, ns string, node string, appAlias []string) ([]*specV1.Application, error) {
+func (s *SystemAppServiceImpl) GenOptionalApps(tx interface{}, ns string, node *specV1.Node, appAlias []string) ([]*specV1.Application, error) {
 	params := map[string]interface{}{
 		"Namespace":                  ns,
 		"NodeName":                   node,
+		"NodeMode":                   node.NodeMode,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
 	}
 	if handler, ok := s.Hooks[HookNamePopulateOptAppsParams]; ok {
@@ -162,7 +166,7 @@ func (s *SystemAppServiceImpl) GenOptionalApps(tx interface{}, ns string, node s
 	var apps []*specV1.Application
 	for _, v := range appAlias {
 		if f, ok := s.OptionalAppFuncs[v]; ok {
-			app, err := f(tx, ns, node, params)
+			app, err := f(tx, ns, node.Name, params)
 			if err != nil {
 				return nil, err
 			}

@@ -758,14 +758,14 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	api.SysApp = sSysApp
 
 	mNode := &specV1.Node{
-		Namespace:   "default",
-		Name:        "abc",
-		Accelerator: "abc",
+		Namespace: "default",
+		Name:      "abc",
 		Labels: map[string]string{
 			"tag":                   "baidu",
 			common.LabelNodeName:    "abc",
+			common.LabelNodeMode:    specV1.NodeModeKube,
 			"test":                  "test",
-			common.LabelAccelerator: "abc",
+			common.LabelAccelerator: "",
 			common.LabelCluster:     "false",
 		},
 		Attributes: map[string]interface{}{
@@ -789,6 +789,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
+			common.LabelNodeMode: specV1.NodeModeKube,
 			"test":               "test",
 		},
 		Attributes: map[string]interface{}{
@@ -816,10 +817,11 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Namespace: "default",
 		Name:      "abc",
 		Labels: map[string]string{
-			"tag":                "baidu",
-			common.LabelNodeName: "abc",
-			"test":               "test",
-			common.LabelCluster: "false",
+			"tag":                   "baidu",
+			common.LabelNodeName:    "abc",
+			common.LabelNodeMode:    specV1.NodeModeKube,
+			"test":                  "test",
+			common.LabelCluster:     "false",
 			common.LabelAccelerator: "",
 		},
 		Attributes: map[string]interface{}{
@@ -841,9 +843,12 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Namespace: "default",
 		Name:      "abc",
 		Labels: map[string]string{
-			"tag":                "baidu",
-			common.LabelNodeName: "abc",
-			"test":               "test",
+			"tag":                   "baidu",
+			common.LabelNodeName:    "abc",
+			common.LabelNodeMode:    specV1.NodeModeKube,
+			"test":                  "test",
+			common.LabelAccelerator: "",
+			common.LabelCluster:     "false",
 		},
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
@@ -853,7 +858,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 
 	sNode.EXPECT().Get(nil, mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
 	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
-	sSysApp.EXPECT().GenOptionalApps(nil, mNode.Namespace, mNode.Name, []string{"a"}).Times(1)
+	sSysApp.EXPECT().GenOptionalApps(nil, mNode.Namespace, mNode, []string{"a"}).Times(1)
 	nodeList := []string{"abc"}
 	sNode.EXPECT().UpdateNodeAppVersion(nil, mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
@@ -862,10 +867,11 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Namespace: "default",
 		Name:      "abc",
 		Labels: map[string]string{
-			"tag":                "baidu",
-			common.LabelNodeName: "abc",
-			"test":               "test",
-			common.LabelCluster: "false",
+			"tag":                   "baidu",
+			common.LabelNodeName:    "abc",
+			common.LabelNodeMode:    specV1.NodeModeKube,
+			"test":                  "test",
+			common.LabelCluster:     "false",
 			common.LabelAccelerator: "",
 		},
 		Attributes: map[string]interface{}{
@@ -882,6 +888,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
+			common.LabelNodeMode: specV1.NodeModeKube,
 			"test":               "test",
 		},
 		Attributes: map[string]interface{}{
@@ -931,6 +938,7 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
+			common.LabelNodeMode: specV1.NodeModeKube,
 			"test":               "test",
 		},
 		Attributes: map[string]interface{}{
@@ -976,11 +984,12 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode7.Namespace, appRule.Name, gomock.Any()).Return(nil).Times(1)
 
 	mNode9 := &specV1.Node{
-		Namespace:   "default",
-		Name:        "abc",
+		Namespace: "default",
+		Name:      "abc",
 		Labels: map[string]string{
 			"tag":                   "baidu",
 			common.LabelNodeName:    "abc",
+			common.LabelNodeMode:    specV1.NodeModeKube,
 			"test":                  "test",
 			common.LabelAccelerator: "",
 			common.LabelCluster:     "false",
@@ -998,6 +1007,7 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
+			common.LabelNodeMode: specV1.NodeModeKube,
 			"test":               "test",
 		},
 		Attributes: map[string]interface{}{
@@ -1038,6 +1048,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
+			common.LabelNodeMode: specV1.NodeModeKube,
 			"test":               "test",
 		},
 		Attributes: map[string]interface{}{
@@ -1068,6 +1079,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                   "baidu",
 			common.LabelNodeName:    "abc",
+			common.LabelNodeMode:    specV1.NodeModeKube,
 			"test":                  "test",
 			common.LabelAccelerator: specV1.NVAccelerator,
 			common.LabelCluster:     "false",
@@ -1115,7 +1127,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 	}
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
-	sSysApp.EXPECT().GenOptionalApps(nil, mNode.Namespace, mNode.Name, []string{specV1.BaetylGPUMetrics}).Times(1)
+	sSysApp.EXPECT().GenOptionalApps(nil, mNode.Namespace, mNode, []string{specV1.BaetylGPUMetrics}).Times(1)
 	nodeList := []string{"abc"}
 	sNode.EXPECT().UpdateNodeAppVersion(nil, mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, gomock.Any(), nodeList).AnyTimes()

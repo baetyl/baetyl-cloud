@@ -5,7 +5,7 @@ labels:
   baetyl-cloud-system: "true"
   resource-invisible: "true"
 type: "container"
-mode: "kube"
+mode: "{{.NodeMode}}"
 system: true
 services:
   - name: "baetyl-init"

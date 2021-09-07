@@ -122,7 +122,7 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 		"baetyl-rule":     is.genRuleApp,
 	}
 
-	out, err := is.GenOptionalApps(gomock.Any(), "ns", node.Name, node.SysApps)
+	out, err := is.GenOptionalApps(gomock.Any(), "ns", node, node.SysApps)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(out))
 }

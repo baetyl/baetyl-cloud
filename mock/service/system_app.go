@@ -49,7 +49,7 @@ func (mr *MockSystemAppServiceMockRecorder) GenApps(arg0, arg1, arg2 interface{}
 }
 
 // GenOptionalApps mocks base method
-func (m *MockSystemAppService) GenOptionalApps(arg0 interface{}, arg1, arg2 string, arg3 []string) ([]*v1.Application, error) {
+func (m *MockSystemAppService) GenOptionalApps(arg0 interface{}, arg1 string, arg2 *v1.Node, arg3 []string) ([]*v1.Application, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenOptionalApps", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].([]*v1.Application)

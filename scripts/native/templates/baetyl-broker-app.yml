@@ -4,7 +4,7 @@ selector: "baetyl-node-name={{.NodeName}}"
 labels:
   baetyl-cloud-system: "true"
 type: "container"
-mode: "kube"
+mode: "{{.NodeMode}}"
 system: true
 services:
   - name: "baetyl-broker"
