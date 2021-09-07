@@ -117,7 +117,8 @@ const (
 	LabelSystem      = "baetyl-cloud-system"
 	LabelBatch       = "baetyl-batch"
 	LabelAccelerator = "baetyl-accelerator"
-	LabelCluster	 = "baetyl-cluster"
+	LabelCluster     = "baetyl-cluster"
+	LabelNodeMode    = "baetyl-node-mode"
 )
 
 const (

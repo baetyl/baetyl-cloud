@@ -65,6 +65,11 @@ func toNodeModel(node *v1alpha1.Node) *specV1.Node {
 			n.Mode = specV1.SyncMode(mode)
 		}
 	}
+	if val, ok := n.Attributes[specV1.KeyNodeMode]; ok {
+		if nodeMode, ok := val.(string); ok {
+			n.NodeMode = nodeMode
+		}
+	}
 	return n
 }
 
@@ -110,6 +115,7 @@ func fromNodeModel(node *specV1.Node) (*v1alpha1.Node, error) {
 	}
 	node.Attributes[specV1.KeyOptionalSysApps] = node.SysApps
 	node.Attributes[specV1.KeyAccelerator] = node.Accelerator
+	node.Attributes[specV1.KeyNodeMode] = node.NodeMode
 	// set default value
 	if _, ok := node.Attributes[specV1.BaetylCoreFrequency]; !ok {
 		node.Attributes[specV1.BaetylCoreFrequency] = common.DefaultCoreFrequency

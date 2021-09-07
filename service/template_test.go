@@ -13,6 +13,7 @@ import (
 var params = map[string]interface{}{
 	"Namespace":                  "ns-1",
 	"NodeName":                   "node-name-1",
+	"NodeMode":                   "kube",
 	"InitAppName":                "init-app-1",
 	"InitVersion":                "init-version-1",
 	"CoreAppName":                "core-app-1",
