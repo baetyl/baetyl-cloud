@@ -116,6 +116,8 @@ const (
 	LabelAppName     = "baetyl-app-name"
 	LabelSystem      = "baetyl-cloud-system"
 	LabelBatch       = "baetyl-batch"
+	LabelAccelerator = "baetyl-accelerator"
+	LabelCluster	 = "baetyl-cluster"
 )
 
 const (
