@@ -152,7 +152,7 @@ func (s *SystemAppServiceImpl) GetOptionalApps() []string {
 func (s *SystemAppServiceImpl) GenOptionalApps(tx interface{}, ns string, node *specV1.Node, appAlias []string) ([]*specV1.Application, error) {
 	params := map[string]interface{}{
 		"Namespace":                  ns,
-		"NodeName":                   node,
+		"NodeName":                   node.Name,
 		"NodeMode":                   node.NodeMode,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
 	}
