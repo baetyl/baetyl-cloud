@@ -198,12 +198,12 @@ var (
 	// Todo use global.go
 	Cache          map[string]string
 	FingerprintMap = map[int]string{
-		0x1:  "sn",
-		0x2:  "input",
-		0x4:  "hostName",
-		0x8:  "bootID",
-		0x10: "systemUUID",
-		0x20: "machineID",
+		FingerprintSN:         "sn",
+		FingerprintInput:      "input",
+		FingerprintHostName:   "hostName",
+		FingerprintBootID:     "bootID",
+		FingerprintSystemUUID: "systemUUID",
+		FingerprintMachineID:  "machineID",
 	}
 )
 
