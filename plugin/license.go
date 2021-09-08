@@ -7,6 +7,7 @@ import "io"
 const (
 	QuotaNode  = "maxNodeCount"
 	QuotaBatch = "maxBatchCount"
+	MenuEnable = "menuEnable"
 )
 
 type QuotaCollector func(namespace string) (map[string]int, error)

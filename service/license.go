@@ -12,7 +12,7 @@ type LicenseService interface {
 	CheckQuota(namespace string, collector plugin.QuotaCollector) error
 }
 
-type licenseService struct {
+type LicenseServiceImpl struct {
 	plugin.License
 }
 
@@ -22,12 +22,12 @@ func NewLicenseService(config *config.CloudConfig) (LicenseService, error) {
 		return nil, err
 	}
 
-	return &licenseService{
+	return &LicenseServiceImpl{
 		l.(plugin.License),
 	}, nil
 }
 
-func (l *licenseService) CheckQuota(namespace string, collector plugin.QuotaCollector) error {
+func (l *LicenseServiceImpl) CheckQuota(namespace string, collector plugin.QuotaCollector) error {
 	limits, err := l.GetQuota(namespace)
 	if err != nil {
 		return err
