@@ -446,6 +446,7 @@ func (api *API) ToApplicationListView(apps *models.ApplicationList) {
 		if apps.Items[i].Mode == "" {
 			apps.Items[i].Mode = context.RunModeKube
 		}
+		delete(apps.Items[i].Labels, common.LabelAppMode)
 	}
 }
 
