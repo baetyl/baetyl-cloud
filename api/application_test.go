@@ -788,13 +788,17 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		Description: "",
 		System:      false,
 	}
+	app1 := app
+	app1.Labels = map[string]string{
+		common.LabelAppMode: context.RunModeKube,
+	}
 
 	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	fApp.EXPECT().CreateApp(appView.Namespace, nil, app, gomock.Any()).Return(app, nil)
+	fApp.EXPECT().CreateApp(appView.Namespace, nil, app, gomock.Any()).Return(app1, nil)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secretRegistry, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secretCertificate, nil).Times(1)
@@ -853,10 +857,16 @@ func TestUpdateContainerApplication(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	mApp2 := getMockContainerApp()
-	mApp2.Selector = "name = test"
+	mApp3 := mApp2
+	mApp3.Selector = "name = test"
+	mApp3.Mode = context.RunModeKube
+	mApp3.Labels = map[string]string{
+		common.LabelAppMode: context.RunModeKube,
+	}
+	mApp3.Services[0].Type = "deployment"
 
 	sApp.EXPECT().Get(gomock.Any(), "abc", gomock.Any()).Return(mApp, nil).AnyTimes()
-	fApp.EXPECT().UpdateApp(mApp.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(mApp2, nil)
+	fApp.EXPECT().UpdateApp(mApp.Namespace, gomock.Any(), mApp2, gomock.Any()).Return(mApp3, nil)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mApp2)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/apps/abc", bytes.NewReader(body))
