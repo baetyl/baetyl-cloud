@@ -187,3 +187,67 @@ func TestShadowTx(t *testing.T) {
 	err = tx.Commit()
 	assert.NoError(t, err)
 }
+
+func TestBatchShadows(t *testing.T)  {
+	db, err := MockNewDB()
+	assert.NoError(t, err)
+	db.MockCreateShadowTable()
+
+	namespace := "test"
+	shadow1 := &models.Shadow{
+		Namespace: namespace,
+		Name:      "node01",
+		Desire: v1.Desire{
+			"apps": []v1.AppInfo{
+				{
+					Name:    "app01",
+					Version: "1",
+				},
+			},
+		},
+		Report: v1.Report{},
+		ReportMeta: map[string]interface{}{},
+		DesireMeta: map[string]interface{}{},
+	}
+
+	shadow2 := &models.Shadow{
+		Namespace: namespace,
+		Name:      "node02",
+		Desire: v1.Desire{
+			"apps": []v1.AppInfo{
+				{
+					Name:    "app01",
+					Version: "1",
+				},
+			},
+		},
+		Report: v1.Report{},
+		ReportMeta: map[string]interface{}{},
+		DesireMeta: map[string]interface{}{},
+	}
+
+	tx, err := db.BeginTx()
+	assert.NoError(t, err)
+
+	_, err = db.Create(tx, shadow1)
+	assert.NoError(t, err)
+
+	_, err = db.Create(tx, shadow2)
+	assert.NoError(t, err)
+
+	names := []string{shadow1.Name, shadow2.Name}
+	_, err = db.ListShadowByNames(tx, namespace, nil)
+	assert.NoError(t, err)
+	shadows, err := db.ListShadowByNames(tx, namespace, names)
+	assert.NoError(t, err)
+	assert.Equal(t, len(shadows), 2)
+
+	err = tx.Commit()
+	assert.NoError(t, err)
+
+	updateShadows := []*models.Shadow{shadow1, shadow2}
+	err = db.UpdateDesires(nil, nil)
+	assert.NoError(t, err)
+	err = db.UpdateDesires(nil, updateShadows)
+	assert.NotNil(t, err)
+}

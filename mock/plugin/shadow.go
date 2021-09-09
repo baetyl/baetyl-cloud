@@ -106,6 +106,21 @@ func (mr *MockShadowMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockShadow)(nil).List), arg0, arg1)
 }
 
+// ListShadowByNames mocks base method
+func (m *MockShadow) ListShadowByNames(arg0 interface{}, arg1 string, arg2 []string) ([]*models.Shadow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListShadowByNames", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]*models.Shadow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListShadowByNames indicates an expected call of ListShadowByNames
+func (mr *MockShadowMockRecorder) ListShadowByNames(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListShadowByNames", reflect.TypeOf((*MockShadow)(nil).ListShadowByNames), arg0, arg1, arg2)
+}
+
 // UpdateDesire mocks base method
 func (m *MockShadow) UpdateDesire(arg0 interface{}, arg1 *models.Shadow) error {
 	m.ctrl.T.Helper()
@@ -118,6 +133,20 @@ func (m *MockShadow) UpdateDesire(arg0 interface{}, arg1 *models.Shadow) error {
 func (mr *MockShadowMockRecorder) UpdateDesire(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDesire", reflect.TypeOf((*MockShadow)(nil).UpdateDesire), arg0, arg1)
+}
+
+// UpdateDesires mocks base method
+func (m *MockShadow) UpdateDesires(arg0 interface{}, arg1 []*models.Shadow) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateDesires", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateDesires indicates an expected call of UpdateDesires
+func (mr *MockShadowMockRecorder) UpdateDesires(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDesires", reflect.TypeOf((*MockShadow)(nil).UpdateDesires), arg0, arg1)
 }
 
 // UpdateReport mocks base method

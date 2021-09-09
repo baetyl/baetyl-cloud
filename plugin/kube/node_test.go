@@ -288,7 +288,7 @@ func TestUpdateNodeDesire(t *testing.T) {
 		Name:      name,
 		Desire:    genDesire(),
 	}
-	_, err := c.UpdateDesire(nil, shadow)
+	err := c.UpdateDesire(nil, shadow)
 	assert.Error(t, err)
 
 	shadow = &models.Shadow{
@@ -296,7 +296,7 @@ func TestUpdateNodeDesire(t *testing.T) {
 		Name:      "test-update",
 		Desire:    genDesire(),
 	}
-	_, err = c.UpdateDesire(nil, shadow)
+	err = c.UpdateDesire(nil, shadow)
 	assert.Error(t, err)
 
 	shadow = &models.Shadow{
@@ -304,10 +304,8 @@ func TestUpdateNodeDesire(t *testing.T) {
 		Name:      "test-create01",
 		Desire:    genDesire(),
 	}
-	n, err := c.UpdateDesire(nil, shadow)
+	err = c.UpdateDesire(nil, shadow)
 	assert.NoError(t, err)
-	assert.Equal(t, shadow.Name, n.Name)
-
 }
 
 func TestUpdateNodeReport(t *testing.T) {
