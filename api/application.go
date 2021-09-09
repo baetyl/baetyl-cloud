@@ -336,6 +336,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 	populateAppDefaultField(appView)
 
 	if app.Type != common.FunctionApp {
+		delete(appView.Labels, common.LabelAppMode)
 		return appView, nil
 	}
 	for index := range appView.Services {
