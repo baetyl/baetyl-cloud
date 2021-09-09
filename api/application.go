@@ -370,6 +370,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 
 		populateFunctionVolumeMount(service)
 	}
+	delete(appView.Labels, common.LabelAppMode)
 	return appView, nil
 }
 
@@ -621,6 +622,10 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 	if app.CronStatus == specV1.CronWait && app.CronTime.Before(time.Now()) {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "failed to add cron job, time should be set after now"))
 	}
+
+	app.Labels = common.AddSystemLabel(app.Labels, map[string]string{
+		common.LabelAppMode: app.Mode,
+	})
 	return nil
 }
 

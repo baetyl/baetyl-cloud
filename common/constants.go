@@ -119,6 +119,7 @@ const (
 	LabelAccelerator = "baetyl-accelerator"
 	LabelCluster     = "baetyl-cluster"
 	LabelNodeMode    = "baetyl-node-mode"
+	LabelAppMode     = "baetyl-app-mode"
 )
 
 const (
