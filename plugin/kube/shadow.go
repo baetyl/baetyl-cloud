@@ -101,6 +101,21 @@ func (c *client) List(namespace string, nodeList *models.NodeList) (*models.Shad
 	return toShadowListModel(nodeList, toDesireMap(deisres), toReportMap(reports)), nil
 }
 
+func (c *client) ListShadowByNames(tx interface{}, namespace string, names []string) ([]*models.Shadow, error) {
+	if names == nil || len(names) < 1 {
+		return nil, nil
+	}
+	var shadows []*models.Shadow
+	for _, name := range names {
+		shd, err := c.Get(tx, namespace, name)
+		if err != nil {
+			return nil, err
+		}
+		shadows = append(shadows, shd)
+	}
+	return shadows, nil
+}
+
 func (c *client) Delete(namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "shadow Delete")()
 	err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Delete(name, &metav1.DeleteOptions{})
@@ -122,33 +137,38 @@ func (c *client) Delete(namespace, name string) error {
 	return err
 }
 
-func (c *client) UpdateDesire(tx interface{}, shadow *models.Shadow) (*models.Shadow, error) {
+func (c *client) UpdateDesire(tx interface{}, shadow *models.Shadow) error {
 	desire, err := toDesire(shadow)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer utils.Trace(c.log.Debug, "shadow UpdateDesire")()
 	d, err := c.customClient.CloudV1alpha1().NodeDesires(shadow.Namespace).Get(desire.Name, metav1.GetOptions{})
 	if err != nil {
 		log.L().Error("get node desire error", log.Error(err))
-		return nil, err
+		return err
 	}
 	desire.ResourceVersion = d.ResourceVersion
 	desire.Labels = d.Labels
 	desire, err = c.customClient.CloudV1alpha1().NodeDesires(shadow.Namespace).Update(desire)
 	if err != nil {
 		log.L().Error("update node desire error", log.Error(err))
-		return nil, err
+		return err
 	}
+	return nil
+}
 
-	shd := &models.Shadow{
-		Name:              d.Name,
-		Namespace:         d.Namespace,
-		CreationTimestamp: d.CreationTimestamp.Time.UTC(),
+func (c *client) UpdateDesires(tx interface{}, shadows []*models.Shadow) error {
+	if shadows == nil || len(shadows) < 1 {
+		return nil
 	}
-
-	shd.Desire = fromDesire(desire)
-	return shd, nil
+	for _, shadow := range shadows {
+		err := c.UpdateDesire(nil, shadow)
+		if err != nil {
+			return nil
+		}
+	}
+	return nil
 }
 
 func (c *client) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {

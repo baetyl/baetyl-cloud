@@ -34,7 +34,7 @@ type NodeService interface {
 	Delete(namespace, name string) error
 
 	UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error)
-	UpdateDesire(tx interface{}, namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) error
+	UpdateDesire(tx interface{}, namespace string, names []string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) error
 
 	GetDesire(namespace, name string) (*specV1.Desire, error)
 
@@ -314,19 +314,16 @@ func (n *NodeServiceImpl) updateReportNodeProperties(ns, name string, report spe
 
 // UpdateDesire Update Desire
 // Parameter f can be RefreshNodeDesireByApp or DeleteNodeDesireByApp
-func (n *NodeServiceImpl) UpdateDesire(tx interface{}, namespace, name string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) error {
-	newShadow, err := n.Shadow.Get(tx, namespace, name)
+func (n *NodeServiceImpl) UpdateDesire(tx interface{}, namespace string, names []string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) error {
+	shadows, err := n.Shadow.ListShadowByNames(tx, namespace, names)
 	if err != nil {
 		return err
 	}
-
-	if newShadow == nil {
-		newShadow, err = n.createShadow(tx, namespace, name, specV1.Desire{}, nil)
+	for _, shadow := range shadows {
+		// Refresh desire in Shadow by app
+		f(shadow, app)
 	}
-
-	// Refresh desire in Shadow by app
-	f(newShadow, app)
-	return n.Shadow.UpdateDesire(tx, newShadow)
+	return n.Shadow.UpdateDesires(tx, shadows)
 }
 
 func (n *NodeServiceImpl) updateDesire(tx interface{}, shadow *models.Shadow, desire specV1.Desire) error {
@@ -438,10 +435,10 @@ func (n *NodeServiceImpl) UpdateNodeAppVersion(tx interface{}, namespace string,
 	for idx := range nodeList.Items {
 		node := &nodeList.Items[idx]
 		nodes = append(nodes, node.Name)
-		err = n.UpdateDesire(tx, node.Namespace, node.Name, app, RefreshNodeDesireByApp)
-		if err != nil {
-			return nil, err
-		}
+	}
+	err = n.UpdateDesire(tx, namespace, nodes, app, RefreshNodeDesireByApp)
+	if err != nil {
+		return nil, err
 	}
 	return nodes, nil
 }
@@ -477,11 +474,10 @@ func (n *NodeServiceImpl) DeleteNodeAppVersion(tx interface{}, namespace string,
 	for idx := range nodeList.Items {
 		node := &nodeList.Items[idx]
 		nodes = append(nodes, node.Name)
-
-		err = n.UpdateDesire(tx, node.Namespace, node.Name, app, DeleteNodeDesireByApp)
-		if err != nil {
-			return nil, err
-		}
+	}
+	err = n.UpdateDesire(tx, namespace, nodes, app, DeleteNodeDesireByApp)
+	if err != nil {
+		return nil, err
 	}
 
 	return nodes, nil

@@ -275,7 +275,6 @@ func TestUpdateNodeAppVersion(t *testing.T) {
 		Version: "1234",
 	}
 	node := genNodeTestCase()
-	shadow := genShadowTestCase()
 
 	_, err := ss.UpdateNodeAppVersion(nil, node.Namespace, app)
 	assert.NoError(t, err)
@@ -374,20 +373,17 @@ func TestUpdateNodeAppVersion(t *testing.T) {
 		},
 	}
 
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
-	mockObject.node.EXPECT().ListNode(nil, node.Namespace, gomock.Any()).Return(nodeList, nil)
-	mockObject.node.EXPECT().UpdateNode(nil, gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
-	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	var shadows []*models.Shadow
+	for i := 0; i < shadowList.Total; i++ {
+		shadows = append(shadows, &shadowList.Items[i])
+	}
+	mockObject.node.EXPECT().ListNode(nil, node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	mockObject.shadow.EXPECT().ListShadowByNames(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadows, nil).AnyTimes()
+	mockObject.shadow.EXPECT().UpdateDesires(gomock.Any(), gomock.Any()).Return(fmt.Errorf("update error"))
 	_, err = ss.UpdateNodeAppVersion(nil, node.Namespace, app)
 	assert.NotNil(t, err)
 
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(&shadowList.Items[2], nil).AnyTimes()
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
-	mockObject.node.EXPECT().ListNode(nil, node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
-	mockObject.node.EXPECT().GetNode(nil, gomock.Any(), gomock.Any()).Return(&nodeList.Items[0], nil).AnyTimes()
-	_, err = ss.UpdateNodeAppVersion(nil, node.Namespace, app)
-	assert.NoError(t, err)
-
+	mockObject.shadow.EXPECT().UpdateDesires(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 	app.Labels = map[string]string{
 		common.LabelSystem: app.Name,
 	}
@@ -410,7 +406,6 @@ func TestDeleteNodeAppVersion(t *testing.T) {
 		Version: "1234",
 	}
 	node := genNodeTestCase()
-	shadow := genShadowTestCase()
 
 	_, err := ss.DeleteNodeAppVersion(nil, node.Namespace, app)
 	assert.NoError(t, err)
@@ -420,10 +415,6 @@ func TestDeleteNodeAppVersion(t *testing.T) {
 	mockObject.node.EXPECT().ListNode(nil, node.Namespace, gomock.Any()).Return(nil, fmt.Errorf("error")).Times(1)
 	_, err = ss.DeleteNodeAppVersion(nil, node.Namespace, app)
 	assert.Equal(t, fmt.Errorf("error"), err)
-
-	mockObject.node.EXPECT().ListNode(nil, node.Namespace, gomock.Any()).Return(&models.NodeList{}, nil).Times(1)
-	_, err = ss.DeleteNodeAppVersion(nil, node.Namespace, app)
-	assert.NoError(t, err)
 
 	nodeList := &models.NodeList{
 		Items: []specV1.Node{
@@ -513,28 +504,21 @@ func TestDeleteNodeAppVersion(t *testing.T) {
 		},
 	}
 
-	mockObject.shadow.EXPECT().List(node.Namespace, gomock.Any()).Return(shadowList, nil).AnyTimes()
-
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
-	mockObject.node.EXPECT().ListNode(nil, node.Namespace, gomock.Any()).Return(nodeList, nil)
-	mockObject.node.EXPECT().UpdateNode(nil, gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
-	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	var shadows []*models.Shadow
+	for i := 0; i < shadowList.Total; i++ {
+		shadows = append(shadows, &shadowList.Items[i])
+	}
+	mockObject.node.EXPECT().ListNode(nil, node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	mockObject.shadow.EXPECT().ListShadowByNames(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadows, nil).AnyTimes()
+	mockObject.shadow.EXPECT().UpdateDesires(gomock.Any(), shadows).Return(fmt.Errorf("error"))
 	_, err = ss.DeleteNodeAppVersion(nil, node.Namespace, app)
 	assert.Equal(t, fmt.Errorf("error"), err)
-
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(&shadowList.Items[2], nil).AnyTimes()
-
-	mockObject.node.EXPECT().ListNode(nil, node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
-	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	_, err = ss.DeleteNodeAppVersion(nil, node.Namespace, app)
-	assert.NoError(t, err)
 
 	app.Labels = map[string]string{
 		common.LabelSystem: app.Name,
 	}
 	mockObject.node.EXPECT().ListNode(nil, node.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
-	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockObject.shadow.EXPECT().UpdateDesires(gomock.Any(), gomock.Any()).Return(nil)
 	_, err = ss.DeleteNodeAppVersion(nil, node.Namespace, app)
 	assert.NoError(t, err)
 }
@@ -747,24 +731,23 @@ func TestUpdateDesired(t *testing.T) {
 	}
 
 	namespace := "test"
-	name := "node01"
+	names := []string{"node01"}
+	listErr := errors.New("failed to Found")
 
-	shadow := genShadowTestCase()
-	shadow.Name = name
-	shadow.Namespace = namespace
+	shadows := []*models.Shadow{genShadowTestCase()}
+	shadows[0].Name = names[0]
+	shadows[0].Namespace = namespace
 	app, _ := genAppTestCase()
 
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil)
-	mockObject.shadow.EXPECT().Create(gomock.Any(), gomock.Any()).Return(shadow, nil)
-	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil)
+	mockObject.shadow.EXPECT().ListShadowByNames(gomock.Any(), namespace, names).Return(nil, listErr)
 
-	err := ns.UpdateDesire(nil, namespace, name, app, RefreshNodeDesireByApp)
-	assert.NoError(t, err)
+	err := ns.UpdateDesire(nil, namespace, names, app, RefreshNodeDesireByApp)
+	assert.Error(t, err, listErr)
 
-	mockObject.shadow.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
-	mockObject.shadow.EXPECT().UpdateDesire(gomock.Any(), gomock.Any()).Return(nil)
+	mockObject.shadow.EXPECT().ListShadowByNames(gomock.Any(), namespace, names).Return(shadows, nil)
+	mockObject.shadow.EXPECT().UpdateDesires(gomock.Any(), shadows).Return(nil)
 
-	err = ns.UpdateDesire(nil, namespace, name, app, RefreshNodeDesireByApp)
+	err = ns.UpdateDesire(nil, namespace, names, app, RefreshNodeDesireByApp)
 	assert.NoError(t, err)
 }
 

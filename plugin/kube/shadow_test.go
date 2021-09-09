@@ -135,6 +135,13 @@ func TestClient_List(t *testing.T) {
 	assert.Equal(t, 2, len(list.Items))
 	assert.Equal(t, "node01", list.Items[0].Name)
 	assert.Equal(t, "node02", list.Items[1].Name)
+
+	names := []string{"node01", "node02"}
+	_,  err = c.ListShadowByNames(nil, namespace, nil)
+	assert.NoError(t, err)
+	listNames, err := c.ListShadowByNames(nil, namespace, names)
+	assert.NoError(t, err)
+	assert.Equal(t, len(listNames), 2)
 }
 
 func TestClient_Delete(t *testing.T) {
@@ -161,9 +168,14 @@ func TestClient_UpdateDesire(t *testing.T) {
 			Version: "1",
 		},
 	}
-	shd, err := c.UpdateDesire(nil, shadow)
+	err := c.UpdateDesire(nil, shadow)
 	assert.NoError(t, err)
-	assert.Equal(t, "app01", shd.Desire.AppInfos(false)[0].Name)
+
+	shadows := []*models.Shadow{shadow}
+	err = c.UpdateDesires(nil, nil)
+	assert.NoError(t, err)
+	err = c.UpdateDesires(nil, shadows)
+	assert.NoError(t, err)
 }
 
 func TestClient_UpdateReport(t *testing.T) {

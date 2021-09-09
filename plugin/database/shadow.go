@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -71,6 +72,17 @@ func (d *DB) List(namespace string, nodeList *models.NodeList) (*models.ShadowLi
 	return result, nil
 }
 
+func (d *DB) ListShadowByNames(tx interface{}, namespace string, names []string) ([]*models.Shadow, error) {
+	if names == nil || len(names) < 1 {
+		return nil, nil
+	}
+	var transaction *sqlx.Tx
+	if tx != nil {
+		transaction = tx.(*sqlx.Tx)
+	}
+	return d.listShadowByNamesTx(transaction, namespace, names)
+}
+
 func (d *DB) Delete(namespace, name string) error {
 	_, err := d.DeleteShadowTx(nil, namespace, name)
 	return err
@@ -97,6 +109,70 @@ func (d *DB) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
 	})
 
 	return shd, err
+}
+
+func (d *DB) UpdateDesires(tx interface{}, shadows []*models.Shadow) error {
+	if shadows == nil || len(shadows) < 1 {
+		return nil
+	}
+	var err error
+	if tx == nil {
+		err = d.Transact(func(transaction *sqlx.Tx) error {
+			_, updateErr := d.updateDesiresTx(transaction, shadows)
+			return updateErr
+		})
+	} else {
+		transaction := tx.(*sqlx.Tx)
+		_, err = d.updateDesiresTx(transaction, shadows)
+	}
+	return err
+}
+
+func (d *DB) updateDesiresTx(tx *sqlx.Tx, shadows []*models.Shadow) (sql.Result, error) {
+	insertSQL := `INSERT INTO baetyl_node_shadow(name,namespace,desire,desire_version,desire_meta) VALUES `
+	params := []interface{}{}
+	for _, shadow := range shadows {
+		insertSQL += `(?,?,?,?,?),`
+		desire, err := shadow.GetDesireString()
+		if err != nil {
+			return nil, err
+		}
+		desireMeta, err := shadow.GetDesireMetaString()
+		if err != nil {
+			return nil, err
+		}
+		params = append(params, shadow.Name, shadow.Namespace, desire, genResourceVersion(), desireMeta)
+	}
+	insertSQL = strings.TrimRight(insertSQL, ",")
+	insertSQL += `
+ON DUPLICATE KEY UPDATE 
+name=VALUES(name),namespace=VALUES(namespace),
+desire=VALUES(desire),desire_version=VALUES(desire_version),desire_meta=VALUES(desire_meta)
+`
+	return d.Exec(tx, insertSQL, params...)
+}
+
+func (d *DB) listShadowByNamesTx(tx *sqlx.Tx, namespace string, names []string) ([]*models.Shadow, error) {
+	selectSQL := `
+SELECT id, name, namespace, report, desire, report_meta, desire_meta, create_time, update_time, desire_version 
+FROM baetyl_node_shadow WHERE namespace=? AND name IN (?)`
+	qry, args, err := sqlx.In(selectSQL, namespace, names)
+	if err != nil {
+		return nil, err
+	}
+	var shadows []entities.Shadow
+	if err = d.Query(tx, qry, &shadows, args...); err != nil {
+		return nil, err
+	}
+	var res []*models.Shadow
+	for _, shadow := range shadows {
+		s, transErr := shadow.ToShadowModel()
+		if err != nil {
+			return nil, transErr
+		}
+		res = append(res, s)
+	}
+	return res, nil
 }
 
 func (d *DB) GetShadowTx(tx *sqlx.Tx, namespace, name string) (*models.Shadow, error) {
