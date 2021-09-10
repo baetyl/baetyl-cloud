@@ -1099,14 +1099,17 @@ func (api *API) getCoreAppFrequency(node *v1.Node) (int, error) {
 }
 
 func (api *API) UpdateConfigByAccelerator(ns string, node *v1.Node) error {
-	sysApps := node.Desire.AppInfos(true)
+	appList, err := api.Index.ListAppsByNode(ns, node.Name)
+	if err != nil {
+		return err
+	}
 	var coreName string
 	var initName string
-	for _, item := range sysApps {
-		if strings.Contains(item.Name, v1.BaetylCore) {
-			coreName = item.Name
-		} else if strings.Contains(item.Name, v1.BaetylInit) {
-			initName = item.Name
+	for _, app := range appList {
+		if strings.Contains(app, v1.BaetylCore) {
+			coreName = app
+		} else if strings.Contains(app, v1.BaetylInit) {
+			initName = app
 		}
 	}
 	core, err := api.App.Get(ns, coreName, "")

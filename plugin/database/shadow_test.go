@@ -188,7 +188,7 @@ func TestShadowTx(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestBatchShadows(t *testing.T)  {
+func TestBatchShadows(t *testing.T) {
 	db, err := MockNewDB()
 	assert.NoError(t, err)
 	db.MockCreateShadowTable()
@@ -205,7 +205,7 @@ func TestBatchShadows(t *testing.T)  {
 				},
 			},
 		},
-		Report: v1.Report{},
+		Report:     v1.Report{},
 		ReportMeta: map[string]interface{}{},
 		DesireMeta: map[string]interface{}{},
 	}
@@ -221,7 +221,7 @@ func TestBatchShadows(t *testing.T)  {
 				},
 			},
 		},
-		Report: v1.Report{},
+		Report:     v1.Report{},
 		ReportMeta: map[string]interface{}{},
 		DesireMeta: map[string]interface{}{},
 	}
