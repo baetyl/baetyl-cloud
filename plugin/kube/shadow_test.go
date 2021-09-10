@@ -137,7 +137,7 @@ func TestClient_List(t *testing.T) {
 	assert.Equal(t, "node02", list.Items[1].Name)
 
 	names := []string{"node01", "node02"}
-	_,  err = c.ListShadowByNames(nil, namespace, nil)
+	_, err = c.ListShadowByNames(nil, namespace, nil)
 	assert.NoError(t, err)
 	listNames, err := c.ListShadowByNames(nil, namespace, names)
 	assert.NoError(t, err)

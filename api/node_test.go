@@ -1126,6 +1126,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 		Namespace: "default",
 	}
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
+	sIndex.EXPECT().ListAppsByNode("default", newNode.Name).Return([]string{specV1.BaetylGPUMetrics, specV1.BaetylCore, specV1.BaetylInit}, nil)
 	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
 	sSysApp.EXPECT().GenOptionalApps(nil, mNode.Namespace, mNode, []string{specV1.BaetylGPUMetrics}).Times(1)
 	nodeList := []string{"abc"}
