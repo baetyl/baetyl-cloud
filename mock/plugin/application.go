@@ -50,17 +50,17 @@ func (mr *MockApplicationMockRecorder) CreateApplication(arg0, arg1, arg2 interf
 }
 
 // DeleteApplication mocks base method
-func (m *MockApplication) DeleteApplication(arg0, arg1 string) error {
+func (m *MockApplication) DeleteApplication(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteApplication", arg0, arg1)
+	ret := m.ctrl.Call(m, "DeleteApplication", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteApplication indicates an expected call of DeleteApplication
-func (mr *MockApplicationMockRecorder) DeleteApplication(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockApplicationMockRecorder) DeleteApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplication", reflect.TypeOf((*MockApplication)(nil).DeleteApplication), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplication", reflect.TypeOf((*MockApplication)(nil).DeleteApplication), arg0, arg1, arg2)
 }
 
 // GetApplication mocks base method
@@ -94,16 +94,16 @@ func (mr *MockApplicationMockRecorder) ListApplication(arg0, arg1, arg2 interfac
 }
 
 // UpdateApplication mocks base method
-func (m *MockApplication) UpdateApplication(arg0 string, arg1 *v1.Application) (*v1.Application, error) {
+func (m *MockApplication) UpdateApplication(arg0 interface{}, arg1 string, arg2 *v1.Application) (*v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateApplication", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateApplication", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateApplication indicates an expected call of UpdateApplication
-func (mr *MockApplicationMockRecorder) UpdateApplication(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockApplicationMockRecorder) UpdateApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplication", reflect.TypeOf((*MockApplication)(nil).UpdateApplication), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplication", reflect.TypeOf((*MockApplication)(nil).UpdateApplication), arg0, arg1, arg2)
 }
