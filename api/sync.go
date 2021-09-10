@@ -46,7 +46,7 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 		return nil, err
 	}
 
-	setNodeAddressIfExist(msg, &report)
+	setNodeClientIPIfExist(msg, &report)
 
 	// TODO remove the trick. set node prop if source=baetyl-init
 	ns, n := msg.Metadata["namespace"], msg.Metadata["name"]
@@ -94,8 +94,8 @@ func (s *SyncAPIImpl) Desire(msg specV1.Message) (*specV1.Message, error) {
 	}, nil
 }
 
-func setNodeAddressIfExist(msg specV1.Message, report *specV1.Report) {
-	if addr, ok := msg.Metadata["address"]; !ok {
+func setNodeClientIPIfExist(msg specV1.Message, report *specV1.Report) {
+	if ip, ok := msg.Metadata["clientIP"]; !ok {
 		return
 	} else {
 		nodeVal, ok := (*report)[common.NodeInfo]
@@ -109,7 +109,7 @@ func setNodeAddressIfExist(msg specV1.Message, report *specV1.Report) {
 				if !ok {
 					continue
 				}
-				node["address"] = addr
+				node["clientIP"] = ip
 				(*report)[common.NodeInfo].(map[string]interface{})[k] = node
 			}
 		}
