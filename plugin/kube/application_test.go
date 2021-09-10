@@ -253,19 +253,19 @@ func TestUpdateApplication(t *testing.T) {
 		Name:      "test_name",
 		Namespace: "default",
 	}
-	cfg2, err := c.UpdateApplication(cfg.Namespace, cfg)
+	cfg2, err := c.UpdateApplication(nil, cfg.Namespace, cfg)
 	assert.NoError(t, err)
 	assert.Equal(t, cfg.Name, cfg2.Name)
 	assert.Equal(t, 0, len(cfg2.Services))
 
 	cfg.Name = cfg.Name + "NULL"
-	_, err = c.UpdateApplication(cfg.Namespace, cfg)
+	_, err = c.UpdateApplication(nil, cfg.Namespace, cfg)
 	assert.NotNil(t, err)
 }
 
 func TestDeleteApplication(t *testing.T) {
 	c := initApplicationClient()
-	err := c.DeleteApplication("default", "test_name")
+	err := c.DeleteApplication(nil, "default", "test_name")
 	assert.NoError(t, err)
 }
 

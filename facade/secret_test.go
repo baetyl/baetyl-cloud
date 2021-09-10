@@ -103,7 +103,7 @@ func TestUpdateSecret(t *testing.T) {
 	mFacade.sIndex.EXPECT().ListAppIndexBySecret(ns, name).Return(appNames, nil).Times(1)
 	mFacade.sApp.EXPECT().Get(ns, appNames[0], "").Return(apps[0], nil).Times(1)
 	mFacade.sApp.EXPECT().Get(ns, appNames[1], "").Return(apps[1], nil).Times(1)
-	mFacade.sApp.EXPECT().Update(ns, gomock.Any()).Return(apps[0], nil).Times(1)
+	mFacade.sApp.EXPECT().Update(nil, ns, gomock.Any()).Return(apps[0], nil).Times(1)
 	mFacade.sNode.EXPECT().UpdateNodeAppVersion(nil, ns, gomock.Any()).Return(nil, nil).Times(1)
 	_, err = sFacade.UpdateSecret(ns, mConf)
 	assert.NoError(t, err)
@@ -123,13 +123,13 @@ func TestUpdateSecret(t *testing.T) {
 	}
 	mFacade.sIndex.EXPECT().ListAppIndexBySecret(ns, name).Return(appNames, nil).AnyTimes()
 	mFacade.sApp.EXPECT().Get(ns, appNames[0], "").Return(apps[0], nil).Times(1)
-	mFacade.sApp.EXPECT().Update(ns, gomock.Any()).Return(nil, unknownErr).Times(1)
+	mFacade.sApp.EXPECT().Update(nil, ns, gomock.Any()).Return(nil, unknownErr).Times(1)
 	_, err = sFacade.UpdateSecret(ns, mConf)
 	assert.Error(t, err, unknownErr)
 
 	apps[0].Volumes[0].Secret.Version = "1"
 	mFacade.sApp.EXPECT().Get(ns, appNames[0], "").Return(apps[0], nil).Times(1)
-	mFacade.sApp.EXPECT().Update(ns, gomock.Any()).Return(nil, nil).Times(1)
+	mFacade.sApp.EXPECT().Update(nil, ns, gomock.Any()).Return(nil, nil).Times(1)
 	mFacade.sNode.EXPECT().UpdateNodeAppVersion(nil, ns, gomock.Any()).Return(nil, unknownErr).Times(1)
 	_, err = sFacade.UpdateSecret(ns, mConf)
 	assert.Error(t, err, unknownErr)

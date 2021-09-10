@@ -118,7 +118,7 @@ func (c *client) CreateApplication(tx interface{}, namespace string, application
 	return res, nil
 }
 
-func (c *client) UpdateApplication(namespace string, application *specV1.Application) (*specV1.Application, error) {
+func (c *client) UpdateApplication(tx interface{}, namespace string, application *specV1.Application) (*specV1.Application, error) {
 	app := fromAppModel(namespace, application)
 	defer utils.Trace(c.log.Debug, "UpdateApplication")()
 	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Update(app)
@@ -128,7 +128,7 @@ func (c *client) UpdateApplication(namespace string, application *specV1.Applica
 	return toAppModel(app), nil
 }
 
-func (c *client) DeleteApplication(namespace, name string) error {
+func (c *client) DeleteApplication(tx interface{}, namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "DeleteApplication")()
 	err := c.customClient.CloudV1alpha1().Applications(namespace).Delete(name, &metav1.DeleteOptions{})
 	return err

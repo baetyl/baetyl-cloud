@@ -554,7 +554,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	node.Attributes[v1.BaetylCoreAPIPort] = fmt.Sprintf("%d", coreConfig.APIPort)
 
-	res, err := api.App.Update(ns, app)
+	res, err := api.App.Update(nil, ns, app)
 	if err != nil {
 		return nil, err
 	}
@@ -871,7 +871,7 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 				}
 			}
 		}
-		if err := api.App.Delete(ns, appName, ""); err != nil {
+		if err := api.App.Delete(nil, ns, appName, ""); err != nil {
 			logResourceError(err, common.Application, appName, ns)
 		}
 		appList = append(appList, app)
@@ -1121,7 +1121,7 @@ func (api *API) UpdateConfigByAccelerator(ns string, node *v1.Node) error {
 	if err != nil {
 		return err
 	}
-	res, err := api.App.Update(ns, core)
+	res, err := api.App.Update(nil, ns, core)
 	if err != nil {
 		return err
 	}
@@ -1137,7 +1137,7 @@ func (api *API) UpdateConfigByAccelerator(ns string, node *v1.Node) error {
 	if err != nil {
 		return err
 	}
-	res, err = api.App.Update(ns, init)
+	res, err = api.App.Update(nil, ns, init)
 	if err != nil {
 		return err
 	}

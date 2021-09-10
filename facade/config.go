@@ -71,7 +71,7 @@ func (a *facade) updateNodeAndApp(namespace string, config *specV1.Configuration
 			continue
 		}
 		// Todo remove by list watch
-		app, err = a.app.Update(namespace, app)
+		app, err = a.app.Update(nil, namespace, app)
 		if err != nil {
 			return err
 		}

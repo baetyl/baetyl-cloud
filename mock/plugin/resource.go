@@ -139,17 +139,17 @@ func (mr *MockResourceMockRecorder) CreateSecret(arg0, arg1, arg2 interface{}) *
 }
 
 // DeleteApplication mocks base method
-func (m *MockResource) DeleteApplication(arg0, arg1 string) error {
+func (m *MockResource) DeleteApplication(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteApplication", arg0, arg1)
+	ret := m.ctrl.Call(m, "DeleteApplication", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteApplication indicates an expected call of DeleteApplication
-func (mr *MockResourceMockRecorder) DeleteApplication(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) DeleteApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplication", reflect.TypeOf((*MockResource)(nil).DeleteApplication), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplication", reflect.TypeOf((*MockResource)(nil).DeleteApplication), arg0, arg1, arg2)
 }
 
 // DeleteConfig mocks base method
@@ -359,18 +359,18 @@ func (mr *MockResourceMockRecorder) ListSecret(arg0, arg1 interface{}) *gomock.C
 }
 
 // UpdateApplication mocks base method
-func (m *MockResource) UpdateApplication(arg0 string, arg1 *v1.Application) (*v1.Application, error) {
+func (m *MockResource) UpdateApplication(arg0 interface{}, arg1 string, arg2 *v1.Application) (*v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateApplication", arg0, arg1)
+	ret := m.ctrl.Call(m, "UpdateApplication", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateApplication indicates an expected call of UpdateApplication
-func (mr *MockResourceMockRecorder) UpdateApplication(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) UpdateApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplication", reflect.TypeOf((*MockResource)(nil).UpdateApplication), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplication", reflect.TypeOf((*MockResource)(nil).UpdateApplication), arg0, arg1, arg2)
 }
 
 // UpdateConfig mocks base method
