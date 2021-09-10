@@ -36,7 +36,7 @@ func (l *httpLink) wrapper(tp specV1.MessageKind) common.HandlerFunc {
 			}
 			msg.Metadata["name"] = n
 			msg.Metadata["namespace"] = ns
-			msg.Metadata["address"] = c.ClientIP()
+			msg.Metadata["clientIP"] = c.ClientIP()
 			resp, err := l.msgRouter[string(specV1.MessageReport)].(server.HandlerMessage)(msg)
 			if err != nil {
 				return nil, err
