@@ -154,13 +154,13 @@ func TestUpdateConfig(t *testing.T) {
 	}
 	mFacade.sIndex.EXPECT().ListAppIndexByConfig(ns, name).Return(appNames, nil).AnyTimes()
 	mFacade.sApp.EXPECT().Get(ns, appNames[0], "").Return(apps[0], nil).Times(1)
-	mFacade.sApp.EXPECT().Update(ns, gomock.Any()).Return(nil, unknownErr).Times(1)
+	mFacade.sApp.EXPECT().Update(nil, ns, gomock.Any()).Return(nil, unknownErr).Times(1)
 	_, err = cfgFacade.UpdateConfig(ns, res3)
 	assert.Error(t, err, unknownErr)
 
 	apps[0].Volumes[0].Config.Version = "1"
 	mFacade.sApp.EXPECT().Get(ns, appNames[0], "").Return(apps[0], nil).Times(1)
-	mFacade.sApp.EXPECT().Update(ns, gomock.Any()).Return(nil, nil).Times(1)
+	mFacade.sApp.EXPECT().Update(nil, ns, gomock.Any()).Return(nil, nil).Times(1)
 	mFacade.sNode.EXPECT().UpdateNodeAppVersion(nil, ns, gomock.Any()).Return(nil, unknownErr).Times(1)
 	_, err = cfgFacade.UpdateConfig(ns, res3)
 	assert.Error(t, err, unknownErr)

@@ -126,11 +126,15 @@ func TestDeleteApplication(t *testing.T) {
 			},
 		},
 	}
-	mAppFacade.sApp.EXPECT().Delete(ns, app.Name, "").Return(unknownErr).Times(1)
+	mAppFacade.txFactory.EXPECT().BeginTx().Return(nil, nil).AnyTimes()
+	mAppFacade.txFactory.EXPECT().Rollback(nil).Return().AnyTimes()
+	mAppFacade.txFactory.EXPECT().Commit(nil).Return().AnyTimes()
+
+	mAppFacade.sApp.EXPECT().Delete(nil, ns, app.Name, "").Return(unknownErr).Times(1)
 	err := appFacade.DeleteApp(ns, app.Name, app)
 	assert.Error(t, err, unknownErr)
 
-	mAppFacade.sApp.EXPECT().Delete(ns, app.Name, "").Return(nil).AnyTimes()
+	mAppFacade.sApp.EXPECT().Delete(nil, ns, app.Name, "").Return(nil).AnyTimes()
 	mAppFacade.sNode.EXPECT().DeleteNodeAppVersion(nil, ns, app).Return(nil, unknownErr).Times(1)
 	err = appFacade.DeleteApp(ns, app.Name, app)
 	assert.Error(t, err, unknownErr)
@@ -208,16 +212,20 @@ func TestUpdateApplication(t *testing.T) {
 	configs := []specV1.Configuration{*config}
 	ns := "baetyl-cloud"
 
+	mAppFacade.txFactory.EXPECT().BeginTx().Return(nil, nil).AnyTimes()
+	mAppFacade.txFactory.EXPECT().Rollback(nil).Return().AnyTimes()
+	mAppFacade.txFactory.EXPECT().Commit(nil).Return().AnyTimes()
+
 	mAppFacade.sConfig.EXPECT().Upsert(nil, ns, gomock.Any()).Return(nil, unknownErr).Times(1)
 	_, err := appFacade.UpdateApp(ns, app, app, configs)
 	assert.Error(t, err, unknownErr)
 
 	mAppFacade.sConfig.EXPECT().Upsert(nil, ns, gomock.Any()).Return(nil, nil).AnyTimes()
-	mAppFacade.sApp.EXPECT().Update(ns, app).Return(nil, unknownErr).Times(1)
+	mAppFacade.sApp.EXPECT().Update(nil, ns, app).Return(nil, unknownErr).Times(1)
 	_, err = appFacade.UpdateApp(ns, app, app, configs)
 	assert.Error(t, err, unknownErr)
 
-	mAppFacade.sApp.EXPECT().Update(ns, app).Return(app, nil).AnyTimes()
+	mAppFacade.sApp.EXPECT().Update(nil, ns, app).Return(app, nil).AnyTimes()
 	oldApp := &specV1.Application{
 		Selector: "test",
 	}

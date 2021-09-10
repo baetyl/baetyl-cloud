@@ -79,7 +79,22 @@ func (a *facade) CreateApp(ns string, baseApp, app *specV1.Application, configs 
 
 func (a *facade) UpdateApp(ns string, oldApp, app *specV1.Application, configs []specV1.Configuration) (*specV1.Application, error) {
 	var err error
-	err = a.updateGenConfigsOfFunctionApp(nil, ns, configs)
+	tx, errTx := a.txFactory.BeginTx()
+	if errTx != nil {
+		return nil, errTx
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			a.txFactory.Rollback(tx)
+			panic(p)
+		} else if err != nil {
+			a.txFactory.Rollback(tx)
+		} else {
+			a.txFactory.Commit(tx)
+		}
+	}()
+
+	err = a.updateGenConfigsOfFunctionApp(tx, ns, configs)
 	if err != nil {
 		return nil, err
 	}
@@ -103,29 +118,44 @@ func (a *facade) UpdateApp(ns string, oldApp, app *specV1.Application, configs [
 		}
 	}
 
-	app, err = a.app.Update(ns, app)
+	app, err = a.app.Update(tx, ns, app)
 	if err != nil {
 		return nil, err
 	}
 
 	if oldApp != nil && oldApp.Selector != app.Selector {
 		// delete old nodes
-		if err = a.DeleteNodeAndAppIndex(nil, ns, oldApp); err != nil {
+		if err = a.DeleteNodeAndAppIndex(tx, ns, oldApp); err != nil {
 			return nil, err
 		}
 	}
 
 	// update nodes
-	if err = a.UpdateNodeAndAppIndex(nil, ns, app); err != nil {
+	if err = a.UpdateNodeAndAppIndex(tx, ns, app); err != nil {
 		return nil, err
 	}
 
-	a.cleanGenConfigsOfFunctionApp(nil, configs, oldApp)
+	a.cleanGenConfigsOfFunctionApp(tx, configs, oldApp)
 	return app, nil
 }
 
 func (a *facade) DeleteApp(ns, name string, app *specV1.Application) error {
 	var err error
+	tx, errTx := a.txFactory.BeginTx()
+	if errTx != nil {
+		return errTx
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			a.txFactory.Rollback(tx)
+			panic(p)
+		} else if err != nil {
+			a.txFactory.Rollback(tx)
+		} else {
+			a.txFactory.Commit(tx)
+		}
+	}()
+
 	if app.CronStatus == specV1.CronWait {
 		err = a.cron.DeleteCron(name, ns)
 		if err != nil {
@@ -133,16 +163,16 @@ func (a *facade) DeleteApp(ns, name string, app *specV1.Application) error {
 		}
 	}
 
-	if err = a.app.Delete(ns, name, ""); err != nil {
+	if err = a.app.Delete(tx, ns, name, ""); err != nil {
 		return err
 	}
 
 	//delete the app from node
-	if err = a.DeleteNodeAndAppIndex(nil, ns, app); err != nil {
+	if err = a.DeleteNodeAndAppIndex(tx, ns, app); err != nil {
 		return err
 	}
 
-	a.cleanGenConfigsOfFunctionApp(nil, nil, app)
+	a.cleanGenConfigsOfFunctionApp(tx, nil, app)
 	return nil
 }
 

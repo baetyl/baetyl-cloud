@@ -61,7 +61,7 @@ func (a *facade) updateAppSecret(namespace string, secret *specV1.Secret) error 
 		if !needUpdateAppSecret(secret, app) {
 			continue
 		}
-		app, err = a.app.Update(namespace, app)
+		app, err = a.app.Update(nil, namespace, app)
 		if err != nil {
 			return err
 		}

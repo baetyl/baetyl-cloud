@@ -19,8 +19,8 @@ import (
 type ApplicationService interface {
 	Get(namespace, name, version string) (*specV1.Application, error)
 	Create(tx interface{}, namespace string, app *specV1.Application) (*specV1.Application, error)
-	Update(namespace string, app *specV1.Application) (*specV1.Application, error)
-	Delete(namespace, name, version string) error
+	Update(tx interface{}, namespace string, app *specV1.Application) (*specV1.Application, error)
+	Delete(tx interface{}, namespace, name, version string) error
 	List(namespace string, listOptions *models.ListOptions) (*models.ApplicationList, error)
 	CreateWithBase(tx interface{}, namespace string, app, base *specV1.Application) (*specV1.Application, error)
 }
@@ -93,26 +93,26 @@ func (a *applicationService) Create(tx interface{}, namespace string, app *specV
 }
 
 // Update update application
-func (a *applicationService) Update(namespace string, app *specV1.Application) (*specV1.Application, error) {
+func (a *applicationService) Update(tx interface{}, namespace string, app *specV1.Application) (*specV1.Application, error) {
 	err := a.validName(app)
 	if err != nil {
 		return nil, err
 	}
 
-	configs, secrets, err := a.getConfigsAndSecrets(nil, namespace, app)
+	configs, secrets, err := a.getConfigsAndSecrets(tx, namespace, app)
 	if err != nil {
 		return nil, err
 	}
 
-	newApp, err := a.app.UpdateApplication(namespace, app)
+	newApp, err := a.app.UpdateApplication(tx, namespace, app)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := a.indexService.RefreshConfigIndexByApp(nil, namespace, newApp.Name, configs); err != nil {
+	if err = a.indexService.RefreshConfigIndexByApp(tx, namespace, newApp.Name, configs); err != nil {
 		return nil, err
 	}
-	if err := a.indexService.RefreshSecretIndexByApp(nil, namespace, newApp.Name, secrets); err != nil {
+	if err = a.indexService.RefreshSecretIndexByApp(tx, namespace, newApp.Name, secrets); err != nil {
 		return nil, err
 	}
 
@@ -120,16 +120,16 @@ func (a *applicationService) Update(namespace string, app *specV1.Application) (
 }
 
 // Delete delete application
-func (a *applicationService) Delete(namespace, name, version string) error {
-	if err := a.app.DeleteApplication(namespace, name); err != nil {
+func (a *applicationService) Delete(tx interface{}, namespace, name, version string) error {
+	if err := a.app.DeleteApplication(tx, namespace, name); err != nil {
 		return err
 	}
 
 	// TODO: Where dirty data comes from
-	if err := a.indexService.RefreshConfigIndexByApp(nil, namespace, name, []string{}); err != nil {
+	if err := a.indexService.RefreshConfigIndexByApp(tx, namespace, name, []string{}); err != nil {
 		log.L().Error("Application clean config index error", log.Error(err))
 	}
-	if err := a.indexService.RefreshSecretIndexByApp(nil, namespace, name, []string{}); err != nil {
+	if err := a.indexService.RefreshSecretIndexByApp(tx, namespace, name, []string{}); err != nil {
 		log.L().Error("Application clean secret index error", log.Error(err))
 	}
 

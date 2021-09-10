@@ -972,7 +972,7 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 	}
 
 	sApp.EXPECT().Get(mNode7.Namespace, appRule.Name, "").Return(appRule, nil).Times(1)
-	sApp.EXPECT().Delete(mNode7.Namespace, appRule.Name, "").Return(nil).Times(1)
+	sApp.EXPECT().Delete(nil, mNode7.Namespace, appRule.Name, "").Return(nil).Times(1)
 	res := &specV1.Configuration{
 		Labels: map[string]string{
 			common.LabelSystem: "true",
@@ -1140,11 +1140,11 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 	coreConfBs, _ := json.Marshal(coreConf)
 	sInit.EXPECT().GetResource(gomock.Any(), mNode.Name, service.TemplateCoreConfYaml, gomock.Any()).Return(coreConfBs, nil)
 	sConfig.EXPECT().Update(nil, coreConf.Namespace, coreConf).Return(coreConf, nil)
-	sApp.EXPECT().Update(gomock.Any(), coreApp).Return(coreApp, nil)
+	sApp.EXPECT().Update(nil, gomock.Any(), coreApp).Return(coreApp, nil)
 	initConfBs, _ := json.Marshal(initConf)
 	sInit.EXPECT().GetResource(gomock.Any(), mNode.Name, service.TemplateInitConfYaml, gomock.Any()).Return(initConfBs, nil)
 	sConfig.EXPECT().Update(nil, initConf.Namespace, initConf).Return(initConf, nil)
-	sApp.EXPECT().Update(gomock.Any(), initApp).Return(initApp, nil)
+	sApp.EXPECT().Update(nil, gomock.Any(), initApp).Return(initApp, nil)
 
 	sNode.EXPECT().Update(newNode.Namespace, newNode).Return(newNode, nil)
 	// equal case
@@ -1265,7 +1265,7 @@ func TestDeleteNode(t *testing.T) {
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, "").Return(nil).Times(1)
+	sApp.EXPECT().Delete(nil, mNode.Namespace, appCore.Name, "").Return(nil).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appCore.Name, gomock.Any()).Return(nil).Times(1)
 	sConfig.EXPECT().Delete(nil, mNode.Namespace, appCore.Volumes[0].Config.Name).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appCore.Volumes[1].Secret.Name, "").Return(secret1, nil).Times(1)
@@ -1273,7 +1273,7 @@ func TestDeleteNode(t *testing.T) {
 	sSecret.EXPECT().Delete(mNode.Namespace, appCore.Volumes[1].Secret.Name).Times(1)
 
 	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, "").Return(nil).Times(1)
+	sApp.EXPECT().Delete(nil, mNode.Namespace, appFunction.Name, "").Return(nil).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appFunction.Name, gomock.Any()).Return(nil).Times(1)
 	sConfig.EXPECT().Delete(nil, mNode.Namespace, appFunction.Volumes[0].Config.Name).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(secret1f, nil).Times(1)
@@ -1430,7 +1430,7 @@ func TestDeleteNodeError(t *testing.T) {
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appCore.Name, "").Return(errors.New("error")).Times(1)
+	sApp.EXPECT().Delete(nil, mNode.Namespace, appCore.Name, "").Return(errors.New("error")).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 	sConfig.EXPECT().Delete(nil, mNode.Namespace, appCore.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appCore.Volumes[1].Secret.Name, "").Return(secret1, nil).Times(1)
@@ -1438,7 +1438,7 @@ func TestDeleteNodeError(t *testing.T) {
 	sSecret.EXPECT().Delete(mNode.Namespace, appCore.Volumes[1].Secret.Name).Times(1)
 
 	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, "").Return(errors.New("error")).Times(1)
+	sApp.EXPECT().Delete(nil, mNode.Namespace, appFunction.Name, "").Return(errors.New("error")).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appFunction.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 	sConfig.EXPECT().Delete(nil, mNode.Namespace, appFunction.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(nil, errors.New("error")).Times(1)
@@ -1464,7 +1464,7 @@ func TestDeleteNodeError(t *testing.T) {
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 
 	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(appFunction, nil).Times(1)
-	sApp.EXPECT().Delete(mNode.Namespace, appFunction.Name, "").Return(errors.New("error")).Times(1)
+	sApp.EXPECT().Delete(nil, mNode.Namespace, appFunction.Name, "").Return(errors.New("error")).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appFunction.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 	sConfig.EXPECT().Delete(nil, mNode.Namespace, appFunction.Volumes[0].Config.Name).Return(errors.New("error")).Times(1)
 	sSecret.EXPECT().Get(mNode.Namespace, appFunction.Volumes[1].Secret.Name, "").Return(nil, errors.New("error")).Times(1)
@@ -1936,7 +1936,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	mockInit.EXPECT().GetResource(ns, node.Name, service.TemplateCoreConfYaml, pparams).Return(confData, nil).Times(1)
 	mockConfig.EXPECT().Update(nil, ns, cconfig).Return(cconfig, nil).Times(1)
 
-	mockApp.EXPECT().Update(ns, coreApp).Return(coreApp, nil).Times(1)
+	mockApp.EXPECT().Update(nil, ns, coreApp).Return(coreApp, nil).Times(1)
 	mockNode.EXPECT().UpdateNodeAppVersion(nil, ns, coreApp).Return(appList, nil).Times(1)
 	mockNode.EXPECT().Update(ns, node).Return(node, nil).Times(1)
 
