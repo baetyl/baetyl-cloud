@@ -3,6 +3,7 @@ namespace: "{{.Namespace}}"
 selector: "baetyl-node-name={{.NodeName}}"
 labels:
   baetyl-cloud-system: "true"
+  baetyl-app-mode: "{{.AppMode}}"
   resource-invisible: "true"
 type: "container"
 mode: "{{.NodeMode}}"
