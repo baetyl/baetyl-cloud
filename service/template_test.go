@@ -14,6 +14,7 @@ var params = map[string]interface{}{
 	"Namespace":                  "ns-1",
 	"NodeName":                   "node-name-1",
 	"NodeMode":                   "kube",
+	"AppMode":                    "kube",
 	"InitAppName":                "init-app-1",
 	"InitVersion":                "init-version-1",
 	"CoreAppName":                "core-app-1",
@@ -65,6 +66,7 @@ func TestTemplateServiceImpl_UnmarshalTemplate(t *testing.T) {
 type: container
 mode: kube
 labels:
+  baetyl-app-mode: kube
   baetyl-cloud-system: "true"
   resource-invisible: "true"
 namespace: ns-1
@@ -154,6 +156,7 @@ system: true
 type: container
 mode: kube
 labels:
+  baetyl-app-mode: kube
   baetyl-cloud-system: "true"
   resource-invisible: "true"
 namespace: ns-1
