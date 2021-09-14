@@ -265,9 +265,10 @@ func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, er
 	for _, svc := range app.Services {
 		if svc.Type != specV1.ServiceTypeDeployment &&
 			svc.Type != specV1.ServiceTypeDaemonSet &&
-			svc.Type != specV1.ServiceTypeStatefulSet {
+			svc.Type != specV1.ServiceTypeStatefulSet &&
+			svc.Type != specV1.ServiceTypeJob {
 			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error",
-				"failed to parse service type, service type should be deployment / daemonset / statefulset"))
+				"failed to parse service type, service type should be deployment / daemonset / statefulset / job"))
 		}
 	}
 	return app, nil
