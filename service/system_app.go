@@ -155,6 +155,7 @@ func (s *SystemAppServiceImpl) GenOptionalApps(tx interface{}, ns string, node *
 		"Namespace":                  ns,
 		"NodeName":                   node.Name,
 		"NodeMode":                   node.NodeMode,
+		"AppMode":                    node.NodeMode,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
 	}
 	if handler, ok := s.Hooks[HookNamePopulateOptAppsParams]; ok {
