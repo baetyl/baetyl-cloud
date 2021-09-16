@@ -175,6 +175,7 @@ func TestInitService_GenCmd(t *testing.T) {
 	expect := "curl -skfL 'https://1.2.3.4:9003/v1/active/setup.sh?token=tokenexpect' -osetup.sh && sh setup.sh"
 	params := map[string]interface{}{
 		"InitApplyYaml": "baetyl-init-deployment.yml",
+		"template":      TemplateBaetylInitCommand,
 		"mode":          "",
 	}
 	sSign.EXPECT().GenToken(info).Return("tokenexpect", nil).Times(1)

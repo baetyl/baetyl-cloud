@@ -29,6 +29,7 @@ const (
 	TemplateCoreConfYaml      = "baetyl-core-conf.yml"
 	TemplateInitConfYaml      = "baetyl-init-conf.yml"
 	TemplateBaetylInitCommand = "baetyl-init-command"
+	TemplateInitCommandWget   = "baetyl-init-command-wget"
 )
 
 var (
@@ -202,7 +203,7 @@ func (s *InitServiceImpl) GetInitCommand(ns, nodeName string, params map[string]
 		InfoName:      nodeName,
 		InfoExpiry:    time.Now().Unix() + CmdExpirationInSeconds,
 	}
-	initCommand, err := s.Property.GetPropertyValue(TemplateBaetylInitCommand)
+	initCommand, err := s.Property.GetPropertyValue(params["template"].(string))
 	if err != nil {
 		return nil, err
 	}

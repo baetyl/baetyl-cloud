@@ -34,9 +34,20 @@ kube_clean() {
   exec_cmd_nobail "kubectl delete ns baetyl-edge-system --ignore-not-found=true" $SUDO
 }
 
+download_tool=curl
+check_download_tool() {
+	if [ -x "$(command -v wget)" ]; then
+		download_tool=wget
+	fi
+}
+
 kube_apply() {	
-  TempFile=$(mktemp temp.XXXXXX)	
-  exec_cmd_nobail "curl -skfL \"$1\" >$TempFile" $SUDO
+  TempFile=$(mktemp temp.XXXXXX)
+  if [ "$download_tool" = "wget" ]; then
+    exec_cmd_nobail "wget --no-check-certificate -O $TempFile \"$1\"" $SUDO
+  else
+    exec_cmd_nobail "curl -skfL \"$1\" >$TempFile" $SUDO
+  fi
   exec_cmd_nobail "kubectl apply -f $TempFile" $SUDO
   exec_cmd_nobail "rm -f $TempFile 2>/dev/null" $SUDO
 }
