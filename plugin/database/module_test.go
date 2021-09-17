@@ -287,7 +287,7 @@ func TestListApp(t *testing.T) {
 		PageSize: 2,
 	}
 
-	resList, err := db.ListModules(page)
+	resList, err := db.ListModules(page, common.ModuleType("a"))
 	assert.NoError(t, err)
 	assert.Len(t, resList, 2)
 	assert.Equal(t, module.Name, resList[0].Name)
@@ -296,7 +296,7 @@ func TestListApp(t *testing.T) {
 	checkModule(t, module2, &resList[1])
 
 	page = &models.Filter{}
-	resList, err = db.ListModules(page)
+	resList, err = db.ListModules(page, common.ModuleType("a"))
 	assert.NoError(t, err)
 	assert.Len(t, resList, 3)
 	assert.Equal(t, module.Name, resList[0].Name)

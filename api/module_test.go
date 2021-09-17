@@ -221,28 +221,28 @@ func TestListModules(t *testing.T) {
 			Name: "baetyl",
 		},
 	}
-	sModule.EXPECT().ListModules(gomock.Any()).Return(res, nil).Times(1)
+	sModule.EXPECT().ListModules(gomock.Any(), gomock.Any()).Return(res, nil).Times(1)
 
 	req, _ := http.NewRequest(http.MethodGet, "/v1/modules", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	sModule.EXPECT().ListRuntimeModules(gomock.Any()).Return(res, nil).Times(1)
+	sModule.EXPECT().ListModules(gomock.Any(), common.TypeUserRuntime).Return(res, nil).Times(1)
 
 	req, _ = http.NewRequest(http.MethodGet, "/v1/modules?type=runtime_user", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	sModule.EXPECT().ListOptionalSysModules(gomock.Any()).Return(res, nil).Times(1)
+	sModule.EXPECT().ListModules(gomock.Any(), common.TypeSystemOptional).Return(res, nil).Times(1)
 
 	req, _ = http.NewRequest(http.MethodGet, "/v1/modules?type=opt_system", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	sModule.EXPECT().ListOptionalSysModules(gomock.Any()).Return(nil, errors.New("err")).Times(1)
+	sModule.EXPECT().ListModules(gomock.Any(), gomock.Any()).Return(nil, errors.New("err")).Times(1)
 
 	req, _ = http.NewRequest(http.MethodGet, "/v1/modules?type=opt_system", nil)
 	w = httptest.NewRecorder()

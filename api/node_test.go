@@ -811,7 +811,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			Image: "b-image",
 		},
 	}
-	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
+	sModule.EXPECT().ListModules(&models.Filter{}, gomock.Any()).Return(modules, nil).Times(1)
 
 	mNode3 := &specV1.Node{
 		Namespace: "default",
@@ -857,7 +857,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 	}
 
 	sNode.EXPECT().Get(nil, mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
-	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
+	sModule.EXPECT().ListModules(&models.Filter{}, gomock.Any()).Return(modules, nil).Times(1)
 	sSysApp.EXPECT().GenOptionalApps(nil, mNode.Namespace, mNode, []string{"a"}).Times(1)
 	nodeList := []string{"abc"}
 	sNode.EXPECT().UpdateNodeAppVersion(nil, mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
@@ -1127,7 +1127,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 	}
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
 	sIndex.EXPECT().ListAppsByNode("default", newNode.Name).Return([]string{specV1.BaetylGPUMetrics, specV1.BaetylCore, specV1.BaetylInit}, nil)
-	sModule.EXPECT().ListOptionalSysModules(&models.Filter{}).Return(modules, nil).Times(1)
+	sModule.EXPECT().ListModules(&models.Filter{}, gomock.Any()).Return(modules, nil).Times(1)
 	sSysApp.EXPECT().GenOptionalApps(nil, mNode.Namespace, mNode, []string{specV1.BaetylGPUMetrics}).Times(1)
 	nodeList := []string{"abc"}
 	sNode.EXPECT().UpdateNodeAppVersion(nil, mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()

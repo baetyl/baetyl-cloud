@@ -72,16 +72,15 @@ func (d *DB) DeleteModuleByVersion(name, version string) error {
 	return d.DeleteModuleByVersionTx(nil, name, version)
 }
 
-func (d *DB) ListModules(filter *models.Filter) ([]models.Module, error) {
-	return d.ListModulesTx(nil, filter)
-}
-
-func (d *DB) ListOptionalSysModules(filter *models.Filter) ([]models.Module, error) {
-	return d.ListOptionalSysModulesTx(nil, filter)
-}
-
-func (d *DB) ListRuntimeModules(filter *models.Filter) ([]models.Module, error) {
-	return d.ListRuntimeModulesTx(nil, filter)
+func (d *DB) ListModules(filter *models.Filter, tp common.ModuleType) ([]models.Module, error) {
+	switch tp {
+	case common.TypeUserRuntime:
+		return d.listModulesByTypeTx(nil, tp, filter)
+	case common.TypeSystemOptional:
+		return d.listModulesByTypeTx(nil, tp, filter)
+	default:
+		return d.ListModulesTx(nil, filter)
+	}
 }
 
 func (d *DB) GetLatestModuleImage(name string) (string, error) {
@@ -200,16 +199,6 @@ FROM baetyl_module WHERE name LIKE ? ORDER BY create_time DESC
 	}
 
 	return d.listModuleTx(tx, selectSQL, args...)
-}
-
-func (d *DB) ListOptionalSysModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error) {
-	t := common.TypeSystemOptional
-	return d.listModulesByTypeTx(tx, t, filter)
-}
-
-func (d *DB) ListRuntimeModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error) {
-	t := common.TypeUserRuntime
-	return d.listModulesByTypeTx(tx, t, filter)
 }
 
 func (d *DB) GetLatestModuleImageTx(tx *sqlx.Tx, name string) (string, error) {

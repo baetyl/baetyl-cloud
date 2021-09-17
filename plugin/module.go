@@ -3,6 +3,7 @@ package plugin
 import (
 	"io"
 
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/baetyl/baetyl-cloud/v2/models"
@@ -19,9 +20,7 @@ type Module interface {
 	UpdateModuleByVersion(module *models.Module) (*models.Module, error)
 	DeleteModules(name string) error
 	DeleteModuleByVersion(name, version string) error
-	ListModules(filter *models.Filter) ([]models.Module, error)
-	ListOptionalSysModules(filter *models.Filter) ([]models.Module, error)
-	ListRuntimeModules(filter *models.Filter) ([]models.Module, error)
+	ListModules(filter *models.Filter, tp common.ModuleType) ([]models.Module, error)
 	GetLatestModuleImage(name string) (string, error)
 	GetLatestModuleProgram(name, platform string) (string, error)
 
@@ -34,8 +33,6 @@ type Module interface {
 	DeleteModulesTx(tx *sqlx.Tx, name string) error
 	DeleteModuleByVersionTx(tx *sqlx.Tx, name, version string) error
 	ListModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error)
-	ListOptionalSysModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error)
-	ListRuntimeModulesTx(tx *sqlx.Tx, filter *models.Filter) ([]models.Module, error)
 	GetLatestModuleImageTx(tx *sqlx.Tx, name string) (string, error)
 	GetLatestModuleProgramTx(tx *sqlx.Tx, name, platform string) (string, error)
 

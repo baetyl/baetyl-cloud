@@ -5,6 +5,7 @@
 package plugin
 
 import (
+	common "github.com/baetyl/baetyl-cloud/v2/common"
 	models "github.com/baetyl/baetyl-cloud/v2/models"
 	gomock "github.com/golang/mock/gomock"
 	sqlx "github.com/jmoiron/sqlx"
@@ -314,18 +315,18 @@ func (mr *MockModuleMockRecorder) GetModules(arg0 interface{}) *gomock.Call {
 }
 
 // ListModules mocks base method
-func (m *MockModule) ListModules(arg0 *models.Filter) ([]models.Module, error) {
+func (m *MockModule) ListModules(arg0 *models.Filter, arg1 common.ModuleType) ([]models.Module, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListModules", arg0)
+	ret := m.ctrl.Call(m, "ListModules", arg0, arg1)
 	ret0, _ := ret[0].([]models.Module)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListModules indicates an expected call of ListModules
-func (mr *MockModuleMockRecorder) ListModules(arg0 interface{}) *gomock.Call {
+func (mr *MockModuleMockRecorder) ListModules(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListModules", reflect.TypeOf((*MockModule)(nil).ListModules), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListModules", reflect.TypeOf((*MockModule)(nil).ListModules), arg0, arg1)
 }
 
 // ListModulesTx mocks base method
@@ -343,79 +344,19 @@ func (mr *MockModuleMockRecorder) ListModulesTx(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListModulesTx", reflect.TypeOf((*MockModule)(nil).ListModulesTx), arg0, arg1)
 }
 
-// ListOptionalSysModules mocks base method
-func (m *MockModule) ListOptionalSysModules(arg0 *models.Filter) ([]models.Module, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListOptionalSysModules", arg0)
-	ret0, _ := ret[0].([]models.Module)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListOptionalSysModules indicates an expected call of ListOptionalSysModules
-func (mr *MockModuleMockRecorder) ListOptionalSysModules(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListOptionalSysModules", reflect.TypeOf((*MockModule)(nil).ListOptionalSysModules), arg0)
-}
-
-// ListOptionalSysModulesTx mocks base method
-func (m *MockModule) ListOptionalSysModulesTx(arg0 *sqlx.Tx, arg1 *models.Filter) ([]models.Module, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListOptionalSysModulesTx", arg0, arg1)
-	ret0, _ := ret[0].([]models.Module)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListOptionalSysModulesTx indicates an expected call of ListOptionalSysModulesTx
-func (mr *MockModuleMockRecorder) ListOptionalSysModulesTx(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListOptionalSysModulesTx", reflect.TypeOf((*MockModule)(nil).ListOptionalSysModulesTx), arg0, arg1)
-}
-
-// ListRuntimeModules mocks base method
-func (m *MockModule) ListRuntimeModules(arg0 *models.Filter) ([]models.Module, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListRuntimeModules", arg0)
-	ret0, _ := ret[0].([]models.Module)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListRuntimeModules indicates an expected call of ListRuntimeModules
-func (mr *MockModuleMockRecorder) ListRuntimeModules(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRuntimeModules", reflect.TypeOf((*MockModule)(nil).ListRuntimeModules), arg0)
-}
-
-// ListRuntimeModulesTx mocks base method
-func (m *MockModule) ListRuntimeModulesTx(arg0 *sqlx.Tx, arg1 *models.Filter) ([]models.Module, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListRuntimeModulesTx", arg0, arg1)
-	ret0, _ := ret[0].([]models.Module)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListRuntimeModulesTx indicates an expected call of ListRuntimeModulesTx
-func (mr *MockModuleMockRecorder) ListRuntimeModulesTx(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRuntimeModulesTx", reflect.TypeOf((*MockModule)(nil).ListRuntimeModulesTx), arg0, arg1)
-}
-
-// UpdateModule mocks base method
+// UpdateModuleByVersion mocks base method
 func (m *MockModule) UpdateModuleByVersion(arg0 *models.Module) (*models.Module, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateModule", arg0)
+	ret := m.ctrl.Call(m, "UpdateModuleByVersion", arg0)
 	ret0, _ := ret[0].(*models.Module)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UpdateModule indicates an expected call of UpdateModule
+// UpdateModuleByVersion indicates an expected call of UpdateModuleByVersion
 func (mr *MockModuleMockRecorder) UpdateModuleByVersion(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateModule", reflect.TypeOf((*MockModule)(nil).UpdateModuleByVersion), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateModuleByVersion", reflect.TypeOf((*MockModule)(nil).UpdateModuleByVersion), arg0)
 }
 
 // UpdateModuleByVersionTx mocks base method
