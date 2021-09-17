@@ -29,6 +29,8 @@ const (
 	BaetylCoreContainerPort = 80
 	BaetylModule            = "baetyl"
 	BaetylCoreAPIPort       = "BaetylCoreAPIPort"
+	MethodWget              = "wget"
+	MethodCurl              = "curl"
 )
 
 // GetNode get a node
@@ -354,8 +356,17 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if mode == "" {
 		mode = v1.NodeModeKube
 	}
+	method := c.Query("method")
+	if method == "" {
+		method = MethodCurl
+	}
+	template := service.TemplateBaetylInitCommand
+	if method == MethodWget {
+		template = service.TemplateInitCommandWget
+	}
 	params := map[string]interface{}{
 		"mode": mode,
+		"template": template,
 	}
 	if mode == v1.NodeModeKube {
 		params["InitApplyYaml"] = "baetyl-init-deployment.yml"
