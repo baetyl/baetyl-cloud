@@ -77,7 +77,7 @@ func (c *functionService) ListSources() []models.FunctionSource {
 
 func (c *functionService) ListRuntimes() (map[string]string, error) {
 	params := &models.Filter{}
-	res, err := c.module.ListRuntimeModules(params)
+	res, err := c.module.ListModules(params, common.TypeUserRuntime)
 	if err != nil {
 		return nil, err
 	}

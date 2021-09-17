@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
@@ -17,9 +18,7 @@ type ModuleService interface {
 	UpdateModuleByVersion(module *models.Module) (*models.Module, error)
 	DeleteModules(name string) error
 	DeleteModuleByVersion(name, version string) error
-	ListModules(filter *models.Filter) ([]models.Module, error)
-	ListOptionalSysModules(filter *models.Filter) ([]models.Module, error)
-	ListRuntimeModules(filter *models.Filter) ([]models.Module, error)
+	ListModules(filter *models.Filter, tp common.ModuleType) ([]models.Module, error)
 
 	GetLatestModuleImage(name string) (string, error)
 	GetLatestModuleProgram(name, platform string) (string, error)

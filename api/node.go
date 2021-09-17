@@ -723,7 +723,7 @@ func (api *API) nodeModeParamCheck(node *v1.Node) error {
 }
 
 func (api *API) getOptionalSysAppsInMap() (map[string]bool, error) {
-	supportApps, err := api.Module.ListOptionalSysModules(&models.Filter{})
+	supportApps, err := api.Module.ListModules(&models.Filter{}, common.TypeSystemOptional)
 	if err != nil {
 		return nil, err
 	}

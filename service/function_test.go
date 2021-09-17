@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
@@ -126,7 +127,7 @@ func TestDefaultFunctionService_ListRuntimes(t *testing.T) {
 			Image: "url-a",
 		},
 	}
-	sModule.EXPECT().ListRuntimeModules(gomock.Any()).Return(ms, nil)
+	sModule.EXPECT().ListModules(gomock.Any(), common.TypeUserRuntime).Return(ms, nil)
 
 	res, err := fs.ListRuntimes()
 	assert.NoError(t, err)

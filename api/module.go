@@ -89,16 +89,7 @@ func (api *API) ListModules(c *common.Context) (interface{}, error) {
 	if err := c.Bind(params); err != nil {
 		return nil, err
 	}
-	var res []models.Module
-	var err error
-	switch common.ModuleType(tp) {
-	case common.TypeUserRuntime:
-		res, err = api.Module.ListRuntimeModules(params)
-	case common.TypeSystemOptional:
-		res, err = api.Module.ListOptionalSysModules(params)
-	default:
-		res, err = api.Module.ListModules(params)
-	}
+	res, err := api.Module.ListModules(params, common.ModuleType(tp))
 	if err != nil {
 		return nil, err
 	}
