@@ -1506,6 +1506,7 @@ func TestGenInitCmdFromNode(t *testing.T) {
 	params := map[string]interface{}{
 		"InitApplyYaml": "baetyl-init-deployment.yml",
 		"mode":          "kube",
+		"template":      service.TemplateBaetylInitCommand,
 	}
 	var expect interface{} = []byte("setup")
 	sInit.EXPECT().GetResource("default", "abc", service.TemplateBaetylInitCommand, params).Return(expect, nil).Times(1)
