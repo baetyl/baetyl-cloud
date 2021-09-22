@@ -21,11 +21,14 @@ const (
 	PermissionRead = "READ"
 	PermissionFull = "FULL_CONTROL"
 
-	PermissionResourceConfig = "config"
-	PermissionResourceSecret = "secret"
-	PermissionResourceApp    = "app"
-	PermissionResourceNode   = "node"
-	PermissionResourceBatch  = "batch"
+	PermissionResourceConfig      = "config"
+	PermissionResourceSecret      = "secret"
+	PermissionResourceApp         = "app"
+	PermissionResourceNode        = "node"
+	PermissionResourceBatch       = "batch"
+	PermissionResourceDevice      = "device"
+	PermissionResourceDeviceModel = "devicemodel"
+	PermissionResourceDriver      = "driver"
 )
 
 var (

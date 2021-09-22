@@ -49,6 +49,12 @@ const (
 	NodeReport Resource = "nodereport"
 	// Batch batch resource
 	Batch Resource = "batch"
+	// Device device resource
+	Device Resource = "device"
+	// Driver driver resource
+	Driver Resource = "driver"
+	// DeviceModel devicemodel resource
+	DeviceModel Resource = "devicemodel"
 	// Index index resource
 	Index Resource = "index"
 	// !deprecated
