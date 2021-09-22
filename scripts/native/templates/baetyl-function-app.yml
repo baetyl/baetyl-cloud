@@ -10,15 +10,15 @@ mode: "{{.NodeMode}}"
 system: true
 services:
   - name: "baetyl-function"
+    image: "{{GetModuleImage "baetyl-function"}}"
     type: "deployment"
-    image: {{GetModuleImage "baetyl-function"}}
     replica: 1
     volumeMounts:
       - name: "func-conf"
         mountPath: "/etc/baetyl"
         readOnly: true
     ports:
-      - containerPort: 80
+      - containerPort: 50011
         protocol: "TCP"
 volumes:
   - name: "func-conf"

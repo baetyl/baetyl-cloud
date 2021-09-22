@@ -5,6 +5,7 @@ labels:
   baetyl-app-name: "{{.FunctionAppName}}"
   baetyl-node-name: "{{.NodeName}}"
   baetyl-cloud-system: "true"
+  resource-invisible: "true"
 data:
   conf.yml: |-
     logger:

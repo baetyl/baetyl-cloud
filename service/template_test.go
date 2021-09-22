@@ -170,7 +170,7 @@ services:
     mountPath: /etc/baetyl
     readOnly: true
   ports:
-  - containerPort: 80
+  - containerPort: 50011
     protocol: TCP
   type: deployment
 volumes:
@@ -190,6 +190,7 @@ labels:
   baetyl-app-name: func-app-name-1
   baetyl-cloud-system: "true"
   baetyl-node-name: node-name-1
+  resource-invisible: "true"
 data:
   conf.yml: |-
     logger:
