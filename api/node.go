@@ -365,7 +365,7 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 		template = service.TemplateInitCommandWget
 	}
 	params := map[string]interface{}{
-		"mode": mode,
+		"mode":     mode,
 		"template": template,
 	}
 	if mode == v1.NodeModeKube {
@@ -402,12 +402,12 @@ func (api *API) ParseAndCheckNode(c *common.Context) (*v1.Node, error) {
 	if node.Name == "" {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is required"))
 	}
-	err = api.checkNodeOptionalSysApps(node.SysApps)
+	err = api.CheckNodeOptionalSysApps(node.SysApps)
 	if err != nil {
 		return nil, err
 	}
 
-	err = api.nodeModeParamCheck(node)
+	err = api.NodeModeParamCheck(node)
 	if err != nil {
 		return nil, err
 	}
@@ -685,7 +685,7 @@ func (api *API) UpdateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string)
 	return nil
 }
 
-func (api *API) checkNodeOptionalSysApps(apps []string) error {
+func (api *API) CheckNodeOptionalSysApps(apps []string) error {
 	if len(apps) == 0 {
 		return nil
 	}
@@ -702,7 +702,7 @@ func (api *API) checkNodeOptionalSysApps(apps []string) error {
 	return nil
 }
 
-func (api *API) nodeModeParamCheck(node *v1.Node) error {
+func (api *API) NodeModeParamCheck(node *v1.Node) error {
 	if node.NodeMode == "" {
 		// if not set, default kube mode
 		node.NodeMode = v1.NodeModeKube
