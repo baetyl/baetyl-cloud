@@ -191,6 +191,7 @@ func (api *API) listAppByNames(namespace string, appNames []string) (*models.App
 			}
 			return nil, err
 		}
+		delete(app.Labels, common.LabelAppMode)
 		result.Total++
 		result.Items = append(result.Items, models.AppItem{
 			Name:              app.Name,
