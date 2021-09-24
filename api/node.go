@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
@@ -354,7 +355,7 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	}
 	mode := c.Query("mode")
 	if mode == "" {
-		mode = v1.NodeModeKube
+		mode = context.RunModeKube
 	}
 	method := c.Query("method")
 	if method == "" {
@@ -368,9 +369,9 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 		"mode":     mode,
 		"template": template,
 	}
-	if mode == v1.NodeModeKube {
+	if mode == context.RunModeKube {
 		params["InitApplyYaml"] = "baetyl-init-deployment.yml"
-	} else if mode == v1.NodeModeNative {
+	} else if mode == context.RunModeNative {
 		params["InitApplyYaml"] = "baetyl-init-apply.json"
 	} else {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("mode", mode))
@@ -402,12 +403,13 @@ func (api *API) ParseAndCheckNode(c *common.Context) (*v1.Node, error) {
 	if node.Name == "" {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is required"))
 	}
-	err = api.CheckNodeOptionalSysApps(node.SysApps)
+
+	err = api.NodeModeParamCheck(node)
 	if err != nil {
 		return nil, err
 	}
 
-	err = api.NodeModeParamCheck(node)
+	err = api.CheckNodeOptionalSysApps(node.SysApps, node.NodeMode)
 	if err != nil {
 		return nil, err
 	}
@@ -685,11 +687,11 @@ func (api *API) UpdateNodeOptionedSysApps(oldNode *v1.Node, newSysApps []string)
 	return nil
 }
 
-func (api *API) CheckNodeOptionalSysApps(apps []string) error {
+func (api *API) CheckNodeOptionalSysApps(apps []string, nodeMode string) error {
 	if len(apps) == 0 {
 		return nil
 	}
-	m, err := api.getOptionalSysAppsInMap()
+	m, err := api.getOptionalSysAppsInMap(nodeMode)
 	if err != nil {
 		return err
 	}
@@ -705,13 +707,13 @@ func (api *API) CheckNodeOptionalSysApps(apps []string) error {
 func (api *API) NodeModeParamCheck(node *v1.Node) error {
 	if node.NodeMode == "" {
 		// if not set, default kube mode
-		node.NodeMode = v1.NodeModeKube
+		node.NodeMode = context.RunModeKube
 		return nil
 	}
-	if node.NodeMode != v1.NodeModeKube && node.NodeMode != v1.NodeModeNative {
+	if node.NodeMode != context.RunModeKube && node.NodeMode != context.RunModeNative {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "only kube or native is surpported with nodemode"))
 	}
-	if node.NodeMode == v1.NodeModeNative {
+	if node.NodeMode == context.RunModeNative {
 		if node.Cluster {
 			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "cluster is not supported with native nodeMode"))
 		}
@@ -722,10 +724,25 @@ func (api *API) NodeModeParamCheck(node *v1.Node) error {
 	return nil
 }
 
-func (api *API) getOptionalSysAppsInMap() (map[string]bool, error) {
-	supportApps, err := api.Module.ListModules(&models.Filter{}, common.TypeSystemOptional)
-	if err != nil {
-		return nil, err
+func (api *API) getOptionalSysAppsInMap(nodeMode string) (map[string]bool, error) {
+	var supportApps []models.Module
+	var err error
+	switch nodeMode {
+	case context.RunModeKube:
+		supportApps, err = api.Module.ListModules(&models.Filter{}, common.TypeSystemKube)
+		if err != nil {
+			return nil, err
+		}
+	case context.RunModeNative:
+		supportApps, err = api.Module.ListModules(&models.Filter{}, common.TypeSystemNative)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		supportApps, err = api.Module.ListModules(&models.Filter{}, common.TypeSystemOptional)
+		if err != nil {
+			return nil, err
+		}
 	}
 	m := make(map[string]bool)
 	for _, v := range supportApps {

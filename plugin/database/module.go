@@ -77,7 +77,43 @@ func (d *DB) ListModules(filter *models.Filter, tp common.ModuleType) ([]models.
 	case common.TypeUserRuntime:
 		return d.listModulesByTypeTx(nil, tp, filter)
 	case common.TypeSystemOptional:
-		return d.listModulesByTypeTx(nil, tp, filter)
+		res, err := d.listModulesByTypeTx(nil, tp, filter)
+		if err != nil {
+			return nil, err
+		}
+		resKube, err := d.listModulesByTypeTx(nil, common.TypeSystemKube, filter)
+		if err != nil {
+			return nil, err
+		}
+		resNative, err := d.listModulesByTypeTx(nil, common.TypeSystemNative, filter)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, resKube...)
+		res = append(res, resNative...)
+		return res, nil
+	case common.TypeSystemKube:
+		res, err := d.listModulesByTypeTx(nil, common.TypeSystemOptional, filter)
+		if err != nil {
+			return nil, err
+		}
+		resKube, err := d.listModulesByTypeTx(nil, tp, filter)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, resKube...)
+		return res, nil
+	case common.TypeSystemNative:
+		res, err := d.listModulesByTypeTx(nil, common.TypeSystemOptional, filter)
+		if err != nil {
+			return nil, err
+		}
+		resNative, err := d.listModulesByTypeTx(nil, tp, filter)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, resNative...)
+		return res, nil
 	default:
 		return d.ListModulesTx(nil, filter)
 	}
