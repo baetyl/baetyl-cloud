@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
@@ -763,7 +764,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                   "baidu",
 			common.LabelNodeName:    "abc",
-			common.LabelNodeMode:    specV1.NodeModeKube,
+			common.LabelNodeMode:    context.RunModeKube,
 			"test":                  "test",
 			common.LabelAccelerator: "",
 			common.LabelCluster:     "false",
@@ -789,7 +790,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
-			common.LabelNodeMode: specV1.NodeModeKube,
+			common.LabelNodeMode: context.RunModeKube,
 			"test":               "test",
 		},
 		Attributes: map[string]interface{}{
@@ -819,7 +820,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                   "baidu",
 			common.LabelNodeName:    "abc",
-			common.LabelNodeMode:    specV1.NodeModeKube,
+			common.LabelNodeMode:    context.RunModeKube,
 			"test":                  "test",
 			common.LabelCluster:     "false",
 			common.LabelAccelerator: "",
@@ -845,7 +846,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                   "baidu",
 			common.LabelNodeName:    "abc",
-			common.LabelNodeMode:    specV1.NodeModeKube,
+			common.LabelNodeMode:    context.RunModeKube,
 			"test":                  "test",
 			common.LabelAccelerator: "",
 			common.LabelCluster:     "false",
@@ -869,7 +870,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                   "baidu",
 			common.LabelNodeName:    "abc",
-			common.LabelNodeMode:    specV1.NodeModeKube,
+			common.LabelNodeMode:    context.RunModeKube,
 			"test":                  "test",
 			common.LabelCluster:     "false",
 			common.LabelAccelerator: "",
@@ -888,7 +889,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
-			common.LabelNodeMode: specV1.NodeModeKube,
+			common.LabelNodeMode: context.RunModeKube,
 			"test":               "test",
 		},
 		Attributes: map[string]interface{}{
@@ -938,7 +939,7 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
-			common.LabelNodeMode: specV1.NodeModeKube,
+			common.LabelNodeMode: context.RunModeKube,
 			"test":               "test",
 		},
 		Attributes: map[string]interface{}{
@@ -989,7 +990,7 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                   "baidu",
 			common.LabelNodeName:    "abc",
-			common.LabelNodeMode:    specV1.NodeModeKube,
+			common.LabelNodeMode:    context.RunModeKube,
 			"test":                  "test",
 			common.LabelAccelerator: "",
 			common.LabelCluster:     "false",
@@ -1007,7 +1008,7 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
-			common.LabelNodeMode: specV1.NodeModeKube,
+			common.LabelNodeMode: context.RunModeKube,
 			"test":               "test",
 		},
 		Attributes: map[string]interface{}{
@@ -1048,7 +1049,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                "baidu",
 			common.LabelNodeName: "abc",
-			common.LabelNodeMode: specV1.NodeModeKube,
+			common.LabelNodeMode: context.RunModeKube,
 			"test":               "test",
 		},
 		Attributes: map[string]interface{}{
@@ -1079,7 +1080,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 		Labels: map[string]string{
 			"tag":                   "baidu",
 			common.LabelNodeName:    "abc",
-			common.LabelNodeMode:    specV1.NodeModeKube,
+			common.LabelNodeMode:    context.RunModeKube,
 			"test":                  "test",
 			common.LabelAccelerator: specV1.NVAccelerator,
 			common.LabelCluster:     "false",

@@ -409,6 +409,125 @@ func TestListApp(t *testing.T) {
 	assert.Len(t, resList, 1)
 }
 
+func TestListModule(t *testing.T) {
+	db, err := MockNewDB()
+	if err != nil {
+		fmt.Printf("get mock sqlite3 error = %s", err.Error())
+		t.Fail()
+		return
+	}
+	db.MockCreateModuleTable()
+
+	module := &models.Module{
+		Name:    "baetyl",
+		Version: "v2.0.1",
+		Image:   "baetyl:v1",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        string(common.TypeSystemOptional),
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	module2 := &models.Module{
+		Name:    "baetyl2",
+		Version: "v2.0.2",
+		Image:   "baetyl:v2",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        string(common.TypeSystemOptional),
+		IsLatest:    false,
+		Description: "for desp",
+	}
+
+	module3 := &models.Module{
+		Name:    "baetyl3",
+		Version: "v2.0.3",
+		Image:   "baetyl:v3",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        string(common.TypeSystemKube),
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	module4 := &models.Module{
+		Name:    "baetyl4",
+		Version: "v2.0.4",
+		Image:   "baetyl:v4",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        string(common.TypeSystemNative),
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	module5 := &models.Module{
+		Name:    "baetyl6",
+		Version: "v2.0.6",
+		Image:   "baetyl:v6",
+		Programs: map[string]string{
+			"linux-amd64":    "url-linux-amd64",
+			"linux-arm64-v8": "url-linux-arm64-v8",
+		},
+		Type:        string(common.TypeUserRuntime),
+		IsLatest:    true,
+		Description: "for desp",
+	}
+
+	_, err = db.CreateModule(module)
+	assert.NoError(t, err)
+	_, err = db.CreateModule(module2)
+	assert.NoError(t, err)
+	_, err = db.CreateModule(module3)
+	assert.NoError(t, err)
+	_, err = db.CreateModule(module4)
+	assert.NoError(t, err)
+	_, err = db.CreateModule(module5)
+	assert.NoError(t, err)
+
+	page := &models.Filter{}
+	resList, err := db.ListModules(page, common.TypeSystemOptional)
+	assert.NoError(t, err)
+	assert.Len(t, resList, 3)
+	assert.Equal(t, module.Name, resList[0].Name)
+	assert.Equal(t, module3.Name, resList[1].Name)
+	assert.Equal(t, module4.Name, resList[2].Name)
+	checkModule(t, module, &resList[0])
+	checkModule(t, module3, &resList[1])
+	checkModule(t, module4, &resList[2])
+
+	resList, err = db.ListModules(page, common.TypeSystemKube)
+	assert.NoError(t, err)
+	assert.Len(t, resList, 2)
+	assert.Equal(t, module.Name, resList[0].Name)
+	assert.Equal(t, module3.Name, resList[1].Name)
+	checkModule(t, module, &resList[0])
+	checkModule(t, module3, &resList[1])
+
+	resList, err = db.ListModules(page, common.TypeSystemNative)
+	assert.NoError(t, err)
+	assert.Len(t, resList, 2)
+	assert.Equal(t, module.Name, resList[0].Name)
+	assert.Equal(t, module4.Name, resList[1].Name)
+	checkModule(t, module, &resList[0])
+	checkModule(t, module4, &resList[1])
+
+	resList, err = db.ListModules(page, common.TypeUserRuntime)
+	assert.NoError(t, err)
+	assert.Len(t, resList, 1)
+	assert.Equal(t, module5.Name, resList[0].Name)
+	checkModule(t, module5, &resList[0])
+}
+
 func checkModule(t *testing.T, expect, actual *models.Module) {
 	assert.Equal(t, expect.Name, actual.Name)
 	assert.Equal(t, expect.Version, actual.Version)

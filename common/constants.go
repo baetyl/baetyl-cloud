@@ -227,6 +227,8 @@ const (
 	TypeUserRuntime    ModuleType = "runtime_user"
 	TypeSystem         ModuleType = "system"
 	TypeSystemOptional ModuleType = "opt_system"
+	TypeSystemKube     ModuleType = "opt_system_kube"
+	TypeSystemNative   ModuleType = "opt_system_native"
 )
 
 const (
