@@ -1005,7 +1005,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int
 		"CoreConfName":  config.Name,
 		"CoreAppName":   app.Name,
 		"CoreFrequency": fmt.Sprintf("%ds", freq),
-		"GPUStats":      node.Accelerator == v1.NVAccelerator,
+		"GPUStats":      node.Accelerator == v1.NVAccelerator || node.Accelerator == v1.JetsonAccelerator,
 	}
 	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateCoreConfYaml, params)
 	if err != nil {
@@ -1041,7 +1041,7 @@ func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node) error {
 	params := map[string]interface{}{
 		"InitConfName": config.Name,
 		"InitAppName":  app.Name,
-		"GPUStats":     node.Accelerator == v1.NVAccelerator,
+		"GPUStats":     node.Accelerator == v1.NVAccelerator || node.Accelerator == v1.JetsonAccelerator,
 	}
 	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateInitConfYaml, params)
 	if err != nil {

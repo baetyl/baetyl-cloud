@@ -39,7 +39,7 @@ type SystemAppService interface {
 }
 
 type GenAppsByOption func(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) ([]*specV1.Application, error)
-type GenAppFunc func(tx interface{}, ns, nodeName string, params map[string]interface{}) (*specV1.Application, error)
+type GenAppFunc func(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) (*specV1.Application, error)
 type HandlerPopulateParams func(tx interface{}, ns string, params map[string]interface{}) error
 type HandlerPopulateOptAppsParams func(tx interface{}, ns string, params map[string]interface{}, appAlias []string) error
 
@@ -100,7 +100,7 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 		"NodeMode":                   node.NodeMode,
 		"AppMode":                    node.NodeMode,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
-		"GPUStats":                   node.Accelerator == specV1.NVAccelerator,
+		"GPUStats":                   node.Accelerator == specV1.NVAccelerator || node.Accelerator == specV1.JetsonAccelerator,
 		"DiskNetStats":               node.NodeMode == context.RunModeKube,
 		"QPSStats":                   node.NodeMode == context.RunModeKube,
 	}
@@ -168,7 +168,7 @@ func (s *SystemAppServiceImpl) GenOptionalApps(tx interface{}, ns string, node *
 	var apps []*specV1.Application
 	for _, v := range appAlias {
 		if f, ok := s.OptionalAppFuncs[v]; ok {
-			app, err := f(tx, ns, node.Name, params)
+			app, err := f(tx, ns, node, params)
 			if err != nil {
 				return nil, err
 			}
@@ -223,13 +223,13 @@ func (s *SystemAppServiceImpl) genInitApp(tx interface{}, ns, nodeName string, p
 	return s.GenApp(tx, ns, templateInitAppYaml, params)
 }
 
-func (s *SystemAppServiceImpl) genFunctionApp(tx interface{}, ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
+func (s *SystemAppServiceImpl) genFunctionApp(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) (*specV1.Application, error) {
 	appName := fmt.Sprintf("baetyl-function-%s", common.RandString(9))
 	confName := fmt.Sprintf("baetyl-function-conf-%s", common.RandString(9))
 	// create config
 	confMap := map[string]interface{}{
 		"Namespace":        ns,
-		"NodeName":         nodeName,
+		"NodeName":         node.Name,
 		"FunctionAppName":  appName,
 		"FunctionConfName": confName,
 	}
@@ -244,7 +244,7 @@ func (s *SystemAppServiceImpl) genFunctionApp(tx interface{}, ns, nodeName strin
 	// create application
 	appMap := map[string]interface{}{
 		"Namespace":           ns,
-		"NodeName":            nodeName,
+		"NodeName":            node.Name,
 		"FunctionAppName":     appName,
 		"FunctionConfName":    conf.Name,
 		"FunctionConfVersion": conf.Version,
@@ -287,13 +287,13 @@ func (s *SystemAppServiceImpl) genBrokerApp(tx interface{}, ns, nodeName string,
 	return s.GenApp(tx, ns, templateBrokerAppYaml, appMap)
 }
 
-func (s *SystemAppServiceImpl) genRuleApp(tx interface{}, ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
+func (s *SystemAppServiceImpl) genRuleApp(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) (*specV1.Application, error) {
 	appName := fmt.Sprintf("baetyl-rule-%s", common.RandString(9))
 	confName := fmt.Sprintf("baetyl-rule-conf-%s", common.RandString(9))
 	// create config
 	confMap := map[string]interface{}{
 		"Namespace":    ns,
-		"NodeName":     nodeName,
+		"NodeName":     node.Name,
 		"RuleAppName":  appName,
 		"RuleConfName": confName,
 	}
@@ -308,7 +308,7 @@ func (s *SystemAppServiceImpl) genRuleApp(tx interface{}, ns, nodeName string, p
 	// create application
 	appMap := map[string]interface{}{
 		"Namespace":       ns,
-		"NodeName":        nodeName,
+		"NodeName":        node.Name,
 		"RuleAppName":     appName,
 		"RuleConfName":    conf.Name,
 		"RuleConfVersion": conf.Version,
