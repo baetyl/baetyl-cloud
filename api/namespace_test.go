@@ -121,7 +121,7 @@ func TestAPI_DeleteNamespace(t *testing.T) {
 	api.Task = mkTaskService
 
 	mkNamespaceService.EXPECT().Get("testA").Return(nil, nil)
-	mkTaskService.EXPECT().AddTask(gomock.Any()).Return(nil)
+	mkTaskService.EXPECT().AddTaskWithKey("DeleteNamespaceTask", gomock.Any()).Return(nil, nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/testA/namespace", nil)
 	w := httptest.NewRecorder()

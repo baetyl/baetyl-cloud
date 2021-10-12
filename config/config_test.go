@@ -51,7 +51,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.SyncLinks = []string{"httplink"}
 	expect.Plugin.Pubsub = "defaultpubsub"
 	expect.Plugin.Locker = "defaultlocker"
-	expect.Plugin.Task = "database"
+	expect.Plugin.Task = "defaulttask"
 	expect.Lock.ExpireTime = 5
 	expect.Plugin.DM = "databaseext"
 	expect.Plugin.Tx = "defaulttx"

@@ -5,7 +5,8 @@
 package service
 
 import (
-	models "github.com/baetyl/baetyl-cloud/v2/models"
+	context "context"
+	task "github.com/baetyl/baetyl-go/v2/task"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -34,45 +35,72 @@ func (m *MockTaskService) EXPECT() *MockTaskServiceMockRecorder {
 }
 
 // AddTask mocks base method
-func (m *MockTaskService) AddTask(arg0 *models.Task) error {
+func (m *MockTaskService) AddTask(arg0 string, arg1 ...interface{}) (*task.TaskResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddTask", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AddTask", varargs...)
+	ret0, _ := ret[0].(*task.TaskResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // AddTask indicates an expected call of AddTask
-func (mr *MockTaskServiceMockRecorder) AddTask(arg0 interface{}) *gomock.Call {
+func (mr *MockTaskServiceMockRecorder) AddTask(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTask", reflect.TypeOf((*MockTaskService)(nil).AddTask), arg0)
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTask", reflect.TypeOf((*MockTaskService)(nil).AddTask), varargs...)
 }
 
-// GetNeedProcessTasks mocks base method
-func (m *MockTaskService) GetNeedProcessTasks() ([]*models.Task, error) {
+// AddTaskWithKey mocks base method
+func (m *MockTaskService) AddTaskWithKey(arg0 string, arg1 map[string]interface{}) (*task.TaskResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNeedProcessTasks")
-	ret0, _ := ret[0].([]*models.Task)
+	ret := m.ctrl.Call(m, "AddTaskWithKey", arg0, arg1)
+	ret0, _ := ret[0].(*task.TaskResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetNeedProcessTasks indicates an expected call of GetNeedProcessTasks
-func (mr *MockTaskServiceMockRecorder) GetNeedProcessTasks() *gomock.Call {
+// AddTaskWithKey indicates an expected call of AddTaskWithKey
+func (mr *MockTaskServiceMockRecorder) AddTaskWithKey(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNeedProcessTasks", reflect.TypeOf((*MockTaskService)(nil).GetNeedProcessTasks))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTaskWithKey", reflect.TypeOf((*MockTaskService)(nil).AddTaskWithKey), arg0, arg1)
 }
 
-// UpdateTask mocks base method
-func (m *MockTaskService) UpdateTask(arg0 *models.Task) (bool, error) {
+// Register mocks base method
+func (m *MockTaskService) Register(arg0 string, arg1 interface{}) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateTask", arg0)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	m.ctrl.Call(m, "Register", arg0, arg1)
 }
 
-// UpdateTask indicates an expected call of UpdateTask
-func (mr *MockTaskServiceMockRecorder) UpdateTask(arg0 interface{}) *gomock.Call {
+// Register indicates an expected call of Register
+func (mr *MockTaskServiceMockRecorder) Register(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTask", reflect.TypeOf((*MockTaskService)(nil).UpdateTask), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockTaskService)(nil).Register), arg0, arg1)
+}
+
+// StartWorker mocks base method
+func (m *MockTaskService) StartWorker(arg0 context.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "StartWorker", arg0)
+}
+
+// StartWorker indicates an expected call of StartWorker
+func (mr *MockTaskServiceMockRecorder) StartWorker(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartWorker", reflect.TypeOf((*MockTaskService)(nil).StartWorker), arg0)
+}
+
+// StopWorker mocks base method
+func (m *MockTaskService) StopWorker() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "StopWorker")
+}
+
+// StopWorker indicates an expected call of StopWorker
+func (mr *MockTaskServiceMockRecorder) StopWorker() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StopWorker", reflect.TypeOf((*MockTaskService)(nil).StopWorker))
 }
