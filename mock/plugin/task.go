@@ -5,7 +5,8 @@
 package plugin
 
 import (
-	models "github.com/baetyl/baetyl-cloud/v2/models"
+	context "context"
+	task "github.com/baetyl/baetyl-go/v2/task"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -33,19 +34,39 @@ func (m *MockTask) EXPECT() *MockTaskMockRecorder {
 	return m.recorder
 }
 
-// AcquireTaskLock mocks base method
-func (m *MockTask) AcquireTaskLock(arg0 *models.Task) (bool, error) {
+// AddTask mocks base method
+func (m *MockTask) AddTask(arg0 string, arg1 ...interface{}) (*task.TaskResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AcquireTaskLock", arg0)
-	ret0, _ := ret[0].(bool)
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AddTask", varargs...)
+	ret0, _ := ret[0].(*task.TaskResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// AcquireTaskLock indicates an expected call of AcquireTaskLock
-func (mr *MockTaskMockRecorder) AcquireTaskLock(arg0 interface{}) *gomock.Call {
+// AddTask indicates an expected call of AddTask
+func (mr *MockTaskMockRecorder) AddTask(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AcquireTaskLock", reflect.TypeOf((*MockTask)(nil).AcquireTaskLock), arg0)
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTask", reflect.TypeOf((*MockTask)(nil).AddTask), varargs...)
+}
+
+// AddTaskWithKey mocks base method
+func (m *MockTask) AddTaskWithKey(arg0 string, arg1 map[string]interface{}) (*task.TaskResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddTaskWithKey", arg0, arg1)
+	ret0, _ := ret[0].(*task.TaskResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddTaskWithKey indicates an expected call of AddTaskWithKey
+func (mr *MockTaskMockRecorder) AddTaskWithKey(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTaskWithKey", reflect.TypeOf((*MockTask)(nil).AddTaskWithKey), arg0, arg1)
 }
 
 // Close mocks base method
@@ -62,77 +83,38 @@ func (mr *MockTaskMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockTask)(nil).Close))
 }
 
-// CreateTask mocks base method
-func (m *MockTask) CreateTask(arg0 *models.Task) (bool, error) {
+// Register mocks base method
+func (m *MockTask) Register(arg0 string, arg1 interface{}) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateTask", arg0)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	m.ctrl.Call(m, "Register", arg0, arg1)
 }
 
-// CreateTask indicates an expected call of CreateTask
-func (mr *MockTaskMockRecorder) CreateTask(arg0 interface{}) *gomock.Call {
+// Register indicates an expected call of Register
+func (mr *MockTaskMockRecorder) Register(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTask", reflect.TypeOf((*MockTask)(nil).CreateTask), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockTask)(nil).Register), arg0, arg1)
 }
 
-// DeleteTask mocks base method
-func (m *MockTask) DeleteTask(arg0 string) (bool, error) {
+// StartWorker mocks base method
+func (m *MockTask) StartWorker(arg0 context.Context) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteTask", arg0)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	m.ctrl.Call(m, "StartWorker", arg0)
 }
 
-// DeleteTask indicates an expected call of DeleteTask
-func (mr *MockTaskMockRecorder) DeleteTask(arg0 interface{}) *gomock.Call {
+// StartWorker indicates an expected call of StartWorker
+func (mr *MockTaskMockRecorder) StartWorker(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTask", reflect.TypeOf((*MockTask)(nil).DeleteTask), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartWorker", reflect.TypeOf((*MockTask)(nil).StartWorker), arg0)
 }
 
-// GetNeedProcessTask mocks base method
-func (m *MockTask) GetNeedProcessTask(arg0, arg1 int32) ([]*models.Task, error) {
+// StopWorker mocks base method
+func (m *MockTask) StopWorker() {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNeedProcessTask", arg0, arg1)
-	ret0, _ := ret[0].([]*models.Task)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	m.ctrl.Call(m, "StopWorker")
 }
 
-// GetNeedProcessTask indicates an expected call of GetNeedProcessTask
-func (mr *MockTaskMockRecorder) GetNeedProcessTask(arg0, arg1 interface{}) *gomock.Call {
+// StopWorker indicates an expected call of StopWorker
+func (mr *MockTaskMockRecorder) StopWorker() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNeedProcessTask", reflect.TypeOf((*MockTask)(nil).GetNeedProcessTask), arg0, arg1)
-}
-
-// GetTask mocks base method
-func (m *MockTask) GetTask(arg0 string) (*models.Task, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTask", arg0)
-	ret0, _ := ret[0].(*models.Task)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTask indicates an expected call of GetTask
-func (mr *MockTaskMockRecorder) GetTask(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTask", reflect.TypeOf((*MockTask)(nil).GetTask), arg0)
-}
-
-// UpdateTask mocks base method
-func (m *MockTask) UpdateTask(arg0 *models.Task) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateTask", arg0)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateTask indicates an expected call of UpdateTask
-func (mr *MockTaskMockRecorder) UpdateTask(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTask", reflect.TypeOf((*MockTask)(nil).UpdateTask), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StopWorker", reflect.TypeOf((*MockTask)(nil).StopWorker))
 }

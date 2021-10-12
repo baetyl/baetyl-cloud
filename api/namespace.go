@@ -1,8 +1,6 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/baetyl/baetyl-go/v2/log"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -40,16 +38,7 @@ func (api *API) DeleteNamespace(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	_, err = api.Task.AddTaskWithKey("DeleteNamespaceTask", map[string]interface{}{"ns":ns})
 
-	return nil, api.Task.AddTask(genTask(ns))
-}
-
-func genTask(namespace string) *models.Task {
-	return &models.Task{
-		Name:             fmt.Sprintf("%s-%s", common.TaskNamespaceDelete, common.UUIDPrune()),
-		Namespace:        namespace,
-		RegistrationName: common.TaskNamespaceDelete,
-		ResourceName:     namespace,
-		ResourceType:     common.KeyContextNamespace,
-	}
+	return nil, err
 }
