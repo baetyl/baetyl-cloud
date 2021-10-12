@@ -230,6 +230,11 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	node.NodeMode = oldNode.NodeMode
 
 	if node.Accelerator != oldNode.Accelerator {
+		// TODO remove redundant logic
+		err = api.deleteGPUMetricsAppsIfNeed(oldNode)
+		if err != nil {
+			return nil, err
+		}
 		node.SysApps = common.UpdateSysAppByAccelerator(node.Accelerator, node.SysApps)
 		err = api.UpdateConfigByAccelerator(ns, node)
 		if err != nil {
@@ -243,6 +248,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	}
 
 	if !reflect.DeepEqual(node.SysApps, oldNode.SysApps) {
+		oldNode.Accelerator = node.Accelerator
 		err = api.UpdateNodeOptionedSysApps(oldNode, node.SysApps)
 		if err != nil {
 			return nil, err
@@ -256,6 +262,26 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 
 	view.Desire = nil
 	return view, nil
+}
+
+func (api *API) deleteGPUMetricsAppsIfNeed(node *v1.Node) error {
+	if node.Accelerator == v1.NVAccelerator || node.Accelerator == v1.JetsonAccelerator {
+		err := api.deleteDeletedSysApps(node, []string{v1.BaetylGPUMetrics})
+		if err != nil {
+			return err
+		}
+		index := -1
+		for i, app := range node.SysApps {
+			if strings.Contains(app, v1.BaetylGPUMetrics) {
+				index = i
+				break
+			}
+		}
+		if index != -1 {
+			node.SysApps = append(node.SysApps[:index], node.SysApps[index + 1:]...)
+		}
+	}
+	return nil
 }
 
 // DeleteNode delete the node
