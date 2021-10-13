@@ -165,6 +165,8 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["InitAppName"] = init.Name
 	params["InitVersion"] = init.Version
 	params["GPUStats"] = node.Accelerator == specV1.NVAccelerator || node.Accelerator == specV1.JetsonAccelerator
+	params["DiskNetStats"] = node.NodeMode == context.RunModeKube
+	params["QPSStats"] = node.NodeMode == context.RunModeKube
 
 	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
 }
