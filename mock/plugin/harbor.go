@@ -5,7 +5,6 @@
 package plugin
 
 import (
-	common "github.com/baetyl/baetyl-cloud/v2/common"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -48,16 +47,16 @@ func (mr *MockHarborMockRecorder) Close() *gomock.Call {
 }
 
 // GetImageDigest mocks base method
-func (m *MockHarbor) GetImageDigest(arg0 *common.Context) (string, error) {
+func (m *MockHarbor) GetImageDigest(arg0, arg1, arg2 string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetImageDigest", arg0)
+	ret := m.ctrl.Call(m, "GetImageDigest", arg0, arg1, arg2)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetImageDigest indicates an expected call of GetImageDigest
-func (mr *MockHarborMockRecorder) GetImageDigest(arg0 interface{}) *gomock.Call {
+func (mr *MockHarborMockRecorder) GetImageDigest(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetImageDigest", reflect.TypeOf((*MockHarbor)(nil).GetImageDigest), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetImageDigest", reflect.TypeOf((*MockHarbor)(nil).GetImageDigest), arg0, arg1, arg2)
 }
