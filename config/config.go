@@ -47,6 +47,7 @@ type CloudConfig struct {
 		Cron       string   `yaml:"cron" json:"cron" default:"database"`
 		Csrf       string   `yaml:"csrf" json:"csrf" default:"defaultcsrf"`
 		JWT        string   `yaml:"jwt" json:"jwt" default:"defaultjwt"`
+		Harbor     string   `yaml:"harbor" json:"harbor" default:"harbor"`
 	} `yaml:"plugin" json:"plugin"`
 }
 
