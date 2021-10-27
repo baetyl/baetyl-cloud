@@ -8,5 +8,6 @@ import (
 
 type Harbor interface {
 	GetImageDigest(projects, repo, tags string) (string, error)
+	ListProjects() ([]string, error)
 	io.Closer
 }

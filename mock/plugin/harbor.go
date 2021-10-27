@@ -60,3 +60,18 @@ func (mr *MockHarborMockRecorder) GetImageDigest(arg0, arg1, arg2 interface{}) *
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetImageDigest", reflect.TypeOf((*MockHarbor)(nil).GetImageDigest), arg0, arg1, arg2)
 }
+
+// ListProjects mocks base method
+func (m *MockHarbor) ListProjects() ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListProjects")
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListProjects indicates an expected call of ListProjects
+func (mr *MockHarborMockRecorder) ListProjects() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProjects", reflect.TypeOf((*MockHarbor)(nil).ListProjects))
+}
