@@ -83,6 +83,7 @@ const (
 	// * nonBaetyl
 	ErrInvalidName = "nonBaetyl"
 	// * license
+	ErrLicenseExpired      = "ErrLicenseExpired"
 	ErrLicenseQuota        = "ErrLicenseQuota"
 	ErrLicenseQuotaAcquire = "ErrLicenseQuotaAcquire"
 	ErrLicenseQuotaRelease = "ErrLicenseQuotaRelease"
@@ -160,6 +161,7 @@ var templates = map[Code]string{
 	ErrInvalidToken: "The token is invalid",
 
 	// * License
+	ErrLicenseExpired:      "The license {{if .name}}({{.name}}){{end}} has expired. {{if .error}} ({{.error}}){{end}}",
 	ErrLicenseQuota:        "Check {{if .name}}({{.name}}){{end}} quota failed, the limited number is {{if .limit}}({{.limit}}){{end}}",
 	ErrLicenseQuotaAcquire: "Check {{if .name}}({{.name}}){{end}} quota acquire failed, the acquire number is {{if .number}}({{.number}}){{end}}",
 	ErrLicenseQuotaRelease: "Check {{if .name}}({{.name}}){{end}} quota release failed, the acquire number is {{if .number}}({{.number}}){{end}}",
