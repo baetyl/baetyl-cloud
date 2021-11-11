@@ -399,20 +399,25 @@ func TestListNode(t *testing.T) {
 				Attributes: map[string]interface{}{
 					specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 				},
+				Labels: map[string]string{
+					"test": "test",
+				},
 			},
 		},
 	}
 
-	sNode.EXPECT().List("default", &models.ListOptions{}).Return(mClist, nil)
+	sNode.EXPECT().List("default", &models.ListOptions{
+		NodeSelector: "test=test",
+	}).Return(mClist, nil)
 
 	// 200
-	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes?nodeSelector=test=test", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 	bytes := w.Body.Bytes()
 	fmt.Println(string(bytes))
-	assert.Equal(t, string(bytes), "{\"total\":1,\"items\":[{\"name\":\"node01\",\"createTime\":\"0001-01-01T00:00:00Z\",\"cluster\":false,\"ready\":2,\"mode\":\"\"}]}\n")
+	assert.Equal(t, string(bytes), "{\"total\":1,\"items\":[{\"name\":\"node01\",\"createTime\":\"0001-01-01T00:00:00Z\",\"labels\":{\"test\":\"test\"},\"cluster\":false,\"ready\":2,\"mode\":\"\"}]}\n")
 	nodelist := new(models.NodeList)
 	err := json.Unmarshal(bytes, nodelist)
 	assert.NoError(t, err)

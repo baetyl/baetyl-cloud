@@ -11,6 +11,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	"github.com/baetyl/baetyl-go/v2/utils"
 	"gopkg.in/yaml.v2"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -130,7 +131,31 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 	start, end := models.GetPagingParam(params, nodeViewList.Total)
 	nodeViewList.Items = resNode[start:end]
 
+	filterByNodeSelector(&nodeViewList)
+
 	return nodeViewList, nil
+}
+
+func filterByNodeSelector(list *models.NodeViewList) {
+	for _, item := range list.Items {
+		if item.Report == nil {
+			continue
+		}
+
+		cluster := item.Report.Node
+		if cluster == nil {
+			continue
+		}
+
+		for key, nodePoint := range cluster {
+			ls := nodePoint.Labels
+
+			if ok, err := utils.IsLabelMatch(list.NodeSelector, ls); err != nil || !ok {
+				delete(cluster, key)
+				continue
+			}
+		}
+	}
 }
 
 /**
