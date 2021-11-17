@@ -16,8 +16,8 @@ github.com/abiosoft/readline v0.0.0-20180607040430-155bce2042db/go.mod h1:rB3B4r
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/aws/aws-sdk-go v1.32.8 h1:ULxiQqR1eZ+k2/1gqv3GYAjkunlS7ncVU2eL801t08M=
 github.com/aws/aws-sdk-go v1.32.8/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
-github.com/baetyl/baetyl-go/v2 v2.2.4-0.20211012061633-cb97fc66fda9 h1:pqI/gL++eqt5oHHUMkrqgAQ5CnnEHlnPZoCmo+MJw/I=
-github.com/baetyl/baetyl-go/v2 v2.2.4-0.20211012061633-cb97fc66fda9/go.mod h1:q+Z0vDb3dbwy4d4vAPaXGJDyMaIUR7REcR2sALEb7I4=
+github.com/baetyl/baetyl-go/v2 v2.2.4-0.20211117065501-e3f899f5b29f h1:vEfIwdzefqEBej3MYjNZsXXbLGsoVCIS5r+XpMpkI8g=
+github.com/baetyl/baetyl-go/v2 v2.2.4-0.20211117065501-e3f899f5b29f/go.mod h1:+icoVFrmQKD1z2k6nU4UEodP1XMM/hXZAa+JrVRlh44=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/bradfitz/gomemcache v0.0.0-20170208213004-1952afaa557d/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=
 github.com/bradfitz/gomemcache v0.0.0-20180710155616-bc664df96737 h1:rRISKWyXfVxvoa702s91Zl5oREZTrR3yv+tXrrX7G/g=
@@ -182,6 +182,7 @@ github.com/memcachier/mc v2.0.1+incompatible h1:s8EDz0xrJLP8goitwZOoq1vA/sm0fPS4
 github.com/memcachier/mc v2.0.1+incompatible/go.mod h1:7bkvFE61leUBvXz+yxsOnGBQSZpBSPIMUQSmmSHvuXc=
 github.com/mholt/archiver v3.1.1+incompatible h1:1dCVxuqs0dJseYEhi5pl7MYPH9zDa1wBi7mF09cbNkU=
 github.com/mholt/archiver v3.1.1+incompatible/go.mod h1:Dh2dOXnSdiLxRiPoVfIr/fI1TwETms9B8CTWfeh7ROU=
+github.com/mitchellh/mapstructure v0.0.0-20170523030023-d0303fe80992 h1:W7VHAEVflA5/eTyRvQ53Lz5j8bhRd1myHZlI/IZFvbU=
 github.com/mitchellh/mapstructure v0.0.0-20170523030023-d0303fe80992/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=

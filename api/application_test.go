@@ -28,6 +28,7 @@ func getMockContainerApp() *specV1.Application {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Type:      common.ContainerApp,
+		Replica:  1,
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -634,6 +635,8 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Type:      common.ContainerApp,
+		Replica:   1,
+		Workload:  specV1.WorkloadDeployment,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -718,13 +721,15 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		CreationTimestamp: time.Time{},
 		Version:           "",
 		Selector:          "",
+		Replica:           1,
+		Workload:          specV1.WorkloadDeployment,
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
 				Hostname: "test-agent",
 				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
 				Replica:  1,
-				Type:     specV1.ServiceTypeDeployment,
+				Type:     specV1.WorkloadDeployment,
 				VolumeMounts: []specV1.VolumeMount{
 					{
 						Name:      "name",
@@ -863,7 +868,8 @@ func TestUpdateContainerApplication(t *testing.T) {
 	mApp3.Labels = map[string]string{
 		common.LabelAppMode: context.RunModeKube,
 	}
-	mApp3.Services[0].Type = "deployment"
+	mApp3.Services[0].Type = specV1.WorkloadDeployment
+	mApp3.Workload = specV1.WorkloadDeployment
 
 	sApp.EXPECT().Get(gomock.Any(), "abc", gomock.Any()).Return(mApp, nil).AnyTimes()
 	fApp.EXPECT().UpdateApp(mApp.Namespace, gomock.Any(), mApp2, gomock.Any()).Return(mApp3, nil)

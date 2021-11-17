@@ -262,14 +262,25 @@ func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, er
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "type is invalid"))
 	}
 
-	for _, svc := range app.Services {
-		if svc.Type != specV1.ServiceTypeDeployment &&
-			svc.Type != specV1.ServiceTypeDaemonSet &&
-			svc.Type != specV1.ServiceTypeStatefulSet &&
-			svc.Type != specV1.ServiceTypeJob {
-			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error",
-				"failed to parse service type, service type should be deployment / daemonset / statefulset / job"))
+	// multi-container compatibility
+	if app.Workload == "" && len(app.Services) > 0 {
+		app.Workload = app.Services[0].Type
+		for _, service := range app.Services {
+			if app.Workload != service.Type {
+				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "service types should be consistent"))
+			}
 		}
+	}
+	if app.Replica == 0 && len(app.Services) > 0 && app.Services[0].Replica != 0 {
+		app.Replica = app.Services[0].Replica
+	}
+
+	if app.Workload != specV1.WorkloadDeployment &&
+		app.Workload != specV1.WorkloadDaemonSet &&
+		app.Workload != specV1.WorkloadStatefulSet &&
+		app.Workload != specV1.WorkloadJob {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error",
+			"failed to parse service type, service type should be deployment / daemonset / statefulset / job"))
 	}
 	return app, nil
 }
@@ -764,10 +775,8 @@ func populateAppDefaultField(appView *models.ApplicationView) {
 	if appView.Mode == "" {
 		appView.Mode = context.RunModeKube
 	}
-	for i, v := range appView.Services {
-		if v.Type == "" {
-			appView.Services[i].Type = specV1.ServiceTypeDeployment
-		}
+	if appView.Workload == "" {
+		appView.Workload = specV1.WorkloadDeployment
 	}
 }
 
