@@ -11,7 +11,7 @@ func TestFromApplicationModel(t *testing.T) {
 	app := &Application{
 		Name:      "testApp",
 		Namespace: "namespace",
-		Content:   `{"name":"testApp","namespace":"namespace","createTime":"0001-01-01T00:00:00Z","cronTime":"0001-01-01T00:00:00Z"}`,
+		Content:   `{"name":"testApp","namespace":"namespace","createTime":"0001-01-01T00:00:00Z","updateTime":"0001-01-01T00:00:00Z","cronTime":"0001-01-01T00:00:00Z"}`,
 	}
 
 	mApp := &specV1.Application{

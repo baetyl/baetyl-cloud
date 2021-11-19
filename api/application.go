@@ -96,6 +96,7 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	log.L().Info("", log.Any("app2", app))
 	app, err = api.Facade.CreateApp(ns, baseApp, app, configs)
 	if err != nil {
 		return nil, err
@@ -262,14 +263,15 @@ func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, er
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "type is invalid"))
 	}
 
-	for _, svc := range app.Services {
-		if svc.Type != specV1.ServiceTypeDeployment &&
-			svc.Type != specV1.ServiceTypeDaemonSet &&
-			svc.Type != specV1.ServiceTypeStatefulSet &&
-			svc.Type != specV1.ServiceTypeJob {
-			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error",
-				"failed to parse service type, service type should be deployment / daemonset / statefulset / job"))
-		}
+	// multi-container compatibility
+	api.compatibleAppDeprecatedFiled(app)
+
+	if app.Workload != specV1.WorkloadDeployment &&
+		app.Workload != specV1.WorkloadDaemonSet &&
+		app.Workload != specV1.WorkloadStatefulSet &&
+		app.Workload != specV1.WorkloadJob {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error",
+			"failed to parse service type, service type should be deployment / daemonset / statefulset / job"))
 	}
 	return app, nil
 }
@@ -654,6 +656,73 @@ func (api *API) isAppCanDelete(namesapce, name string) (bool, error) {
 	return true, nil
 }
 
+func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
+	// Workload
+	if app.Workload == "" {
+		// compatible with the original one service corresponding to one workload
+		if len(app.Services) > 0 && app.Services[0].Type != "" {
+			api.log.Debug("workload is empty, use the services[0].Type ")
+			app.Workload = app.Services[0].Type
+			for i := 1; i < len(app.Services); i++ {
+				if app.Services[i].Type != app.Workload {
+					api.log.Warn("app service type is inconsistent", log.Any("index", i), log.Any("name", app.Services[i].Name))
+				}
+			}
+		} else {
+			app.Workload = specV1.WorkloadDeployment
+		}
+	}
+
+	// HostNetwork
+	if !app.HostNetwork && len(app.Services) > 0 && app.Services[0].HostNetwork {
+		api.log.Debug("app.HostNetwork is false, use the services[0].HostNetwork true ")
+		app.HostNetwork = true
+	}
+
+	// Replica
+	if app.Replica == 0 {
+		// compatible with the original one service corresponding to one workload
+		if len(app.Services) > 0 && app.Services[0].Replica != 0 {
+			api.log.Debug("app.Replica is 0, use the services[0].Replica ")
+			app.Replica = app.Services[0].Replica
+			for i := 1; i < len(app.Services); i++ {
+				if app.Services[i].Replica != app.Replica {
+					api.log.Warn("app service replica is inconsistent", log.Any("index", i), log.Any("name", app.Services[i].Name))
+				}
+			}
+		} else {
+			app.Replica = 1
+		}
+	}
+
+	// JobConfig
+	if app.JobConfig == nil || app.JobConfig.RestartPolicy == "" {
+		// compatible with the original one service corresponding to one workload
+		if len(app.Services) > 0 && app.Services[0].JobConfig != nil {
+			api.log.Debug("app.JobConfig is 0, use the services[0].JobConfig ")
+			app.JobConfig = &specV1.AppJobConfig{
+				Completions:   app.Services[0].JobConfig.Completions,
+				Parallelism:   app.Services[0].JobConfig.Parallelism,
+				BackoffLimit:  app.Services[0].JobConfig.BackoffLimit,
+				RestartPolicy: app.Services[0].JobConfig.RestartPolicy,
+			}
+		} else {
+			app.JobConfig = &specV1.AppJobConfig{RestartPolicy: "Never"}
+		}
+	}
+
+	// Label
+	if app.Labels == nil {
+		app.Labels = map[string]string{}
+	}
+	if len(app.Services) > 0 && app.Services[0].Labels != nil {
+		api.log.Debug("app.Label add services[0].Label ")
+		for key, val := range app.Services[0].Labels {
+			app.Labels[key] = val
+		}
+	}
+}
+
 func getGenConfigNameOfFunctionService(app *specV1.Application, serviceName string) (string, error) {
 	volumeMountName := getNameOfFunctionConfigVolumeMount(serviceName)
 	for _, v := range app.Volumes {
@@ -764,10 +833,8 @@ func populateAppDefaultField(appView *models.ApplicationView) {
 	if appView.Mode == "" {
 		appView.Mode = context.RunModeKube
 	}
-	for i, v := range appView.Services {
-		if v.Type == "" {
-			appView.Services[i].Type = specV1.ServiceTypeDeployment
-		}
+	if appView.Workload == "" {
+		appView.Workload = specV1.WorkloadDeployment
 	}
 }
 

@@ -74,7 +74,6 @@ selector: baetyl-node-name=node-name-1
 services:
 - name: baetyl-core
   image: out-baetyl
-  replica: 1
   volumeMounts:
   - name: core-conf
     mountPath: /etc/baetyl
@@ -95,6 +94,7 @@ services:
   - core
   security:
     privileged: true
+  replica: 1
   type: deployment
 volumes:
 - name: core-conf
@@ -115,6 +115,7 @@ volumes:
   hostPath:
     path: '{{.BAETYL_HOST_PATH_LIB}}/host'
 system: true
+replica: 1
 `,
 		},
 		{
@@ -164,7 +165,6 @@ selector: baetyl-node-name=node-name-1
 services:
 - name: baetyl-function
   image: out-baetyl-function
-  replica: 1
   volumeMounts:
   - name: func-conf
     mountPath: /etc/baetyl
@@ -172,6 +172,7 @@ services:
   ports:
   - containerPort: 50011
     protocol: TCP
+  replica: 1
   type: deployment
 volumes:
 - name: func-conf
@@ -179,6 +180,7 @@ volumes:
     name: func-conf-name-1
     version: func-conf-version-1
 system: true
+replica: 1
 `,
 		},
 		{

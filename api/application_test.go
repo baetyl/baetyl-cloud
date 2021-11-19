@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/context"
+	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -28,6 +29,7 @@ func getMockContainerApp() *specV1.Application {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Type:      common.ContainerApp,
+		Replica:   1,
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -155,7 +157,7 @@ func getMockFunctionApp() *specV1.Application {
 }
 
 func initApplicationAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
-	api := &API{}
+	api := &API{log: log.L().With(log.Any("test", "api"))}
 	router := gin.Default()
 	mockCtl := gomock.NewController(t)
 	mockIM := func(c *gin.Context) { c.Set(common.KeyContextNamespace, "baetyl-cloud") }
@@ -634,6 +636,8 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Type:      common.ContainerApp,
+		Replica:   1,
+		Workload:  specV1.WorkloadDeployment,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -718,13 +722,16 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		CreationTimestamp: time.Time{},
 		Version:           "",
 		Selector:          "",
+		Replica:           1,
+		Workload:          specV1.WorkloadDeployment,
+		JobConfig:         &specV1.AppJobConfig{RestartPolicy: "Never"},
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
 				Hostname: "test-agent",
 				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
 				Replica:  1,
-				Type:     specV1.ServiceTypeDeployment,
+				Type:     specV1.WorkloadDeployment,
 				VolumeMounts: []specV1.VolumeMount{
 					{
 						Name:      "name",
@@ -793,6 +800,8 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		common.LabelAppMode: context.RunModeKube,
 	}
 
+	log.L().Info("", log.Any("app1", app))
+
 	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
@@ -858,12 +867,14 @@ func TestUpdateContainerApplication(t *testing.T) {
 
 	mApp2 := getMockContainerApp()
 	mApp3 := mApp2
+	mApp2.JobConfig = &specV1.AppJobConfig{RestartPolicy: "Never"}
 	mApp3.Selector = "name = test"
 	mApp3.Mode = context.RunModeKube
 	mApp3.Labels = map[string]string{
 		common.LabelAppMode: context.RunModeKube,
 	}
-	mApp3.Services[0].Type = "deployment"
+	mApp3.Services[0].Type = specV1.WorkloadDeployment
+	mApp3.Workload = specV1.WorkloadDeployment
 
 	sApp.EXPECT().Get(gomock.Any(), "abc", gomock.Any()).Return(mApp, nil).AnyTimes()
 	fApp.EXPECT().UpdateApp(mApp.Namespace, gomock.Any(), mApp2, gomock.Any()).Return(mApp3, nil)
@@ -2993,4 +3004,88 @@ func TestAPI_GetNodeSysAppRegistries(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func Test_compatibleAppDeprecatedFiled(t *testing.T) {
+	api, _, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	app0 := &models.ApplicationView{
+		Name: "a0",
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:        "s1",
+					Labels:      map[string]string{"a": "b"},
+					HostNetwork: true,
+					Replica:     3,
+					JobConfig: &specV1.ServiceJobConfig{
+						Completions:   1,
+						Parallelism:   2,
+						BackoffLimit:  3,
+						RestartPolicy: "Never",
+					},
+					Type: specV1.WorkloadJob,
+				},
+			},
+		},
+	}
+
+	expectApp0 := &models.ApplicationView{
+		Name:        "a0",
+		Labels:      map[string]string{"a": "b"},
+		HostNetwork: true,
+		Replica:     3,
+		JobConfig: &specV1.AppJobConfig{
+			Completions:   1,
+			Parallelism:   2,
+			BackoffLimit:  3,
+			RestartPolicy: "Never",
+		},
+		Workload: specV1.WorkloadJob,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:        "s1",
+					Labels:      map[string]string{"a": "b"},
+					HostNetwork: true,
+					Replica:     3,
+					JobConfig: &specV1.ServiceJobConfig{
+						Completions:   1,
+						Parallelism:   2,
+						BackoffLimit:  3,
+						RestartPolicy: "Never",
+					},
+					Type: specV1.WorkloadJob,
+				},
+			},
+		},
+	}
+
+	api.compatibleAppDeprecatedFiled(app0)
+	assert.EqualValues(t, expectApp0, app0)
+
+	// case 1
+	app1 := &models.ApplicationView{
+		Name:     "a1",
+		Services: []models.ServiceView{},
+	}
+
+	expectApp1 := &models.ApplicationView{
+		Name:        "a1",
+		Labels:      map[string]string{},
+		HostNetwork: false,
+		Replica:     1,
+		JobConfig: &specV1.AppJobConfig{
+			Completions:   0,
+			Parallelism:   0,
+			BackoffLimit:  0,
+			RestartPolicy: "Never",
+		},
+		Workload: specV1.WorkloadDeployment,
+		Services: []models.ServiceView{},
+	}
+
+	api.compatibleAppDeprecatedFiled(app1)
+	assert.EqualValues(t, expectApp1, app1)
 }

@@ -8,6 +8,7 @@ labels:
 type: "container"
 mode: "{{.NodeMode}}"
 system: true
+replica: 1
 services:
   - name: "baetyl-core"
     type: "deployment"
