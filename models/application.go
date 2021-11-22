@@ -36,6 +36,7 @@ type VolumeView struct {
 	HostPath    *specV1.HostPathVolumeSource `json:"hostPath,omitempty"`
 	Config      *specV1.ObjectReference      `json:"config,omitempty"`
 	Secret      *specV1.ObjectReference      `json:"secret,omitempty"`
+	EmptyDir    *specV1.EmptyDirVolumeSource `json:"emptyDir,omitempty"`
 	Certificate *specV1.ObjectReference      `json:"certificate,omitempty"`
 }
 

@@ -438,6 +438,10 @@ func TestCreateContainerApplication(t *testing.T) {
 							Name:      "name",
 							MountPath: "mountPath",
 						},
+						{
+							Name:      "emptydir",
+							MountPath: "mp",
+						},
 					},
 					Ports: []specV1.ContainerPort{
 						{
@@ -471,6 +475,13 @@ func TestCreateContainerApplication(t *testing.T) {
 				Name: "secret",
 				Secret: &specV1.ObjectReference{
 					Name: "secret01",
+				},
+			},
+			{
+				Name: "emptydir",
+				EmptyDir: &specV1.EmptyDirVolumeSource{
+					Medium:    "Memory",
+					SizeLimit: "1",
 				},
 			},
 		},
