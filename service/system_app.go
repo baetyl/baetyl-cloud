@@ -100,7 +100,7 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 		"NodeMode":                   node.NodeMode,
 		"AppMode":                    node.NodeMode,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
-		"GPUStats":                   node.Accelerator == specV1.NVAccelerator || node.Accelerator == specV1.JetsonAccelerator,
+		"GPUStats":                   node.Accelerator == specV1.NVAccelerator || node.Accelerator == specV1.JetsonAccelerator || node.Accelerator == specV1.BitmainAccelerator,
 		"DiskNetStats":               node.NodeMode == context.RunModeKube,
 		"QPSStats":                   node.NodeMode == context.RunModeKube,
 	}

@@ -3,7 +3,7 @@ package common
 import (
 	"strings"
 
-	"github.com/baetyl/baetyl-go/v2/spec/v1"
+	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	uuid2 "github.com/google/uuid"
 )
 
@@ -62,7 +62,7 @@ func UpdateSysAppByAccelerator(accelerator string, sysApps []string) []string {
 			break
 		}
 	}
-	if accelerator == v1.NVAccelerator || accelerator == v1.JetsonAccelerator {
+	if accelerator == v1.NVAccelerator || accelerator == v1.JetsonAccelerator || accelerator == v1.BitmainAccelerator {
 		if !found {
 			sysApps = append(sysApps, v1.BaetylGPUMetrics)
 		}
