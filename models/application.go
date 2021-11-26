@@ -16,6 +16,7 @@ type ApplicationView struct {
 	Version           string                `json:"version,omitempty"`
 	Selector          string                `json:"selector,omitempty"`
 	NodeSelector      string                `json:"nodeSelector,omitempty"`
+	InitServices      []ServiceView         `json:"initServices,omitempty" validate:"dive"`
 	Services          []ServiceView         `json:"services,omitempty" validate:"dive"`
 	Volumes           []VolumeView          `json:"volumes,omitempty" validate:"dive"`
 	Description       string                `json:"description,omitempty"`
