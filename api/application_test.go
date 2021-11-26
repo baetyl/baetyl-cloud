@@ -15,6 +15,7 @@ import (
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -619,6 +620,59 @@ func TestCreateContainerApplication(t *testing.T) {
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestInitContainerApp(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode := ms.NewMockNodeService(mockCtl)
+	sIndex := ms.NewMockIndexService(mockCtl)
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
+	api.Index = sIndex
+	api.Node = sNode
+
+	appView := &models.ApplicationView{
+		Namespace: "baetyl-cloud",
+		Name:      "abc",
+		Type:      common.ContainerApp,
+		InitServices: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:     "init",
+					Image:    "hub.baidubce.com/baetyl/baetyl-init:1.0.0",
+				},
+			},
+		},
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:     "agent",
+					Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+				},
+			},
+		},
+	}
+	app := &specV1.Application{}
+	copier.Copy(app, appView)
+
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app, nil).Times(1)
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(appView)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 }
