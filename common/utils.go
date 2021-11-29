@@ -62,7 +62,7 @@ func UpdateSysAppByAccelerator(accelerator string, sysApps []string) []string {
 			break
 		}
 	}
-	if accelerator == v1.NVAccelerator || accelerator == v1.JetsonAccelerator || accelerator == v1.BitmainAccelerator {
+	if accelerator == v1.NVAccelerator || accelerator == v1.JetsonAccelerator || accelerator == v1.BitmainAccelerator || accelerator == v1.CambriconAccelerator {
 		if !found {
 			sysApps = append(sysApps, v1.BaetylGPUMetrics)
 		}
