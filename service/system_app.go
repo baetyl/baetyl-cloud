@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/baetyl/baetyl-go/v2/context"
@@ -378,8 +379,15 @@ func (s *SystemAppServiceImpl) GenConfig(tx interface{}, ns, template string, pa
 }
 
 func (s *SystemAppServiceImpl) GenApp(tx interface{}, ns, template string, params map[string]interface{}) (*specV1.Application, error) {
+	registryAuth, err := s.Property.GetPropertyValue(common.RegistryAuth)
+	if err == nil {
+		params["RegistryAuth"] = base64.StdEncoding.EncodeToString([]byte(registryAuth))
+	} else {
+		params["RegistryAuth"] = ""
+	}
+
 	application := &specV1.Application{}
-	err := s.TemplateService.UnmarshalTemplate(template, params, application)
+	err = s.TemplateService.UnmarshalTemplate(template, params, application)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
