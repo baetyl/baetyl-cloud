@@ -3,10 +3,12 @@ package service
 import (
 	"testing"
 
+	"github.com/baetyl/baetyl-go/v2/errors"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
@@ -20,10 +22,12 @@ func TestInitService_GenApps(t *testing.T) {
 	sSecret := service.NewMockSecretService(mock)
 	sTemplate := service.NewMockTemplateService(mock)
 	sPKI := service.NewMockPKIService(mock)
+	ps := service.NewMockPropertyService(mock)
 
 	is := SystemAppServiceImpl{}
 	is.TemplateService = sTemplate
 	is.PKI = sPKI
+	is.Property = ps
 	is.AppCombinedService = &AppCombinedService{
 		App:    sApp,
 		Config: sConfig,
@@ -62,6 +66,7 @@ func TestInitService_GenApps(t *testing.T) {
 	sConfig.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(config, nil).Times(3)
 	sSecret.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(secret, nil).Times(1)
 	sApp.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(app, nil).Times(3)
+	ps.EXPECT().GetPropertyValue(common.RegistryAuth).Return("", errors.New("resource not found")).AnyTimes()
 
 	node := &v1.Node{
 		Namespace: "ns",
@@ -81,10 +86,12 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 	sSecret := service.NewMockSecretService(mock)
 	sTemplate := service.NewMockTemplateService(mock)
 	sPKI := service.NewMockPKIService(mock)
+	ps := service.NewMockPropertyService(mock)
 
 	is := SystemAppServiceImpl{}
 	is.TemplateService = sTemplate
 	is.PKI = sPKI
+	is.Property = ps
 	is.AppCombinedService = &AppCombinedService{
 		App:    sApp,
 		Config: sConfig,
@@ -107,6 +114,7 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sConfig.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(config, nil).Times(2)
 	sApp.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(app, nil).Times(2)
+	ps.EXPECT().GetPropertyValue(common.RegistryAuth).Return("{\"auths\":{\"docker.io\":{\"username\":\"baetyl\",\"password\":\"baetyl\"}}}", nil).AnyTimes()
 
 	node := &v1.Node{
 		Namespace: "ns",

@@ -168,6 +168,13 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["DiskNetStats"] = node.NodeMode == context.RunModeKube
 	params["QPSStats"] = node.NodeMode == context.RunModeKube
 
+	registryAuth, err := s.Property.GetPropertyValue(common.RegistryAuth)
+	if err == nil {
+		params["RegistryAuth"] = base64.StdEncoding.EncodeToString([]byte(registryAuth))
+	} else {
+		params["RegistryAuth"] = ""
+	}
+
 	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
 }
 
