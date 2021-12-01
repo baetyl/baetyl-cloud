@@ -16,6 +16,7 @@ import (
 // SecretService SecretService
 type SecretService interface {
 	Get(namespace, name, version string) (*specV1.Secret, error)
+	GetTx(tx interface{}, namespace, name, version string) (*specV1.Secret, error)
 	List(namespace string, listOptions *models.ListOptions) (*models.SecretList, error)
 	Create(tx interface{}, namespace string, secret *specV1.Secret) (*specV1.Secret, error)
 	Update(namespace string, secret *specV1.Secret) (*specV1.Secret, error)
@@ -35,6 +36,15 @@ func NewSecretService(config *config.CloudConfig) (SecretService, error) {
 	return &secretService{
 		secret: secret.(plugin.Secret),
 	}, nil
+}
+
+// Get get a Secret
+func (s *secretService) GetTx(tx interface{}, namespace, name, version string) (*specV1.Secret, error) {
+	res, err := s.secret.GetSecret(tx, namespace, name, version)
+	if err != nil && strings.Contains(err.Error(), "not found") {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "secret"), common.Field("name", name))
+	}
+	return res, err
 }
 
 // Get get a Secret

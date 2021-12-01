@@ -1,7 +1,7 @@
 package service
 
 import (
-	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
 	"github.com/baetyl/baetyl-go/v2/context"
@@ -379,15 +379,18 @@ func (s *SystemAppServiceImpl) GenConfig(tx interface{}, ns, template string, pa
 }
 
 func (s *SystemAppServiceImpl) GenApp(tx interface{}, ns, template string, params map[string]interface{}) (*specV1.Application, error) {
-	registryAuth, err := s.Property.GetPropertyValue(common.RegistryAuth)
-	if err == nil {
-		params["RegistryAuth"] = base64.StdEncoding.EncodeToString([]byte(registryAuth))
-	} else {
-		params["RegistryAuth"] = ""
+	// Create registry secret for system app
+	params["RegistryAuth"] = ""
+	if registryAuth, err := s.Property.GetPropertyValue(common.RegistryAuth); err == nil {
+		secretVersion, createErr := s.GenSystemRegistry(tx, ns, registryAuth)
+		if createErr != nil {
+			return nil, errors.Trace(createErr)
+		}
+		params["RegistryAuth"] = common.RegistryAuth
+		params["RegistryAuthVersion"] = secretVersion
 	}
-
 	application := &specV1.Application{}
-	err = s.TemplateService.UnmarshalTemplate(template, params, application)
+	err := s.TemplateService.UnmarshalTemplate(template, params, application)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -401,4 +404,35 @@ func (s *SystemAppServiceImpl) GenApp(tx interface{}, ns, template string, param
 		app = res
 	}
 	return app, nil
+}
+
+func (s *SystemAppServiceImpl) GenSystemRegistry(tx interface{}, ns, registryAuth string) (string, error) {
+	var registryModel models.Registry
+	err := json.Unmarshal([]byte(registryAuth), &registryModel)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	registrySecret := &specV1.Secret{
+		Name: common.RegistryAuth,
+		Namespace: ns,
+		Labels: map[string]string{specV1.SecretLabel: specV1.SecretRegistry, common.ResourceInvisible: "true", common.LabelSystem: "true"},
+		System: true,
+		Data: map[string][]byte{
+			"address":  []byte(registryModel.Address),
+			"username": []byte(registryModel.Username),
+			"password": []byte(registryModel.Password),
+		},
+	}
+	rs, err := s.Secret.GetTx(tx, ns, common.RegistryAuth, "")
+	if err != nil {
+		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
+			rs, err = s.Secret.Create(tx, ns, registrySecret)
+			if err != nil {
+				return "", errors.Trace(err)
+			}
+		} else {
+			return "", errors.Trace(err)
+		}
+	}
+	return rs.Version, nil
 }

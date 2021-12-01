@@ -39,6 +39,19 @@ func TestDefaultRegistryService_Get(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestDefaultRegistryService_TxGet(t *testing.T) {
+	mockObject := InitMockEnvironment(t)
+	defer mockObject.Close()
+	registry := genSecretTestCase()
+	mockObject.secret.EXPECT().GetSecret(gomock.Any(), gomock.Any(), gomock.Any(), "").Return(genSecretTestCase(), nil).AnyTimes()
+	cs, err := NewSecretService(mockObject.conf)
+	assert.NoError(t, err)
+	_, err = cs.GetTx(nil, registry.Namespace, registry.Name, "")
+	assert.NoError(t, err)
+	_, err = cs.GetTx(nil, registry.Namespace, registry.Name, "")
+	assert.NoError(t, err)
+}
+
 func TestDefaultRegistryService_List(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()

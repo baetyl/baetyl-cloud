@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"strings"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 //go:generate mockgen -destination=../mock/service/init.go -package=service github.com/baetyl/baetyl-cloud/v2/service InitService
@@ -167,12 +169,18 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["GPUStats"] = node.Accelerator == specV1.NVAccelerator || node.Accelerator == specV1.JetsonAccelerator || node.Accelerator == specV1.BitmainAccelerator || node.Accelerator == specV1.CambriconAccelerator
 	params["DiskNetStats"] = node.NodeMode == context.RunModeKube
 	params["QPSStats"] = node.NodeMode == context.RunModeKube
+	params["RegistryAuth"] = ""
 
+	// Add system registry auth if property exist
 	registryAuth, err := s.Property.GetPropertyValue(common.RegistryAuth)
 	if err == nil {
-		params["RegistryAuth"] = base64.StdEncoding.EncodeToString([]byte(registryAuth))
-	} else {
-		params["RegistryAuth"] = ""
+		var registryModel models.Registry
+		parseErr := json.Unmarshal([]byte(registryAuth), &registryModel)
+		if parseErr != nil {
+			return nil, errors.Trace(err)
+		}
+		params["RegistryAuth"] = base64.StdEncoding.EncodeToString([]byte(
+			"{\"auths\":{\"" + registryModel.Address + "\":{\"username\":\"" + registryModel.Username + "\",\"password\":\"" + registryModel.Password + "\"}}}"))
 	}
 
 	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
