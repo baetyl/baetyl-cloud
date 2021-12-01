@@ -55,6 +55,18 @@ func TestInitService_GenApps(t *testing.T) {
 		Name:      "app",
 	}
 
+	registrySecret := &v1.Secret{
+		Name: common.RegistryAuth,
+		Namespace: "ns",
+		Labels: map[string]string{v1.SecretLabel: v1.SecretRegistry, common.ResourceInvisible: "true", common.LabelSystem: "true"},
+		System: true,
+		Data: map[string][]byte{
+			"address":  []byte("docker.io"),
+			"username": []byte("baetyl"),
+			"password": []byte("baetyl"),
+		},
+	}
+
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-core-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-core-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-broker-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
@@ -66,7 +78,10 @@ func TestInitService_GenApps(t *testing.T) {
 	sConfig.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(config, nil).Times(3)
 	sSecret.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(secret, nil).Times(1)
 	sApp.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(app, nil).Times(3)
-	ps.EXPECT().GetPropertyValue(common.RegistryAuth).Return("", errors.New("resource not found")).AnyTimes()
+	ps.EXPECT().GetPropertyValue(common.RegistryAuth).Return("{\"address\":\"docker.io\",\"username\":\"baetyl\",\"password\":\"baetyl\"}", nil).AnyTimes()
+	sSecret.EXPECT().GetTx(gomock.Any(), "ns", gomock.Any(), "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sSecret.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(registrySecret, nil).Times(1)
+	sSecret.EXPECT().GetTx(gomock.Any(), "ns", gomock.Any(), "").Return(registrySecret, nil).AnyTimes()
 
 	node := &v1.Node{
 		Namespace: "ns",
@@ -114,7 +129,7 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sConfig.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(config, nil).Times(2)
 	sApp.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(app, nil).Times(2)
-	ps.EXPECT().GetPropertyValue(common.RegistryAuth).Return("{\"auths\":{\"docker.io\":{\"username\":\"baetyl\",\"password\":\"baetyl\"}}}", nil).AnyTimes()
+	ps.EXPECT().GetPropertyValue(common.RegistryAuth).Return("", errors.New("resource not found")).AnyTimes()
 
 	node := &v1.Node{
 		Namespace: "ns",

@@ -77,7 +77,7 @@ func TestInitService_GetResource(t *testing.T) {
 	ns.EXPECT().Get(nil, "default", "node1").Return(node, nil)
 	sApp.EXPECT().Get("default", "baetyl-init-node01", "").Return(app, nil)
 	sc.EXPECT().Get("default", "agent-conf", "").Return(sec, nil)
-	ps.EXPECT().GetPropertyValue(common.RegistryAuth).Return("{\"auths\":{\"registry.baidubce.com\":{\"username\":\"baetyl\",\"password\":\"baetyl\"}}}", nil).Times(1)
+	ps.EXPECT().GetPropertyValue(common.RegistryAuth).Return("{\"address\":\"docker.io\",\"username\":\"baetyl\",\"password\":\"baetyl\"}", nil).Times(1)
 
 	res, _ := as.GetResource("default", "node1", templateInitDeploymentYaml, nil)
 	assert.Equal(t, res, []byte("init"))

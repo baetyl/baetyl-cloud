@@ -78,6 +78,21 @@ func (mr *MockSecretServiceMockRecorder) Get(arg0, arg1, arg2 interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockSecretService)(nil).Get), arg0, arg1, arg2)
 }
 
+// GetTx mocks base method
+func (m *MockSecretService) GetTx(arg0 interface{}, arg1, arg2, arg3 string) (*v1.Secret, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTx", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*v1.Secret)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTx indicates an expected call of GetTx
+func (mr *MockSecretServiceMockRecorder) GetTx(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTx", reflect.TypeOf((*MockSecretService)(nil).GetTx), arg0, arg1, arg2, arg3)
+}
+
 // List mocks base method
 func (m *MockSecretService) List(arg0 string, arg1 *models.ListOptions) (*models.SecretList, error) {
 	m.ctrl.T.Helper()
