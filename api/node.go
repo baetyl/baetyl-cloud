@@ -290,7 +290,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) deleteGPUMetricsAppsIfNeed(node *v1.Node) error {
-	if node.Accelerator == v1.NVAccelerator || node.Accelerator == v1.JetsonAccelerator || node.Accelerator == v1.BitmainAccelerator || node.Accelerator == v1.CambriconAccelerator {
+	if v1.IsLegalAcceleratorType(node.Accelerator) {
 		err := api.deleteDeletedSysApps(node, []string{v1.BaetylGPUMetrics})
 		if err != nil {
 			return err
@@ -1056,7 +1056,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int
 		"CoreConfName":  config.Name,
 		"CoreAppName":   app.Name,
 		"CoreFrequency": fmt.Sprintf("%ds", freq),
-		"GPUStats":      node.Accelerator == v1.NVAccelerator || node.Accelerator == v1.JetsonAccelerator || node.Accelerator == v1.BitmainAccelerator || node.Accelerator == v1.CambriconAccelerator,
+		"GPUStats":      v1.IsLegalAcceleratorType(node.Accelerator),
 		"DiskNetStats":  node.NodeMode == context.RunModeKube,
 		"QPSStats":      node.NodeMode == context.RunModeKube,
 	}
@@ -1094,7 +1094,7 @@ func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node) error {
 	params := map[string]interface{}{
 		"InitConfName": config.Name,
 		"InitAppName":  app.Name,
-		"GPUStats":     node.Accelerator == v1.NVAccelerator || node.Accelerator == v1.JetsonAccelerator || node.Accelerator == v1.BitmainAccelerator || node.Accelerator == v1.CambriconAccelerator,
+		"GPUStats":     v1.IsLegalAcceleratorType(node.Accelerator),
 		"DiskNetStats": node.NodeMode == context.RunModeKube,
 		"QPSStats":     node.NodeMode == context.RunModeKube,
 	}

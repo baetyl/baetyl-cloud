@@ -101,7 +101,7 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 		"NodeMode":                   node.NodeMode,
 		"AppMode":                    node.NodeMode,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
-		"GPUStats":                   node.Accelerator == specV1.NVAccelerator || node.Accelerator == specV1.JetsonAccelerator || node.Accelerator == specV1.BitmainAccelerator || node.Accelerator == specV1.CambriconAccelerator,
+		"GPUStats":                   specV1.IsLegalAcceleratorType(node.Accelerator),
 		"DiskNetStats":               node.NodeMode == context.RunModeKube,
 		"QPSStats":                   node.NodeMode == context.RunModeKube,
 	}
@@ -413,10 +413,10 @@ func (s *SystemAppServiceImpl) GenSystemRegistry(tx interface{}, ns, registryAut
 		return "", errors.Trace(err)
 	}
 	registrySecret := &specV1.Secret{
-		Name: common.RegistryAuth,
+		Name:      common.RegistryAuth,
 		Namespace: ns,
-		Labels: map[string]string{specV1.SecretLabel: specV1.SecretRegistry, common.ResourceInvisible: "true", common.LabelSystem: "true"},
-		System: true,
+		Labels:    map[string]string{specV1.SecretLabel: specV1.SecretRegistry, common.ResourceInvisible: "true", common.LabelSystem: "true"},
+		System:    true,
 		Data: map[string][]byte{
 			"address":  []byte(registryModel.Address),
 			"username": []byte(registryModel.Username),
