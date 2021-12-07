@@ -942,7 +942,7 @@ func TestUpdateContainerApplication(t *testing.T) {
 	mApp3.Workload = specV1.WorkloadDeployment
 
 	sApp.EXPECT().Get(gomock.Any(), "abc", gomock.Any()).Return(mApp, nil).AnyTimes()
-	fApp.EXPECT().UpdateApp(mApp.Namespace, gomock.Any(), mApp2, gomock.Any()).Return(mApp3, nil)
+	fApp.EXPECT().UpdateApp(mApp.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(mApp3, nil)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mApp2)
 	req, _ = http.NewRequest(http.MethodPut, "/v1/apps/abc", bytes.NewReader(body))
