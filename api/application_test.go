@@ -651,16 +651,16 @@ func TestInitContainerApp(t *testing.T) {
 		InitServices: []models.ServiceView{
 			{
 				Service: specV1.Service{
-					Name:     "init",
-					Image:    "hub.baidubce.com/baetyl/baetyl-init:1.0.0",
+					Name:  "init",
+					Image: "hub.baidubce.com/baetyl/baetyl-init:1.0.0",
 				},
 			},
 		},
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
-					Name:     "agent",
-					Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+					Name:  "agent",
+					Image: "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
 				},
 			},
 		},
@@ -3153,4 +3153,63 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 
 	api.compatibleAppDeprecatedFiled(app1)
 	assert.EqualValues(t, expectApp1, app1)
+
+	// case 2
+	app2 := &models.ApplicationView{
+		Name:        "a0",
+		Replica:     1,
+		HostNetwork: true,
+		JobConfig: &specV1.AppJobConfig{
+			Completions:   1,
+			Parallelism:   2,
+			BackoffLimit:  3,
+			RestartPolicy: "Never",
+		},
+		Workload: specV1.WorkloadJob,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:   "s1",
+					Labels: map[string]string{"a": "b"},
+				},
+			},
+		},
+	}
+
+	expectApp2 := &models.ApplicationView{
+		Name:        "a0",
+		Labels:      map[string]string{"a": "b"},
+		HostNetwork: true,
+		Replica:     1,
+		JobConfig: &specV1.AppJobConfig{
+			Completions:   1,
+			Parallelism:   2,
+			BackoffLimit:  3,
+			RestartPolicy: "Never",
+		},
+		Workload: specV1.WorkloadJob,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:        "s1",
+					Labels:      map[string]string{"a": "b"},
+					HostNetwork: true,
+					Replica:     1,
+					JobConfig: &specV1.ServiceJobConfig{
+						Completions:   1,
+						Parallelism:   2,
+						BackoffLimit:  3,
+						RestartPolicy: "Never",
+					},
+					Type: specV1.WorkloadJob,
+				},
+			},
+		},
+	}
+
+	api.compatibleAppDeprecatedFiled(app2)
+	assert.EqualValues(t, expectApp2.Services[0].JobConfig, app2.Services[0].JobConfig)
+	expectApp2.Services[0].JobConfig = nil
+	app2.Services[0].JobConfig = nil
+	assert.EqualValues(t, expectApp2, app2)
 }
