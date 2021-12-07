@@ -671,12 +671,24 @@ func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
 		} else {
 			app.Workload = specV1.WorkloadDeployment
 		}
+	} else {
+		for i, svc := range app.Services {
+			if svc.Type == "" {
+				app.Services[i].Type = app.Workload
+			}
+		}
 	}
 
 	// HostNetwork
 	if !app.HostNetwork && len(app.Services) > 0 && app.Services[0].HostNetwork {
 		api.log.Debug("app.HostNetwork is false, use the services[0].HostNetwork true ")
 		app.HostNetwork = true
+	} else {
+		if app.HostNetwork {
+			for i, _ := range app.Services {
+				app.Services[i].HostNetwork = true
+			}
+		}
 	}
 
 	// Replica
@@ -693,6 +705,12 @@ func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
 		} else {
 			app.Replica = 1
 		}
+	} else {
+		for i, svc := range app.Services {
+			if svc.Replica == 0 {
+				app.Services[i].Replica = app.Replica
+			}
+		}
 	}
 
 	// JobConfig
@@ -708,6 +726,17 @@ func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
 			}
 		} else {
 			app.JobConfig = &specV1.AppJobConfig{RestartPolicy: "Never"}
+		}
+	} else {
+		for i, svc := range app.Services {
+			if svc.JobConfig == nil || svc.JobConfig.RestartPolicy == "" {
+				app.Services[i].JobConfig = &specV1.ServiceJobConfig{
+					Completions:   app.JobConfig.Completions,
+					Parallelism:   app.JobConfig.Parallelism,
+					BackoffLimit:  app.JobConfig.BackoffLimit,
+					RestartPolicy: app.JobConfig.RestartPolicy,
+				}
+			}
 		}
 	}
 
