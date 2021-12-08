@@ -31,6 +31,7 @@ var (
 	HookNamePopulateParams        = "populateParams"
 	HookNamePopulateOptAppsParams = "populateOptAppsParams"
 	HookNameGenAppsByOption       = "genAppsByOption"
+	HookNameGenCoreExtResource    = "genCoreExtResource"
 )
 
 type SystemAppService interface {
@@ -43,6 +44,7 @@ type GenAppsByOption func(tx interface{}, ns string, node *specV1.Node, params m
 type GenAppFunc func(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) (*specV1.Application, error)
 type HandlerPopulateParams func(tx interface{}, ns string, params map[string]interface{}) error
 type HandlerPopulateOptAppsParams func(tx interface{}, ns string, params map[string]interface{}, appAlias []string) error
+type GenCoreExtResource func(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) error
 
 type SystemAppServiceImpl struct {
 	cfg             *config.CloudConfig
@@ -113,7 +115,7 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 	}
 
 	var apps []*specV1.Application
-	ca, err := s.genCoreApp(tx, ns, node.Name, params)
+	ca, err := s.genCoreApp(tx, ns, node, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -179,7 +181,7 @@ func (s *SystemAppServiceImpl) GenOptionalApps(tx interface{}, ns string, node *
 	return apps, nil
 }
 
-func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
+func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) (*specV1.Application, error) {
 	appName := fmt.Sprintf("baetyl-core-%s", common.RandString(9))
 	confName := fmt.Sprintf("baetyl-core-conf-%s", common.RandString(9))
 	params["CoreAppName"] = appName
@@ -194,9 +196,16 @@ func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns, nodeName string, p
 	}
 
 	// create secret
-	cert, err := s.genNodeCerts(tx, ns, nodeName, appName)
+	cert, err := s.genNodeCerts(tx, ns, node.Name, appName)
 	if err != nil {
 		return nil, errors.Trace(err)
+	}
+
+	if gen, ok := s.Hooks[HookNameGenCoreExtResource]; ok {
+		err = gen.(GenCoreExtResource)(tx, ns, node, params)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
 	}
 
 	params["CoreConfVersion"] = conf.Version
