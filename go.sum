@@ -16,8 +16,8 @@ github.com/abiosoft/readline v0.0.0-20180607040430-155bce2042db/go.mod h1:rB3B4r
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/aws/aws-sdk-go v1.32.8 h1:ULxiQqR1eZ+k2/1gqv3GYAjkunlS7ncVU2eL801t08M=
 github.com/aws/aws-sdk-go v1.32.8/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
-github.com/baetyl/baetyl-go/v2 v2.2.4-0.20211203090444-71b61fb661ec h1:LLbNEZM40jBMCT2JBDnHirpZtLFKrEgLRyqXLRqLOd0=
-github.com/baetyl/baetyl-go/v2 v2.2.4-0.20211203090444-71b61fb661ec/go.mod h1:+icoVFrmQKD1z2k6nU4UEodP1XMM/hXZAa+JrVRlh44=
+github.com/baetyl/baetyl-go/v2 v2.2.4-0.20211208030337-7a001800196a h1:xWktXe1L2RtYV2Li8Wa+6y8KkAr9bB0MR4KE0ieI6jI=
+github.com/baetyl/baetyl-go/v2 v2.2.4-0.20211208030337-7a001800196a/go.mod h1:+icoVFrmQKD1z2k6nU4UEodP1XMM/hXZAa+JrVRlh44=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/bradfitz/gomemcache v0.0.0-20170208213004-1952afaa557d/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=
 github.com/bradfitz/gomemcache v0.0.0-20180710155616-bc664df96737 h1:rRISKWyXfVxvoa702s91Zl5oREZTrR3yv+tXrrX7G/g=

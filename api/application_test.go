@@ -17,6 +17,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	mf "github.com/baetyl/baetyl-cloud/v2/mock/facade"
@@ -677,6 +678,77 @@ func TestInitContainerApp(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestCreateNodePortApp(t *testing.T) {
+	api, router, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+
+	sApp := ms.NewMockApplicationService(mockCtl)
+	sConfig := ms.NewMockConfigService(mockCtl)
+	sSecret := ms.NewMockSecretService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App:    sApp,
+		Config: sConfig,
+		Secret: sSecret,
+	}
+
+	sNode := ms.NewMockNodeService(mockCtl)
+	sIndex := ms.NewMockIndexService(mockCtl)
+	fApp := mf.NewMockFacade(mockCtl)
+	api.Facade = fApp
+	api.Index = sIndex
+	api.Node = sNode
+
+	appView := &models.ApplicationView{
+		Namespace: "baetyl-cloud",
+		Name:      "nodeport",
+		Type:      common.ContainerApp,
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name:  "agent",
+					Image: "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+					Ports: []specV1.ContainerPort{
+						{
+							HostPort:      80,
+							ContainerPort: 80,
+							ServiceType:   string(v1.ServiceTypeNodePort),
+						},
+					},
+				},
+			},
+		},
+	}
+	app := &specV1.Application{}
+
+	sApp.EXPECT().Get(appView.Namespace, appView.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).AnyTimes()
+	w := httptest.NewRecorder()
+	body, _ := json.Marshal(appView)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	appView.Services[0].Ports = []specV1.ContainerPort{
+		{
+			HostPort:      80,
+			ContainerPort: 80,
+			ServiceType:   string(v1.ServiceTypeClusterIP),
+		},
+		{
+			ContainerPort: 8080,
+			NodePort:      8080,
+			ServiceType:   string(v1.ServiceTypeNodePort),
+		},
+	}
+
+	copier.Copy(app, appView)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app, nil).Times(1)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
 func TestCreateApplicationHasCertificates(t *testing.T) {
 	api, router, mockCtl := initApplicationAPI(t)
 	defer mockCtl.Finish()
@@ -807,6 +879,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 					{
 						HostPort:      8080,
 						ContainerPort: 8080,
+						ServiceType:   string(v1.ServiceTypeClusterIP),
 					},
 				},
 				Devices: []specV1.Device{

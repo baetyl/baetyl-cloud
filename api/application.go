@@ -12,6 +12,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/jinzhu/copier"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
@@ -621,6 +622,13 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 			_, err := api.Config.Get(namesapce, service.ProgramConfig, "")
 			if err != nil {
 				return err
+			}
+		}
+		for _, port := range service.Ports {
+			if port.ServiceType == string(v1.ServiceTypeNodePort) {
+				if port.HostPort != 0 {
+					return common.Error(common.ErrRequestParamInvalid, common.Field("error", "invalid NodePort type with HostPort"))
+				}
 			}
 		}
 	}
