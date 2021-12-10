@@ -121,7 +121,7 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 	}
 
 	var apps []*specV1.Application
-	ca, err := s.genCoreApp(tx, ns, node, params)
+	ca, err := s.genCoreApp(tx, ns, node.Name, params)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -187,7 +187,7 @@ func (s *SystemAppServiceImpl) GenOptionalApps(tx interface{}, ns string, node *
 	return apps, nil
 }
 
-func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) (*specV1.Application, error) {
+func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
 	appName := fmt.Sprintf("baetyl-core-%s", common.RandString(9))
 	confName := fmt.Sprintf("baetyl-core-conf-%s", common.RandString(9))
 	params["CoreAppName"] = appName
@@ -202,7 +202,7 @@ func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns string, node *specV
 	}
 
 	// create secret
-	cert, err := s.genNodeCerts(tx, ns, node.Name, appName)
+	cert, err := s.genNodeCerts(tx, ns, nodeName, appName)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
