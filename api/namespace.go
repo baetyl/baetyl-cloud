@@ -38,7 +38,7 @@ func (api *API) DeleteNamespace(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = api.Task.AddTaskWithKey("DeleteNamespaceTask", map[string]interface{}{"ns":ns})
+	_, err = api.Task.AddTaskWithKey("DeleteNamespaceTask", map[string]interface{}{"ns": ns})
 
 	return nil, err
 }

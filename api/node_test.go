@@ -1269,7 +1269,7 @@ func TestDeleteNode(t *testing.T) {
 	}
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
-	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
+	sNode.EXPECT().Delete(mNode.Namespace, mNode).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
 	sApp.EXPECT().Delete(nil, mNode.Namespace, appCore.Name, "").Return(nil).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appCore.Name, gomock.Any()).Return(nil).Times(1)
@@ -1408,7 +1408,7 @@ func TestDeleteNodeError(t *testing.T) {
 	}
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
-	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
+	sNode.EXPECT().Delete(mNode.Namespace, mNode).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil).AnyTimes()
@@ -1434,7 +1434,7 @@ func TestDeleteNodeError(t *testing.T) {
 	}
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
-	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
+	sNode.EXPECT().Delete(mNode.Namespace, mNode).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(appCore, nil).Times(1)
 	sApp.EXPECT().Delete(nil, mNode.Namespace, appCore.Name, "").Return(errors.New("error")).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
@@ -1465,7 +1465,7 @@ func TestDeleteNodeError(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w2.Code)
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
-	sNode.EXPECT().Delete(mNode.Namespace, mNode.Name).Return(nil).Times(1)
+	sNode.EXPECT().Delete(mNode.Namespace, mNode).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, errors.New("error")).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appCore.Name, gomock.Any()).Return(errors.New("error")).Times(1)
 

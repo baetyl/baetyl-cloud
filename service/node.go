@@ -14,9 +14,13 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-const KeyCheckResourceDependency = "checkResourceDependency"
+const (
+	KeyCheckResourceDependency = "checkResourceDependency"
+	KeyDeleteCoreExtResource   = "deleteCoreExtResource"
+)
 
 type CheckResourceDependencyFunc func(ns, nodeName string) error
+type DeleteCoreExtResource func(ns string, node *specV1.Node) error
 
 //go:generate mockgen -destination=../mock/service/node.go -package=service github.com/baetyl/baetyl-cloud/v2/service NodeService
 
@@ -31,7 +35,7 @@ type NodeService interface {
 
 	Create(tx interface{}, namespace string, node *specV1.Node) (*specV1.Node, error)
 	Update(namespace string, node *specV1.Node) (*specV1.Node, error)
-	Delete(namespace, name string) error
+	Delete(namespace string, node *specV1.Node) error
 
 	UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error)
 	UpdateDesire(tx interface{}, namespace string, names []string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) error
@@ -206,30 +210,35 @@ func (n *NodeServiceImpl) CountAll() (map[string]int, error) {
 }
 
 // Delete delete node
-func (n *NodeServiceImpl) Delete(namespace, name string) error {
+func (n *NodeServiceImpl) Delete(namespace string, node *specV1.Node) error {
 	if check, ok := n.Hooks[KeyCheckResourceDependency].(CheckResourceDependencyFunc); ok {
-		if err := check(namespace, name); err != nil {
+		if err := check(namespace, node.Name); err != nil {
+			return err
+		}
+	}
+	if delFunc, ok := n.Hooks[KeyDeleteCoreExtResource].(DeleteCoreExtResource); ok {
+		if err := delFunc(namespace, node); err != nil {
 			return err
 		}
 	}
 
-	if err := n.Node.DeleteNode(nil, namespace, name); err != nil {
+	if err := n.Node.DeleteNode(nil, namespace, node.Name); err != nil {
 		return err
 	}
 
-	if err := n.Shadow.Delete(namespace, name); err != nil {
+	if err := n.Shadow.Delete(namespace, node.Name); err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", common.Shadow),
 			log.Any("namespace", namespace),
-			log.Any("name", name),
+			log.Any("name", node.Name),
 			log.Any("operation", "delete"))
 	}
 
-	if err := n.IndexService.RefreshAppsIndexByNode(nil, namespace, name, []string{}); err != nil {
+	if err := n.IndexService.RefreshAppsIndexByNode(nil, namespace, node.Name, []string{}); err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", "app node index"),
 			log.Any("namespace", namespace),
-			log.Any("name", name),
+			log.Any("name", node.Name),
 			log.Any("operation", "delete"))
 	}
 	return nil

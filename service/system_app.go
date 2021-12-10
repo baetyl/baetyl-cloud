@@ -31,6 +31,7 @@ var (
 	HookNamePopulateParams        = "populateParams"
 	HookNamePopulateOptAppsParams = "populateOptAppsParams"
 	HookNameGenAppsByOption       = "genAppsByOption"
+	HookNameGenSyncExtResource    = "genSyncExtResource"
 )
 
 type SystemAppService interface {
@@ -43,6 +44,7 @@ type GenAppsByOption func(tx interface{}, ns string, node *specV1.Node, params m
 type GenAppFunc func(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) (*specV1.Application, error)
 type HandlerPopulateParams func(tx interface{}, ns string, params map[string]interface{}) error
 type HandlerPopulateOptAppsParams func(tx interface{}, ns string, params map[string]interface{}, appAlias []string) error
+type GenSyncExtResource func(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) error
 
 type SystemAppServiceImpl struct {
 	cfg             *config.CloudConfig
@@ -107,6 +109,12 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 	}
 	if handler, ok := s.Hooks[HookNamePopulateParams]; ok {
 		err := handler.(HandlerPopulateParams)(tx, ns, params)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+	}
+	if gen, ok := s.Hooks[HookNameGenSyncExtResource]; ok {
+		err := gen.(GenSyncExtResource)(tx, ns, node, params)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}

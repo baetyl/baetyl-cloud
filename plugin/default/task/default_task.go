@@ -13,7 +13,7 @@ func init() {
 type defaultTask struct {
 	task.TaskProducer
 	task.TaskWorker
-	broker task.TaskBroker
+	broker  task.TaskBroker
 	backend task.TaskBackend
 }
 

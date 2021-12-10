@@ -14,7 +14,7 @@ const (
 	KeyTraceHeader   = "TraceHeader"
 	ValueTraceHeader = "x-bce-request-id" // TODO: change to x-baetyl-request-id when support configuration
 
-	RegistryAuth     = "system-registry-auth"
+	RegistryAuth = "system-registry-auth"
 )
 
 var cache = persistence.NewInMemoryStore(time.Minute * 10)

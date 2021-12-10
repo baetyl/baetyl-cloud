@@ -321,7 +321,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	}
 
 	// Delete Node
-	if err := api.Node.Delete(c.GetNamespace(), c.GetNameFromParam()); err != nil {
+	if err := api.Node.Delete(c.GetNamespace(), node); err != nil {
 		return nil, err
 	}
 	if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
