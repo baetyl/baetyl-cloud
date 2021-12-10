@@ -56,10 +56,10 @@ func TestInitService_GenApps(t *testing.T) {
 	}
 
 	registrySecret := &v1.Secret{
-		Name: common.RegistryAuth,
+		Name:      common.RegistryAuth,
 		Namespace: "ns",
-		Labels: map[string]string{v1.SecretLabel: v1.SecretRegistry, common.ResourceInvisible: "true", common.LabelSystem: "true"},
-		System: true,
+		Labels:    map[string]string{v1.SecretLabel: v1.SecretRegistry, common.ResourceInvisible: "true", common.LabelSystem: "true"},
+		System:    true,
 		Data: map[string][]byte{
 			"address":  []byte("docker.io"),
 			"username": []byte("baetyl"),

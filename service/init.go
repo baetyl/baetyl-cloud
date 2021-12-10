@@ -32,6 +32,7 @@ const (
 	TemplateInitConfYaml      = "baetyl-init-conf.yml"
 	TemplateBaetylInitCommand = "baetyl-init-command"
 	TemplateInitCommandWget   = "baetyl-init-command-wget"
+	NamePopulateExtParams     = "populateExtParams"
 )
 
 var (
@@ -39,6 +40,7 @@ var (
 )
 
 type GetInitResource func(ns, nodeName string, params map[string]interface{}) ([]byte, error)
+type PopulateExtParams func(ns string, node *specV1.Node, app *specV1.Application, params map[string]interface{}) error
 
 // InitService
 type InitService interface {
@@ -54,6 +56,7 @@ type InitServiceImpl struct {
 	*AppCombinedService
 	PKI             PKIService
 	ResourceMapFunc map[string]GetInitResource
+	Hooks           map[string]interface{}
 	log             *log.Logger
 }
 
@@ -102,6 +105,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 		AppCombinedService: acs,
 		PKI:                pki,
 		ResourceMapFunc:    map[string]GetInitResource{},
+		Hooks:              map[string]interface{}{},
 		log:                log.L().With(log.Any("service", "init")),
 	}
 	initService.ResourceMapFunc[templateInitDeploymentYaml] = initService.getInitDeploymentYaml
@@ -181,6 +185,11 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 		}
 		params["RegistryAuth"] = base64.StdEncoding.EncodeToString([]byte(
 			"{\"auths\":{\"" + registryModel.Address + "\":{\"username\":\"" + registryModel.Username + "\",\"password\":\"" + registryModel.Password + "\"}}}"))
+	}
+	if f, ok := s.Hooks[NamePopulateExtParams].(PopulateExtParams); ok {
+		if err = f(ns, node, init, params); err != nil {
+			return nil, errors.Trace(err)
+		}
 	}
 
 	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
