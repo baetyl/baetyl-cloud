@@ -337,6 +337,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 		return nil, err
 	}
 
+	api.compatibleAppDeprecatedFiled(appView)
 	populateAppDefaultField(appView)
 
 	if app.Type != common.FunctionApp {
