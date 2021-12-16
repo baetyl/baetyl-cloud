@@ -57,7 +57,7 @@ type AppItem struct {
 	CronTime          time.Time             `json:"cronTime,omitempty"`
 	HostNetwork       bool                  `json:"hostNetwork,omitempty" yaml:"hostNetwork,omitempty"` // specifies host network mode of service
 	Replica           int                   `json:"replica,omitempty" yaml:"replica,omitempty" binding:"required" default:"1"`
-	Workload          string                `json:"workload,omitempty" yaml:"workload,omitempty" default:"deployment"` // deployment | daemonset | statefulset | job
+	Workload          string                `json:"workload,omitempty" yaml:"workload,omitempty"` // deployment | daemonset | statefulset | job
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty" yaml:"jobConfig,omitempty"`
 }
 
