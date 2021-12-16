@@ -733,7 +733,7 @@ func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
 				RestartPolicy: app.Services[0].JobConfig.RestartPolicy,
 			}
 		} else {
-			app.JobConfig = &specV1.AppJobConfig{RestartPolicy: "Never"}
+			app.JobConfig = &specV1.AppJobConfig{RestartPolicy: "Never", Completions: 1}
 		}
 	} else {
 		for i, svc := range app.Services {
