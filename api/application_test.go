@@ -861,7 +861,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		Selector:          "",
 		Replica:           1,
 		Workload:          specV1.WorkloadDeployment,
-		JobConfig:         &specV1.AppJobConfig{RestartPolicy: "Never"},
+		JobConfig:         &specV1.AppJobConfig{RestartPolicy: "Never", Completions: 1},
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -3215,7 +3215,7 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 		HostNetwork: false,
 		Replica:     1,
 		JobConfig: &specV1.AppJobConfig{
-			Completions:   0,
+			Completions:   1,
 			Parallelism:   0,
 			BackoffLimit:  0,
 			RestartPolicy: "Never",
