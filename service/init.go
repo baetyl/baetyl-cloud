@@ -173,19 +173,13 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["GPUStats"] = specV1.IsLegalAcceleratorType(node.Accelerator)
 	params["DiskNetStats"] = node.NodeMode == context.RunModeKube
 	params["QPSStats"] = node.NodeMode == context.RunModeKube
-	params["RegistryAuth"] = ""
 
-	// Add system registry auth if property exist
-	registryAuth, err := s.Property.GetPropertyValue(common.RegistryAuth)
-	if err == nil {
-		var registryModel models.Registry
-		parseErr := json.Unmarshal([]byte(registryAuth), &registryModel)
-		if parseErr != nil {
-			return nil, errors.Trace(err)
-		}
-		params["RegistryAuth"] = base64.StdEncoding.EncodeToString([]byte(
-			"{\"auths\":{\"" + registryModel.Address + "\":{\"username\":\"" + registryModel.Username + "\",\"password\":\"" + registryModel.Password + "\"}}}"))
+	registryAuth, err := s.GetRegistryAuth()
+	if err != nil {
+		return nil, errors.Trace(err)
 	}
+	params["RegistryAuth"] = registryAuth
+
 	if f, ok := s.Hooks[NamePopulateExtParams].(PopulateExtParams); ok {
 		if err = f(ns, node, init, params); err != nil {
 			return nil, errors.Trace(err)
@@ -193,6 +187,21 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	}
 
 	return s.TemplateService.ParseTemplate(templateInitDeploymentYaml, params)
+}
+
+// GetRegistryAuth add system registry auth if property exist
+func (s *InitServiceImpl) GetRegistryAuth() (string, error) {
+	registryAuth, err := s.Property.GetPropertyValue(common.RegistryAuth)
+	if err != nil {
+		return "", nil
+	}
+	var registryModel models.Registry
+	parseErr := json.Unmarshal([]byte(registryAuth), &registryModel)
+	if parseErr != nil {
+		return "", errors.Trace(err)
+	}
+	return base64.StdEncoding.EncodeToString([]byte(
+		"{\"auths\":{\"" + registryModel.Address + "\":{\"username\":\"" + registryModel.Username + "\",\"password\":\"" + registryModel.Password + "\"}}}")), nil
 }
 
 func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, error) {
