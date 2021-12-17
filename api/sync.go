@@ -51,14 +51,13 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 	// TODO remove the trick. set node prop if source=baetyl-init
 	ns, n := msg.Metadata["namespace"], msg.Metadata["name"]
 	if msg.Metadata != nil && msg.Metadata["source"] == specV1.BaetylInit {
-		props, err := s.Node.GetNodeProperties(ns, n)
+		nodeInfo, err := s.Node.Get(nil, ns, n)
 		if err != nil {
-			s.log.Warn("failed to get node properties", log.Any("source", specV1.BaetylInit))
+			s.log.Warn("failed to get node info", log.Any("source", specV1.BaetylInit))
 		} else {
-			s.log.Debug("set init node properties", log.Any("source", specV1.BaetylInit))
-			if props != nil {
-				report[common.NodeProps] = props.State.Report
-			}
+			s.log.Debug("set init node info", log.Any("source", specV1.BaetylInit))
+			nodeInfo.Report["sysapps"] = report["sysapps"]
+			report = nodeInfo.Report
 		}
 	}
 	delta, err := s.Sync.Report(ns, n, report)
