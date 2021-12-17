@@ -198,7 +198,7 @@ func (s *InitServiceImpl) GetRegistryAuth() (string, error) {
 	var registryModel models.Registry
 	parseErr := json.Unmarshal([]byte(registryAuth), &registryModel)
 	if parseErr != nil {
-		return "", errors.Trace(err)
+		return "", errors.Trace(parseErr)
 	}
 	return base64.StdEncoding.EncodeToString([]byte(
 		"{\"auths\":{\"" + registryModel.Address + "\":{\"username\":\"" + registryModel.Username + "\",\"password\":\"" + registryModel.Password + "\"}}}")), nil
