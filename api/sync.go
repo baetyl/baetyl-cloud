@@ -54,12 +54,21 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 	// TODO remove the trick. set node prop if source=baetyl-init
 	ns, n := msg.Metadata["namespace"], msg.Metadata["name"]
 	if msg.Metadata != nil && msg.Metadata["source"] == specV1.BaetylInit {
+		props, err := s.Node.GetNodeProperties(ns, n)
+		if err != nil {
+			s.log.Warn("failed to get node properties", log.Any("source", specV1.BaetylInit))
+		} else {
+			s.log.Debug("set init node properties", log.Any("source", specV1.BaetylInit))
+			if props != nil {
+				report[common.NodeProps] = props.State.Report
+			}
+		}
+	} else if msg.Metadata != nil && msg.Metadata["source"] == specV1.BaetylCore {
 		nodeInfo, err := s.Node.Get(nil, ns, n)
 		if err != nil {
-			s.log.Warn("failed to get node info", log.Any("source", specV1.BaetylInit))
+			s.log.Warn("failed to get node properties", log.Any("source", specV1.BaetylInit))
 		} else {
-			s.log.Debug("set init node info", log.Any("source", specV1.BaetylInit))
-			report = updateCoreStateOnly(report, nodeInfo)
+			report = keepCoreStateOnly(report, nodeInfo)
 		}
 	}
 	delta, err := s.Sync.Report(ns, n, report)
@@ -117,69 +126,75 @@ func setNodeClientIPIfExist(msg specV1.Message, report *specV1.Report) {
 	}
 }
 
-func updateCoreStateOnly(report specV1.Report, nodeInfo *specV1.Node) specV1.Report {
-	coreApps, err := json.Marshal(nodeInfo.Report["sysapps"])
+func keepCoreStateOnly(report specV1.Report, nodeInfo *specV1.Node) specV1.Report {
+	oldApps, err := json.Marshal(nodeInfo.Report["sysapps"])
 	if err != nil {
-		return nodeInfo.Report
+		return report
 	}
-	initApps, err := json.Marshal(report["sysapps"])
+	newApps, err := json.Marshal(report["sysapps"])
 	if err != nil {
-		return nodeInfo.Report
+		return report
 	}
-	var coreSysApps, initSysApps []specV1.AppInfo
-	err = json.Unmarshal(coreApps, &coreSysApps)
+	var oldSysApps, newSysApps []specV1.AppInfo
+	err = json.Unmarshal(oldApps, &oldSysApps)
 	if err != nil {
-		return nodeInfo.Report
+		return report
 	}
-	err = json.Unmarshal(initApps, &initSysApps)
+	err = json.Unmarshal(newApps, &newSysApps)
 	if err != nil {
-		return nodeInfo.Report
+		return report
 	}
 
-	mApps := map[string]specV1.AppInfo{}
-	for _, v := range coreSysApps {
-		mApps[v.Name] = v
-	}
-	for _, v := range initSysApps {
-		mApps[v.Name] = v
-	}
-	sysApps := []specV1.AppInfo{}
-	for _, v := range mApps {
-		sysApps = append(sysApps, v)
-	}
-	nodeInfo.Report["sysapps"] = sysApps
-
-	coreState, err := json.Marshal(nodeInfo.Report["sysappstats"])
-	if err != nil {
-		return nodeInfo.Report
-	}
-	initState, err := json.Marshal(report["sysappstats"])
-	if err != nil {
-		return nodeInfo.Report
-	}
-	var coreSysAppState, initSysAppState []specV1.AppStats
-	err = json.Unmarshal(coreState, &coreSysAppState)
-	if err != nil {
-		return nodeInfo.Report
-	}
-	err = json.Unmarshal(initState, &initSysAppState)
-	if err != nil {
-		return nodeInfo.Report
-	}
-	mState := map[string]specV1.AppStats{}
-	for _, v := range coreSysAppState {
-		mState[v.Name] = v
-	}
-	for _, v := range initSysAppState {
+	coreFlag := true
+	for _, v := range newSysApps {
 		if strings.Contains(v.Name, specV1.BaetylCore) {
-			mState[v.Name] = v
+			coreFlag = false
+			break
 		}
 	}
-	sysState := []specV1.AppStats{}
-	for _, v := range mState {
-		sysState = append(sysState, v)
+	if coreFlag {
+		for _, v := range oldSysApps {
+			if strings.Contains(v.Name, specV1.BaetylCore) {
+				newSysApps = append(newSysApps, v)
+				break
+			}
+		}
 	}
-	nodeInfo.Report["sysappstats"] = sysState
+	report["sysapps"] = newSysApps
 
-	return nodeInfo.Report
+	oldState, err := json.Marshal(nodeInfo.Report["sysappstats"])
+	if err != nil {
+		return report
+	}
+	newState, err := json.Marshal(report["sysappstats"])
+	if err != nil {
+		return report
+	}
+	var oldSysAppState, newSysAppState []specV1.AppStats
+	err = json.Unmarshal(oldState, &oldSysAppState)
+	if err != nil {
+		return report
+	}
+	err = json.Unmarshal(newState, &newSysAppState)
+	if err != nil {
+		return report
+	}
+	coreStatFlag := true
+	for _, v := range newSysAppState {
+		if strings.Contains(v.Name, specV1.BaetylCore) {
+			coreStatFlag = false
+			break
+		}
+	}
+	if coreStatFlag {
+		for _, v := range oldSysAppState {
+			if strings.Contains(v.Name, specV1.BaetylCore) {
+				newSysAppState = append(newSysAppState, v)
+				break
+			}
+		}
+	}
+	report["sysappstats"] = newSysAppState
+
+	return report
 }
