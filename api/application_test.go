@@ -894,6 +894,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 						Value: "value",
 					},
 				},
+				JobConfig: &specV1.ServiceJobConfig{RestartPolicy: "Never", Completions: 1},
 			},
 		},
 		Volumes: []specV1.Volume{

@@ -735,6 +735,16 @@ func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
 			}
 		} else {
 			app.JobConfig = &specV1.AppJobConfig{RestartPolicy: "Never", Completions: 1}
+			for i, svc := range app.Services {
+				if svc.JobConfig == nil || svc.JobConfig.RestartPolicy == "" {
+					app.Services[i].JobConfig = &specV1.ServiceJobConfig{
+						Completions:   app.JobConfig.Completions,
+						Parallelism:   app.JobConfig.Parallelism,
+						BackoffLimit:  app.JobConfig.BackoffLimit,
+						RestartPolicy: app.JobConfig.RestartPolicy,
+					}
+				}
+			}
 		}
 	} else {
 		for i, svc := range app.Services {
