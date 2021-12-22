@@ -747,6 +747,29 @@ func TestCreateNodePortApp(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	appView.InitServices = []models.ServiceView{
+		{
+			Service: specV1.Service{
+				Name:  "agent",
+				Image: "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+				Ports: []specV1.ContainerPort{
+					{
+						HostPort:      80,
+						ContainerPort: 80,
+						ServiceType:   string(v1.ServiceTypeClusterIP),
+					},
+				},
+			},
+		},
+	}
+	copier.Copy(app, appView)
+
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 func TestCreateApplicationHasCertificates(t *testing.T) {

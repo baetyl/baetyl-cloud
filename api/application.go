@@ -588,7 +588,7 @@ func (api *API) translateSecretsToSecretLikedResources(appView *models.Applicati
 func (api *API) validApplication(namesapce string, app *models.ApplicationView) error {
 	for _, v := range app.Volumes {
 		if v.Config != nil {
-			// native program config will be validate by service.ProgramConfig
+			// native program config will be validated by service.ProgramConfig
 			if isProgramConfig(v.Name) {
 				continue
 			}
@@ -618,6 +618,7 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 		}
 	}
 
+	ports := make(map[int32]bool)
 	for _, service := range app.Services {
 		if service.ProgramConfig != "" {
 			_, err := api.Config.Get(namesapce, service.ProgramConfig, "")
@@ -625,14 +626,18 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 				return err
 			}
 		}
-		for _, port := range service.Ports {
-			if port.ServiceType == string(v1.ServiceTypeNodePort) {
-				if port.HostPort != 0 {
-					return common.Error(common.ErrRequestParamInvalid, common.Field("error", "invalid NodePort type with HostPort"))
-				}
-			}
+		err := isValidPort(&service, ports)
+		if err != nil {
+			return err
 		}
 	}
+	for _, service := range app.InitServices {
+		err := isValidPort(&service, ports)
+		if err != nil {
+			return err
+		}
+	}
+
 	if app.CronStatus == specV1.CronWait && app.CronTime.Before(time.Now()) {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "failed to add cron job, time should be set after now"))
 	}
@@ -640,6 +645,28 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 	app.Labels = common.AddSystemLabel(app.Labels, map[string]string{
 		common.LabelAppMode: app.Mode,
 	})
+	return nil
+}
+
+func isValidPort(service *models.ServiceView, ports map[int32]bool) error {
+	for _, port := range service.Ports {
+		if port.ServiceType == string(v1.ServiceTypeNodePort) {
+			if port.NodePort <= 0 {
+				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "invalid NodePort"))
+			}
+			if _, ok := ports[port.NodePort]; ok {
+				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate host ports"))
+			} else {
+				ports[port.NodePort] = true
+			}
+		} else {
+			if _, ok := ports[port.HostPort]; ok {
+				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate host ports"))
+			} else {
+				ports[port.HostPort] = true
+			}
+		}
+	}
 	return nil
 }
 
