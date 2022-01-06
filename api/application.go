@@ -396,6 +396,10 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 			oldServices[service.Name] = true
 		}
 	}
+	volMap := map[string]bool{}
+	for _, vol := range app.Volumes {
+		volMap[vol.Name] = true
+	}
 
 	var configs []specV1.Configuration
 	for index := range app.Services {
@@ -414,14 +418,18 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 
 		if _, ok := oldServices[service.Name]; !ok {
 			vmName := getNameOfFunctionConfigVolumeMount(service.Name)
-			volumeMount, volume := generateVmAndMount(config.Name, vmName, ConfigDir)
-			service.VolumeMounts = append(service.VolumeMounts, volumeMount)
-			app.Volumes = append(app.Volumes, volume)
+			if !volMap[vmName] {
+				volumeMount, volume := generateVmAndMount(config.Name, vmName, ConfigDir)
+				service.VolumeMounts = append(service.VolumeMounts, volumeMount)
+				app.Volumes = append(app.Volumes, volume)
+			}
 
 			vmName = getNameOfFunctionProgramVmMount(service.Name)
-			volumeMountPrpgram, volumeProgram := generateVmAndMount(programConfig.Name, vmName, ProgramConfigDir)
-			service.VolumeMounts = append(service.VolumeMounts, volumeMountPrpgram)
-			app.Volumes = append(app.Volumes, volumeProgram)
+			if !volMap[vmName] {
+				volumeMountPrpgram, volumeProgram := generateVmAndMount(programConfig.Name, vmName, ProgramConfigDir)
+				service.VolumeMounts = append(service.VolumeMounts, volumeMountPrpgram)
+				app.Volumes = append(app.Volumes, volumeProgram)
+			}
 		}
 
 		runtimes, err := api.Func.ListRuntimes()
