@@ -3310,3 +3310,132 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 	app2.Services[0].JobConfig = nil
 	assert.EqualValues(t, expectApp2, app2)
 }
+
+func TestAPI_ToApplication(t *testing.T) {
+	appView := &models.ApplicationView{
+		Name:              "a0",
+		Mode:              "kube",
+		Type:              "function",
+		Namespace:         "default",
+		CreationTimestamp: time.Unix(0, 0),
+		Services: []models.ServiceView{
+			{
+				Service: specV1.Service{
+					Name: "s0",
+					VolumeMounts: []specV1.VolumeMount{
+						{
+							Name:      "baetyl-function-config-s0",
+							MountPath: "/bin",
+						}, {
+							Name:      "v1",
+							MountPath: "/test",
+						},
+					},
+					FunctionConfig: &specV1.ServiceFunctionConfig{
+						Name:    "s0",
+						Runtime: "nodejs10",
+					},
+				},
+				ProgramConfig: "p0",
+			},
+		},
+		Volumes: []models.VolumeView{
+			{
+				Name: "baetyl-function-config-s0",
+				Config: &specV1.ObjectReference{
+					Name:    "baetyl-function-config-s0",
+					Version: "1",
+				},
+			},
+			{Name: "v1"},
+		},
+		Description: "test",
+		System:      false,
+		Replica:     1,
+		Workload:    "deployment",
+		JobConfig: &specV1.AppJobConfig{
+			Completions:   1,
+			RestartPolicy: "Never",
+		},
+	}
+	api, _, mockCtl := initApplicationAPI(t)
+	defer mockCtl.Finish()
+	mockTemplate := ms.NewMockTemplateService(mockCtl)
+	api.Template = mockTemplate
+	mockTemplate.EXPECT().UnmarshalTemplate("baetyl-nodejs10-program.yml", gomock.Any(), gomock.Any()).Return(nil).Times(1)
+	mockFunc := ms.NewMockFunctionService(mockCtl)
+	api.Func = mockFunc
+	mockFunc.EXPECT().ListRuntimes().Return(map[string]string{"nodejs10": "nodejs10"}, nil).Times(1)
+
+	expApp := &specV1.Application{
+		Name:              "a0",
+		Mode:              "kube",
+		Namespace:         "default",
+		Type:              "function",
+		CreationTimestamp: time.Unix(0, 0),
+		Services: []specV1.Service{
+			{
+				Name:  "s0",
+				Image: "nodejs10",
+				VolumeMounts: []specV1.VolumeMount{
+					{
+						Name:      "baetyl-function-config-s0",
+						MountPath: "/bin",
+					}, {
+						Name:      "v1",
+						MountPath: "/test",
+					},
+					{
+						Name:      "baetyl-function-program-config-s0",
+						MountPath: "/var/lib/baetyl/bin",
+						ReadOnly:  true,
+					},
+				},
+				Ports: []specV1.ContainerPort{
+					{
+						ContainerPort: 80,
+						Protocol:      "TCP",
+					},
+				},
+				FunctionConfig: &specV1.ServiceFunctionConfig{
+					Name:    "s0",
+					Runtime: "nodejs10",
+				},
+			},
+		},
+		Volumes: []specV1.Volume{
+			{
+				Name: "baetyl-function-config-s0",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name:    "baetyl-function-config-s0",
+						Version: "1",
+					},
+				},
+			},
+			{Name: "v1"},
+			{
+				Name: "baetyl-function-program-config-s0",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name:    "",
+						Version: "",
+					},
+				},
+			},
+		},
+		Description: "test",
+		System:      false,
+		Replica:     1,
+		Workload:    "deployment",
+		JobConfig: &specV1.AppJobConfig{
+			Completions:   1,
+			RestartPolicy: "Never",
+		},
+	}
+
+	app, cfg, err := api.ToApplication(appView, nil)
+	assert.NoError(t, err)
+	assert.EqualValues(t, expApp, app)
+	fmt.Println(cfg)
+}
