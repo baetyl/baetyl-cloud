@@ -343,7 +343,6 @@ func TestGetFunctionApplication(t *testing.T) {
 	}
 	fApp.EXPECT().GetApp(mApp.Namespace, mApp.Name, "").Return(mApp, nil).Times(1)
 	sConfig.EXPECT().Get(mApp.Namespace, "baetyl-function-app-service-xxxxxxxxx", "").Return(config, nil).Times(1)
-	sConfig.EXPECT().Get(mApp.Namespace, "baetyl-function-program-config-x3-xs3-uwredcfxb", "").Return(config, nil).Times(1)
 
 	// 200
 	req, _ = http.NewRequest(http.MethodGet, "/v1/apps/abc", nil)
@@ -2247,8 +2246,6 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	fApp.EXPECT().UpdateApp(namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(newApp, nil)
 	sConfig.EXPECT().Get(namespace, "baetyl-function-config-app-service-2", "").Return(config2, nil).Times(1)
 	sConfig.EXPECT().Get(namespace, "baetyl-function-config-app-service-3", "").Return(config2, nil).Times(1)
-	sConfig.EXPECT().Get(namespace, "baetyl-function-program-config-app-service-bbbb", "").Return(config2, nil).Times(1)
-	sConfig.EXPECT().Get(namespace, "baetyl-function-program-config-app-service-cccc", "").Return(config2, nil).Times(1)
 
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(newAppView)

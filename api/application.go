@@ -354,9 +354,12 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 			return nil, err
 		}
 
-		generatedProgramConfigName, err := getGenProgramNameOfFunctionService(app, service.Name)
-		if err != nil {
-			return nil, err
+		var generatedProgramConfigName string
+		if app.Mode == context.RunModeNative {
+			generatedProgramConfigName, err = getGenProgramNameOfFunctionService(app, service.Name)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		config, err := api.Config.Get(appView.Namespace, generatedConfigName, "")
@@ -372,9 +375,11 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 			service.Functions = serviceFunctions.Functions
 		}
 
-		_, err = api.Config.Get(appView.Namespace, generatedProgramConfigName, "")
-		if err != nil {
-			return nil, err
+		if app.Mode == context.RunModeNative {
+			_, err = api.Config.Get(appView.Namespace, generatedProgramConfigName, "")
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		populateFunctionVolumeMount(service)
