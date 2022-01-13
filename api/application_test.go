@@ -1748,19 +1748,6 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	config2 := &specV1.Configuration{}
-	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(errors.New("err")).Times(1)
-
-	w = httptest.NewRecorder()
-	body, _ = json.Marshal(appView)
-	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
-
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
-	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
@@ -1792,7 +1779,6 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
 	funcs := map[string]string{
 		"python36": "image",
 	}
@@ -1808,7 +1794,6 @@ func TestCreateFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	// one more for program config
 	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
@@ -2255,8 +2240,6 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(namespace, "baetyl-function-config-app-service-3", "").Return(config2, nil).Times(1)
 	sConfig.EXPECT().Get(namespace, "baetyl-function-program-config-app-service-bbbb", "").Return(config2, nil).Times(1)
 	sConfig.EXPECT().Get(namespace, "baetyl-function-program-config-app-service-cccc", "").Return(config2, nil).Times(1)
-	config4 := &specV1.Configuration{}
-	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config4).Return(nil).Times(2)
 	funcs := map[string]string{
 		"python36": "image",
 	}
@@ -2498,19 +2481,6 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	config2 := &specV1.Configuration{}
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(errors.New("err")).Times(1)
-
-	w = httptest.NewRecorder()
-	body, _ = json.Marshal(appView)
-	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
-	router.ServeHTTP(w, req)
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
-
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
-	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
@@ -2542,7 +2512,6 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
 	funcs := map[string]string{
 		"python36": "image",
 	}
@@ -2558,7 +2527,6 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
-	sTemplate.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	// one more for program config
 	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
@@ -2719,6 +2687,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Type:      common.FunctionApp,
+		Mode:      context.RunModeNative,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -3360,9 +3329,6 @@ func TestAPI_ToApplication(t *testing.T) {
 	}
 	api, _, mockCtl := initApplicationAPI(t)
 	defer mockCtl.Finish()
-	mockTemplate := ms.NewMockTemplateService(mockCtl)
-	api.Template = mockTemplate
-	mockTemplate.EXPECT().UnmarshalTemplate("baetyl-nodejs10-program.yml", gomock.Any(), gomock.Any()).Return(nil).Times(1)
 	mockFunc := ms.NewMockFunctionService(mockCtl)
 	api.Func = mockFunc
 	mockFunc.EXPECT().ListRuntimes().Return(map[string]string{"nodejs10": "nodejs10"}, nil).Times(1)
@@ -3384,11 +3350,6 @@ func TestAPI_ToApplication(t *testing.T) {
 					}, {
 						Name:      "v1",
 						MountPath: "/test",
-					},
-					{
-						Name:      "baetyl-function-program-config-s0",
-						MountPath: "/var/lib/baetyl/bin",
-						ReadOnly:  true,
 					},
 				},
 				Ports: []specV1.ContainerPort{
@@ -3414,15 +3375,6 @@ func TestAPI_ToApplication(t *testing.T) {
 				},
 			},
 			{Name: "v1"},
-			{
-				Name: "baetyl-function-program-config-s0",
-				VolumeSource: specV1.VolumeSource{
-					Config: &specV1.ObjectReference{
-						Name:    "",
-						Version: "",
-					},
-				},
-			},
 		},
 		Description: "test",
 		System:      false,
