@@ -413,11 +413,14 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 		}
 		configs = append(configs, *config)
 
-		programConfig, err := generateProgramOfFunctionService(api, service, app)
-		if err != nil {
-			return nil, nil, err
+		var programConfig *specV1.Configuration
+		if app.Mode == context.RunModeNative {
+			programConfig, err = generateProgramOfFunctionService(api, service, app)
+			if err != nil {
+				return nil, nil, err
+			}
+			configs = append(configs, *programConfig)
 		}
-		configs = append(configs, *programConfig)
 
 		if _, ok := oldServices[service.Name]; !ok {
 			vmName := getNameOfFunctionConfigVolumeMount(service.Name)
@@ -427,11 +430,13 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 				app.Volumes = append(app.Volumes, volume)
 			}
 
-			vmName = getNameOfFunctionProgramVmMount(service.Name)
-			if !volMap[vmName] {
-				volumeMountPrpgram, volumeProgram := generateVmAndMount(programConfig.Name, vmName, ProgramConfigDir)
-				service.VolumeMounts = append(service.VolumeMounts, volumeMountPrpgram)
-				app.Volumes = append(app.Volumes, volumeProgram)
+			if app.Mode == context.RunModeNative {
+				vmName = getNameOfFunctionProgramVmMount(service.Name)
+				if !volMap[vmName] {
+					volumeMountPrpgram, volumeProgram := generateVmAndMount(programConfig.Name, vmName, ProgramConfigDir)
+					service.VolumeMounts = append(service.VolumeMounts, volumeMountPrpgram)
+					app.Volumes = append(app.Volumes, volumeProgram)
+				}
 			}
 		}
 
