@@ -152,6 +152,9 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	}
 
 	app, err = api.Facade.UpdateApp(ns, oldApp, app, configs)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 
 	return api.ToApplicationView(app)
 }
