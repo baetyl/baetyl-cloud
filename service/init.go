@@ -25,14 +25,16 @@ const (
 )
 
 const (
-	templateInitDeploymentYaml = "baetyl-init-deployment.yml"
-	templateBaetylInstallShell = "baetyl-install.sh"
+	templateInitDeploymentYaml        = "baetyl-init-deployment.yml"
+	templateBaetylInstallShell        = "baetyl-install.sh"
+	templateBaetylWindowsInstallShell = "baetyl-install.ps1"
 
-	TemplateCoreConfYaml      = "baetyl-core-conf.yml"
-	TemplateInitConfYaml      = "baetyl-init-conf.yml"
-	TemplateBaetylInitCommand = "baetyl-init-command"
-	TemplateInitCommandWget   = "baetyl-init-command-wget"
-	NamePopulateExtParams     = "populateExtParams"
+	TemplateCoreConfYaml       = "baetyl-core-conf.yml"
+	TemplateInitConfYaml       = "baetyl-init-conf.yml"
+	TemplateBaetylInitCommand  = "baetyl-init-command"
+	TemplateInitCommandWget    = "baetyl-init-command-wget"
+	TemplateInitCommandWindows = "baetyl-init-command-windows"
+	NamePopulateExtParams      = "populateExtParams"
 )
 
 var (
@@ -112,6 +114,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	initService.ResourceMapFunc[TemplateBaetylInitCommand] = initService.GetInitCommand
 	initService.ResourceMapFunc[TemplateCoreConfYaml] = initService.getCoreConfig
 	initService.ResourceMapFunc[templateBaetylInstallShell] = initService.getInstallShell
+	initService.ResourceMapFunc[templateBaetylWindowsInstallShell] = initService.getWindowsInstallShell
 	initService.ResourceMapFunc[TemplateInitConfYaml] = initService.getInitConfig
 
 	return initService, nil
@@ -221,6 +224,15 @@ func (s *InitServiceImpl) GetNodeCert(app *specV1.Application) (*specV1.Secret, 
 			common.Field("namespace", app.Namespace))
 	}
 	return cert, nil
+}
+
+func (s *InitServiceImpl) getWindowsInstallShell(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
+	params["DBPath"] = context.DefaultWindowsHostPathLib
+	data, err := s.TemplateService.ParseTemplate(templateBaetylWindowsInstallShell, params)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return data, nil
 }
 
 func (s *InitServiceImpl) getInstallShell(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
