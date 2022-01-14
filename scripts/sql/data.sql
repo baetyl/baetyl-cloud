@@ -7,10 +7,9 @@ INSERT INTO `baetyl_property` (`name`, `value`) VALUES
 ('command-k3s-installation-docker', 'curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn INSTALL_K3S_VERSION=v1.18.9+k3s1 INSTALL_K3S_EXEC=\"--docker --write-kubeconfig ~/.kube/config --write-kubeconfig-mode 666\" sh -'),
 ('baetyl-init-command', 'curl -skfL \'{{GetProperty \"init-server-address\"}}/v1/init/baetyl-install.sh?token={{.Token}}&mode={{.mode}}&initApplyYaml={{.InitApplyYaml}}\' -osetup.sh && sh setup.sh'),
 ('baetyl-init-command-wget', 'wget --no-check-certificate -O setup.sh \'{{GetProperty \"init-server-address\"}}/v1/init/baetyl-install.sh?token={{.Token}}&mode={{.mode}}&initApplyYaml={{.InitApplyYaml}}\' && sh setup.sh'),
-('baetyl-init-command-windows', 'Set-ExecutionPolicy Bypass -Scope Process -Force;[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}; iex ((New-Object System.Net.WebClient).DownloadString(\'{{GetProperty \"init-server-address\"}}/v1/init/baetyl-install.ps1?token={{.Token}}&mode={{.mode}}&initApplyYaml={{.InitApplyYaml}}\'))')
+('baetyl-init-command-windows', 'Set-ExecutionPolicy Bypass -Scope Process -Force;[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}; iex ((New-Object System.Net.WebClient).DownloadString(\'{{GetProperty \"init-server-address\"}}/v1/init/baetyl-install.ps1?token={{.Token}}&mode={{.mode}}&initApplyYaml={{.InitApplyYaml}}\'))'),
 ('command-baetyl-kube-delete', 'kubectl delete ns baetyl-edge baetyl-edge-system --grace-period=0 --force'),
 ('command-baetyl-native-delete', 'sudo baetyl delete && sudo baetyl delete -n baetyl-edge'),
-
 ('command-baetyl-installation', 'curl -sSL https://baetyl-repo-gz.gz.bcebos.com/v2/install.sh | bash');
 
 INSERT INTO `baetyl_module` (`name`, `version`, `image`, `programs`, `type`, `is_latest`, `description`) VALUES
