@@ -1,8 +1,8 @@
-Addr="{{GetProperty "init-server-address"}}"
-DeployYaml="{{.InitApplyYaml}}"
-DbPath='{{.DBPath}}'
-Token="{{.Token}}"
-Mode='{{.Mode}}'
+$Addr="{{GetProperty "init-server-address"}}"
+$DeployYaml="{{.InitApplyYaml}}"
+$DbPath='{{.DBPath}}'
+$Token="{{.Token}}"
+$Mode='{{.Mode}}'
 
 function Check-User {
      $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
