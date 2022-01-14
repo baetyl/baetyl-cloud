@@ -33,6 +33,7 @@ const (
 	BaetylCoreAPIPort       = "BaetylCoreAPIPort"
 	MethodWget              = "wget"
 	MethodCurl              = "curl"
+	PlatformWindows         = "windows"
 )
 
 // GetNode get a node
@@ -415,6 +416,9 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	template := service.TemplateBaetylInitCommand
 	if method == MethodWget {
 		template = service.TemplateInitCommandWget
+	}
+	if PlatformWindows == c.Query("platform") {
+		template = service.TemplateInitCommandWindows
 	}
 	params := map[string]interface{}{
 		"mode":     mode,
