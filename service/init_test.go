@@ -84,7 +84,7 @@ func TestInitService_GetResource(t *testing.T) {
 
 	// bad case : not found
 	_, err := as.GetResource("", "", "dummy", nil)
-	assert.EqualError(t, err, "The (resource) resource (dummy) is not found.")
+	assert.Contains(t, err.Error(), "The (resource) resource (dummy) is not found.")
 }
 
 func TestInitService_getInitYaml(t *testing.T) {
@@ -131,7 +131,7 @@ func TestInitService_getInitYaml(t *testing.T) {
 	sApp.EXPECT().Get("default", "baetyl-core-1", "").Return(coreApp, nil).Times(1)
 	sSecret.EXPECT().Get("default", "sync-cert", "").Return(nil, nil).Times(1)
 	res, err := as.getInitDeploymentYaml("default", "n0", nil)
-	assert.EqualError(t, err, "The (secret) resource (sync-cert) is not found in namespace(default).")
+	assert.Contains(t, err.Error(), "The (secret) resource (sync-cert) is not found in namespace(default).")
 	assert.Nil(t, res)
 }
 
@@ -155,7 +155,7 @@ func TestInitService_GetNodeCert(t *testing.T) {
 
 	sSecret.EXPECT().Get("default", "", "").Return(nil, nil).Times(1)
 	res, err := as.GetNodeCert(app1)
-	assert.EqualError(t, err, "The (secret) resource is not found in namespace(default).")
+	assert.Contains(t, err.Error(), "The (secret) resource is not found in namespace(default).")
 	assert.Nil(t, res)
 }
 

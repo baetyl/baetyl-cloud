@@ -222,7 +222,7 @@ func TestModule(t *testing.T) {
 
 	ress, err = db.GetModules(module3.Name)
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "The (module) resource (baetyl3) is not found.")
+	assert.Equal(t, err.Error(), "访问不存在的资源。\nThe (module) resource (baetyl3) is not found.")
 }
 
 func TestListApp(t *testing.T) {
