@@ -21,7 +21,7 @@ func TestError(t *testing.T) {
 			args: args{
 				c: ErrRequestAccessDenied,
 			},
-			wantErr: "The request access is denied.",
+			wantErr: templates[ErrRequestAccessDenied],
 		},
 		{
 			name: "ErrRequestAccessDenied-2",
@@ -29,14 +29,14 @@ func TestError(t *testing.T) {
 				c:  ErrRequestAccessDenied,
 				fs: []*F{Field("dummy", "dummy")},
 			},
-			wantErr: "The request access is denied.",
+			wantErr: templates[ErrRequestAccessDenied],
 		},
 		{
 			name: "ErrRequestParamInvalid-1",
 			args: args{
 				c: ErrRequestParamInvalid,
 			},
-			wantErr: "The request parameter is invalid.",
+			wantErr: "非法的请求参数。\nThe request parameter is invalid.",
 		},
 		{
 			name: "ErrRequestParamInvalid-2",
@@ -44,14 +44,14 @@ func TestError(t *testing.T) {
 				c:  ErrRequestParamInvalid,
 				fs: []*F{Field("error", "missing name")},
 			},
-			wantErr: "The request parameter is invalid. (missing name)",
+			wantErr: "非法的请求参数。\nThe request parameter is invalid. (missing name)",
 		},
 		{
 			name: "ErrResourceNotFound-1",
 			args: args{
 				c: ErrResourceNotFound,
 			},
-			wantErr: "The resource is not found.",
+			wantErr: "访问不存在的资源。\nThe resource is not found.",
 		},
 		{
 			name: "ErrResourceNotFound-2",
@@ -59,7 +59,7 @@ func TestError(t *testing.T) {
 				c:  ErrResourceNotFound,
 				fs: []*F{Field("name", "xxx")},
 			},
-			wantErr: "The resource (xxx) is not found.",
+			wantErr: "访问不存在的资源。\nThe resource (xxx) is not found.",
 		},
 		{
 			name: "ErrVolumeType-1",

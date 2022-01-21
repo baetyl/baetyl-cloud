@@ -104,15 +104,15 @@ var templates = map[Code]string{
 	ErrPluginNotFound: "The plugin{{if .name}} ({{.name}}){{end}} is not found.",
 	ErrPluginInvalid:  "The plugin {{.name}} is invalid, not implement all interfaces of {{.kind}}.",
 	// * request
-	ErrRequestAccessDenied:   "The request access is denied.",
-	ErrRequestMethodNotFound: "The request method is not found.",
-	ErrRequestParamInvalid:   "The request parameter is invalid.{{if .error}} ({{.error}}){{end}}",
+	ErrRequestAccessDenied:   "访问已被拒绝。\nThe request access is denied.",
+	ErrRequestMethodNotFound: "访问了不存在的api接口。\nThe request method is not found.",
+	ErrRequestParamInvalid:   "非法的请求参数。\nThe request parameter is invalid.{{if .error}} ({{.error}}){{end}}",
 	// * resource
-	ErrResourceNotFound:        `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} is not found{{if .namespace}} in namespace({{.namespace}}){{end}}.`,
-	ErrResourceAccessForbidden: `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} can not be accessed{{if .namespace}} in namespace({{.namespace}}){{end}}.`,
-	ErrResourceConflict:        `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} already exist.`,
-	ErrResourceHasBeenUsed:     `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} has been used.`,
-	ErrResourceDeleteForbidden: `The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} can not be deleted{{if .namespace}} in namespace({{.namespace}}){{end}}`,
+	ErrResourceNotFound:        "访问不存在的资源。\nThe {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} is not found{{if .namespace}} in namespace({{.namespace}}){{end}}.",
+	ErrResourceAccessForbidden: "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} can not be accessed{{if .namespace}} in namespace({{.namespace}}){{end}}.",
+	ErrResourceConflict:        "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} already exist.",
+	ErrResourceHasBeenUsed:     "该资源名称已被占用，请更换命名。The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} has been used.",
+	ErrResourceDeleteForbidden: "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} can not be deleted{{if .namespace}} in namespace({{.namespace}}){{end}}",
 	// * volumes
 	ErrVolumeType: "The volume{{if .name}} ({{.name}}){{end}} type should be{{if .type}} ({{.type}}){{end}}.",
 	// * unknown
@@ -123,10 +123,10 @@ var templates = map[Code]string{
 	ErrNodeNotReady:            "The node {{if .name}}({{.name}} ){{end}}is not ready, please retry later.",
 	ErrAppReferencedByNode:     "The {{if .name}}({{.name}}){{end}} app is still referenced by a node.",
 	// * node
-	ErrNodeNumMaxLimit:       "The number of nodes reaches the maximum limit",
+	ErrNodeNumMaxLimit:       "节点个数已达上线，请联系相关人员申请更高节点限额。\nThe number of nodes reaches the maximum limit",
 	ErrNodeNumQueryException: "The number of nodes is null",
 	// * config
-	ErrConfigInUsed: "The config name {{if .name}}({{.name}}){{end}} in used.",
+	ErrConfigInUsed: "该配置名称已被占用，请更换配置名称。\nThe config name {{if .name}}({{.name}}){{end}} in used.",
 	// * register
 	ErrRegisterQuotaNumOut:     "Number reached the upper limit {{if .num}}({{.num}}){{end}}",
 	ErrRegisterDeleteRecord:    "Batch {{if .name}}({{.name}}){{end}} delete failed, record not null.",
@@ -146,8 +146,8 @@ var templates = map[Code]string{
 	// * function(cfc, aws lambda)
 	ErrFunction: "Problem occurred when importing a function.{{if .error}} ({{.error}}){{end}}",
 
-	ErrInvalidResourceName: "The field ({{if .resourceName}}{{.resourceName}}{{end}}) beginning and ending with an alphanumeric character ([a-z0-9]) with dashes (-) or the string which is consist of no more than 63 characters.{{if .error}} {{.error}}{{end}}.",
-	ErrInvalidLabels: "The field ({{if .validLabels}}{{.validLabels}}{{end}}) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character, " +
+	ErrInvalidResourceName: "非法的资源名称，请根据以下提示重新命名。\nThe field ({{if .resourceName}}{{.resourceName}}{{end}}) beginning and ending with an alphanumeric character ([a-z0-9]) with dashes (-) or the string which is consist of no more than 63 characters.{{if .error}} {{.error}}{{end}}.",
+	ErrInvalidLabels: "非法的Label名称，请根据以下提示重新命名。\nThe field ({{if .validLabels}}{{.validLabels}}{{end}}) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character, " +
 		"the key prefix is optional. If specified, the prefix must be a DNS subdomain: a series of DNS labels separated by dots (.), not longer than 253 characters in total, followed by a slash (/)",
 	ErrInvalidRequired:         "{{if .error}}{{.error}}{{end}}",
 	ErrInvalidFingerprintValue: "The field ({{if .fingerprintValue}}{{.fingerprintValue}}{{end}}) beginning and ending with an alphanumeric character ([a-z0-9A-Z]) with dashes (-) or the string which is consist of no more than 63 characters",
@@ -155,10 +155,10 @@ var templates = map[Code]string{
 	ErrInvalidDuration:         "The ({{if .duration}}{{.duration}}{{end}}) must be a positive integer, optionally followed by a corresponding time unit (s|m|h)",
 	ErrInvalidSetcpus: "The ({{if .setcpus}}{{.setcpus}}{{end}}) must be a comma-separated list or hyphen-separated range of CPUs a container can use, " +
 		"a valid value might be 0-3 (to use the first, second, third, and fourth CPU) or 1,3 (to use the second and fourth CPU)",
-	ErrInvalidName: "The field ({{if .nonBaetyl}}{{.nonBaetyl}}{{end}}) cannot contain baetyl (case insensitive)",
+	ErrInvalidName: "非法名称，baetyl命名已被系统占用，请重新命名。\nThe field ({{if .nonBaetyl}}{{.nonBaetyl}}{{end}}) cannot contain baetyl (case insensitive)",
 
 	// * Token auth for init server
-	ErrInvalidToken: "The token is invalid",
+	ErrInvalidToken: "非法的token导致鉴权失败，请联系系统管理人员。\nThe token is invalid",
 
 	// * License
 	ErrLicenseExpired:      "The license {{if .name}}({{.name}}){{end}} has expired. {{if .error}} ({{.error}}){{end}}",

@@ -147,7 +147,7 @@ func TestObjectService_GenInternalObjectURL(t *testing.T) {
 
 	_, err = cs.GenInternalObjectURL(ns, bucket, name, "unknown")
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source (unknown) is not supported)")
+	assert.Contains(t, err.Error(), "The request parameter is invalid. (the source (unknown) is not supported)")
 }
 
 func TestObjectService_CreateInternalBucketIfNotExist(t *testing.T) {
@@ -170,7 +170,7 @@ func TestObjectService_CreateInternalBucketIfNotExist(t *testing.T) {
 
 	_, err = cs.CreateInternalBucketIfNotExist(ns, bucket, "public", "default")
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source (default) is not supported)")
+	assert.Contains(t, err.Error(), "The request parameter is invalid. (the source (default) is not supported)")
 }
 
 func TestObjectService_PutInternalObjectFromURL(t *testing.T) {
@@ -192,7 +192,7 @@ func TestObjectService_PutInternalObjectFromURL(t *testing.T) {
 
 	err = cs.PutInternalObjectFromURLIfNotExist(ns, bucket, name, url, "default")
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source (default) is not supported)")
+	assert.Contains(t, err.Error(), "The request parameter is invalid. (the source (default) is not supported)")
 }
 
 func TestObjectService_ListExternalBuckets(t *testing.T) {
@@ -314,5 +314,5 @@ func TestObjectService_GenExternalObjectURL(t *testing.T) {
 
 	_, err = cs.GenExternalObjectURL(info, bucket, name, "unknown")
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "The request parameter is invalid. (the source (unknown) is not supported)")
+	assert.Contains(t, err.Error(), "The request parameter is invalid. (the source (unknown) is not supported)")
 }
