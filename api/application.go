@@ -681,6 +681,9 @@ func isValidPort(service *models.ServiceView, ports map[int32]bool) error {
 				ports[port.NodePort] = true
 			}
 		} else {
+			if port.HostPort == 0 {
+				continue
+			}
 			if _, ok := ports[port.HostPort]; ok {
 				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate host ports"))
 			} else {
