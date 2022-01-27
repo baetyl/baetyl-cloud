@@ -93,6 +93,20 @@ func (api *API) ListModules(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	// remove deprecated baetyl-gpu-metrics
+	if tp == string(common.TypeSystemKube) {
+		index := -1
+		for i, app := range res {
+			if app.Name == DeprecatedGPUMetrics {
+				index = i
+				break
+			}
+		}
+		if index != -1 {
+			res = append(res[:index], res[index+1:]...)
+		}
+	}
+
 	return models.ListView{
 		Total:    len(res),
 		PageNo:   params.PageNo,
