@@ -34,6 +34,7 @@ const (
 	MethodWget              = "wget"
 	MethodCurl              = "curl"
 	PlatformWindows         = "windows"
+	DeprecatedGPUMetrics    = "baetyl-gpu-metrics"
 )
 
 // GetNode get a node
@@ -292,22 +293,27 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 
 func (api *API) deleteGPUMetricsAppsIfNeed(node *v1.Node) error {
 	if v1.IsLegalAcceleratorType(node.Accelerator) {
-		err := api.deleteDeletedSysApps(node, []string{v1.BaetylGPUMetrics})
+		err := api.deleteDeletedSysApps(node, []string{v1.BaetylGPUMetrics, DeprecatedGPUMetrics})
 		if err != nil {
 			return err
 		}
-		index := -1
-		for i, app := range node.SysApps {
-			if strings.Contains(app, v1.BaetylGPUMetrics) {
-				index = i
-				break
-			}
-		}
-		if index != -1 {
-			node.SysApps = append(node.SysApps[:index], node.SysApps[index+1:]...)
-		}
+		deleteNodeSysApp(node, v1.BaetylGPUMetrics)
+		deleteNodeSysApp(node, DeprecatedGPUMetrics)
 	}
 	return nil
+}
+
+func deleteNodeSysApp(node *v1.Node, appName string) {
+	index := -1
+	for i, app := range node.SysApps {
+		if strings.Contains(app, appName) {
+			index = i
+			break
+		}
+	}
+	if index != -1 {
+		node.SysApps = append(node.SysApps[:index], node.SysApps[index+1:]...)
+	}
 }
 
 // DeleteNode delete the node
