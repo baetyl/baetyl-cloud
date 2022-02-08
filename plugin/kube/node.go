@@ -70,6 +70,12 @@ func toNodeModel(node *v1alpha1.Node) *specV1.Node {
 			n.NodeMode = nodeMode
 		}
 	}
+	if val, ok := n.Attributes[specV1.KeyLink].(string); ok {
+		n.Link = val
+	}
+	if val, ok := n.Attributes[specV1.KeyCoreId].(string); ok {
+		n.CoreId = val
+	}
 	return n
 }
 
@@ -116,6 +122,12 @@ func fromNodeModel(node *specV1.Node) (*v1alpha1.Node, error) {
 	node.Attributes[specV1.KeyOptionalSysApps] = node.SysApps
 	node.Attributes[specV1.KeyAccelerator] = node.Accelerator
 	node.Attributes[specV1.KeyNodeMode] = node.NodeMode
+	if node.Link != "" {
+		node.Attributes[specV1.KeyLink] = node.Link
+	}
+	if node.CoreId != "" {
+		node.Attributes[specV1.KeyCoreId] = node.CoreId
+	}
 	// set default value
 	if _, ok := node.Attributes[specV1.BaetylCoreFrequency]; !ok {
 		node.Attributes[specV1.BaetylCoreFrequency] = common.DefaultCoreFrequency
