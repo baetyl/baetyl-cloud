@@ -3161,7 +3161,6 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 
 	expectApp0 := &models.ApplicationView{
 		Name:        "a0",
-		Labels:      map[string]string{"a": "b"},
 		HostNetwork: true,
 		Replica:     3,
 		JobConfig: &specV1.AppJobConfig{
@@ -3201,7 +3200,6 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 
 	expectApp1 := &models.ApplicationView{
 		Name:        "a1",
-		Labels:      map[string]string{},
 		HostNetwork: false,
 		Replica:     1,
 		JobConfig: &specV1.AppJobConfig{
@@ -3241,7 +3239,6 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 
 	expectApp2 := &models.ApplicationView{
 		Name:        "a0",
-		Labels:      map[string]string{"a": "b"},
 		HostNetwork: true,
 		Replica:     1,
 		JobConfig: &specV1.AppJobConfig{
