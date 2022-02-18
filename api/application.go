@@ -809,17 +809,6 @@ func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
 			}
 		}
 	}
-
-	// Label
-	if app.Labels == nil {
-		app.Labels = map[string]string{}
-	}
-	if len(app.Services) > 0 && app.Services[0].Labels != nil {
-		api.log.Debug("app.Label add services[0].Label ")
-		for key, val := range app.Services[0].Labels {
-			app.Labels[key] = val
-		}
-	}
 }
 
 func getGenConfigNameOfFunctionService(app *specV1.Application, serviceName string) (string, error) {
