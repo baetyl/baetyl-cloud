@@ -384,6 +384,24 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 
 		populateFunctionVolumeMount(service)
 	}
+
+	// kube function set program nil
+	if appView.Type == common.FunctionApp && appView.Mode == context.RunModeKube {
+		for i := 0; i < len(appView.Volumes); i++ {
+			if strings.HasPrefix(appView.Volumes[i].Name, "baetyl-function-program-config") {
+				appView.Volumes = append(appView.Volumes[:i], appView.Volumes[i+1:]...)
+				i--
+			}
+		}
+		for _, svc := range appView.Services {
+			for i := 0; i < len(svc.VolumeMounts); i++ {
+				if strings.HasPrefix(svc.VolumeMounts[i].Name, "baetyl-function-program-config") {
+					svc.VolumeMounts = append(svc.VolumeMounts[:i], svc.VolumeMounts[i+1:]...)
+					i--
+				}
+			}
+		}
+	}
 	delete(appView.Labels, common.LabelAppMode)
 	return appView, nil
 }
