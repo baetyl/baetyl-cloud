@@ -393,13 +393,14 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 				i--
 			}
 		}
-		for _, svc := range appView.Services {
-			for i := 0; i < len(svc.VolumeMounts); i++ {
-				if strings.HasPrefix(svc.VolumeMounts[i].Name, "baetyl-function-program-config") {
-					svc.VolumeMounts = append(svc.VolumeMounts[:i], svc.VolumeMounts[i+1:]...)
-					i--
+		for i, svc := range appView.Services {
+			for j := 0; j < len(svc.VolumeMounts); j++ {
+				if strings.HasPrefix(svc.VolumeMounts[j].Name, "baetyl-function-program-config") {
+					svc.VolumeMounts = append(svc.VolumeMounts[:j], svc.VolumeMounts[j+1:]...)
+					j--
 				}
 			}
+			appView.Services[i] = svc
 		}
 	}
 	delete(appView.Labels, common.LabelAppMode)
