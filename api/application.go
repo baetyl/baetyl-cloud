@@ -625,26 +625,26 @@ func (api *API) translateSecretsToSecretLikedResources(appView *models.Applicati
 	return nil
 }
 
-func (api *API) validApplication(namesapce string, app *models.ApplicationView) error {
+func (api *API) validApplication(namespace string, app *models.ApplicationView) error {
 	for _, v := range app.Volumes {
 		if v.Config != nil {
 			// native program config will be validated by service.ProgramConfig
 			if isProgramConfig(v.Name) {
 				continue
 			}
-			_, err := api.Config.Get(namesapce, v.Config.Name, "")
+			_, err := api.Config.Get(namespace, v.Config.Name, "")
 			if err != nil {
 				return err
 			}
 		}
 		if v.Secret != nil {
-			_, err := api.Secret.Get(namesapce, v.Secret.Name, "")
+			_, err := api.Secret.Get(namespace, v.Secret.Name, "")
 			if err != nil {
 				return err
 			}
 		}
 		if v.Certificate != nil {
-			_, err := api.Secret.Get(namesapce, v.Certificate.Name, "")
+			_, err := api.Secret.Get(namespace, v.Certificate.Name, "")
 			if err != nil {
 				return err
 			}
@@ -652,7 +652,7 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 	}
 
 	for _, r := range app.Registries {
-		_, err := api.Secret.Get(namesapce, r.Name, "")
+		_, err := api.Secret.Get(namespace, r.Name, "")
 		if err != nil {
 			return err
 		}
@@ -661,10 +661,14 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 	ports := make(map[int32]bool)
 	for _, service := range app.Services {
 		if service.ProgramConfig != "" {
-			_, err := api.Config.Get(namesapce, service.ProgramConfig, "")
+			_, err := api.Config.Get(namespace, service.ProgramConfig, "")
 			if err != nil {
 				return err
 			}
+		}
+		if app.Replica > 1 && len(service.Ports) > 0 {
+			return common.Error(common.ErrRequestParamInvalid,
+				common.Field("error", "port mapping is only supported under single replica"))
 		}
 		err := isValidPort(&service, ports)
 		if err != nil {
@@ -672,6 +676,10 @@ func (api *API) validApplication(namesapce string, app *models.ApplicationView) 
 		}
 	}
 	for _, service := range app.InitServices {
+		if app.Replica > 1 && len(service.Ports) > 0 {
+			return common.Error(common.ErrRequestParamInvalid,
+				common.Field("error", "port mapping is only supported under single replica"))
+		}
 		err := isValidPort(&service, ports)
 		if err != nil {
 			return err
