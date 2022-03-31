@@ -33,6 +33,20 @@ func (m *MockObjectService) EXPECT() *MockObjectServiceMockRecorder {
 	return m.recorder
 }
 
+// CreateExternalBucket mocks base method
+func (m *MockObjectService) CreateExternalBucket(arg0 models.ExternalObjectInfo, arg1, arg2, arg3 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateExternalBucket", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateExternalBucket indicates an expected call of CreateExternalBucket
+func (mr *MockObjectServiceMockRecorder) CreateExternalBucket(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateExternalBucket", reflect.TypeOf((*MockObjectService)(nil).CreateExternalBucket), arg0, arg1, arg2, arg3)
+}
+
 // CreateInternalBucketIfNotExist mocks base method
 func (m *MockObjectService) CreateInternalBucketIfNotExist(arg0, arg1, arg2, arg3 string) (*models.Bucket, error) {
 	m.ctrl.T.Helper()
@@ -46,6 +60,20 @@ func (m *MockObjectService) CreateInternalBucketIfNotExist(arg0, arg1, arg2, arg
 func (mr *MockObjectServiceMockRecorder) CreateInternalBucketIfNotExist(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateInternalBucketIfNotExist", reflect.TypeOf((*MockObjectService)(nil).CreateInternalBucketIfNotExist), arg0, arg1, arg2, arg3)
+}
+
+// DeleteExternalObject mocks base method
+func (m *MockObjectService) DeleteExternalObject(arg0 models.ExternalObjectInfo, arg1, arg2, arg3 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteExternalObject", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteExternalObject indicates an expected call of DeleteExternalObject
+func (mr *MockObjectServiceMockRecorder) DeleteExternalObject(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteExternalObject", reflect.TypeOf((*MockObjectService)(nil).DeleteExternalObject), arg0, arg1, arg2, arg3)
 }
 
 // GenExternalObjectURL mocks base method
@@ -76,6 +104,51 @@ func (m *MockObjectService) GenInternalObjectURL(arg0, arg1, arg2, arg3 string) 
 func (mr *MockObjectServiceMockRecorder) GenInternalObjectURL(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenInternalObjectURL", reflect.TypeOf((*MockObjectService)(nil).GenInternalObjectURL), arg0, arg1, arg2, arg3)
+}
+
+// GetExternalObject mocks base method
+func (m *MockObjectService) GetExternalObject(arg0 models.ExternalObjectInfo, arg1, arg2, arg3 string) (*models.Object, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetExternalObject", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*models.Object)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetExternalObject indicates an expected call of GetExternalObject
+func (mr *MockObjectServiceMockRecorder) GetExternalObject(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalObject", reflect.TypeOf((*MockObjectService)(nil).GetExternalObject), arg0, arg1, arg2, arg3)
+}
+
+// HeadExternalObject mocks base method
+func (m *MockObjectService) HeadExternalObject(arg0 models.ExternalObjectInfo, arg1, arg2, arg3 string) (*models.ObjectMeta, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HeadExternalObject", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*models.ObjectMeta)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// HeadExternalObject indicates an expected call of HeadExternalObject
+func (mr *MockObjectServiceMockRecorder) HeadExternalObject(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeadExternalObject", reflect.TypeOf((*MockObjectService)(nil).HeadExternalObject), arg0, arg1, arg2, arg3)
+}
+
+// HeadInternalObject mocks base method
+func (m *MockObjectService) HeadInternalObject(arg0, arg1, arg2, arg3 string) (*models.ObjectMeta, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HeadInternalObject", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*models.ObjectMeta)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// HeadInternalObject indicates an expected call of HeadInternalObject
+func (mr *MockObjectServiceMockRecorder) HeadInternalObject(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeadInternalObject", reflect.TypeOf((*MockObjectService)(nil).HeadInternalObject), arg0, arg1, arg2, arg3)
 }
 
 // ListExternalBucketObjects mocks base method
@@ -150,6 +223,48 @@ func (m *MockObjectService) ListSources() map[string]models.ObjectStorageSourceV
 func (mr *MockObjectServiceMockRecorder) ListSources() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSources", reflect.TypeOf((*MockObjectService)(nil).ListSources))
+}
+
+// PutExternalObject mocks base method
+func (m *MockObjectService) PutExternalObject(arg0 models.ExternalObjectInfo, arg1, arg2, arg3 string, arg4 []byte) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PutExternalObject", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PutExternalObject indicates an expected call of PutExternalObject
+func (mr *MockObjectServiceMockRecorder) PutExternalObject(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutExternalObject", reflect.TypeOf((*MockObjectService)(nil).PutExternalObject), arg0, arg1, arg2, arg3, arg4)
+}
+
+// PutExternalObjectFromURL mocks base method
+func (m *MockObjectService) PutExternalObjectFromURL(arg0 models.ExternalObjectInfo, arg1, arg2, arg3, arg4 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PutExternalObjectFromURL", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PutExternalObjectFromURL indicates an expected call of PutExternalObjectFromURL
+func (mr *MockObjectServiceMockRecorder) PutExternalObjectFromURL(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutExternalObjectFromURL", reflect.TypeOf((*MockObjectService)(nil).PutExternalObjectFromURL), arg0, arg1, arg2, arg3, arg4)
+}
+
+// PutInternalObject mocks base method
+func (m *MockObjectService) PutInternalObject(arg0, arg1, arg2, arg3 string, arg4 []byte) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PutInternalObject", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PutInternalObject indicates an expected call of PutInternalObject
+func (mr *MockObjectServiceMockRecorder) PutInternalObject(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutInternalObject", reflect.TypeOf((*MockObjectService)(nil).PutInternalObject), arg0, arg1, arg2, arg3, arg4)
 }
 
 // PutInternalObjectFromURLIfNotExist mocks base method
