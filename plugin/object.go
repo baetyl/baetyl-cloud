@@ -26,7 +26,13 @@ type Object interface {
 
 	ListExternalBuckets(info models.ExternalObjectInfo) ([]models.Bucket, error)
 	HeadExternalBucket(info models.ExternalObjectInfo, bucket string) error
+	CreateExternalBucket(info models.ExternalObjectInfo, bucket, permission string) error
 	ListExternalBucketObjects(info models.ExternalObjectInfo, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error)
+	PutExternalObject(info models.ExternalObjectInfo, bucket, name string, b []byte) error
+	PutExternalObjectFromURL(info models.ExternalObjectInfo, bucket, name, url string) error
+	GetExternalObject(info models.ExternalObjectInfo, bucket, name string) (*models.Object, error)
+	HeadExternalObject(info models.ExternalObjectInfo, bucket, name string) (*models.ObjectMeta, error)
+	DeleteExternalObject(info models.ExternalObjectInfo, bucket, name string) error
 	GenExternalObjectURL(info models.ExternalObjectInfo, bucket, name string) (*models.ObjectURL, error)
 
 	io.Closer

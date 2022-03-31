@@ -19,10 +19,18 @@ type ObjectService interface {
 	CreateInternalBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error)
 	PutInternalObjectFromURLIfNotExist(userID, bucket, object, url, source string) error
 	GenInternalObjectURL(userID string, bucket, object, source string) (*models.ObjectURL, error)
+	PutInternalObject(userID, bucket, name, source string, b []byte) error
+	HeadInternalObject(userID, bucket, name, source string) (*models.ObjectMeta, error)
 
 	ListExternalBuckets(info models.ExternalObjectInfo, source string) ([]models.Bucket, error)
 	ListExternalBucketObjects(info models.ExternalObjectInfo, bucket, source string) (*models.ListObjectsResult, error)
 	GenExternalObjectURL(info models.ExternalObjectInfo, bucket, object, source string) (*models.ObjectURL, error)
+	CreateExternalBucket(info models.ExternalObjectInfo, bucket, permission, source string) error
+	PutExternalObject(info models.ExternalObjectInfo, bucket, name, source string, b []byte) error
+	PutExternalObjectFromURL(info models.ExternalObjectInfo, bucket, name, url, source string) error
+	GetExternalObject(info models.ExternalObjectInfo, bucket, name, source string) (*models.Object, error)
+	HeadExternalObject(info models.ExternalObjectInfo, bucket, name, source string) (*models.ObjectMeta, error)
+	DeleteExternalObject(info models.ExternalObjectInfo, bucket, name, source string) error
 }
 
 type objectService struct {
@@ -137,4 +145,68 @@ func (c *objectService) GenExternalObjectURL(info models.ExternalObjectInfo, buc
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
 	}
 	return objectPlugin.GenExternalObjectURL(info, bucket, object)
+}
+
+func (c *objectService) PutInternalObject(userID, bucket, name, source string, b []byte) error {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+	return objectPlugin.PutInternalObject(userID, bucket, name, b)
+}
+
+func (c *objectService) HeadInternalObject(userID, bucket, name, source string) (*models.ObjectMeta, error) {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+	return objectPlugin.HeadInternalObject(userID, bucket, name)
+}
+
+func (c *objectService) CreateExternalBucket(info models.ExternalObjectInfo, bucket, permission, source string) error {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+	return objectPlugin.CreateExternalBucket(info, bucket, permission)
+}
+
+func (c *objectService) PutExternalObject(info models.ExternalObjectInfo, bucket, name, source string, b []byte) error {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+	return objectPlugin.PutExternalObject(info, bucket, name, b)
+}
+
+func (c *objectService) PutExternalObjectFromURL(info models.ExternalObjectInfo, bucket, name, url, source string) error {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+	return objectPlugin.PutExternalObjectFromURL(info, bucket, name, url)
+}
+
+func (c *objectService) GetExternalObject(info models.ExternalObjectInfo, bucket, name, source string) (*models.Object, error) {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+	return objectPlugin.GetExternalObject(info, bucket, name)
+}
+
+func (c *objectService) HeadExternalObject(info models.ExternalObjectInfo, bucket, name, source string) (*models.ObjectMeta, error) {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+	return objectPlugin.HeadExternalObject(info, bucket, name)
+}
+
+func (c *objectService) DeleteExternalObject(info models.ExternalObjectInfo, bucket, name, source string) error {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+	return objectPlugin.DeleteExternalObject(info, bucket, name)
 }
