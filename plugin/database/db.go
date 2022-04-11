@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"io"
 	"strings"
@@ -67,7 +68,10 @@ func NewDB(cfg CloudConfig) (*DB, error) {
 	db.SetMaxIdleConns(cfg.Database.MaxIdleConns)
 	db.SetMaxOpenConns(cfg.Database.MaxConns)
 	db.SetConnMaxLifetime(time.Duration(cfg.Database.ConnMaxLifetime) * time.Second)
-	err = db.Ping()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	err = db.PingContext(ctx)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
