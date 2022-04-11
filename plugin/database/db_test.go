@@ -1,6 +1,9 @@
 package database
 
 import (
+	"context"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -13,7 +16,9 @@ func MockNewDB() (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = db.Ping()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	err = db.PingContext(ctx)
 	if err != nil {
 		return nil, err
 	}
