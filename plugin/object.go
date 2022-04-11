@@ -18,6 +18,7 @@ type Object interface {
 	CreateInternalBucket(userID, bucket, permission string) error
 	ListInternalBucketObjects(userID, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error)
 	PutInternalObject(userID, bucket, name string, b []byte) error
+	PutInternalObjectFromFile(userID, bucket, name, filename string) error
 	PutInternalObjectFromURL(userID, bucket, name, url string) error
 	GetInternalObject(userID, bucket, name string) (*models.Object, error)
 	HeadInternalObject(userID, bucket, name string) (*models.ObjectMeta, error)
@@ -29,6 +30,7 @@ type Object interface {
 	CreateExternalBucket(info models.ExternalObjectInfo, bucket, permission string) error
 	ListExternalBucketObjects(info models.ExternalObjectInfo, bucket string, params *models.ObjectParams) (*models.ListObjectsResult, error)
 	PutExternalObject(info models.ExternalObjectInfo, bucket, name string, b []byte) error
+	PutExternalObjectFromFile(info models.ExternalObjectInfo, bucket, name, filename string) error
 	PutExternalObjectFromURL(info models.ExternalObjectInfo, bucket, name, url string) error
 	GetExternalObject(info models.ExternalObjectInfo, bucket, name string) (*models.Object, error)
 	HeadExternalObject(info models.ExternalObjectInfo, bucket, name string) (*models.ObjectMeta, error)

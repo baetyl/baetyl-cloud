@@ -123,9 +123,9 @@ func TestDefaultApplicationService_Delete(t *testing.T) {
 	defer mockObject.Close()
 
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
-	as := applicationService{
-		indexService: mockIndexService,
-		app:          mockObject.app,
+	as := AppServiceImpl{
+		IndexService: mockIndexService,
+		App:          mockObject.app,
 	}
 	newApp, _ := genAppTestCase()
 
@@ -152,11 +152,11 @@ func TestDefaultApplicationService_CreateWithBase(t *testing.T) {
 
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
 
-	as := applicationService{
-		indexService: mockIndexService,
-		config:       mockObject.configuration,
-		secret:       mockObject.secret,
-		app:          mockObject.app,
+	as := AppServiceImpl{
+		IndexService: mockIndexService,
+		Config:       mockObject.configuration,
+		Secret:       mockObject.secret,
+		App:          mockObject.app,
 	}
 	config := &specV1.Configuration{Name: "agent-conf", Version: "123"}
 	secret2 := &specV1.Secret{Name: "test-secret-02", Version: "123"}
@@ -220,11 +220,11 @@ func TestDefaultApplicationService_Update(t *testing.T) {
 	defer mockObject.Close()
 
 	mockIndexService := ms.NewMockIndexService(mockObject.ctl)
-	as := applicationService{
-		indexService: mockIndexService,
-		config:       mockObject.configuration,
-		secret:       mockObject.secret,
-		app:          mockObject.app,
+	as := AppServiceImpl{
+		IndexService: mockIndexService,
+		Config:       mockObject.configuration,
+		Secret:       mockObject.secret,
+		App:          mockObject.app,
 	}
 
 	newApp, oldApp := genAppTestCase()
@@ -260,10 +260,10 @@ func TestDefaultApplicationService_Update(t *testing.T) {
 func TestDefaultApplicationService_constuctConfig(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()
-	cs := applicationService{
-		config: mockObject.configuration,
-		secret: mockObject.secret,
-		app:    mockObject.app,
+	cs := AppServiceImpl{
+		Config: mockObject.configuration,
+		Secret: mockObject.secret,
+		App:    mockObject.app,
 	}
 
 	_, baseApp := genAppTestCase()

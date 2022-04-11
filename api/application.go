@@ -26,7 +26,15 @@ const (
 	FunctionProgramConfigPrefix = "baetyl-function-program-config"
 	FunctionCodePrefix          = "baetyl-function-code"
 	FunctionDefaultConfigFile   = "conf.yml"
+
+	HookCreateApplicationOta = "hookCreateApplicationOta"
+	HookUpdateApplicationOta = "hookUpdateApplicationOta"
+	HookDeleteApplicationOta = "hookDeleteApplicationOta"
 )
+
+type CreateApplicationOta = func(app *specV1.Application) (*specV1.Application, error)
+type UpdateApplicationOta = func(app *specV1.Application) (*specV1.Application, error)
+type DeleteApplicationOta = func(app *specV1.Application) error
 
 // GetApplication get a application
 func (api *API) GetApplication(c *common.Context) (interface{}, error) {
@@ -60,7 +68,7 @@ func (api *API) ListApplication(c *common.Context) (interface{}, error) {
 
 // CreateApplication create one application
 func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
-	appView, err := api.parseApplication(c)
+	appView, err := api.ParseApplication(c)
 	if err != nil {
 		return nil, err
 	}
@@ -103,12 +111,21 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	if f, exist := api.Hooks[HookCreateApplicationOta]; exist {
+		if otaFunc, ok := f.(CreateApplicationOta); ok {
+			app, err = otaFunc(app)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	return api.ToApplicationView(app)
 }
 
 // UpdateApplication update the application
 func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
-	appView, err := api.parseApplication(c)
+	appView, err := api.ParseApplication(c)
 	if err != nil {
 		return nil, err
 	}
@@ -151,6 +168,18 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	// ota can not modify
+	app.Ota = oldApp.Ota
+
+	if f, exist := api.Hooks[HookUpdateApplicationOta]; exist {
+		if otaFunc, ok := f.(UpdateApplicationOta); ok {
+			app, err = otaFunc(app)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	app, err = api.Facade.UpdateApp(ns, oldApp, app, configs)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -174,6 +203,15 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	} else if !canDelete {
 		return nil, common.Error(common.ErrAppReferencedByNode, common.Field("name", name))
+	}
+
+	if f, exist := api.Hooks[HookDeleteApplicationOta]; exist {
+		if otaFunc, ok := f.(DeleteApplicationOta); ok {
+			err = otaFunc(app)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	err = api.Facade.DeleteApp(ns, name, app)
@@ -227,7 +265,7 @@ func (api *API) GetSysAppRegistries(c *common.Context) (interface{}, error) {
 	return api.ToRegistryViewList(res), nil
 }
 
-func (api *API) parseApplication(c *common.Context) (*models.ApplicationView, error) {
+func (api *API) ParseApplication(c *common.Context) (*models.ApplicationView, error) {
 	app := new(models.ApplicationView)
 	app.Name = c.GetNameFromParam()
 	app.Namespace = c.GetNamespace()

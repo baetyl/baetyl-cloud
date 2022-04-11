@@ -96,5 +96,7 @@ type ExternalObjectInfo struct {
 	Endpoint      string `form:"endpoint,omitempty"`
 	Ak            string `form:"ak,omitempty"`
 	Sk            string `form:"sk,omitempty"`
+	SessionToken  string `form:"sessionToken,omitempty"`
+	Region        string `form:"region,omitempty"`
 	AddressFormat string `form:"addressFormat,omitempty"`
 }
