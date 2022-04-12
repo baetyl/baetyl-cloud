@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/baetyl/baetyl-go/v2/context"
+	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
@@ -53,24 +55,38 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 
 	// TODO remove the trick. set node prop if source=baetyl-init
 	ns, n := msg.Metadata["namespace"], msg.Metadata["name"]
-	if msg.Metadata != nil && msg.Metadata["source"] == specV1.BaetylInit {
-		props, err := s.Node.GetNodeProperties(ns, n)
-		if err != nil {
-			s.log.Warn("failed to get node properties", log.Any("source", specV1.BaetylInit))
-		} else {
-			s.log.Debug("set init node properties", log.Any("source", specV1.BaetylInit))
-			if props != nil {
-				report[common.NodeProps] = props.State.Report
+	if msg.Metadata != nil {
+		switch msg.Metadata["source"] {
+		case specV1.BaetylInit:
+			props, err := s.Node.GetNodeProperties(ns, n)
+			if err != nil {
+				s.log.Warn("failed to get node properties", log.Any("source", specV1.BaetylInit))
+			} else {
+				s.log.Debug("set init node properties", log.Any("source", specV1.BaetylInit))
+				if props != nil {
+					report[common.NodeProps] = props.State.Report
+				}
+			}
+		case specV1.BaetylCore:
+			nodeInfo, err := s.Node.Get(nil, ns, n)
+			if err != nil {
+				s.log.Warn("failed to get node properties", log.Any("source", specV1.BaetylInit))
+			} else {
+				report = keepCoreStateOnly(report, nodeInfo)
+			}
+		case specV1.BaetylCoreAndroid:
+			nodeInfo, err := s.Node.Get(nil, ns, n)
+			if err != nil {
+				s.log.Warn("failed to get node", log.Any("source", specV1.BaetylCoreAndroid))
+			} else {
+				err = s.updateAndroidInfo(nodeInfo, &report)
+				if err != nil {
+					s.log.Warn("failed to update node android info", log.Any("source", specV1.BaetylCoreAndroid))
+				}
 			}
 		}
-	} else if msg.Metadata != nil && msg.Metadata["source"] == specV1.BaetylCore {
-		nodeInfo, err := s.Node.Get(nil, ns, n)
-		if err != nil {
-			s.log.Warn("failed to get node properties", log.Any("source", specV1.BaetylInit))
-		} else {
-			report = keepCoreStateOnly(report, nodeInfo)
-		}
 	}
+
 	delta, err := s.Sync.Report(ns, n, report)
 	if err != nil {
 		return nil, err
@@ -102,6 +118,37 @@ func (s *SyncAPIImpl) Desire(msg specV1.Message) (*specV1.Message, error) {
 		Metadata: msg.Metadata,
 		Content:  specV1.LazyValue{Value: specV1.DesireResponse{Values: res}},
 	}, nil
+}
+
+func (s *SyncAPIImpl) updateAndroidInfo(node *specV1.Node, report *specV1.Report) error {
+	nodeVal, ok := (*report)[common.NodeInfo]
+	if !ok {
+		return nil
+	}
+	nodes, ok := nodeVal.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	deviceId := ""
+	// android only ONE key
+	for k, _ := range nodes {
+		deviceId = k
+		break
+	}
+	if deviceId == "" {
+		return nil
+	}
+	if node.Attributes == nil {
+		node.Attributes = map[string]interface{}{}
+	}
+	if node.Attributes[context.RunModeAndroid] != deviceId {
+		node.Attributes[context.RunModeAndroid] = deviceId
+		_, err := s.Node.Update(node.Namespace, node)
+		if err != nil {
+			return errors.Trace(err)
+		}
+	}
+	return nil
 }
 
 func setNodeClientIPIfExist(msg specV1.Message, report *specV1.Report) {

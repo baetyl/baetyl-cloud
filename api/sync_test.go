@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
@@ -98,4 +99,31 @@ func TestSyncAPIImpl_Desire(t *testing.T) {
 	mSync.EXPECT().Desire("default", nil, msg.Metadata).Return(nil, os.ErrInvalid).Times(1)
 	_, err = sync.Desire(msg)
 	assert.Error(t, err)
+}
+
+func TestSyncAPIImpl_updateAndroidInfo(t *testing.T) {
+	mockCtl := gomock.NewController(t)
+	defer mockCtl.Finish()
+	sync := &SyncAPIImpl{}
+	mSync := ms.NewMockSyncService(mockCtl)
+	mNode := ms.NewMockNodeService(mockCtl)
+	sync.Sync = mSync
+	sync.Node = mNode
+	sync.log = log.L().With(log.Any("test", "sync"))
+
+	// good case 0
+	info := specV1.Report{}
+	info["node"] = map[string]interface{}{"1001": nil}
+
+	node := &specV1.Node{
+		Name:      "n0",
+		Namespace: "default",
+		Attributes: map[string]interface{}{
+			context.RunModeAndroid: "1002",
+		},
+	}
+
+	mNode.EXPECT().Update(node.Namespace, node).Return(node, nil).Times(1)
+	err := sync.updateAndroidInfo(node, &info)
+	assert.NoError(t, err)
 }

@@ -309,6 +309,20 @@ func (mr *MockObjectMockRecorder) PutExternalObject(arg0, arg1, arg2, arg3 inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutExternalObject", reflect.TypeOf((*MockObject)(nil).PutExternalObject), arg0, arg1, arg2, arg3)
 }
 
+// PutExternalObjectFromFile mocks base method
+func (m *MockObject) PutExternalObjectFromFile(arg0 models.ExternalObjectInfo, arg1, arg2, arg3 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PutExternalObjectFromFile", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PutExternalObjectFromFile indicates an expected call of PutExternalObjectFromFile
+func (mr *MockObjectMockRecorder) PutExternalObjectFromFile(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutExternalObjectFromFile", reflect.TypeOf((*MockObject)(nil).PutExternalObjectFromFile), arg0, arg1, arg2, arg3)
+}
+
 // PutExternalObjectFromURL mocks base method
 func (m *MockObject) PutExternalObjectFromURL(arg0 models.ExternalObjectInfo, arg1, arg2, arg3 string) error {
 	m.ctrl.T.Helper()
@@ -335,6 +349,20 @@ func (m *MockObject) PutInternalObject(arg0, arg1, arg2 string, arg3 []byte) err
 func (mr *MockObjectMockRecorder) PutInternalObject(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutInternalObject", reflect.TypeOf((*MockObject)(nil).PutInternalObject), arg0, arg1, arg2, arg3)
+}
+
+// PutInternalObjectFromFile mocks base method
+func (m *MockObject) PutInternalObjectFromFile(arg0, arg1, arg2, arg3 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PutInternalObjectFromFile", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PutInternalObjectFromFile indicates an expected call of PutInternalObjectFromFile
+func (mr *MockObjectMockRecorder) PutInternalObjectFromFile(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutInternalObjectFromFile", reflect.TypeOf((*MockObject)(nil).PutInternalObjectFromFile), arg0, arg1, arg2, arg3)
 }
 
 // PutInternalObjectFromURL mocks base method

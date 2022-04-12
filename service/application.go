@@ -25,11 +25,11 @@ type ApplicationService interface {
 	CreateWithBase(tx interface{}, namespace string, app, base *specV1.Application) (*specV1.Application, error)
 }
 
-type applicationService struct {
-	config       plugin.Configuration
-	secret       plugin.Secret
-	app          plugin.Application
-	indexService IndexService
+type AppServiceImpl struct {
+	Config       plugin.Configuration
+	Secret       plugin.Secret
+	App          plugin.Application
+	IndexService IndexService
 }
 
 // NewApplicationService NewApplicationService
@@ -51,17 +51,17 @@ func NewApplicationService(config *config.CloudConfig) (ApplicationService, erro
 	if err != nil {
 		return nil, err
 	}
-	return &applicationService{
-		indexService: is,
-		config:       cfg.(plugin.Configuration),
-		secret:       secret.(plugin.Secret),
-		app:          app.(plugin.Application),
+	return &AppServiceImpl{
+		IndexService: is,
+		Config:       cfg.(plugin.Configuration),
+		Secret:       secret.(plugin.Secret),
+		App:          app.(plugin.Application),
 	}, nil
 }
 
 // Get get application
-func (a *applicationService) Get(namespace, name, version string) (*specV1.Application, error) {
-	app, err := a.app.GetApplication(namespace, name, version)
+func (a *AppServiceImpl) Get(namespace, name, version string) (*specV1.Application, error) {
+	app, err := a.App.GetApplication(namespace, name, version)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"),
 			common.Field("name", name))
@@ -71,20 +71,20 @@ func (a *applicationService) Get(namespace, name, version string) (*specV1.Appli
 }
 
 // Create create application
-func (a *applicationService) Create(tx interface{}, namespace string, app *specV1.Application) (*specV1.Application, error) {
+func (a *AppServiceImpl) Create(tx interface{}, namespace string, app *specV1.Application) (*specV1.Application, error) {
 	configs, secrets, err := a.getConfigsAndSecrets(tx, namespace, app)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	if err = a.indexService.RefreshConfigIndexByApp(tx, namespace, app.Name, configs); err != nil {
+	if err = a.IndexService.RefreshConfigIndexByApp(tx, namespace, app.Name, configs); err != nil {
 		return nil, err
 	}
-	if err = a.indexService.RefreshSecretIndexByApp(tx, namespace, app.Name, secrets); err != nil {
+	if err = a.IndexService.RefreshSecretIndexByApp(tx, namespace, app.Name, secrets); err != nil {
 		return nil, err
 	}
 
 	// create application
-	app, err = a.app.CreateApplication(tx, namespace, app)
+	app, err = a.App.CreateApplication(tx, namespace, app)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (a *applicationService) Create(tx interface{}, namespace string, app *specV
 }
 
 // Update update application
-func (a *applicationService) Update(tx interface{}, namespace string, app *specV1.Application) (*specV1.Application, error) {
+func (a *AppServiceImpl) Update(tx interface{}, namespace string, app *specV1.Application) (*specV1.Application, error) {
 	err := a.validName(app)
 	if err != nil {
 		return nil, err
@@ -104,15 +104,15 @@ func (a *applicationService) Update(tx interface{}, namespace string, app *specV
 		return nil, err
 	}
 
-	newApp, err := a.app.UpdateApplication(tx, namespace, app)
+	newApp, err := a.App.UpdateApplication(tx, namespace, app)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = a.indexService.RefreshConfigIndexByApp(tx, namespace, newApp.Name, configs); err != nil {
+	if err = a.IndexService.RefreshConfigIndexByApp(tx, namespace, newApp.Name, configs); err != nil {
 		return nil, err
 	}
-	if err = a.indexService.RefreshSecretIndexByApp(tx, namespace, newApp.Name, secrets); err != nil {
+	if err = a.IndexService.RefreshSecretIndexByApp(tx, namespace, newApp.Name, secrets); err != nil {
 		return nil, err
 	}
 
@@ -120,16 +120,16 @@ func (a *applicationService) Update(tx interface{}, namespace string, app *specV
 }
 
 // Delete delete application
-func (a *applicationService) Delete(tx interface{}, namespace, name, version string) error {
-	if err := a.app.DeleteApplication(tx, namespace, name); err != nil {
+func (a *AppServiceImpl) Delete(tx interface{}, namespace, name, version string) error {
+	if err := a.App.DeleteApplication(tx, namespace, name); err != nil {
 		return err
 	}
 
 	// TODO: Where dirty data comes from
-	if err := a.indexService.RefreshConfigIndexByApp(tx, namespace, name, []string{}); err != nil {
+	if err := a.IndexService.RefreshConfigIndexByApp(tx, namespace, name, []string{}); err != nil {
 		log.L().Error("Application clean config index error", log.Error(err))
 	}
-	if err := a.indexService.RefreshSecretIndexByApp(tx, namespace, name, []string{}); err != nil {
+	if err := a.IndexService.RefreshSecretIndexByApp(tx, namespace, name, []string{}); err != nil {
 		log.L().Error("Application clean secret index error", log.Error(err))
 	}
 
@@ -137,13 +137,13 @@ func (a *applicationService) Delete(tx interface{}, namespace, name, version str
 }
 
 // List get list config
-func (a *applicationService) List(namespace string,
+func (a *AppServiceImpl) List(namespace string,
 	listOptions *models.ListOptions) (*models.ApplicationList, error) {
-	return a.app.ListApplication(nil, namespace, listOptions)
+	return a.App.ListApplication(nil, namespace, listOptions)
 }
 
 // CreateWithBase create application with base
-func (a *applicationService) CreateWithBase(tx interface{}, namespace string, app, base *specV1.Application) (*specV1.Application, error) {
+func (a *AppServiceImpl) CreateWithBase(tx interface{}, namespace string, app, base *specV1.Application) (*specV1.Application, error) {
 	if base != nil {
 		if namespace != base.Namespace {
 			err := a.constructConfig(tx, namespace, base)
@@ -163,10 +163,10 @@ func (a *applicationService) CreateWithBase(tx interface{}, namespace string, ap
 	return a.Create(tx, namespace, app)
 }
 
-func (a *applicationService) constructConfig(tx interface{}, namespace string, base *specV1.Application) error {
+func (a *AppServiceImpl) constructConfig(tx interface{}, namespace string, base *specV1.Application) error {
 	for _, v := range base.Volumes {
 		if v.Config != nil {
-			cfg, err := a.config.GetConfig(tx, base.Namespace, v.Config.Name, "")
+			cfg, err := a.Config.GetConfig(tx, base.Namespace, v.Config.Name, "")
 			if err != nil {
 				log.L().Error("failed to get system config",
 					log.Any(common.KeyContextNamespace, base.Namespace),
@@ -177,13 +177,13 @@ func (a *applicationService) constructConfig(tx interface{}, namespace string, b
 					common.Field("name", v.Config.Name))
 			}
 
-			config, err := a.config.CreateConfig(tx, namespace, cfg)
+			config, err := a.Config.CreateConfig(tx, namespace, cfg)
 			if err != nil {
 				log.L().Error("failed to create user config",
 					log.Any(common.KeyContextNamespace, namespace),
 					log.Any("name", v.Config.Name))
 				cfg.Name = cfg.Name + "-" + common.RandString(9)
-				config, err = a.config.CreateConfig(tx, namespace, cfg)
+				config, err = a.Config.CreateConfig(tx, namespace, cfg)
 				if err != nil {
 					return err
 				}
@@ -196,13 +196,13 @@ func (a *applicationService) constructConfig(tx interface{}, namespace string, b
 }
 
 // get App secrets
-func (a *applicationService) getConfigsAndSecrets(tx interface{}, namespace string, app *specV1.Application) ([]string, []string, error) {
+func (a *AppServiceImpl) getConfigsAndSecrets(tx interface{}, namespace string, app *specV1.Application) ([]string, []string, error) {
 	var configs []string
 	var secrets []string
 	for _, vol := range app.Volumes {
 		if vol.Config != nil {
 			// set the lastest config version
-			config, err := a.config.GetConfig(tx, namespace, vol.Config.Name, "")
+			config, err := a.Config.GetConfig(tx, namespace, vol.Config.Name, "")
 			if err != nil {
 				return nil, nil, err
 			}
@@ -210,7 +210,7 @@ func (a *applicationService) getConfigsAndSecrets(tx interface{}, namespace stri
 			configs = append(configs, vol.Config.Name)
 		}
 		if vol.Secret != nil {
-			secret, err := a.secret.GetSecret(tx, namespace, vol.Secret.Name, "")
+			secret, err := a.Secret.GetSecret(tx, namespace, vol.Secret.Name, "")
 			if err != nil {
 				return nil, nil, err
 			}
@@ -222,7 +222,7 @@ func (a *applicationService) getConfigsAndSecrets(tx interface{}, namespace stri
 	return configs, secrets, nil
 }
 
-func (a *applicationService) validName(app *specV1.Application) error {
+func (a *AppServiceImpl) validName(app *specV1.Application) error {
 	sf, vf := make(map[string]bool), make(map[string]bool)
 	for _, v := range app.Volumes {
 		if _, ok := vf[v.Name]; ok {

@@ -28,6 +28,7 @@ type ApplicationView struct {
 	Replica           int                   `json:"replica,omitempty"`
 	Workload          string                `json:"workload,omitempty"` // deployment | daemonset | statefulset | job
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty"`
+	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
 }
 
 // VolumeView volume view

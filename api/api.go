@@ -11,6 +11,7 @@ import (
 
 // API baetyl api server
 type API struct {
+	Hooks    map[string]interface{}
 	NS       service.NamespaceService
 	Node     service.NodeService
 	Index    service.IndexService

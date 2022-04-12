@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -108,6 +109,16 @@ func (c *awss3Storage) PutInternalObject(_, bucket, name string, b []byte) error
 	}
 
 	return putObject(c.s3Client, "", bucket, name, b)
+}
+
+// PutInternalObjectFromFile from file
+func (c *awss3Storage) PutInternalObjectFromFile(_, bucket, name, filename string) error {
+	err := c.checkInternalSupported()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return putObjectFromFile(c.s3Client, "", bucket, name, filename)
 }
 
 // PutInternalObjectFromURL PutInternalObjectFromURL
@@ -218,6 +229,15 @@ func (c *awss3Storage) PutExternalObject(info models.ExternalObjectInfo, bucket,
 	return putObject(cli, "", bucket, name, b)
 }
 
+func (c *awss3Storage) PutExternalObjectFromFile(info models.ExternalObjectInfo, bucket, name, file string) error {
+	cli, _, err := newS3(info)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return putObjectFromFile(cli, "", bucket, name, file)
+}
+
 func (c *awss3Storage) PutExternalObjectFromURL(info models.ExternalObjectInfo, bucket, name, url string) error {
 	cli, up, err := newS3(info)
 	if err != nil {
@@ -324,6 +344,28 @@ func putObject(cli *s3.S3, _, bucket, name string, b []byte) error {
 
 	_, err = cli.PutObject(&s3.PutObjectInput{
 		Body:   bytes.NewReader(b),
+		Bucket: aws.String(bucket),
+		Key:    aws.String(name),
+	})
+	if err != nil {
+		return common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3"))
+	}
+	return nil
+}
+
+func putObjectFromFile(cli *s3.S3, _, bucket, name, file string) error {
+	err := headBucket(cli, bucket)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	_, err = cli.PutObject(&s3.PutObjectInput{
+		Body:   f,
 		Bucket: aws.String(bucket),
 		Key:    aws.String(name),
 	})

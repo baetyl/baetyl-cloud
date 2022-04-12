@@ -67,12 +67,12 @@ func (a *facade) CreateApp(ns string, baseApp, app *specV1.Application, configs 
 
 	app, err = a.app.CreateWithBase(tx, ns, app, baseApp)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	err = a.UpdateNodeAndAppIndex(tx, ns, app)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 	return app, nil
 }
