@@ -1,6 +1,8 @@
 package api
 
 import (
+	"github.com/baetyl/baetyl-go/v2/errors"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
@@ -59,6 +61,27 @@ func (api *API) ListBucketObjectsV2(c *common.Context) (interface{}, error) {
 		objects = append(objects, view)
 	}
 	return &models.ObjectsView{Objects: objects}, err
+}
+
+func (api *API) GetObjectPathV2(c *common.Context) (interface{}, error) {
+	params, err := api.parseObject(c)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	var res *models.ObjectURL
+	if params.Account == OtherAccount {
+		res, err = api.Obj.GenExternalObjectURL(params.ExternalObjectInfo, params.Bucket, c.Param("object"), params.Source)
+	} else {
+		res, err = api.Obj.GenInternalObjectURL(c.GetUser().ID, params.Bucket, c.Param("object"), params.Source)
+	}
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return map[string]string{
+		"url": res.URL,
+		"md5": res.MD5,
+	}, nil
 }
 
 func (api *API) parseObject(c *common.Context) (*models.ObjectRequestParams, error) {

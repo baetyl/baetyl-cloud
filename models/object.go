@@ -80,9 +80,9 @@ type ObjectMeta struct {
 }
 
 type ObjectURL struct {
-	URL   string
-	MD5   string
-	Token string
+	URL   string `json:"url,omitempty"`
+	MD5   string `json:"md5,omitempty"`
+	Token string `json:"token,omitempty"`
 }
 
 type ObjectRequestParams struct {

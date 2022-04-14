@@ -31,6 +31,7 @@ func initObjectV2API(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		objects.GET("", mockIM, common.Wrapper(api.ListObjectSourcesV2))
 		objects.GET("/:source/buckets", mockIM, common.Wrapper(api.ListBucketsV2))
 		objects.GET("/:source/buckets/:bucket/objects", mockIM, common.Wrapper(api.ListBucketObjectsV2))
+		objects.GET("/:source/buckets/:bucket/objects/:object", mockIM, common.Wrapper(api.GetObjectPathV2))
 	}
 	return api, router, mockCtl
 }
@@ -209,6 +210,53 @@ func TestListBucketObjectsV2(t *testing.T) {
 
 	mkObjectService.EXPECT().ListExternalBucketObjects(info, "baetyl-test", "baidubos").Return(nil, errors.New("error")).Times(1)
 	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects?account=other&endpoint=x&ak=xx&sk=xxx", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestGetObjectPathV2(t *testing.T) {
+	api, router, mockCtl := initObjectV2API(t)
+	defer mockCtl.Finish()
+	mkObjectService := ms.NewMockObjectService(mockCtl)
+	api.Obj = mkObjectService
+
+	object := &models.ObjectURL{
+		URL:   "http://xxx",
+		MD5:   "xxx",
+		Token: "xxx",
+	}
+
+	mkObjectService.EXPECT().GenInternalObjectURL("default", "baetyl-test", "abc", "baidubos").Return(object, nil).Times(1)
+
+	// 200 internal
+	req, _ := http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects/abc?account=current", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// 200 external
+	info := models.ExternalObjectInfo{
+		Endpoint:      "x",
+		Ak:            "xx",
+		Sk:            "xxx",
+		AddressFormat: PathStyle,
+	}
+	mkObjectService.EXPECT().GenExternalObjectURL(info, "baetyl-test", "abc", "baidubos").Return(object, nil).Times(1)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects/abc?account=other&endpoint=x&ak=xx&sk=xxx", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// 400
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects/abc?account=other", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// 500
+	mkObjectService.EXPECT().GenExternalObjectURL(info, "baetyl-test", "abc", "baidubos").Return(nil, errors.New("error")).Times(1)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/objects/abc?account=other&endpoint=x&ak=xx&sk=xxx", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
