@@ -244,6 +244,7 @@ func (s *AdminServer) InitRoute() {
 		if len(s.cfg.Plugin.Objects) != 0 {
 			objects.GET("/:source/buckets", common.Wrapper(s.api.ListBucketsV2))
 			objects.GET("/:source/buckets/:bucket/objects", common.Wrapper(s.api.ListBucketObjectsV2))
+			objects.GET("/:source/buckets/:bucket/objects/:object", common.Wrapper(s.api.GetObjectPathV2))
 		}
 	}
 }
