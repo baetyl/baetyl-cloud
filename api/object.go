@@ -84,10 +84,7 @@ func (api *API) GetObjectPathV2(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	return map[string]string{
-		"url": res.URL,
-		"md5": res.MD5,
-	}, nil
+	return res, nil
 }
 
 func (api *API) parseObject(c *common.Context) (*models.ObjectRequestParams, error) {
