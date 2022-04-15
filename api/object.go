@@ -13,6 +13,10 @@ const (
 	PathStyle      = "pathStyle"
 )
 
+type ObjectName struct {
+	Object string `json:"object"`
+}
+
 // ListObjectSourcesV2 ListObjectSourcesV2
 func (api *API) ListObjectSourcesV2(c *common.Context) (interface{}, error) {
 	res := api.Obj.ListSources()
@@ -68,12 +72,17 @@ func (api *API) GetObjectPathV2(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+	var object ObjectName
+	err = c.LoadBody(&object)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 
 	var res *models.ObjectURL
 	if params.Account == OtherAccount {
-		res, err = api.Obj.GenExternalObjectURL(params.ExternalObjectInfo, params.Bucket, c.Param("object"), params.Source)
+		res, err = api.Obj.GenExternalObjectURL(params.ExternalObjectInfo, params.Bucket, object.Object, params.Source)
 	} else {
-		res, err = api.Obj.GenInternalObjectURL(c.GetUser().ID, params.Bucket, c.Param("object"), params.Source)
+		res, err = api.Obj.GenInternalObjectURL(c.GetUser().ID, params.Bucket, object.Object, params.Source)
 	}
 	if err != nil {
 		return nil, errors.Trace(err)
