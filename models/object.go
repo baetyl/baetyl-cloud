@@ -88,6 +88,7 @@ type ObjectURL struct {
 type ObjectRequestParams struct {
 	Source             string             `json:"source,omitempty"`
 	Bucket             string             `json:"bucket,omitempty"`
+	Object             string             `form:"object,omitempty"`
 	Account            string             `form:"account,omitempty"`
 	ExternalObjectInfo ExternalObjectInfo `form:",inline"`
 }

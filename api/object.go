@@ -1,8 +1,6 @@
 package api
 
 import (
-	"net/url"
-
 	"github.com/baetyl/baetyl-go/v2/errors"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -70,16 +68,12 @@ func (api *API) GetObjectPathV2(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	object, err := url.PathUnescape(c.Param("object"))
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
 
 	var res *models.ObjectURL
 	if params.Account == OtherAccount {
-		res, err = api.Obj.GenExternalObjectURL(params.ExternalObjectInfo, params.Bucket, object, params.Source)
+		res, err = api.Obj.GenExternalObjectURL(params.ExternalObjectInfo, params.Bucket, params.Object, params.Source)
 	} else {
-		res, err = api.Obj.GenInternalObjectURL(c.GetUser().ID, params.Bucket, object, params.Source)
+		res, err = api.Obj.GenInternalObjectURL(c.GetUser().ID, params.Bucket, params.Object, params.Source)
 	}
 	if err != nil {
 		return nil, errors.Trace(err)
