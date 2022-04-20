@@ -35,7 +35,15 @@ const (
 	MethodCurl              = "curl"
 	PlatformWindows         = "windows"
 	DeprecatedGPUMetrics    = "baetyl-gpu-metrics"
+
+	HookCreateNodeOta = "hookCreateNodeOta"
+	HookUpdateNodeOta = "hookUpdateNodeOta"
+	HookDeleteNodeOta = "hookDeleteNodeOta"
 )
+
+type CreateNodeOta = func(*v1.Node) (*v1.Node, error)
+type UpdateNodeOta = func(*v1.Node) (*v1.Node, error)
+type DeleteNodeOta = func(*v1.Node) error
 
 // GetNode get a node
 func (api *API) GetNode(c *common.Context) (interface{}, error) {
@@ -220,6 +228,15 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	if f, exist := api.Hooks[HookCreateNodeOta]; exist {
+		if otaFunc, ok := f.(CreateNodeOta); ok {
+			n, err = otaFunc(n)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	view, err := api.ToNodeView(node)
 	if err != nil {
 		return nil, err
@@ -266,6 +283,15 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		err = api.UpdateConfigByAccelerator(ns, node)
 		if err != nil {
 			return nil, err
+		}
+	}
+
+	if f, exist := api.Hooks[HookUpdateNodeOta]; exist {
+		if otaFunc, ok := f.(UpdateNodeOta); ok {
+			node, err = otaFunc(node)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -325,6 +351,15 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 			return nil, nil
 		}
 		return nil, err
+	}
+
+	if f, exist := api.Hooks[HookDeleteNodeOta]; exist {
+		if otaFunc, ok := f.(DeleteNodeOta); ok {
+			err = otaFunc(node)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	// Delete Node
@@ -771,8 +806,8 @@ func (api *API) NodeModeParamCheck(node *v1.Node) error {
 		node.NodeMode = context.RunModeKube
 		return nil
 	}
-	if node.NodeMode != context.RunModeKube && node.NodeMode != context.RunModeNative {
-		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "only kube or native is surpported with nodemode"))
+	if node.NodeMode != context.RunModeKube && node.NodeMode != context.RunModeNative && node.NodeMode != context.RunModeAndroid {
+		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "only kube or native or android is surpported with nodemode"))
 	}
 	if node.NodeMode == context.RunModeNative {
 		if node.Cluster {

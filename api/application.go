@@ -105,12 +105,6 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	log.L().Info("", log.Any("app2", app))
-	app, err = api.Facade.CreateApp(ns, baseApp, app, configs)
-	if err != nil {
-		return nil, err
-	}
-
 	if f, exist := api.Hooks[HookCreateApplicationOta]; exist {
 		if otaFunc, ok := f.(CreateApplicationOta); ok {
 			app, err = otaFunc(app)
@@ -118,6 +112,12 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 				return nil, err
 			}
 		}
+	}
+
+	log.L().Info("", log.Any("app2", app))
+	app, err = api.Facade.CreateApp(ns, baseApp, app, configs)
+	if err != nil {
+		return nil, err
 	}
 
 	return api.ToApplicationView(app)
