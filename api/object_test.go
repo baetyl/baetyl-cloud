@@ -32,6 +32,7 @@ func initObjectV2API(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		objects.GET("/:source/buckets", mockIM, common.Wrapper(api.ListBucketsV2))
 		objects.GET("/:source/buckets/:bucket/objects", mockIM, common.Wrapper(api.ListBucketObjectsV2))
 		objects.GET("/:source/buckets/:bucket/object", mockIM, common.Wrapper(api.GetObjectPathV2))
+		objects.GET("/:source/buckets/:bucket/object/put", mockIM, common.Wrapper(api.GetObjectPutPathV2))
 	}
 	return api, router, mockCtl
 }
@@ -257,6 +258,39 @@ func TestGetObjectPathV2(t *testing.T) {
 	// 500
 	mkObjectService.EXPECT().GenExternalObjectURL(info, "baetyl-test", "abc", "baidubos").Return(nil, errors.New("error")).Times(1)
 	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/object?object=abc&account=other&endpoint=x&ak=xx&sk=xxx", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestGetObjectPutPathV2(t *testing.T) {
+	api, router, mockCtl := initObjectV2API(t)
+	defer mockCtl.Finish()
+	mkObjectService := ms.NewMockObjectService(mockCtl)
+	api.Obj = mkObjectService
+
+	object := &models.ObjectURL{
+		URL:   "http://xxx",
+		MD5:   "xxx",
+		Token: "xxx",
+	}
+
+	// 200 internal
+	mkObjectService.EXPECT().GenInternalObjectPutURL("default", "baetyl-test", "abc/abc.json", "baidubos").Return(object, nil).Times(1)
+	req, _ := http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/object/put?object=abc%2Fabc.json", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// 400
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/object/put?object=abc&account=other", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// 500
+	mkObjectService.EXPECT().GenInternalObjectPutURL("default", "baetyl-test", "abc", "baidubos").Return(nil, errors.New("error")).Times(1)
+	req, _ = http.NewRequest(http.MethodGet, "/v2/objects/baidubos/buckets/baetyl-test/object/put?object=abc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)

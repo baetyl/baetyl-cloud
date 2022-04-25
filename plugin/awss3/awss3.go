@@ -171,6 +171,15 @@ func (c *awss3Storage) GenInternalObjectURL(_, bucket, object string) (*models.O
 	return genObjectURL(c.s3Client, bucket, object, c.cfg.Expiration)
 }
 
+func (c *awss3Storage) GenInternalPutObjectURL(_, bucket, name string) (*models.ObjectURL, error) {
+	err := c.checkInternalSupported()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return genPutObjectURL(c.s3Client, bucket, name, c.cfg.Expiration)
+}
+
 // ListExternalBuckets ListExternalBuckets
 func (c *awss3Storage) ListExternalBuckets(info models.ExternalObjectInfo) ([]models.Bucket, error) {
 	cli, _, err := newS3(info)
@@ -528,6 +537,25 @@ func genObjectURL(cli *s3.S3, bucket, name string, expiration time.Duration) (*m
 	}
 
 	req, _ := cli.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(name),
+	})
+	url, err := req.Presign(expiration)
+	if err != nil {
+		return nil, errors.Trace(common.Error(common.ErrObjectOperationException, common.Field("error", err.Error()), common.Field("source", "awss3")))
+	}
+	return &models.ObjectURL{
+		URL: url,
+	}, nil
+}
+
+func genPutObjectURL(cli *s3.S3, bucket, name string, expiration time.Duration) (*models.ObjectURL, error) {
+	err := headBucket(cli, bucket)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	req, _ := cli.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(name),
 	})

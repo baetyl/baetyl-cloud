@@ -24,6 +24,7 @@ type Object interface {
 	HeadInternalObject(userID, bucket, name string) (*models.ObjectMeta, error)
 	DeleteInternalObject(userID, bucket, name string) error
 	GenInternalObjectURL(userID, bucket, name string) (*models.ObjectURL, error)
+	GenInternalPutObjectURL(userID, bucket, name string) (*models.ObjectURL, error)
 
 	ListExternalBuckets(info models.ExternalObjectInfo) ([]models.Bucket, error)
 	HeadExternalBucket(info models.ExternalObjectInfo, bucket string) error

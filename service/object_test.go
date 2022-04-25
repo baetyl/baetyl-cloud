@@ -148,6 +148,16 @@ func TestObjectService_GenInternalObjectURL(t *testing.T) {
 	_, err = cs.GenInternalObjectURL(ns, bucket, name, "unknown")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "The request parameter is invalid. (the source (unknown) is not supported)")
+
+	mockObject.objectStorage.EXPECT().GenInternalPutObjectURL(ns, bucket, name).Return(urlObj, nil).Times(1)
+	res, err = cs.GenInternalObjectPutURL(ns, bucket, name, mockObject.conf.Plugin.Objects[0])
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+	assert.Equal(t, res, urlObj)
+
+	_, err = cs.GenInternalObjectPutURL(ns, bucket, name, "unknown")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "The request parameter is invalid. (the source (unknown) is not supported)")
 }
 
 func TestObjectService_CreateInternalBucketIfNotExist(t *testing.T) {
