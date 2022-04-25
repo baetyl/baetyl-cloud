@@ -81,6 +81,23 @@ func (api *API) GetObjectPathV2(c *common.Context) (interface{}, error) {
 	return res, nil
 }
 
+func (api *API) GetObjectPutPathV2(c *common.Context) (interface{}, error) {
+	params, err := api.parseObject(c)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	var res *models.ObjectURL
+	if params.Account == OtherAccount {
+		return nil, errors.Trace(common.Error(common.ErrRequestParamInvalid, common.Field("error", "this operation is not allowed")))
+	}
+	res, err = api.Obj.GenInternalObjectPutURL(c.GetUser().ID, params.Bucket, params.Object, params.Source)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return res, nil
+}
+
 func (api *API) parseObject(c *common.Context) (*models.ObjectRequestParams, error) {
 	params := &models.ObjectRequestParams{}
 	params.ExternalObjectInfo.AddressFormat = PathStyle

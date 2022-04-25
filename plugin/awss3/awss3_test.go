@@ -232,6 +232,31 @@ awss3:
 	assert.Len(t, objects.Contents, 0)
 }
 
+func TestGenPutObject(t *testing.T) {
+	t.Skip(t.Name())
+	conf := `
+minio:
+  endpoint: http://106.12.34.129:30900/
+  ak: xx
+  sk: xx
+`
+	filename := "cloud.yml"
+	err := ioutil.WriteFile(filename, []byte(conf), 0644)
+	defer os.Remove(filename)
+	common.SetConfFile(filename)
+
+	p, err := New()
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+
+	namespace := "default"
+	aws3 := p.(plugin.Object)
+
+	url, err := aws3.GenInternalPutObjectURL(namespace, "test", "node.go")
+	assert.NoError(t, err)
+	println(url.URL)
+}
+
 func TestCheckResourceNotFound(t *testing.T) {
 	err := errors.New("[Code: NotFound; Message: 404 Not Found; RequestId: xxx]")
 	assert.True(t, checkResourceNotFound(err))

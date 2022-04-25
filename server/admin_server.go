@@ -245,6 +245,7 @@ func (s *AdminServer) InitRoute() {
 			objects.GET("/:source/buckets", common.Wrapper(s.api.ListBucketsV2))
 			objects.GET("/:source/buckets/:bucket/objects", common.Wrapper(s.api.ListBucketObjectsV2))
 			objects.GET("/:source/buckets/:bucket/object", common.Wrapper(s.api.GetObjectPathV2))
+			objects.GET("/:source/buckets/:bucket/object/put", common.Wrapper(s.api.GetObjectPutPathV2))
 		}
 	}
 }

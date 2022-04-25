@@ -91,6 +91,21 @@ func (mr *MockObjectServiceMockRecorder) GenExternalObjectURL(arg0, arg1, arg2, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenExternalObjectURL", reflect.TypeOf((*MockObjectService)(nil).GenExternalObjectURL), arg0, arg1, arg2, arg3)
 }
 
+// GenInternalObjectPutURL mocks base method
+func (m *MockObjectService) GenInternalObjectPutURL(arg0, arg1, arg2, arg3 string) (*models.ObjectURL, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenInternalObjectPutURL", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(*models.ObjectURL)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GenInternalObjectPutURL indicates an expected call of GenInternalObjectPutURL
+func (mr *MockObjectServiceMockRecorder) GenInternalObjectPutURL(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenInternalObjectPutURL", reflect.TypeOf((*MockObjectService)(nil).GenInternalObjectPutURL), arg0, arg1, arg2, arg3)
+}
+
 // GenInternalObjectURL mocks base method
 func (m *MockObjectService) GenInternalObjectURL(arg0, arg1, arg2, arg3 string) (*models.ObjectURL, error) {
 	m.ctrl.T.Helper()

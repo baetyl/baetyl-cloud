@@ -19,6 +19,7 @@ type ObjectService interface {
 	CreateInternalBucketIfNotExist(userID, bucket, permission, source string) (*models.Bucket, error)
 	PutInternalObjectFromURLIfNotExist(userID, bucket, object, url, source string) error
 	GenInternalObjectURL(userID string, bucket, object, source string) (*models.ObjectURL, error)
+	GenInternalObjectPutURL(userID string, bucket, object, source string) (*models.ObjectURL, error)
 	PutInternalObject(userID, bucket, name, source string, b []byte) error
 	HeadInternalObject(userID, bucket, name, source string) (*models.ObjectMeta, error)
 
@@ -118,6 +119,16 @@ func (c *objectService) GenInternalObjectURL(userID string, bucket, object, sour
 	}
 
 	return objectPlugin.GenInternalObjectURL(userID, bucket, object)
+}
+
+// GenInternalObjectPutURL GenInternalObjectPutURL
+func (c *objectService) GenInternalObjectPutURL(userID string, bucket, object, source string) (*models.ObjectURL, error) {
+	objectPlugin, ok := c.objects[source]
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the source (%s) is not supported", source)))
+	}
+
+	return objectPlugin.GenInternalPutObjectURL(userID, bucket, object)
 }
 
 // ListExternalBuckets ListExternalBuckets
