@@ -34,6 +34,7 @@ const (
 	MethodWget              = "wget"
 	MethodCurl              = "curl"
 	PlatformWindows         = "windows"
+	PlatformAndroid         = "android"
 	DeprecatedGPUMetrics    = "baetyl-gpu-metrics"
 
 	HookCreateNodeOta = "hookCreateNodeOta"
@@ -458,8 +459,11 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if method == MethodWget {
 		template = service.TemplateInitCommandWget
 	}
-	if PlatformWindows == c.Query("platform") {
+	switch c.Query("platform") {
+	case PlatformWindows:
 		template = service.TemplateInitCommandWindows
+	case PlatformAndroid:
+		template = service.TemplateInitCommandAndroid
 	}
 	params := map[string]interface{}{
 		"mode":     mode,
