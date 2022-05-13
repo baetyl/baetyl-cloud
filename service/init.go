@@ -29,14 +29,18 @@ const (
 	templateBaetylInstallShell        = "baetyl-install.sh"
 	templateBaetylWindowsInstallShell = "baetyl-install.ps1"
 
-	TemplateCoreConfYaml            = "baetyl-core-conf.yml"
-	TemplateInitConfYaml            = "baetyl-init-conf.yml"
-	TemplateBaetylInitCommand       = "baetyl-init-command"
-	TemplateInitCommandWget         = "baetyl-init-command-wget"
-	TemplateInitCommandWindows      = "baetyl-init-command-windows"
-	TemplateInitCommandAndroid      = "baetyl-init-command-android"
-	TemplateInitCommandAndroidBatch = "baetyl-init-command-android-batch"
-	NamePopulateExtParams           = "populateExtParams"
+	TemplateCoreConfYaml       = "baetyl-core-conf.yml"
+	TemplateInitConfYaml       = "baetyl-init-conf.yml"
+	TemplateBaetylInitCommand  = "baetyl-init-command"
+	TemplateInitCommandWget    = "baetyl-init-command-wget"
+	TemplateInitCommandWindows = "baetyl-init-command-windows"
+
+	NamePopulateExtParams = "populateExtParams"
+
+	PropInitCommandAndroid         = "baetyl-init-command-android"
+	PropInitCommandAndroidSys      = "baetyl-init-command-android-sys"
+	PropInitCommandAndroidBatch    = "baetyl-init-command-android-batch"
+	PropInitCommandAndroidBatchSys = "baetyl-init-command-android-batch-sys"
 )
 
 var (
