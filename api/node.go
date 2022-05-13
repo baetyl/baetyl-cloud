@@ -463,7 +463,7 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	case PlatformWindows:
 		template = service.TemplateInitCommandWindows
 	case PlatformAndroid:
-		template = service.TemplateInitCommandAndroid
+		return api.GenAndroidInitCmdFromNode()
 	}
 	params := map[string]interface{}{
 		"mode":     mode,
@@ -481,7 +481,19 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return map[string]string{"cmd": string(cmd.([]byte))}, nil
+	return models.InitCMD{CMD: string(cmd.([]byte))}, nil
+}
+
+func (api *API) GenAndroidInitCmdFromNode() (interface{}, error) {
+	apk, err := api.Prop.GetPropertyValue(service.PropInitCommandAndroid)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	apkSys, err := api.Prop.GetPropertyValue(service.PropInitCommandAndroidSys)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return models.InitCMD{APK: apk, APKSys: apkSys}, nil
 }
 
 // GetNodeDeployHistory list node // TODO will support later

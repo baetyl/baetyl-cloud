@@ -16,3 +16,9 @@ type Module struct {
 	CreationTimestamp time.Time         `json:"createTime,omitempty"`
 	UpdateTimestamp   time.Time         `json:"updateTime,omitempty"`
 }
+
+type InitCMD struct {
+	CMD    string `json:"cmd,omitempty"`
+	APK    string `json:"apk,omitempty"`
+	APKSys string `json:"apk_sys,omitempty"`
+}
