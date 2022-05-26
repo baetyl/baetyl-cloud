@@ -145,3 +145,25 @@ func (c *client) ListApplication(tx interface{}, namespace string, listOptions *
 	res.ListOptions = listOptions
 	return res, err
 }
+
+func (c *client) ListApplicationsByNames(tx interface{}, ns string, names []string) ([]models.AppItem, int, error) {
+	defer utils.Trace(c.log.Debug, "ListApplicationsByNames")()
+	list, err := c.customClient.CloudV1alpha1().Applications(ns).List(metav1.ListOptions{})
+	if err != nil {
+		return nil, 0, err
+	}
+	res := toAppListModel(list)
+
+	nameMap := map[string]bool{}
+	for _, name := range names {
+		nameMap[name] = true
+	}
+
+	apps := []models.AppItem{}
+	for _, app := range res.Items {
+		if nameMap[app.Name] {
+			apps = append(apps, app)
+		}
+	}
+	return apps, len(apps), nil
+}

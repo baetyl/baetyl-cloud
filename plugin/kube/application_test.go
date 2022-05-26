@@ -275,3 +275,16 @@ func TestListListApplication(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, l.Total, 1)
 }
+
+func TestListListApplicationByName(t *testing.T) {
+	c := initApplicationClient()
+	l, num, err := c.ListApplicationsByNames(nil, "default", []string{"test_name"})
+	assert.NoError(t, err)
+	assert.Equal(t, 1, num)
+	assert.Equal(t, "test_name", l[0].Name)
+
+	// case 2
+	l, num, err = c.ListApplicationsByNames(nil, "default", []string{"no"})
+	assert.NoError(t, err)
+	assert.Equal(t, 0, num)
+}
