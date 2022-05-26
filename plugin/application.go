@@ -14,4 +14,5 @@ type Application interface {
 	UpdateApplication(tx interface{}, namespace string, application *v1.Application) (*v1.Application, error)
 	DeleteApplication(tx interface{}, namespace, name string) error
 	ListApplication(tx interface{}, namespace string, listOptions *models.ListOptions) (*models.ApplicationList, error)
+	ListApplicationsByNames(tx interface{}, ns string, names []string) ([]models.AppItem, int, error)
 }

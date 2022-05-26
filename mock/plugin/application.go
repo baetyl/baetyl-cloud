@@ -93,6 +93,22 @@ func (mr *MockApplicationMockRecorder) ListApplication(arg0, arg1, arg2 interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListApplication", reflect.TypeOf((*MockApplication)(nil).ListApplication), arg0, arg1, arg2)
 }
 
+// ListApplicationsByNames mocks base method
+func (m *MockApplication) ListApplicationsByNames(arg0 interface{}, arg1 string, arg2 []string) ([]models.AppItem, int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListApplicationsByNames", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]models.AppItem)
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListApplicationsByNames indicates an expected call of ListApplicationsByNames
+func (mr *MockApplicationMockRecorder) ListApplicationsByNames(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListApplicationsByNames", reflect.TypeOf((*MockApplication)(nil).ListApplicationsByNames), arg0, arg1, arg2)
+}
+
 // UpdateApplication mocks base method
 func (m *MockApplication) UpdateApplication(arg0 interface{}, arg1 string, arg2 *v1.Application) (*v1.Application, error) {
 	m.ctrl.T.Helper()

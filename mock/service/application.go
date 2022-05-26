@@ -108,6 +108,21 @@ func (mr *MockApplicationServiceMockRecorder) List(arg0, arg1 interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockApplicationService)(nil).List), arg0, arg1)
 }
 
+// ListByNames mocks base method
+func (m *MockApplicationService) ListByNames(arg0 string, arg1 []string) ([]models.AppItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListByNames", arg0, arg1)
+	ret0, _ := ret[0].([]models.AppItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListByNames indicates an expected call of ListByNames
+func (mr *MockApplicationServiceMockRecorder) ListByNames(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByNames", reflect.TypeOf((*MockApplicationService)(nil).ListByNames), arg0, arg1)
+}
+
 // Update mocks base method
 func (m *MockApplicationService) Update(arg0 interface{}, arg1 string, arg2 *v1.Application) (*v1.Application, error) {
 	m.ctrl.T.Helper()

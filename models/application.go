@@ -60,6 +60,7 @@ type AppItem struct {
 	Replica           int                   `json:"replica,omitempty" yaml:"replica,omitempty" binding:"required" default:"1"`
 	Workload          string                `json:"workload,omitempty" yaml:"workload,omitempty"` // deployment | daemonset | statefulset | job
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty" yaml:"jobConfig,omitempty"`
+	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
 }
 
 // ApplicationList app List
