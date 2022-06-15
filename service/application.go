@@ -22,6 +22,7 @@ type ApplicationService interface {
 	Update(tx interface{}, namespace string, app *specV1.Application) (*specV1.Application, error)
 	Delete(tx interface{}, namespace, name, version string) error
 	List(namespace string, listOptions *models.ListOptions) (*models.ApplicationList, error)
+	ListByNames(ns string, names []string) ([]models.AppItem, error)
 	CreateWithBase(tx interface{}, namespace string, app, base *specV1.Application) (*specV1.Application, error)
 }
 
@@ -140,6 +141,14 @@ func (a *AppServiceImpl) Delete(tx interface{}, namespace, name, version string)
 func (a *AppServiceImpl) List(namespace string,
 	listOptions *models.ListOptions) (*models.ApplicationList, error) {
 	return a.App.ListApplication(nil, namespace, listOptions)
+}
+
+func (a *AppServiceImpl) ListByNames(ns string, names []string) ([]models.AppItem, error) {
+	res, _, err := a.App.ListApplicationsByNames(nil, ns, names)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return res, nil
 }
 
 // CreateWithBase create application with base

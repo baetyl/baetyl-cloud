@@ -34,6 +34,7 @@ const (
 	MethodWget              = "wget"
 	MethodCurl              = "curl"
 	PlatformWindows         = "windows"
+	PlatformAndroid         = "android"
 	DeprecatedGPUMetrics    = "baetyl-gpu-metrics"
 
 	HookCreateNodeOta = "hookCreateNodeOta"
@@ -458,8 +459,11 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if method == MethodWget {
 		template = service.TemplateInitCommandWget
 	}
-	if PlatformWindows == c.Query("platform") {
+	switch c.Query("platform") {
+	case PlatformWindows:
 		template = service.TemplateInitCommandWindows
+	case PlatformAndroid:
+		return api.GenAndroidInitCmdFromNode()
 	}
 	params := map[string]interface{}{
 		"mode":     mode,
@@ -477,7 +481,19 @@ func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return map[string]string{"cmd": string(cmd.([]byte))}, nil
+	return models.InitCMD{CMD: string(cmd.([]byte))}, nil
+}
+
+func (api *API) GenAndroidInitCmdFromNode() (interface{}, error) {
+	apk, err := api.Prop.GetPropertyValue(service.PropInitCommandAndroid)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	apkSys, err := api.Prop.GetPropertyValue(service.PropInitCommandAndroidSys)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return models.InitCMD{APK: apk, APKSys: apkSys}, nil
 }
 
 // GetNodeDeployHistory list node // TODO will support later

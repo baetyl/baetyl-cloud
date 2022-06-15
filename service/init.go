@@ -34,7 +34,13 @@ const (
 	TemplateBaetylInitCommand  = "baetyl-init-command"
 	TemplateInitCommandWget    = "baetyl-init-command-wget"
 	TemplateInitCommandWindows = "baetyl-init-command-windows"
-	NamePopulateExtParams      = "populateExtParams"
+
+	NamePopulateExtParams = "populateExtParams"
+
+	PropInitCommandAndroid         = "baetyl-init-command-android"
+	PropInitCommandAndroidSys      = "baetyl-init-command-android-sys"
+	PropInitCommandAndroidBatch    = "baetyl-init-command-android-batch"
+	PropInitCommandAndroidBatchSys = "baetyl-init-command-android-batch-sys"
 )
 
 var (
