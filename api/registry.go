@@ -60,7 +60,7 @@ func (api *API) CreateRegistry(c *common.Context) (interface{}, error) {
 	if sd != nil {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
-	if err = api.validateRegistryModel(cfg); err != nil {
+	if err = api.ValidateRegistryModel(cfg); err != nil {
 		return nil, err
 	}
 	secret, err := api.Facade.CreateSecret(ns, cfg.ToSecret())
@@ -90,7 +90,7 @@ func (api *API) UpdateRegistry(c *common.Context) (interface{}, error) {
 	}
 	sd.Description = cfg.Description
 	sd.UpdateTimestamp = time.Now()
-	if err = api.validateRegistryModel(sd); err != nil {
+	if err = api.ValidateRegistryModel(sd); err != nil {
 		return nil, err
 	}
 	secret, err = api.Secret.Update(ns, sd.ToSecret())
@@ -114,7 +114,7 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 	sd := api.ToRegistryView(secret)
 	sd.UpdateTimestamp = time.Now()
 	sd.Password = cfg.Password
-	if err = api.validateRegistryModel(sd); err != nil {
+	if err = api.ValidateRegistryModel(sd); err != nil {
 		return nil, err
 	}
 
@@ -128,7 +128,7 @@ func (api *API) RefreshRegistryPassword(c *common.Context) (interface{}, error) 
 // DeleteRegistry delete the Registry
 func (api *API) DeleteRegistry(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	return api.deleteSecret(ns, n, "registry")
+	return api.DeleteSecretResource(ns, n, "registry")
 }
 
 // GetAppByRegistry list app
@@ -191,7 +191,7 @@ func (api *API) ToRegistryViewList(s *models.SecretList) *models.RegistryList {
 }
 
 // validateRegistryModel validate the registry model
-func (api *API) validateRegistryModel(r *models.Registry) error {
+func (api *API) ValidateRegistryModel(r *models.Registry) error {
 	if r.Address == "" || r.Username == "" || r.Password == "" {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "address/username/password is required"))
 	}

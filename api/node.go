@@ -974,7 +974,7 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 					continue
 				}
 
-				if res := checkIsSysResources(config.Labels); !res {
+				if res := CheckIsSysResources(config.Labels); !res {
 					continue
 				}
 
@@ -990,7 +990,7 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 					continue
 				}
 
-				if res := checkIsSysResources(secret.Labels); !res {
+				if res := CheckIsSysResources(secret.Labels); !res {
 					continue
 				}
 
@@ -1020,7 +1020,7 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 }
 
 // don't delete resource which doesn't belong to system
-func checkIsSysResources(labels map[string]string) bool {
+func CheckIsSysResources(labels map[string]string) bool {
 	v, ok := labels[common.LabelSystem]
 	if !ok {
 		return false

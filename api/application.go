@@ -148,7 +148,7 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	}
 
 	// labels and Selector can't be modified of sys apps
-	if checkIsSysResources(oldApp.Labels) &&
+	if CheckIsSysResources(oldApp.Labels) &&
 		(oldApp.Selector != appView.Selector || !reflect.DeepEqual(oldApp.Labels, appView.Labels) || !appView.System) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "selector，labels or system field can't be modified of sys apps"))
 	}
@@ -199,7 +199,7 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	if canDelete, err := api.isAppCanDelete(ns, name); err != nil {
+	if canDelete, err := api.IsAppCanDelete(ns, name); err != nil {
 		return nil, err
 	} else if !canDelete {
 		return nil, common.Error(common.ErrAppReferencedByNode, common.Field("name", name))
@@ -766,7 +766,7 @@ func isProgramConfig(volume string) bool {
 	return false
 }
 
-func (api *API) isAppCanDelete(namesapce, name string) (bool, error) {
+func (api *API) IsAppCanDelete(namesapce, name string) (bool, error) {
 	// TODO: improve
 	if strings.HasPrefix(name, "baetyl-") {
 		nodeNames, err := api.Index.ListNodesByApp(namesapce, name)
