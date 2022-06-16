@@ -93,7 +93,7 @@ func (api *API) UpdateSecret(c *common.Context) (interface{}, error) {
 // DeleteSecret delete the secret
 func (api *API) DeleteSecret(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	return api.deleteSecret(ns, n, "secret")
+	return api.DeleteSecretResource(ns, n, "secret")
 }
 
 // GetAppBySecret list app
@@ -141,7 +141,7 @@ func (api *API) ToSecretViewList(s *models.SecretList) *models.SecretViewList {
 	return models.FromSecretListToView(s, false)
 }
 
-func (api *API) deleteSecret(namespace, secret, secretType string) (interface{}, error) {
+func (api *API) DeleteSecretResource(namespace, secret, secretType string) (interface{}, error) {
 	_, err := api.Secret.Get(namespace, secret, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {

@@ -106,7 +106,7 @@ func (api *API) UpdateCertificate(c *common.Context) (interface{}, error) {
 // DeleteCertificate delete the Certificate
 func (api *API) DeleteCertificate(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	return api.deleteSecret(ns, n, "certificate")
+	return api.DeleteSecretResource(ns, n, "certificate")
 }
 
 // GetAppByCertificate list app

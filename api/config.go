@@ -103,7 +103,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 	}
 
 	// labels can't be modified of sys apps
-	if checkIsSysResources(res.Labels) && !reflect.DeepEqual(res.Labels, config.Labels) {
+	if CheckIsSysResources(res.Labels) && !reflect.DeepEqual(res.Labels, config.Labels) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "labels can't be modified of sys apps"))
 	}
 
