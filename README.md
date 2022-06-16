@@ -78,38 +78,26 @@ Please download the baetyl-cloud project before installation. We take the script
 git clone https://github.com/baetyl/baetyl-cloud.git
 ```
 
-### Install database
+### Prepare database
 
-Before installing baetyl-cloud, we need to install the database first, and execute the following command to install it.
+Before installing baetyl-cloud, you should prepare a database(mysql or mariadb both meets the requirements)
 
-```shell
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install mariadb --set rootUser.password=secretpassword,db.name=baetyl_cloud bitnami/mariadb
-helm install phpmyadmin bitnami/phpmyadmin 
-```
-**Note**: For the convenience of demonstration, we have hardcoded the password, please modify it yourself, and you can replace secretpassword globally.
+Modify `sync-server-address` and `init-server-address` for table `baetyl_property` in the sql file *scripts/sql/data.sql* to set your own profile.
 
-### Initialize data
-
-Confirm that mariadb and phpmyadmin are in the Running state.
-
-```shell
-kubectl get pod
-# NAME                            READY   STATUS             RESTARTS   AGE
-# mariadb-master-0                1/1     Running            0          2m56s
-# mariadb-slave-0                 1/1     Running            0          2m56s
-# phpmyadmin-55f4f964d7-ctmxj     1/1     Running            0          117s
+```yaml
+sync-server-address : https://${host-ip}:30005
+init-server-address : https://${host-ip}:30003
 ```
 
-Then execute the following command to keep the terminal from exiting.
+Import the sql file *scripts/sql/tables.sql* to create tables and the file *scripts/sql/data.sql* to initialize settings.
 
-```shell
-export POD_NAME=$(kubectl get pods --namespace default -l "app=phpmyadmin,release=phpmyadmin" -o jsonpath="{.items[0].metadata.name}")
-echo "phpMyAdmin URL: http://127.0.0.1:8080"
-kubectl port-forward --namespace default svc/phpmyadmin 8080:80
+Enter your database information in the setting file *scripts/charts/baetyl-cloud/conf/cloud.yml*
+
+```yaml
+database:
+type: "mysql"
+url: "${database_username}:${database_password}@(${database_ip}:3306)/baetyl_cloud?charset=utf8&parseTime=true"
 ```
-
-Then use a browser to open http://127.0.0.1:8080/index.php, Server input: mariadb, Username input: root, Password input: secretpassword. After logging in, select the database baetyl_cloud, click the SQL button, and enter the sql statements of all files in the scripts/sql directory under the baetyl-cloud project into the page for execution. If no error is reported during execution, the data initialization is successful.
 
 ### Install baetyl-cloud
 
@@ -117,9 +105,9 @@ Enter the directory where the baetyl-cloud project is located and execute the fo
 
 ```shell
 # helm 3
-cd scripts/charts/baetyl-cloud
-kubectl apply -f ./apply/
-helm install baetyl-cloud .
+cd scripts/charts
+kubectl apply -f ./baetyl-cloud/apply/
+helm install baetyl-cloud ./baetyl-cloud/
 ```
 Make sure that baetyl-cloud is in the Running state, and you can also check the log for errors.
 
