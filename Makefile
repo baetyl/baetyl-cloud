@@ -8,7 +8,7 @@ GIT_REV:=git-$(shell git rev-parse --short HEAD)
 VERSION:=$(if $(GIT_TAG),$(GIT_TAG),$(GIT_REV))
 
 GO_FLAGS:=-s -w -X github.com/baetyl/baetyl-go/v2/utils.REVISION=$(GIT_REV) -X github.com/baetyl/baetyl-go/v2/utils.VERSION=$(VERSION)
-GO_PROXY:=$(shell go env GOPROXY)
+GO_PROXY:=https://goproxy.cn
 GO_TEST_FLAGS:=-race -short -covermode=atomic -coverprofile=coverage.txt
 GO_TEST_PKGS:=$(shell go list ./...)
 
@@ -19,7 +19,7 @@ all: build
 
 .PHONY: build
 build: $(SRC_FILES)
-	env CGO_ENABLED=0 go build -o output/$(MODULE) -ldflags "$(GO_FLAGS)" .
+	env GO111MODULE=on GOPROXY=$(GO_PROXY) CGO_ENABLED=0 go build -o output/$(MODULE) -ldflags "$(GO_FLAGS)" .
 
 .PHONY: image
 image:
