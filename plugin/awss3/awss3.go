@@ -171,13 +171,13 @@ func (c *awss3Storage) GenInternalObjectURL(_, bucket, object string) (*models.O
 	return genObjectURL(c.s3Client, bucket, object, c.cfg.Expiration)
 }
 
-func (c *awss3Storage) GenInternalPutObjectURL(userID, bucket, name string) (*models.ObjectURL, error) {
+func (c *awss3Storage) GenInternalPutObjectURL(_, bucket, name string) (*models.ObjectURL, error) {
 	err := c.checkInternalSupported()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	return genPutObjectURL(c.s3Client, bucket, userID+"/"+name, c.cfg.Expiration)
+	return genPutObjectURL(c.s3Client, bucket, name, c.cfg.Expiration)
 }
 
 // ListExternalBuckets ListExternalBuckets
