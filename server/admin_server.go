@@ -236,6 +236,12 @@ func (s *AdminServer) InitRoute() {
 		quotas := v1.Group("/quotas")
 		quotas.GET("", common.Wrapper(s.api.GetQuota))
 	}
+	{
+		yaml := v1.Group("v1/yaml")
+		yaml.POST("", common.Wrapper(s.api.CreateYamlResource))
+		yaml.PUT("", common.Wrapper(s.api.UpdateYamlResource))
+		yaml.DELETE("", common.Wrapper(s.api.DeleteYamlResource))
+	}
 
 	v2 := s.router.Group("v2")
 	{
