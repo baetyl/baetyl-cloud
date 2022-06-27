@@ -69,8 +69,6 @@ func (api *API) CreateYamlResource(c *common.Context) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-		default:
-			continue
 		}
 	}
 	return res, nil
@@ -109,8 +107,6 @@ func (api *API) UpdateYamlResource(c *common.Context) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-		default:
-			continue
 		}
 	}
 	return res, nil
@@ -145,8 +141,6 @@ func (api *API) DeleteYamlResource(c *common.Context) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-		default:
-			continue
 		}
 	}
 	return nil, err
