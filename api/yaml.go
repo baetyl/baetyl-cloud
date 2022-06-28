@@ -541,7 +541,7 @@ func (api *API) deleteConfig(ns string, r runtime.Object) (string, error) {
 
 func generateConfigData(userId string, cfgData, configData map[string]string) error {
 	for name, content := range cfgData {
-		vmap := map[string]interface{}{}
+		vmap := map[string]string{}
 		err := yaml.Unmarshal([]byte(content), &vmap)
 		if err != nil {
 			if strings.HasPrefix(name, common.ConfigObjectPrefix) {
@@ -563,37 +563,51 @@ func generateConfigData(userId string, cfgData, configData map[string]string) er
 
 		switch ctype {
 		case ConfigTypeObject:
-			ok = checkElementExist(vmap, "source")
+			ok = checkElementsExist(vmap, "source")
 			if !ok {
 				return common.Error(common.ErrRequestParamInvalid,
 					common.Field("error", "failed to validate object data of config"))
 			}
 			if vmap["source"] == ConfigObjectTypeHttp {
-				ok = checkElementExist(vmap, "url")
+				ok = checkElementsExist(vmap, "url")
 				if !ok {
 					return common.Error(common.ErrRequestParamInvalid,
 						common.Field("error", "failed to validate object data of config"))
 				}
 			}
-			vmap["userID"] = userId
-			vbytes, err := json.Marshal(vmap)
+			object := &specV1.ConfigurationObject{
+				URL:      vmap["url"],
+				MD5:      vmap["md5"],
+				Unpack:   vmap["unpack"],
+				Metadata: map[string]string{},
+			}
+			object.Metadata = vmap
+			object.Metadata["userID"] = userId
+			bytes, err := json.Marshal(object)
 			if err != nil {
 				return err
 			}
-			configData[common.ConfigObjectPrefix+name] = string(vbytes)
+			configData[common.ConfigObjectPrefix+name] = string(bytes)
 		case ConfigTypeFunction:
-			ok = checkElementExist(vmap, "function", "version", "runtime",
+			ok = checkElementsExist(vmap, "function", "version", "runtime",
 				"handler", "bucket", "object")
 			if !ok {
 				return common.Error(common.ErrRequestParamInvalid,
 					common.Field("error", "failed to validate function data of config"))
 			}
-			vmap["userID"] = userId
-			vbytes, err := json.Marshal(vmap)
+			object := &specV1.ConfigurationObject{
+				URL:      vmap["url"],
+				MD5:      vmap["md5"],
+				Unpack:   vmap["unpack"],
+				Metadata: map[string]string{},
+			}
+			object.Metadata = vmap
+			object.Metadata["userID"] = userId
+			bytes, err := json.Marshal(object)
 			if err != nil {
 				return err
 			}
-			configData[common.ConfigObjectPrefix+name] = string(vbytes)
+			configData[common.ConfigObjectPrefix+name] = string(bytes)
 		default:
 			continue
 		}
@@ -616,15 +630,6 @@ func validateConfig(c *specV1.Configuration) error {
 		}
 	}
 	return nil
-}
-
-func checkElementExist(m map[string]interface{}, elems ...string) bool {
-	for _, v := range elems {
-		if _, ok := m[v]; !ok {
-			return false
-		}
-	}
-	return true
 }
 
 // app resource
