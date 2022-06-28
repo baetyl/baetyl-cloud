@@ -228,7 +228,11 @@ func (api *API) generateSecret(ns string, r runtime.Object) (interface{}, error)
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "secret name is already in use"))
 	}
 
-	return api.Facade.CreateSecret(ns, secret)
+	res, err := api.Facade.CreateSecret(ns, secret)
+	if err != nil {
+		return nil, err
+	}
+	return api.ToFilteredSecretView(res), nil
 }
 
 func (api *API) updateSecret(ns string, r runtime.Object) (interface{}, error) {
@@ -382,6 +386,9 @@ func (api *API) generateCommonSecret(ns string, s *corev1.Secret) (*specV1.Secre
 		return nil, err
 	}
 	secret.Namespace = ns
+	secret.Labels = common.AddSystemLabel(secret.Labels, map[string]string{
+		specV1.SecretLabel: specV1.SecretConfig,
+	})
 	return secret, nil
 }
 
@@ -441,7 +448,7 @@ func (api *API) generateConfig(ns, userId string, r runtime.Object) (interface{}
 		return nil, err
 	}
 
-	return config, nil
+	return api.ToConfigurationView(config)
 }
 
 func (api *API) updateConfig(ns, userId string, r runtime.Object) (interface{}, error) {
@@ -640,7 +647,7 @@ func (api *API) generateApplication(ns string, r runtime.Object) (interface{}, e
 		return nil, err
 	}
 
-	return app, nil
+	return api.ToApplicationView(app)
 }
 
 func (api *API) updateApplication(ns string, r runtime.Object) (interface{}, error) {
@@ -674,7 +681,12 @@ func (api *API) updateApplication(ns string, r runtime.Object) (interface{}, err
 	app.Version = oldApp.Version
 	app.CreationTimestamp = oldApp.CreationTimestamp
 
-	return api.Facade.UpdateApp(ns, oldApp, app, nil)
+	app, err = api.Facade.UpdateApp(ns, oldApp, app, nil)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return api.ToApplicationView(app)
 }
 
 func (api *API) deleteApplication(ns string, r runtime.Object) (string, error) {
@@ -904,6 +916,15 @@ func (api *API) generateCommonAppInfo(ns string, podSpec *corev1.PodSpec) (*spec
 		if !isRegistrySecret(*registry) {
 			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "imagePullSecrets is not registry type"))
 		}
+		secretVolume := specV1.Volume{
+			Name: v.Name,
+			VolumeSource: specV1.VolumeSource{
+				Secret: &specV1.ObjectReference{
+					Name: v.Name,
+				},
+			},
+		}
+		volumes = append(volumes, secretVolume)
 	}
 
 	var svcs []specV1.Service
