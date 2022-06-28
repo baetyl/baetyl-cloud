@@ -251,7 +251,7 @@ func initYamlAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 	{
 		yaml.POST("", mockIM, common.Wrapper(api.CreateYamlResource))
 		yaml.PUT("", mockIM, common.Wrapper(api.UpdateYamlResource))
-		yaml.DELETE("", mockIM, common.Wrapper(api.DeleteYamlResource))
+		yaml.POST("/delete", mockIM, common.Wrapper(api.DeleteYamlResource))
 	}
 
 	return api, router, mockCtl
@@ -602,7 +602,7 @@ func TestAPI_DeleteSecret(t *testing.T) {
 	io.Copy(fw, strings.NewReader(testSecret))
 	w.Close()
 
-	req, _ := http.NewRequest(http.MethodDelete, "/v1/yaml", buf)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/yaml/delete", buf)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	re := httptest.NewRecorder()
@@ -632,7 +632,7 @@ func TestAPI_DeleteSecret(t *testing.T) {
 	io.Copy(fw, strings.NewReader(testRegistry))
 	w.Close()
 
-	req, _ = http.NewRequest(http.MethodDelete, "/v1/yaml", buf)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/yaml/delete", buf)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	re = httptest.NewRecorder()
@@ -667,7 +667,7 @@ func TestAPI_DeleteSecret(t *testing.T) {
 	io.Copy(fw, strings.NewReader(testCert))
 	w.Close()
 
-	req, _ = http.NewRequest(http.MethodDelete, "/v1/yaml", buf)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/yaml/delete", buf)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	re = httptest.NewRecorder()
@@ -1079,7 +1079,7 @@ func TestAPI_DeleteConfig(t *testing.T) {
 	io.Copy(fw, strings.NewReader(commonCfg))
 	w.Close()
 
-	req, _ := http.NewRequest(http.MethodDelete, "/v1/yaml", buf)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/yaml/delete", buf)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	re := httptest.NewRecorder()
