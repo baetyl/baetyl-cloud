@@ -278,7 +278,8 @@ func TestAPI_CreateSecret(t *testing.T) {
 		Name:      "dcell",
 		Namespace: "default",
 		Labels: map[string]string{
-			"secret": "dcell",
+			"secret":           "dcell",
+			specV1.SecretLabel: specV1.SecretConfig,
 		},
 		Annotations: map[string]string{
 			"secret": "dcell",

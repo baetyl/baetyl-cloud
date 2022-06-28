@@ -394,6 +394,14 @@ func TestAPI_CreateDeployApp(t *testing.T) {
 					},
 				},
 			},
+			{
+				Name: "myregistrykey",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name: "myregistrykey",
+					},
+				},
+			},
 		},
 		Replica:  1,
 		Workload: "deployment",
@@ -412,8 +420,8 @@ func TestAPI_CreateDeployApp(t *testing.T) {
 	}
 	sApp.EXPECT().Get("default", "nginx", "").Return(nil, nil).Times(1)
 	sConfig.EXPECT().Get("default", "common-cm", "").Return(cfg, nil).Times(2)
-	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(2)
-	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(2)
+	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(4)
+	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(4)
 	sFacade.EXPECT().CreateApp("default", nil, gomock.Any(), nil).Return(deployApp, nil).Times(1)
 
 	buf := new(bytes.Buffer)
@@ -429,7 +437,7 @@ func TestAPI_CreateDeployApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []specV1.Application
+	var resApp []gmodels.ApplicationView
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
 	err = json.Unmarshal(body, &resApp)
@@ -440,7 +448,8 @@ func TestAPI_CreateDeployApp(t *testing.T) {
 	resapp, err := api.generateDeployApp("default", deploy)
 	resapp.Services[0].Resources.Limits = nil
 	resapp.Services[0].Resources.Requests = nil
-	assert.DeepEqual(t, &resApp[0], resapp)
+	appView, _ := api.ToApplicationView(resapp)
+	assert.DeepEqual(t, &resApp[0], appView)
 }
 
 func TestAPI_CreateDaemonSetApp(t *testing.T) {
@@ -538,6 +547,14 @@ func TestAPI_CreateDaemonSetApp(t *testing.T) {
 					},
 				},
 			},
+			{
+				Name: "myregistrykey",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name: "myregistrykey",
+					},
+				},
+			},
 		},
 		Workload: "daemonset",
 	}
@@ -555,8 +572,8 @@ func TestAPI_CreateDaemonSetApp(t *testing.T) {
 	}
 	sApp.EXPECT().Get("default", "nginx", "").Return(nil, nil).Times(1)
 	sConfig.EXPECT().Get("default", "common-cm", "").Return(cfg, nil).Times(2)
-	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(2)
-	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(2)
+	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(4)
+	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(4)
 	sFacade.EXPECT().CreateApp("default", nil, gomock.Any(), nil).Return(dsApp, nil).Times(1)
 
 	buf := new(bytes.Buffer)
@@ -572,7 +589,7 @@ func TestAPI_CreateDaemonSetApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []specV1.Application
+	var resApp []gmodels.ApplicationView
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
 	err = json.Unmarshal([]byte(body), &resApp)
@@ -581,7 +598,8 @@ func TestAPI_CreateDaemonSetApp(t *testing.T) {
 	resources := api.parseK8SYaml([]byte(testAppDs))
 	ds, _ := resources[0].(*appv1.DaemonSet)
 	resapp, err := api.generateDaemonSetApp("default", ds)
-	assert.DeepEqual(t, &resApp[0], resapp)
+	appView, _ := api.ToApplicationView(resapp)
+	assert.DeepEqual(t, &resApp[0], appView)
 }
 
 func TestAPI_CreateJobApp(t *testing.T) {
@@ -642,7 +660,7 @@ func TestAPI_CreateJobApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []specV1.Application
+	var resApp []gmodels.ApplicationView
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
 	err = json.Unmarshal([]byte(body), &resApp)
@@ -652,7 +670,10 @@ func TestAPI_CreateJobApp(t *testing.T) {
 	job, _ := resources[0].(*batchv1.Job)
 	resapp, err := api.generateJobApp("default", job)
 	resapp.Services[0].Resources = nil
-	assert.DeepEqual(t, &resApp[0], resapp)
+	appView, _ := api.ToApplicationView(resapp)
+	appView.Volumes = nil
+	appView.Registries = nil
+	assert.DeepEqual(t, &resApp[0], appView)
 }
 
 func TestAPI_UpdateDeployApp(t *testing.T) {
@@ -747,6 +768,14 @@ func TestAPI_UpdateDeployApp(t *testing.T) {
 					},
 				},
 			},
+			{
+				Name: "myregistrykey",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name: "myregistrykey",
+					},
+				},
+			},
 		},
 		Replica:  1,
 		Workload: "deployment",
@@ -826,6 +855,14 @@ func TestAPI_UpdateDeployApp(t *testing.T) {
 					},
 				},
 			},
+			{
+				Name: "myregistrykey",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name: "myregistrykey",
+					},
+				},
+			},
 		},
 		Replica:  1,
 		Workload: "deployment",
@@ -845,8 +882,8 @@ func TestAPI_UpdateDeployApp(t *testing.T) {
 
 	sApp.EXPECT().Get("default", "nginx", "").Return(expectApp, nil).Times(1)
 	sConfig.EXPECT().Get("default", "common-cm", "").Return(cfg, nil).Times(2)
-	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(2)
-	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(2)
+	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(4)
+	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(4)
 	sFacade.EXPECT().UpdateApp("default", expectApp, gomock.Any(), nil).Return(updateApp, nil).Times(1)
 
 	buf := new(bytes.Buffer)
@@ -862,7 +899,7 @@ func TestAPI_UpdateDeployApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []specV1.Application
+	var resApp []gmodels.ApplicationView
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
 	err = json.Unmarshal(body, &resApp)
@@ -873,7 +910,8 @@ func TestAPI_UpdateDeployApp(t *testing.T) {
 	resapp, err := api.generateDeployApp("default", deploy)
 	resapp.Services[0].Resources.Limits = nil
 	resapp.Services[0].Resources.Requests = nil
-	assert.DeepEqual(t, &resApp[0], resapp)
+	appView, _ := api.ToApplicationView(resapp)
+	assert.DeepEqual(t, &resApp[0], appView)
 }
 
 func TestAPI_UpdateDsApp(t *testing.T) {
@@ -971,6 +1009,14 @@ func TestAPI_UpdateDsApp(t *testing.T) {
 					},
 				},
 			},
+			{
+				Name: "myregistrykey",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name: "myregistrykey",
+					},
+				},
+			},
 		},
 		Workload: "daemonset",
 	}
@@ -1052,6 +1098,14 @@ func TestAPI_UpdateDsApp(t *testing.T) {
 					},
 				},
 			},
+			{
+				Name: "myregistrykey",
+				VolumeSource: specV1.VolumeSource{
+					Secret: &specV1.ObjectReference{
+						Name: "myregistrykey",
+					},
+				},
+			},
 		},
 		Workload: "daemonset",
 	}
@@ -1070,8 +1124,8 @@ func TestAPI_UpdateDsApp(t *testing.T) {
 
 	sApp.EXPECT().Get("default", "nginx", "").Return(dsApp, nil).Times(1)
 	sConfig.EXPECT().Get("default", "common-cm", "").Return(cfg, nil).Times(2)
-	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(2)
-	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(2)
+	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(4)
+	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(4)
 	sFacade.EXPECT().UpdateApp("default", dsApp, gomock.Any(), nil).Return(updateApp, nil).Times(1)
 
 	buf := new(bytes.Buffer)
@@ -1087,7 +1141,7 @@ func TestAPI_UpdateDsApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []specV1.Application
+	var resApp []gmodels.ApplicationView
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
 	err = json.Unmarshal(body, &resApp)
@@ -1096,7 +1150,8 @@ func TestAPI_UpdateDsApp(t *testing.T) {
 	resources := api.parseK8SYaml([]byte(updateAppDs))
 	ds, _ := resources[0].(*appv1.DaemonSet)
 	resapp, err := api.generateDaemonSetApp("default", ds)
-	assert.DeepEqual(t, &resApp[0], resapp)
+	appView, _ := api.ToApplicationView(resapp)
+	assert.DeepEqual(t, &resApp[0], appView)
 }
 
 func TestAPI_UpdateJobApp(t *testing.T) {
@@ -1181,7 +1236,7 @@ func TestAPI_UpdateJobApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []specV1.Application
+	var resApp []gmodels.ApplicationView
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
 	err = json.Unmarshal(body, &resApp)
@@ -1191,7 +1246,10 @@ func TestAPI_UpdateJobApp(t *testing.T) {
 	job, _ := resources[0].(*batchv1.Job)
 	resapp, err := api.generateJobApp("default", job)
 	resapp.Services[0].Resources = nil
-	assert.DeepEqual(t, &resApp[0], resapp)
+	appView, _ := api.ToApplicationView(resapp)
+	appView.Registries = nil
+	appView.Volumes = nil
+	assert.DeepEqual(t, &resApp[0], appView)
 }
 
 func TestAPI_DeleteApp(t *testing.T) {
