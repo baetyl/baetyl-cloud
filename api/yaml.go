@@ -260,7 +260,11 @@ func (api *API) updateSecret(ns string, r runtime.Object) (interface{}, error) {
 	secret.Version = oldSecret.Version
 	secret.UpdateTimestamp = time.Now()
 
-	return api.Facade.UpdateSecret(ns, secret)
+	res, err := api.Facade.UpdateSecret(ns, secret)
+	if err != nil {
+		return nil, err
+	}
+	return api.ToSecretView(res), nil
 }
 
 func (api *API) deleteSecret(ns string, r runtime.Object) (string, error) {
@@ -492,7 +496,12 @@ func (api *API) updateConfig(ns, userId string, r runtime.Object) (interface{}, 
 	config.UpdateTimestamp = time.Now()
 	config.CreationTimestamp = res.CreationTimestamp
 
-	return api.Facade.UpdateConfig(ns, config)
+	res, err = api.Facade.UpdateConfig(ns, config)
+	if err != nil {
+		return nil, err
+	}
+
+	return api.ToConfigurationView(res)
 }
 
 func (api *API) deleteConfig(ns string, r runtime.Object) (string, error) {
@@ -527,7 +536,6 @@ func (api *API) deleteConfig(ns string, r runtime.Object) (string, error) {
 			common.Field("name", cfg.Name))
 	}
 
-	//TODO: should remove file(bos/aws) of a function Config
 	return cfg.Name, api.Facade.DeleteConfig(ns, cfg.Name)
 }
 
