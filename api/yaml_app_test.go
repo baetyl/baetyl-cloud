@@ -1359,7 +1359,7 @@ func TestAPI_DeleteApp(t *testing.T) {
 	io.Copy(fw, strings.NewReader(testAppDeploy))
 	w.Close()
 
-	req, _ := http.NewRequest(http.MethodDelete, "/v1/yaml", buf)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/yaml/delete", buf)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	re := httptest.NewRecorder()
@@ -1971,7 +1971,7 @@ func TestAPI_DeleteService(t *testing.T) {
 	io.Copy(fw, strings.NewReader(testService))
 	w.Close()
 
-	req, _ := http.NewRequest(http.MethodDelete, "/v1/yaml", buf)
+	req, _ := http.NewRequest(http.MethodPost, "/v1/yaml/delete", buf)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	re := httptest.NewRecorder()
