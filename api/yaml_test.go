@@ -725,7 +725,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 		Name:      "object-cm",
 		Namespace: "default",
 		Data: map[string]string{
-			"_object_123.jpg": "{\"account\":\"current\",\"bucket\":\"bie-document\",\"object\":\"test-images/1.jpg\",\"source\":\"baidubos\",\"type\":\"object\",\"userID\":\"\"}",
+			"_object_123.jpg": "{\"metadata\":{\"account\":\"current\",\"bucket\":\"bie-document\",\"object\":\"test-images/1.jpg\",\"source\":\"baidubos\",\"type\":\"object\",\"userID\":\"\"}}",
 		},
 	}
 	sConfig.EXPECT().Get("default", "object-cm", "").Return(nil, nil).Times(1)
@@ -749,7 +749,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 		Name:      "bos-cm",
 		Namespace: "default",
 		Data: map[string]string{
-			"_object_download1616485040271.zip": "{\"account\":\"other\",\"ak\":\"618466d309734d1b908590ec2ee46932\",\"bucket\":\"baetyl-test1616485040271\",\"endpoint\":\"http://bj-bos-sandbox.baidu-int.com\",\"object\":\"download1616485040271.zip\",\"sk\":\"9891e1e22a34463ea1d3d5c673e2bfd0\",\"source\":\"baidubos\",\"type\":\"object\",\"unpack\":\"zip\",\"userID\":\"\"}",
+			"_object_download1616485040271.zip": "{\"unpack\":\"zip\",\"metadata\":{\"account\":\"other\",\"ak\":\"618466d309734d1b908590ec2ee46932\",\"bucket\":\"baetyl-test1616485040271\",\"endpoint\":\"http://bj-bos-sandbox.baidu-int.com\",\"object\":\"download1616485040271.zip\",\"sk\":\"9891e1e22a34463ea1d3d5c673e2bfd0\",\"source\":\"baidubos\",\"type\":\"object\",\"unpack\":\"zip\",\"userID\":\"\"}}",
 		},
 	}
 	sConfig.EXPECT().Get("default", "bos-cm", "").Return(nil, nil).Times(1)
@@ -773,7 +773,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 		Name:      "http-cm",
 		Namespace: "default",
 		Data: map[string]string{
-			"_object_tf_mnist.zip": "{\"object\":\"tf_mnist.zip\",\"source\":\"http\",\"type\":\"object\",\"unpack\":\"zip\",\"url\":\"https://doc.bce.baidu.com/bce-documentation/BIE/tf_mnist.zip\",\"userID\":\"\"}",
+			"_object_tf_mnist.zip": "{\"url\":\"https://doc.bce.baidu.com/bce-documentation/BIE/tf_mnist.zip\",\"unpack\":\"zip\",\"metadata\":{\"object\":\"tf_mnist.zip\",\"source\":\"http\",\"type\":\"object\",\"unpack\":\"zip\",\"url\":\"https://doc.bce.baidu.com/bce-documentation/BIE/tf_mnist.zip\",\"userID\":\"\"}}",
 		},
 	}
 	sConfig.EXPECT().Get("default", "http-cm", "").Return(nil, nil).Times(1)
@@ -827,7 +827,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 			"baetyl-config-type": "baetyl-program",
 		},
 		Data: map[string]string{
-			"_object_linux-amd64": "{\"account\":\"current\",\"bucket\":\"bie-document\",\"object\":\"Easyedge-SDK/program1.zip\",\"platform\":\"linux-amd64\",\"source\":\"baidubos\",\"type\":\"object\",\"unpack\":\"zip\",\"userID\":\"\"}",
+			"_object_linux-amd64": "{\"unpack\":\"zip\",\"metadata\":{\"account\":\"current\",\"bucket\":\"bie-document\",\"object\":\"Easyedge-SDK/program1.zip\",\"platform\":\"linux-amd64\",\"source\":\"baidubos\",\"type\":\"object\",\"unpack\":\"zip\",\"userID\":\"\"}}",
 		},
 	}
 	sConfig.EXPECT().Get("default", "program-cm", "").Return(nil, nil).Times(1)
@@ -855,7 +855,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 			"baetyl-function":    "",
 		},
 		Data: map[string]string{
-			"_object_cfc-new-demo.zip": "{\"bucket\":\"baetyl-cloud-1cd2d7790b6f4347bbeb3ecee54eca6e\",\"function\":\"cfc-new-demo\",\"handler\":\"index.add2\",\"object\":\"9741a152f1282a514d72804927cc3f4c71d49aae86684195c2930c63c56f784b/cfc-new-demo.zip\",\"runtime\":\"python3\",\"source\":\"baidubos\",\"type\":\"function\",\"unpack\":\"zip\",\"userID\":\"\",\"version\":1}",
+			"_object_cfc-new-demo.zip": "{\"unpack\":\"zip\",\"metadata\":{\"bucket\":\"baetyl-cloud-1cd2d7790b6f4347bbeb3ecee54eca6e\",\"function\":\"cfc-new-demo\",\"handler\":\"index.add2\",\"object\":\"9741a152f1282a514d72804927cc3f4c71d49aae86684195c2930c63c56f784b/cfc-new-demo.zip\",\"runtime\":\"python3\",\"source\":\"baidubos\",\"type\":\"function\",\"unpack\":\"zip\",\"userID\":\"\",\"version\":\"1\"}}",
 		},
 	}
 	sConfig.EXPECT().Get("default", "function-cm", "").Return(nil, nil).Times(1)
