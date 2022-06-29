@@ -51,7 +51,7 @@ type: Opaque`
 	testRegistry = `
 apiVersion: v1
 data:
-  .dockerconfigjson: eyJhdXRocyI6eyJET0NLRVJfUkVHSVNUUllfU0VSVkVSIjp7InVzZXJuYW1lIjoiRE9DS0VSX1VTRVIiLCJwYXNzd29yZCI6IkRPQ0tFUl9QQVNTV09SRCIsImVtYWlsIjoiRE9DS0VSX0VNQUlMIiwiYXV0aCI6IlJFOURTMFZTWDFWVFJWSTZSRTlEUzBWU1gxQkJVMU5YVDFKRSJ9fX0=
+  .dockerconfigjson: eyJhdXRocyI6eyJjY3ItM3p6NnpkeG4tcHViLmNuYy5nei5iYWlkdWJjZS5jb20iOnsiVXNlcm5hbWUiOiJ2X3BhbnpoaWFvIiwiUGFzc3dvcmQiOiIxMzRwYW5QcCIsIkF1dGgiOiJkbDl3WVc1NmFHbGhiem94TXpSd1lXNVFjQT09In19fQ==
 kind: Secret
 metadata:
   name: myregistrykey
@@ -313,9 +313,9 @@ func TestAPI_CreateSecret(t *testing.T) {
 			specV1.SecretLabel: specV1.SecretRegistry,
 		},
 		Data: map[string][]byte{
-			"password": []byte("DOCKER_PASSWORD"),
-			"username": []byte("DOCKER_USER"),
-			"address":  []byte("DOCKER_REGISTRY_SERVER"),
+			"password": []byte("134panPp"),
+			"username": []byte("v_panzhiao"),
+			"address":  []byte("ccr-3zz6zdxn-pub.cnc.gz.baidubce.com"),
 		},
 	}
 	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(nil, nil).Times(1)

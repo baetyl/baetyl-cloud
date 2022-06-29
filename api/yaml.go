@@ -331,30 +331,35 @@ func (api *API) generateSecretResource(ns string, sec *corev1.Secret) (*specV1.S
 
 func (api *API) generateRegistry(ns string, s *corev1.Secret) (*models.Registry, error) {
 	registry := new(models.Registry)
-	if dockercfgjson, ok := s.Data[corev1.DockerConfigJsonKey]; ok {
-		auths := map[string]interface{}{}
-		err := json.Unmarshal(dockercfgjson, &auths)
-		if err != nil {
-			return nil, err
-		}
-		if data, ok := auths["auths"]; ok {
-			if dd, ok := data.(map[string]interface{}); ok {
-				for key, value := range dd {
-					registry.Address = key
-					registry.Name = s.Name
-					registry.Namespace = ns
-					if v, ok := value.(map[string]interface{})["username"]; ok {
-						registry.Username = v.(string)
+	dockercfgjson, ok := s.Data[corev1.DockerConfigJsonKey]
+	if !ok {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "no dockerconfigjson found in registry"))
+	}
+	auths := map[string]interface{}{}
+	err := json.Unmarshal(dockercfgjson, &auths)
+	if err != nil {
+		return nil, err
+	}
+	if data, ok := auths["auths"]; ok {
+		if dd, ok := data.(map[string]interface{}); ok {
+			for key, value := range dd {
+				registry.Address = key
+				registry.Name = s.Name
+				registry.Namespace = ns
+				if vmap, ok := value.(map[string]interface{}); ok {
+					for k, v := range vmap {
+						if strings.Contains(strings.ToLower(k), "username") {
+							registry.Username = v.(string)
+						}
+						if strings.Contains(strings.ToLower(k), "password") {
+							registry.Password = v.(string)
+						}
 					}
-					if v, ok := value.(map[string]interface{})["password"]; ok {
-						registry.Password = v.(string)
-					}
-
-					if err = api.ValidateRegistryModel(registry); err != nil {
-						return nil, err
-					}
-					return registry, nil
 				}
+				if err = api.ValidateRegistryModel(registry); err != nil {
+					return nil, err
+				}
+				return registry, nil
 			}
 		}
 	}
@@ -904,7 +909,9 @@ func (api *API) generateCommonAppInfo(ns string, podSpec *corev1.PodSpec) (*spec
 			vol.Name = v.Name
 			vol.VolumeSource.HostPath = &specV1.HostPathVolumeSource{
 				Path: v.HostPath.Path,
-				Type: string(*v.HostPath.Type),
+			}
+			if v.HostPath.Type != nil {
+				vol.VolumeSource.HostPath.Type = string(*v.HostPath.Type)
 			}
 		} else if v.EmptyDir != nil {
 			vol.Name = v.Name
