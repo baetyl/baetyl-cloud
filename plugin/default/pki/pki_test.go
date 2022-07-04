@@ -203,7 +203,7 @@ func TestDefaultPkiClient_DeleteRootCert(t *testing.T) {
 	p, s := genDefaultPkiClient(t)
 	// good case
 	s.EXPECT().CountCertByParentId(RootCertId).Return(0, nil).Times(1)
-	s.EXPECT().DeleteCert(RootCertId).Return(nil).Times(2)
+	s.EXPECT().DeleteCert(RootCertId).Return(nil).Times(1)
 	err := p.DeleteRootCert(RootCertId)
 	assert.NoError(t, err)
 

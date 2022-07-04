@@ -40,11 +40,30 @@ const (
 	HookCreateNodeOta = "hookCreateNodeOta"
 	HookUpdateNodeOta = "hookUpdateNodeOta"
 	HookDeleteNodeOta = "hookDeleteNodeOta"
+
+	HookCreateNodeDmp = "hookCreateNodeDmp"
+	HookUpdateNodeDmp = "hookUpdateNodeDmp"
+	HookDeleteNodeDmp = "hookDeleteNodeDmp"
 )
 
-type CreateNodeOta = func(*v1.Node) (*v1.Node, error)
-type UpdateNodeOta = func(*v1.Node) (*v1.Node, error)
-type DeleteNodeOta = func(*v1.Node) error
+var (
+	HookCreateList = []string{
+		HookCreateNodeOta,
+		HookCreateNodeDmp,
+	}
+	HookUpdateList = []string{
+		HookUpdateNodeOta,
+		HookUpdateNodeDmp,
+	}
+	HookDeleteList = []string{
+		HookDeleteNodeOta,
+		HookDeleteNodeDmp,
+	}
+)
+
+type CreateNodeHook = func(*v1.Node) (*v1.Node, error)
+type UpdateNodeHook = func(*v1.Node) (*v1.Node, error)
+type DeleteNodeHook = func(*v1.Node) error
 
 // GetNode get a node
 func (api *API) GetNode(c *common.Context) (interface{}, error) {
@@ -229,11 +248,13 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	if f, exist := api.Hooks[HookCreateNodeOta]; exist {
-		if otaFunc, ok := f.(CreateNodeOta); ok {
-			n, err = otaFunc(n)
-			if err != nil {
-				return nil, err
+	for _, item := range HookCreateList {
+		if f, exist := api.Hooks[item]; exist {
+			if otaFunc, ok := f.(CreateNodeHook); ok {
+				n, err = otaFunc(n)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
@@ -287,11 +308,13 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		}
 	}
 
-	if f, exist := api.Hooks[HookUpdateNodeOta]; exist {
-		if otaFunc, ok := f.(UpdateNodeOta); ok {
-			node, err = otaFunc(node)
-			if err != nil {
-				return nil, err
+	for _, item := range HookUpdateList {
+		if f, exist := api.Hooks[item]; exist {
+			if otaFunc, ok := f.(UpdateNodeHook); ok {
+				node, err = otaFunc(node)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
@@ -354,11 +377,13 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	if f, exist := api.Hooks[HookDeleteNodeOta]; exist {
-		if otaFunc, ok := f.(DeleteNodeOta); ok {
-			err = otaFunc(node)
-			if err != nil {
-				return nil, err
+	for _, item := range HookDeleteList {
+		if f, exist := api.Hooks[item]; exist {
+			if otaFunc, ok := f.(DeleteNodeHook); ok {
+				err = otaFunc(node)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
