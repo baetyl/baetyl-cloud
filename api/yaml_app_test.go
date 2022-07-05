@@ -437,11 +437,15 @@ func TestAPI_CreateDeployApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []gmodels.ApplicationView
+	var res gmodels.YamlResourceList
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
-	err = json.Unmarshal(body, &resApp)
+	err = json.Unmarshal(body, &res)
 	assert.NilError(t, err)
+
+	var aaa gmodels.ApplicationView
+	appByte, _ := json.Marshal(res.Items[0])
+	json.Unmarshal(appByte, &aaa)
 
 	resources := api.parseK8SYaml([]byte(testAppDeploy))
 	deploy, _ := resources[0].(*appv1.Deployment)
@@ -449,7 +453,8 @@ func TestAPI_CreateDeployApp(t *testing.T) {
 	resapp.Services[0].Resources.Limits = nil
 	resapp.Services[0].Resources.Requests = nil
 	appView, _ := api.ToApplicationView(resapp)
-	assert.DeepEqual(t, &resApp[0], appView)
+
+	assert.DeepEqual(t, &aaa, appView)
 }
 
 func TestAPI_CreateDaemonSetApp(t *testing.T) {
@@ -589,17 +594,21 @@ func TestAPI_CreateDaemonSetApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []gmodels.ApplicationView
+	var res gmodels.YamlResourceList
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
-	err = json.Unmarshal([]byte(body), &resApp)
+	err = json.Unmarshal(body, &res)
 	assert.NilError(t, err)
+
+	var aaa gmodels.ApplicationView
+	appByte, _ := json.Marshal(res.Items[0])
+	json.Unmarshal(appByte, &aaa)
 
 	resources := api.parseK8SYaml([]byte(testAppDs))
 	ds, _ := resources[0].(*appv1.DaemonSet)
 	resapp, err := api.generateDaemonSetApp("default", ds)
 	appView, _ := api.ToApplicationView(resapp)
-	assert.DeepEqual(t, &resApp[0], appView)
+	assert.DeepEqual(t, &aaa, appView)
 }
 
 func TestAPI_CreateJobApp(t *testing.T) {
@@ -660,11 +669,15 @@ func TestAPI_CreateJobApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []gmodels.ApplicationView
+	var res gmodels.YamlResourceList
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
-	err = json.Unmarshal([]byte(body), &resApp)
+	err = json.Unmarshal(body, &res)
 	assert.NilError(t, err)
+
+	var aaa gmodels.ApplicationView
+	appByte, _ := json.Marshal(res.Items[0])
+	json.Unmarshal(appByte, &aaa)
 
 	resources := api.parseK8SYaml([]byte(testAppJob))
 	job, _ := resources[0].(*batchv1.Job)
@@ -673,7 +686,7 @@ func TestAPI_CreateJobApp(t *testing.T) {
 	appView, _ := api.ToApplicationView(resapp)
 	appView.Volumes = nil
 	appView.Registries = nil
-	assert.DeepEqual(t, &resApp[0], appView)
+	assert.DeepEqual(t, &aaa, appView)
 }
 
 func TestAPI_UpdateDeployApp(t *testing.T) {
@@ -899,11 +912,15 @@ func TestAPI_UpdateDeployApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []gmodels.ApplicationView
+	var res gmodels.YamlResourceList
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
-	err = json.Unmarshal(body, &resApp)
+	err = json.Unmarshal(body, &res)
 	assert.NilError(t, err)
+
+	var aaa gmodels.ApplicationView
+	appByte, _ := json.Marshal(res.Items[0])
+	json.Unmarshal(appByte, &aaa)
 
 	resources := api.parseK8SYaml([]byte(updateAppDeploy))
 	deploy, _ := resources[0].(*appv1.Deployment)
@@ -911,7 +928,7 @@ func TestAPI_UpdateDeployApp(t *testing.T) {
 	resapp.Services[0].Resources.Limits = nil
 	resapp.Services[0].Resources.Requests = nil
 	appView, _ := api.ToApplicationView(resapp)
-	assert.DeepEqual(t, &resApp[0], appView)
+	assert.DeepEqual(t, &aaa, appView)
 }
 
 func TestAPI_UpdateDsApp(t *testing.T) {
@@ -1141,17 +1158,21 @@ func TestAPI_UpdateDsApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []gmodels.ApplicationView
+	var res gmodels.YamlResourceList
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
-	err = json.Unmarshal(body, &resApp)
+	err = json.Unmarshal(body, &res)
 	assert.NilError(t, err)
+
+	var aaa gmodels.ApplicationView
+	appByte, _ := json.Marshal(res.Items[0])
+	json.Unmarshal(appByte, &aaa)
 
 	resources := api.parseK8SYaml([]byte(updateAppDs))
 	ds, _ := resources[0].(*appv1.DaemonSet)
 	resapp, err := api.generateDaemonSetApp("default", ds)
 	appView, _ := api.ToApplicationView(resapp)
-	assert.DeepEqual(t, &resApp[0], appView)
+	assert.DeepEqual(t, &aaa, appView)
 }
 
 func TestAPI_UpdateJobApp(t *testing.T) {
@@ -1236,11 +1257,15 @@ func TestAPI_UpdateJobApp(t *testing.T) {
 	router.ServeHTTP(re, req)
 	assert.Equal(t, http.StatusOK, re.Code)
 
-	var resApp []gmodels.ApplicationView
+	var res gmodels.YamlResourceList
 	body, err := ioutil.ReadAll(re.Body)
 	assert.NilError(t, err)
-	err = json.Unmarshal(body, &resApp)
+	err = json.Unmarshal(body, &res)
 	assert.NilError(t, err)
+
+	var aaa gmodels.ApplicationView
+	appByte, _ := json.Marshal(res.Items[0])
+	json.Unmarshal(appByte, &aaa)
 
 	resources := api.parseK8SYaml([]byte(updateAppJob))
 	job, _ := resources[0].(*batchv1.Job)
@@ -1249,7 +1274,7 @@ func TestAPI_UpdateJobApp(t *testing.T) {
 	appView, _ := api.ToApplicationView(resapp)
 	appView.Registries = nil
 	appView.Volumes = nil
-	assert.DeepEqual(t, &resApp[0], appView)
+	assert.DeepEqual(t, &aaa, appView)
 }
 
 func TestAPI_DeleteApp(t *testing.T) {
