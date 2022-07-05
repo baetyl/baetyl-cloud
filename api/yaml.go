@@ -37,7 +37,7 @@ const (
 
 // yaml resources api
 func (api *API) CreateYamlResource(c *common.Context) (interface{}, error) {
-	var res []interface{}
+	var res models.YamlResourceList
 	ns := c.GetNamespace()
 	resources, err := api.parseYamlFileAndCheck(c)
 	if err != nil {
@@ -51,19 +51,22 @@ func (api *API) CreateYamlResource(c *common.Context) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-			res = append(res, se)
+			res.Items = append(res.Items, se)
+			res.Total++
 		case TypeConfig:
 			cfg, err := api.generateConfig(ns, c.GetUser().ID, r)
 			if err != nil {
 				return nil, err
 			}
-			res = append(res, cfg)
+			res.Items = append(res.Items, cfg)
+			res.Total++
 		case TypeDeploy, TypeDaemonset, TypeJob:
 			app, err := api.generateApplication(ns, r)
 			if err != nil {
 				return nil, err
 			}
-			res = append(res, app)
+			res.Items = append(res.Items, app)
+			res.Total++
 		case TypeService:
 			err = api.generateService(ns, r)
 			if err != nil {
@@ -75,7 +78,7 @@ func (api *API) CreateYamlResource(c *common.Context) (interface{}, error) {
 }
 
 func (api *API) UpdateYamlResource(c *common.Context) (interface{}, error) {
-	var res []interface{}
+	var res models.YamlResourceList
 	ns := c.GetNamespace()
 	resources, err := api.parseYamlFileAndCheck(c)
 	if err != nil {
@@ -89,19 +92,22 @@ func (api *API) UpdateYamlResource(c *common.Context) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-			res = append(res, se)
+			res.Items = append(res.Items, se)
+			res.Total++
 		case TypeConfig:
 			cfg, err := api.updateConfig(ns, c.GetUser().ID, r)
 			if err != nil {
 				return nil, err
 			}
-			res = append(res, cfg)
+			res.Items = append(res.Items, cfg)
+			res.Total++
 		case TypeDeploy, TypeDaemonset, TypeJob:
 			app, err := api.updateApplication(ns, r)
 			if err != nil {
 				return nil, err
 			}
-			res = append(res, app)
+			res.Items = append(res.Items, app)
+			res.Total++
 		case TypeService:
 			err = api.updateService(ns, r)
 			if err != nil {
