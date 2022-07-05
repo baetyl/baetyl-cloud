@@ -704,6 +704,8 @@ func (api *API) updateApplication(ns string, r runtime.Object) (interface{}, err
 
 	app.Version = oldApp.Version
 	app.CreationTimestamp = oldApp.CreationTimestamp
+	app.Selector = oldApp.Selector
+	app.NodeSelector = oldApp.NodeSelector
 
 	app, err = api.Facade.UpdateApp(ns, oldApp, app, nil)
 	if err != nil {
