@@ -1142,7 +1142,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int
 		"CoreConfName":  config.Name,
 		"CoreAppName":   app.Name,
 		"CoreFrequency": fmt.Sprintf("%ds", freq),
-		"GPUStats":      v1.IsLegalAcceleratorType(node.Accelerator),
+		"GPUStats":      node.NodeMode == context.RunModeKube,
 		"DiskNetStats":  node.NodeMode == context.RunModeKube,
 		"QPSStats":      node.NodeMode == context.RunModeKube,
 	}
@@ -1180,7 +1180,7 @@ func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node) error {
 	params := map[string]interface{}{
 		"InitConfName": config.Name,
 		"InitAppName":  app.Name,
-		"GPUStats":     v1.IsLegalAcceleratorType(node.Accelerator),
+		"GPUStats":     node.NodeMode == context.RunModeKube,
 		"DiskNetStats": node.NodeMode == context.RunModeKube,
 		"QPSStats":     node.NodeMode == context.RunModeKube,
 	}
