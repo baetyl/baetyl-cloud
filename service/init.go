@@ -179,7 +179,7 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["EdgeSystemNamespace"] = context.EdgeSystemNamespace()
 	params["InitAppName"] = init.Name
 	params["InitVersion"] = init.Version
-	params["GPUStats"] = specV1.IsLegalAcceleratorType(node.Accelerator)
+	params["GPUStats"] = node.NodeMode == context.RunModeKube
 	params["DiskNetStats"] = node.NodeMode == context.RunModeKube
 	params["QPSStats"] = node.NodeMode == context.RunModeKube
 
