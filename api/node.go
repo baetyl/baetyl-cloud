@@ -61,9 +61,9 @@ var (
 	}
 )
 
-type CreateNodeHook = func(*v1.Node) (*v1.Node, error)
-type UpdateNodeHook = func(*v1.Node) (*v1.Node, error)
-type DeleteNodeHook = func(*v1.Node) error
+type CreateNodeHook = func(*common.Context, *v1.Node) (*v1.Node, error)
+type UpdateNodeHook = func(*common.Context, *v1.Node) (*v1.Node, error)
+type DeleteNodeHook = func(*common.Context, *v1.Node) error
 
 // GetNode get a node
 func (api *API) GetNode(c *common.Context) (interface{}, error) {
@@ -250,8 +250,8 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 
 	for _, item := range HookCreateList {
 		if f, exist := api.Hooks[item]; exist {
-			if otaFunc, ok := f.(CreateNodeHook); ok {
-				n, err = otaFunc(n)
+			if hk, ok := f.(CreateNodeHook); ok {
+				n, err = hk(c, n)
 				if err != nil {
 					return nil, err
 				}
@@ -310,8 +310,8 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 
 	for _, item := range HookUpdateList {
 		if f, exist := api.Hooks[item]; exist {
-			if otaFunc, ok := f.(UpdateNodeHook); ok {
-				node, err = otaFunc(node)
+			if hk, ok := f.(UpdateNodeHook); ok {
+				node, err = hk(c, node)
 				if err != nil {
 					return nil, err
 				}
@@ -379,8 +379,8 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 
 	for _, item := range HookDeleteList {
 		if f, exist := api.Hooks[item]; exist {
-			if otaFunc, ok := f.(DeleteNodeHook); ok {
-				err = otaFunc(node)
+			if hk, ok := f.(DeleteNodeHook); ok {
+				err = hk(c, node)
 				if err != nil {
 					return nil, err
 				}
