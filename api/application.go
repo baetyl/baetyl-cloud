@@ -32,9 +32,9 @@ const (
 	HookDeleteApplicationOta = "hookDeleteApplicationOta"
 )
 
-type CreateApplicationOta = func(app *specV1.Application) (*specV1.Application, error)
-type UpdateApplicationOta = func(app *specV1.Application) (*specV1.Application, error)
-type DeleteApplicationOta = func(app *specV1.Application) error
+type CreateApplicationOta = func(c *common.Context, app *specV1.Application) (*specV1.Application, error)
+type UpdateApplicationOta = func(c *common.Context, app *specV1.Application) (*specV1.Application, error)
+type DeleteApplicationOta = func(c *common.Context, app *specV1.Application) error
 
 // GetApplication get a application
 func (api *API) GetApplication(c *common.Context) (interface{}, error) {
@@ -106,8 +106,8 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 	}
 
 	if f, exist := api.Hooks[HookCreateApplicationOta]; exist {
-		if otaFunc, ok := f.(CreateApplicationOta); ok {
-			app, err = otaFunc(app)
+		if hk, ok := f.(CreateApplicationOta); ok {
+			app, err = hk(c, app)
 			if err != nil {
 				return nil, err
 			}
@@ -172,8 +172,8 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	app.Ota = oldApp.Ota
 
 	if f, exist := api.Hooks[HookUpdateApplicationOta]; exist {
-		if otaFunc, ok := f.(UpdateApplicationOta); ok {
-			app, err = otaFunc(app)
+		if hk, ok := f.(UpdateApplicationOta); ok {
+			app, err = hk(c, app)
 			if err != nil {
 				return nil, err
 			}
@@ -206,8 +206,8 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 	}
 
 	if f, exist := api.Hooks[HookDeleteApplicationOta]; exist {
-		if otaFunc, ok := f.(DeleteApplicationOta); ok {
-			err = otaFunc(app)
+		if hk, ok := f.(DeleteApplicationOta); ok {
+			err = hk(c, app)
 			if err != nil {
 				return nil, err
 			}
