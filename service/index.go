@@ -21,6 +21,7 @@ type IndexService interface {
 	ListNodesByApp(namespace, app string) ([]string, error)
 	ListAppsByNode(namespace, node string) ([]string, error)
 	ListAppIndexBySecret(namespace, secret string) ([]string, error)
+	ListSecretIndexByApp(namespace, app string) ([]string, error)
 
 	// app and secret
 	RefreshSecretIndexByApp(tx interface{}, namespace, app string, secrets []string) error
@@ -90,4 +91,8 @@ func (i *indexService) RefreshSecretIndexByApp(tx interface{}, namespace, app st
 
 func (i *indexService) ListAppIndexBySecret(namespace, secret string) ([]string, error) {
 	return i.ListIndex(namespace, common.Application, common.Secret, secret)
+}
+
+func (i *indexService) ListSecretIndexByApp(namespace, app string) ([]string, error) {
+	return i.ListIndex(namespace, common.Secret, common.Application, app)
 }
