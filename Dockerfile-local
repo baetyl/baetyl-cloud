@@ -1,4 +1,4 @@
-FROM golang:1.13.5-stretch as devel
+FROM golang:1.18.3-stretch as devel
 COPY / /go/src/
 RUN cd /go/src/ && make build
 
