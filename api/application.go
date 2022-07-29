@@ -708,21 +708,17 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 		if err != nil {
 			return err
 		}
-		if app.Replica > 1 && hostPortNum > 1 {
+		if app.Replica > 1 && hostPortNum > 0 {
 			return common.Error(common.ErrRequestParamInvalid,
 				common.Field("error", "port mapping is only supported under single replica"))
 		}
 	}
 	for _, service := range app.InitServices {
-		if app.Replica > 1 && len(service.Ports) > 0 {
-			return common.Error(common.ErrRequestParamInvalid,
-				common.Field("error", "port mapping is only supported under single replica"))
-		}
 		hostPortNum, err := isValidPort(&service, ports)
 		if err != nil {
 			return err
 		}
-		if app.Replica > 1 && hostPortNum > 1 {
+		if app.Replica > 1 && hostPortNum > 0 {
 			return common.Error(common.ErrRequestParamInvalid,
 				common.Field("error", "port mapping is only supported under single replica"))
 		}

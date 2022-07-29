@@ -637,10 +637,6 @@ func TestCreateContainerApplication(t *testing.T) {
 						HostPort:      8080,
 						ContainerPort: 8080,
 					},
-					{
-						HostPort:      8081,
-						ContainerPort: 8081,
-					},
 				},
 			},
 		},
