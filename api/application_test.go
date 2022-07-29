@@ -622,6 +622,66 @@ func TestCreateContainerApplication(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	appView.Volumes = []models.VolumeView{}
+	appView.Registries = []models.RegistryView{}
+	appView.Services = []models.ServiceView{
+		{
+			Service: specV1.Service{
+				Name:     "agent",
+				Hostname: "test-agent",
+				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+				Replica:  2,
+				Ports: []specV1.ContainerPort{
+					{
+						HostPort:      8080,
+						ContainerPort: 8080,
+					},
+					{
+						HostPort:      8081,
+						ContainerPort: 8081,
+					},
+				},
+			},
+		},
+	}
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	appView.Services = []models.ServiceView{
+		{
+			Service: specV1.Service{
+				Name:     "agent",
+				Hostname: "test-agent",
+				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+				Replica:  2,
+				Ports: []specV1.ContainerPort{
+					{
+						ServiceType:   string(v1.ServiceTypeNodePort),
+						NodePort:      8080,
+						ContainerPort: 8080,
+					},
+					{
+						ServiceType:   string(v1.ServiceTypeNodePort),
+						NodePort:      8081,
+						ContainerPort: 8081,
+					},
+				},
+			},
+		},
+	}
+	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Return(eden2, nil).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(mApp, nil).Times(1)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestInitContainerApp(t *testing.T) {
