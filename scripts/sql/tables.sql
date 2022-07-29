@@ -150,4 +150,16 @@ CREATE TABLE IF NOT EXISTS `baetyl_module` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_name` (`name`,`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='module table';
+
+CREATE TABLE IF NOT EXISTS `baetyl_cron_app` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID,主键',
+  `name` varchar(128) NOT NULL DEFAULT '' COMMENT '应用名称',
+  `namespace` varchar(64) NOT NULL DEFAULT '' COMMENT '命名空间',
+  `selector` varchar(2048) NOT NULL DEFAULT '' COMMENT '边缘节点选择器',
+  `cron_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'cron time',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_name` (`namespace`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='cron app table';
 COMMIT;
