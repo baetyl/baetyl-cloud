@@ -704,13 +704,13 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 				return err
 			}
 		}
-		if app.Replica > 1 && len(service.Ports) > 0 {
-			return common.Error(common.ErrRequestParamInvalid,
-				common.Field("error", "port mapping is only supported under single replica"))
-		}
-		err := isValidPort(&service, ports)
+		hostPortNum, err := isValidPort(&service, ports)
 		if err != nil {
 			return err
+		}
+		if app.Replica > 1 && hostPortNum > 1 {
+			return common.Error(common.ErrRequestParamInvalid,
+				common.Field("error", "port mapping is only supported under single replica"))
 		}
 	}
 	for _, service := range app.InitServices {
@@ -718,9 +718,13 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 			return common.Error(common.ErrRequestParamInvalid,
 				common.Field("error", "port mapping is only supported under single replica"))
 		}
-		err := isValidPort(&service, ports)
+		hostPortNum, err := isValidPort(&service, ports)
 		if err != nil {
 			return err
+		}
+		if app.Replica > 1 && hostPortNum > 1 {
+			return common.Error(common.ErrRequestParamInvalid,
+				common.Field("error", "port mapping is only supported under single replica"))
 		}
 	}
 
@@ -734,14 +738,15 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 	return nil
 }
 
-func isValidPort(service *models.ServiceView, ports map[int32]bool) error {
+func isValidPort(service *models.ServiceView, ports map[int32]bool) (int, error) {
+	hostPortNum := 0
 	for _, port := range service.Ports {
 		if port.ServiceType == string(v1.ServiceTypeNodePort) {
 			if port.NodePort <= 0 {
-				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "invalid NodePort"))
+				return hostPortNum, common.Error(common.ErrRequestParamInvalid, common.Field("error", "invalid NodePort"))
 			}
 			if _, ok := ports[port.NodePort]; ok {
-				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate host ports"))
+				return hostPortNum, common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate node ports"))
 			} else {
 				ports[port.NodePort] = true
 			}
@@ -750,13 +755,14 @@ func isValidPort(service *models.ServiceView, ports map[int32]bool) error {
 				continue
 			}
 			if _, ok := ports[port.HostPort]; ok {
-				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate host ports"))
+				return hostPortNum, common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate host ports"))
 			} else {
+				hostPortNum++
 				ports[port.HostPort] = true
 			}
 		}
 	}
-	return nil
+	return hostPortNum, nil
 }
 
 func isProgramConfig(volume string) bool {
