@@ -15,6 +15,7 @@ const (
 	memory           = "memory"
 	duration         = "duration"
 	setcpus          = "setcpus"
+	devicemodel      = "devicemodel"
 	nonBaetyl        = "nonBaetyl"
 	namespace        = "namespace"
 	validLabels      = "validLabels"
@@ -30,6 +31,7 @@ var regexps = map[string]string{
 	duration:        "^[1-9][0-9]*(s|m|h)$",
 	setcpus:         "^(([1-9]\\d*|0)-([1-9]\\d*|0)|([1-9]\\d*|0)(,([1-9]\\d*|0))*)$",
 	validConfigKeys: "^[-._a-zA-Z0-9]+$",
+	devicemodel:     "^[a-zA-Z0-9\\-_]{1,32}$",
 }
 
 var validate *validator.Validate
