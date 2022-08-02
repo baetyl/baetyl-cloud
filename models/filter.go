@@ -19,6 +19,8 @@ type ListOptions struct {
 	LabelSelector string `form:"selector,omitempty" json:"selector,omitempty"`
 	NodeSelector  string `form:"nodeSelector,omitempty" json:"nodeSelector,omitempty"`
 	FieldSelector string `form:"fieldSelector,omitempty" json:"fieldSelector,omitempty"`
+	KeywordType   string `form:"keywordType,omitempty" json:"keywordType,omitempty"`
+	Keyword       string `form:"keyword,omitempty" json:"keyword,omitempty"`
 	Limit         int64  `form:"limit,omitempty" json:"limit,omitempty"`
 	Continue      string `form:"continue,omitempty" json:"continue,omitempty"`
 	Filter        `json:",inline"`
