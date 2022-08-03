@@ -46,6 +46,15 @@ func (f *Filter) GetFuzzyName() string {
 	return f.Name
 }
 
+func (l *ListOptions) GetFuzzyKeyword() string {
+	if l.Keyword == "" {
+		return "%"
+	} else if !strings.Contains(l.Keyword, "%") {
+		return "%" + l.Keyword + "%"
+	}
+	return l.Keyword
+}
+
 func GetPagingParam(listOptions *ListOptions, resLen int) (start, end int) {
 	start = 0
 	end = resLen
