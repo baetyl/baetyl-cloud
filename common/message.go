@@ -30,6 +30,7 @@ const (
 	ErrResourceConflict        = "ErrResourceConflict"
 	ErrResourceDeleteForbidden = "ErrResourceDeleteForbidden"
 	ErrResourceHasBeenUsed     = "ErrResourceHasBeenUsed"
+	ErrSubResourceExist        = "ErrSubResourceExist"
 	ErrNodeNotReady            = "ErrNodeNotReady"
 	ErrInvalidToken            = "ErrInvalidToken"
 
@@ -112,6 +113,7 @@ var templates = map[Code]string{
 	ErrResourceAccessForbidden: "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} can not be accessed{{if .namespace}} in namespace({{.namespace}}){{end}}.",
 	ErrResourceConflict:        "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} already exist.",
 	ErrResourceHasBeenUsed:     "该资源名称已被占用，请更换命名。The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} has been used.",
+	ErrSubResourceExist:        "该资源下存在子资源未删除，请删除后重试。The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} exist",
 	ErrResourceDeleteForbidden: "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} can not be deleted{{if .namespace}} in namespace({{.namespace}}){{end}}",
 	// * volumes
 	ErrVolumeType: "The volume{{if .name}} ({{.name}}){{end}} type should be{{if .type}} ({{.type}}){{end}}.",
