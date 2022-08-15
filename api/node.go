@@ -28,6 +28,7 @@ const (
 	BaetylAppNameKey        = "baetyl-app-name"
 	BaetylCoreConfPrefix    = "baetyl-core-conf"
 	BaetylInitConfPrefix    = "baetyl-init-conf"
+	BaetylAgentConfPrefix   = "baetyl-agent-conf"
 	BaetylCoreContainerPort = 80
 	BaetylModule            = "baetyl"
 	BaetylCoreAPIPort       = "BaetylCoreAPIPort"
@@ -678,9 +679,16 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	// get agent port
+	agentPort, err := api.getAgentPort(node)
+	if err != nil {
+		return nil, err
+	}
+
 	if coreConfig.Version == version &&
 		coreConfig.Frequency == freq &&
-		coreConfig.APIPort == port {
+		coreConfig.APIPort == port &&
+		coreConfig.AgentPort == agentPort {
 		return api.ToApplicationView(app)
 	}
 
@@ -692,7 +700,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	coreService.Image = image
 
-	err = api.updateCoreAppConfig(app, node, coreConfig.Frequency)
+	err = api.updateCoreAppConfig(app, node, coreConfig.Frequency, coreConfig.AgentPort)
 	if err != nil {
 		return nil, err
 	}
@@ -704,14 +712,22 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	node.Attributes[v1.BaetylCoreAPIPort] = fmt.Sprintf("%d", coreConfig.APIPort)
 
-	res, err := api.App.Update(nil, ns, app)
+	coreApp, err := api.App.Update(nil, ns, app)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = api.Node.UpdateNodeAppVersion(nil, ns, res)
+	_, err = api.Node.UpdateNodeAppVersion(nil, ns, coreApp)
 	if err != nil {
 		return nil, err
+	}
+
+	if coreConfig.AgentPort != agentPort {
+		err = api.updateAgentConfig(app, node, coreConfig.AgentPort)
+		if err != nil {
+			return nil, err
+		}
+		node.Attributes[v1.BaetylAgentPort] = fmt.Sprintf(":%d", coreConfig.AgentPort)
 	}
 
 	_, err = api.Node.Update(ns, node)
@@ -719,7 +735,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	return api.ToApplicationView(res)
+	return api.ToApplicationView(coreApp)
 }
 
 func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
@@ -757,6 +773,13 @@ func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// get agent port
+	coreInfo.AgentPort, err = api.getAgentPort(node)
+	if err != nil {
+		return nil, err
+	}
+
 	return coreInfo, nil
 }
 
@@ -1069,6 +1092,11 @@ func (api *API) parseCoreAppConfigs(c *common.Context) (*models.NodeCoreConfigs,
 	if config.APIPort < 1024 || config.APIPort > 65535 {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "api port must be between 1024 - 65535"))
 	}
+
+	if config.AgentPort < 1024 || config.AgentPort > 65535 {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "agent port must be between 1024 - 65535"))
+	}
+
 	return config, nil
 }
 
@@ -1133,7 +1161,7 @@ func (api *API) updateCoreVersions(node *v1.Node, currentVersion, updateVersion 
 	node.Attributes[BaetylCorePrevVersion] = currentVersion
 }
 
-func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int) error {
+func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq, agentPort int) error {
 	config, err := api.getAppConfig(app, BaetylCoreConfPrefix)
 	if err != nil {
 		return err
@@ -1142,6 +1170,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int
 		"CoreConfName":  config.Name,
 		"CoreAppName":   app.Name,
 		"CoreFrequency": fmt.Sprintf("%ds", freq),
+		"AgentPort":     agentPort,
 		"GPUStats":      node.NodeMode == context.RunModeKube,
 		"DiskNetStats":  node.NodeMode == context.RunModeKube,
 		"QPSStats":      node.NodeMode == context.RunModeKube,
@@ -1166,6 +1195,45 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq int
 	newConf.Name = config.Name
 	newConf.Version = config.Version
 	_, err = api.Config.Update(nil, config.Namespace, &newConf)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (api *API) updateAgentConfig(app *v1.Application, node *v1.Node, agentPort int) error {
+	config, err := api.getAppConfig(app, BaetylAgentConfPrefix)
+	if err != nil {
+		return err
+	}
+	params := map[string]interface{}{
+		"AgentAppName":  app.Name,
+		"AgentConfName": config.Name,
+		"AgentPort":     agentPort,
+	}
+	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateAgentConfYaml, params)
+	if err != nil {
+		return err
+	}
+
+	var data []byte
+	var ok bool
+	if data, ok = res.([]byte); !ok {
+		return common.Error(common.ErrConvertConflict, common.Field("name", "BaetylAgentConfig"), common.Field("error", "failed to convert to []byte`"))
+	}
+
+	var newConf v1.Configuration
+	err = yaml.Unmarshal(data, &newConf)
+	if err != nil {
+		return common.Error(common.ErrTemplate, common.Field("error", err))
+	}
+
+	newConf.Name = config.Name
+	newConf.Version = config.Version
+	newConf.UpdateTimestamp = time.Now()
+	newConf.CreationTimestamp = config.CreationTimestamp
+
+	_, err = api.Facade.UpdateConfig(config.Namespace, &newConf)
 	if err != nil {
 		return err
 	}
@@ -1224,6 +1292,24 @@ func (api *API) getCoreAppAPIPort(node *v1.Node) (int, error) {
 	res, err := strconv.Atoi(port)
 	if err != nil {
 		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylCoreAPIPort), common.Field("error", err.Error()))
+	}
+	return res, nil
+}
+
+func (api *API) getAgentPort(node *v1.Node) (int, error) {
+	if node.Attributes == nil {
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
+	}
+	if _, ok := node.Attributes[v1.BaetylAgentPort]; !ok {
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", v1.BaetylAgentPort), common.Field("namespace", node.Namespace))
+	}
+	port, ok := node.Attributes[v1.BaetylAgentPort].(string)
+	if !ok {
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylAgentPort), common.Field("error", "failed to convert to string`"))
+	}
+	res, err := strconv.Atoi(strings.TrimLeft(port, ":"))
+	if err != nil {
+		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylAgentPort), common.Field("error", err.Error()))
 	}
 	return res, nil
 }
@@ -1289,7 +1375,11 @@ func (api *API) UpdateConfigByAccelerator(ns string, node *v1.Node) error {
 	if err != nil {
 		return err
 	}
-	err = api.updateCoreAppConfig(core, node, freq)
+	agentPort, err := api.getAgentPort(node)
+	if err != nil {
+		return err
+	}
+	err = api.updateCoreAppConfig(core, node, freq, agentPort)
 	if err != nil {
 		return err
 	}

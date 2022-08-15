@@ -135,6 +135,9 @@ func fromNodeModel(node *specV1.Node) (*v1alpha1.Node, error) {
 	if _, ok := node.Attributes[specV1.BaetylCoreAPIPort]; !ok {
 		node.Attributes[specV1.BaetylCoreAPIPort] = common.DefaultCoreAPIPort
 	}
+	if _, ok := node.Attributes[specV1.BaetylAgentPort]; !ok {
+		node.Attributes[specV1.BaetylAgentPort] = common.DefaultAgentPort
+	}
 	if _, ok := node.Attributes[specV1.KeySyncMode]; !ok {
 		node.Attributes[specV1.KeySyncMode] = specV1.CloudMode
 	}
