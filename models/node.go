@@ -58,6 +58,7 @@ type NodeCoreConfigs struct {
 	// unit: seconds
 	Frequency int `yaml:"frequency,omitempty" json:"frequency,omitempty"`
 	APIPort   int `yaml:"apiport,omitempty" json:"apiport,omitempty"`
+	AgentPort int `yaml:"agentport,omitempty" json:"agentport,omitempty"`
 }
 
 type NodeCoreVersions struct {

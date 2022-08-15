@@ -1059,6 +1059,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 		},
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylAgentPort:     common.DefaultAgentPort,
 		},
 		Desire: specV1.Desire{
 			specV1.KeySysApps: []interface{}{
@@ -1093,6 +1094,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 		Accelerator: specV1.NVAccelerator,
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
+			specV1.BaetylAgentPort:     common.DefaultAgentPort,
 		},
 		Desire: specV1.Desire{
 			specV1.KeySysApps: []interface{}{
@@ -1852,6 +1854,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.BaetylCoreAPIPort:   common.DefaultCoreAPIPort,
+			specV1.BaetylAgentPort:     common.DefaultAgentPort,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},
@@ -1908,6 +1911,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Version:   "v2.0.0",
 		Frequency: 20,
 		APIPort:   30050,
+		AgentPort: 30080,
 	}
 	data, err := json.Marshal(coreConfig)
 	assert.NoError(t, err)
@@ -1935,6 +1939,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		"CoreAppName":   "baetyl-core-1",
 		"CoreConfName":  "baetyl-core-conf-ialplsycd",
 		"CoreFrequency": "40s",
+		"AgentPort":     30080,
 		"GPUStats":      false,
 		"DiskNetStats":  false,
 		"QPSStats":      false,
@@ -1953,6 +1958,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Version:   "v2.0.0",
 		Frequency: 40,
 		APIPort:   30000,
+		AgentPort: 30080,
 	}
 	data, err = json.Marshal(coreConfig)
 	assert.NoError(t, err)
@@ -1977,6 +1983,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Version:   "v2.0.0",
 		Frequency: 40,
 		APIPort:   30000,
+		AgentPort: 30080,
 	}
 	data, err = json.Marshal(coreConfig)
 	assert.NoError(t, err)
@@ -1990,6 +1997,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Version:   "v2.0.0",
 		Frequency: 30,
 		APIPort:   30000,
+		AgentPort: 30080,
 	}
 	data, err = json.Marshal(coreConfig)
 	assert.NoError(t, err)
@@ -2024,6 +2032,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Version:   "v2.0.0",
 		Frequency: 40,
 		APIPort:   20000,
+		AgentPort: 30080,
 	}
 	data, err = json.Marshal(coreConfig)
 	assert.NoError(t, err)
@@ -2063,6 +2072,7 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.BaetylCoreAPIPort:   common.DefaultCoreAPIPort,
+			specV1.BaetylAgentPort:     common.DefaultAgentPort,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},

@@ -194,6 +194,7 @@ func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns, nodeName string, p
 	params["CoreConfName"] = confName
 	params["CoreFrequency"] = fmt.Sprintf("%ss", common.DefaultCoreFrequency)
 	params["CoreAPIPort"] = common.DefaultCoreAPIPort
+	params["AgentPort"] = common.DefaultAgentPort
 
 	// create config
 	conf, err := s.GenConfig(tx, ns, TemplateCoreConfYaml, params)
