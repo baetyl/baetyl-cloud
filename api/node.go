@@ -723,7 +723,12 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 
 	if coreConfig.AgentPort != agentPort {
-		err = api.updateAgentConfig(app, node, coreConfig.AgentPort)
+		// get agent app
+		agent, err := api.getAgentAppByNodeName(ns, n)
+		if err != nil {
+			return nil, err
+		}
+		err = api.updateAgentConfig(agent, node, coreConfig.AgentPort)
 		if err != nil {
 			return nil, err
 		}
@@ -1338,6 +1343,24 @@ func (api *API) getCoreAppByNodeName(ns, node string) (*v1.Application, error) {
 	}
 	if core == "" {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"), common.Field("name", v1.BaetylCore), common.Field("namespace", ns))
+	}
+	return api.App.Get(ns, core, "")
+}
+
+func (api *API) getAgentAppByNodeName(ns, node string) (*v1.Application, error) {
+	appList, err := api.Index.ListAppsByNode(ns, node)
+	if err != nil {
+		return nil, err
+	}
+	var core string
+	for _, item := range appList {
+		if strings.Contains(item, v1.BaetylAgent) {
+			core = item
+			break
+		}
+	}
+	if core == "" {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"), common.Field("name", v1.BaetylAgent), common.Field("namespace", ns))
 	}
 	return api.App.Get(ns, core, "")
 }
