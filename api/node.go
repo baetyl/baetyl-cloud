@@ -1175,7 +1175,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq, ag
 		"CoreConfName":  config.Name,
 		"CoreAppName":   app.Name,
 		"CoreFrequency": fmt.Sprintf("%ds", freq),
-		"AgentPort":     agentPort,
+		"AgentPort":     fmt.Sprintf(":%d", agentPort),
 		"GPUStats":      node.NodeMode == context.RunModeKube,
 		"DiskNetStats":  node.NodeMode == context.RunModeKube,
 		"QPSStats":      node.NodeMode == context.RunModeKube,
