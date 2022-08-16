@@ -1301,7 +1301,7 @@ func (api *API) getAgentPort(node *v1.Node) (int, error) {
 		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
 	}
 	if _, ok := node.Attributes[v1.BaetylAgentPort]; !ok {
-		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", v1.BaetylAgentPort), common.Field("namespace", node.Namespace))
+		node.Attributes[v1.BaetylAgentPort] = common.DefaultAgentPort
 	}
 	port, ok := node.Attributes[v1.BaetylAgentPort].(string)
 	if !ok {
