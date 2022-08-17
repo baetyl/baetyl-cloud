@@ -286,6 +286,28 @@ func WrapperRaw(handler HandlerFunc, abort bool) func(c *gin.Context) {
 	}
 }
 
+func WrapperNative(handler HandlerFunc, abort bool) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		cc := NewContext(c)
+		defer func() {
+			if r := recover(); r != nil {
+				err, ok := r.(error)
+				if !ok {
+					err = Error(ErrUnknown, Field("error", r))
+				}
+				log.L().Info("handle a panic", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
+				PopulateFailedResponse(cc, err, abort)
+			}
+		}()
+		_, err := handler(cc)
+		if err != nil {
+			log.L().Error("failed to handler request", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
+			PopulateFailedResponse(cc, err, abort)
+			return
+		}
+	}
+}
+
 func _toJsonString(obj interface{}) string {
 	data, _ := json.Marshal(obj)
 	return string(data)
