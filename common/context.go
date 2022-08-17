@@ -299,7 +299,7 @@ func WrapperNative(handler HandlerFunc, abort bool) func(c *gin.Context) {
 				PopulateFailedResponse(cc, err, abort)
 			}
 		}()
-		res, err := handler(cc)
+		_, err := handler(cc)
 		if err != nil {
 			log.L().Error("failed to handler request", log.Any(cc.GetTrace()), log.Code(err), log.Error(err))
 			PopulateFailedResponse(cc, err, abort)
