@@ -9,6 +9,10 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
+const (
+	HookSupportSysApps = "baetyl-hook-support-sys-apps"
+)
+
 func (api *API) GetModules(c *common.Context) (interface{}, error) {
 	res, err := api.Module.GetModules(c.Param("name"))
 	if err != nil {
@@ -127,7 +131,14 @@ func (api *API) parseAndCheckModule(module *models.Module, c *common.Context) er
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "version is required"))
 	}
 	if module.Type == string(common.TypeSystemOptional) {
-		supportSysApps := api.SysApp.GetOptionalApps()
+		var supportSysApps []string
+		if f, exist := api.Hooks[HookSupportSysApps]; exist {
+			if apps, ok := f.([]string); ok {
+				supportSysApps = apps
+			}
+		} else {
+			supportSysApps = api.SysApp.GetOptionalApps()
+		}
 		var ok bool
 		for _, v := range supportSysApps {
 			if v == module.Name {
