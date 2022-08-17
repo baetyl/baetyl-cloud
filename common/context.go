@@ -305,9 +305,6 @@ func WrapperNative(handler HandlerFunc, abort bool) func(c *gin.Context) {
 			PopulateFailedResponse(cc, err, abort)
 			return
 		}
-		if res == nil {
-			return
-		}
 	}
 }
 
