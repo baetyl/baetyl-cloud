@@ -653,7 +653,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 
 	// get core app
-	app, err := api.getCoreAppByNodeName(ns, n)
+	app, err := api.getAppByNodeName(ns, n, v1.BaetylCore)
 	if err != nil {
 		return nil, err
 	}
@@ -700,31 +700,21 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	coreService.Image = image
 
-	err = api.updateCoreAppConfig(app, node, coreConfig.Frequency, coreConfig.AgentPort)
-	if err != nil {
-		return nil, err
-	}
-	node.Attributes[v1.BaetylCoreFrequency] = fmt.Sprintf("%d", coreConfig.Frequency)
-
 	err = api.updateCoreAppAPIPort(ns, coreService, port, coreConfig.APIPort)
 	if err != nil {
 		return nil, err
 	}
 	node.Attributes[v1.BaetylCoreAPIPort] = fmt.Sprintf("%d", coreConfig.APIPort)
 
-	coreApp, err := api.App.Update(nil, ns, app)
+	err = api.updateCoreAppConfig(app, node, coreConfig.Frequency, coreConfig.AgentPort)
 	if err != nil {
 		return nil, err
 	}
-
-	_, err = api.Node.UpdateNodeAppVersion(nil, ns, coreApp)
-	if err != nil {
-		return nil, err
-	}
+	node.Attributes[v1.BaetylCoreFrequency] = fmt.Sprintf("%d", coreConfig.Frequency)
 
 	if coreConfig.AgentPort != agentPort {
 		// get agent app
-		agent, err := api.getAgentAppByNodeName(ns, n)
+		agent, err := api.getAppByNodeName(ns, n, v1.BaetylAgent)
 		if err != nil {
 			return nil, err
 		}
@@ -733,9 +723,24 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 			return nil, err
 		}
 		node.Attributes[v1.BaetylAgentPort] = fmt.Sprintf(":%d", coreConfig.AgentPort)
+
+		// get init app
+		init, err := api.getAppByNodeName(ns, n, v1.BaetylInit)
+		if err != nil {
+			return nil, err
+		}
+		err = api.updateInitAppConfig(init, node, coreConfig.AgentPort)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	_, err = api.Node.Update(ns, node)
+	if err != nil {
+		return nil, err
+	}
+
+	coreApp, err := api.App.Get(ns, app.Name, "")
 	if err != nil {
 		return nil, err
 	}
@@ -751,7 +756,7 @@ func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
 	}
 
 	var coreInfo models.NodeCoreConfigs
-	app, err := api.getCoreAppByNodeName(ns, n)
+	app, err := api.getAppByNodeName(ns, n, v1.BaetylCore)
 	if err != nil {
 		return nil, err
 	}
@@ -808,7 +813,7 @@ func (api *API) GetCoreAppVersions(c *common.Context) (interface{}, error) {
 		coreVersions.Versions = append(coreVersions.Versions, res)
 	}
 
-	app, err := api.getCoreAppByNodeName(ns, n)
+	app, err := api.getAppByNodeName(ns, n, v1.BaetylCore)
 	if err != nil {
 		return nil, err
 	}
@@ -1199,7 +1204,9 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq, ag
 
 	newConf.Name = config.Name
 	newConf.Version = config.Version
-	_, err = api.Config.Update(nil, config.Namespace, &newConf)
+	newConf.UpdateTimestamp = time.Now()
+	newConf.CreationTimestamp = config.CreationTimestamp
+	_, err = api.Facade.UpdateConfig(config.Namespace, &newConf)
 	if err != nil {
 		return err
 	}
@@ -1245,7 +1252,7 @@ func (api *API) updateAgentConfig(app *v1.Application, node *v1.Node, agentPort 
 	return nil
 }
 
-func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node) error {
+func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node, agentPort int) error {
 	config, err := api.getAppConfig(app, BaetylInitConfPrefix)
 	if err != nil {
 		return err
@@ -1253,6 +1260,7 @@ func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node) error {
 	params := map[string]interface{}{
 		"InitConfName": config.Name,
 		"InitAppName":  app.Name,
+		"AgentPort":    fmt.Sprintf(":%d", agentPort),
 		"GPUStats":     node.NodeMode == context.RunModeKube,
 		"DiskNetStats": node.NodeMode == context.RunModeKube,
 		"QPSStats":     node.NodeMode == context.RunModeKube,
@@ -1276,7 +1284,9 @@ func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node) error {
 
 	newConf.Name = config.Name
 	newConf.Version = config.Version
-	_, err = api.Config.Update(nil, config.Namespace, &newConf)
+	newConf.UpdateTimestamp = time.Now()
+	newConf.CreationTimestamp = config.CreationTimestamp
+	_, err = api.Facade.UpdateConfig(config.Namespace, &newConf)
 	if err != nil {
 		return err
 	}
@@ -1329,40 +1339,22 @@ func (api *API) updateCoreAppAPIPort(ns string, service *v1.Service, oldPort, ne
 	return common.Error(common.ErrResourceNotFound, common.Field("type", "APIPort"), common.Field("name", v1.BaetylCore), common.Field("namespace", ns))
 }
 
-func (api *API) getCoreAppByNodeName(ns, node string) (*v1.Application, error) {
+func (api *API) getAppByNodeName(ns, node, prefix string) (*v1.Application, error) {
 	appList, err := api.Index.ListAppsByNode(ns, node)
 	if err != nil {
 		return nil, err
 	}
-	var core string
+	var app string
 	for _, item := range appList {
-		if strings.Contains(item, v1.BaetylCore) {
-			core = item
+		if strings.Contains(item, prefix) {
+			app = item
 			break
 		}
 	}
-	if core == "" {
-		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"), common.Field("name", v1.BaetylCore), common.Field("namespace", ns))
+	if app == "" {
+		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"), common.Field("name", prefix), common.Field("namespace", ns))
 	}
-	return api.App.Get(ns, core, "")
-}
-
-func (api *API) getAgentAppByNodeName(ns, node string) (*v1.Application, error) {
-	appList, err := api.Index.ListAppsByNode(ns, node)
-	if err != nil {
-		return nil, err
-	}
-	var core string
-	for _, item := range appList {
-		if strings.Contains(item, v1.BaetylAgent) {
-			core = item
-			break
-		}
-	}
-	if core == "" {
-		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"), common.Field("name", v1.BaetylAgent), common.Field("namespace", ns))
-	}
-	return api.App.Get(ns, core, "")
+	return api.App.Get(ns, app, "")
 }
 
 func (api *API) getCoreAppFrequency(node *v1.Node) (int, error) {
@@ -1406,27 +1398,11 @@ func (api *API) UpdateConfigByAccelerator(ns string, node *v1.Node) error {
 	if err != nil {
 		return err
 	}
-	res, err := api.App.Update(nil, ns, core)
-	if err != nil {
-		return err
-	}
-	_, err = api.Node.UpdateNodeAppVersion(nil, ns, res)
-	if err != nil {
-		return err
-	}
 	init, err := api.App.Get(ns, initName, "")
 	if err != nil {
 		return err
 	}
-	err = api.updateInitAppConfig(init, node)
-	if err != nil {
-		return err
-	}
-	res, err = api.App.Update(nil, ns, init)
-	if err != nil {
-		return err
-	}
-	_, err = api.Node.UpdateNodeAppVersion(nil, ns, res)
+	err = api.updateInitAppConfig(init, node, agentPort)
 	if err != nil {
 		return err
 	}
