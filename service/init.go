@@ -184,6 +184,7 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["GPUStats"] = node.NodeMode == context.RunModeKube
 	params["DiskNetStats"] = node.NodeMode == context.RunModeKube
 	params["QPSStats"] = node.NodeMode == context.RunModeKube
+	params["AgentPort"] = common.DefaultAgentPort
 
 	registryAuth, err := s.GetRegistryAuth()
 	if err != nil {

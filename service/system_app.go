@@ -221,6 +221,7 @@ func (s *SystemAppServiceImpl) genInitApp(tx interface{}, ns, nodeName string, p
 	confName := fmt.Sprintf("baetyl-init-conf-%s", common.RandString(9))
 	params["InitAppName"] = appName
 	params["InitConfName"] = confName
+	params["AgentPort"] = common.DefaultAgentPort
 
 	// create config
 	conf, err := s.GenConfig(tx, ns, templateInitConfYaml, params)
