@@ -89,7 +89,7 @@ const (
 	// DefaultCoreAPIPort
 	DefaultCoreAPIPort = "30050"
 	// DefaultAgentPort
-	DefaultAgentPort = ":30080"
+	DefaultAgentPort = "30080"
 	// ComposeVersion compose version
 	ComposeVersion = "3"
 	// Bind bind

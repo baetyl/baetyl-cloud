@@ -722,7 +722,7 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		node.Attributes[v1.BaetylAgentPort] = fmt.Sprintf(":%d", coreConfig.AgentPort)
+		node.Attributes[v1.BaetylAgentPort] = fmt.Sprintf("%d", coreConfig.AgentPort)
 
 		// get init app
 		init, err := api.getAppByNodeName(ns, n, v1.BaetylInit)
@@ -1180,7 +1180,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq, ag
 		"CoreConfName":  config.Name,
 		"CoreAppName":   app.Name,
 		"CoreFrequency": fmt.Sprintf("%ds", freq),
-		"AgentPort":     fmt.Sprintf(":%d", agentPort),
+		"AgentPort":     fmt.Sprintf("%d", agentPort),
 		"GPUStats":      node.NodeMode == context.RunModeKube,
 		"DiskNetStats":  node.NodeMode == context.RunModeKube,
 		"QPSStats":      node.NodeMode == context.RunModeKube,
@@ -1221,7 +1221,7 @@ func (api *API) updateAgentConfig(app *v1.Application, node *v1.Node, agentPort 
 	params := map[string]interface{}{
 		"AgentAppName":  app.Name,
 		"AgentConfName": config.Name,
-		"AgentPort":     fmt.Sprintf(":%d", agentPort),
+		"AgentPort":     fmt.Sprintf("%d", agentPort),
 	}
 	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateAgentConfYaml, params)
 	if err != nil {
@@ -1260,7 +1260,7 @@ func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node, agentPor
 	params := map[string]interface{}{
 		"InitConfName": config.Name,
 		"InitAppName":  app.Name,
-		"AgentPort":    fmt.Sprintf(":%d", agentPort),
+		"AgentPort":    fmt.Sprintf("%d", agentPort),
 		"GPUStats":     node.NodeMode == context.RunModeKube,
 		"DiskNetStats": node.NodeMode == context.RunModeKube,
 		"QPSStats":     node.NodeMode == context.RunModeKube,
@@ -1322,7 +1322,7 @@ func (api *API) getAgentPort(node *v1.Node) (int, error) {
 	if !ok {
 		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylAgentPort), common.Field("error", "failed to convert to string`"))
 	}
-	res, err := strconv.Atoi(strings.TrimLeft(port, ":"))
+	res, err := strconv.Atoi(port)
 	if err != nil {
 		return 0, common.Error(common.ErrConvertConflict, common.Field("name", v1.BaetylAgentPort), common.Field("error", err.Error()))
 	}
