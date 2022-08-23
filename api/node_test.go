@@ -1940,7 +1940,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		"CoreAppName":   "baetyl-core-1",
 		"CoreConfName":  "baetyl-core-conf-ialplsycd",
 		"CoreFrequency": "40s",
-		"AgentPort":     ":30080",
+		"AgentPort":     "30080",
 		"GPUStats":      false,
 		"DiskNetStats":  false,
 		"QPSStats":      false,
