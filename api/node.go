@@ -1235,9 +1235,9 @@ func (api *API) updateAgentConfig(app *v1.Application, node *v1.Node, agentPort 
 		return err
 	}
 	params := map[string]interface{}{
-		"AgentAppName":    app.Name,
-		"AgentConfName":   config.Name,
-		"AgentServerPort": fmt.Sprintf(":%d", agentPort),
+		"AgentAppName":  app.Name,
+		"AgentConfName": config.Name,
+		"AgentPort":     fmt.Sprintf("%d", agentPort),
 	}
 	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateAgentConfYaml, params)
 	if err != nil {
