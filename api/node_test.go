@@ -1141,6 +1141,9 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 	sIndex.EXPECT().ListAppsByNode("default", newNode.Name).Return([]string{specV1.BaetylGPUMetrics, specV1.BaetylCore, specV1.BaetylInit}, nil)
 	sModule.EXPECT().ListModules(&models.Filter{}, gomock.Any()).Return(modules, nil).Times(1)
 	sSysApp.EXPECT().GenOptionalApps(nil, mNode.Namespace, mNode, []string{specV1.BaetylGPUMetrics}).Times(1)
+	nodeList := []string{"abc"}
+	sNode.EXPECT().UpdateNodeAppVersion(nil, mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
+	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
 
 	sApp.EXPECT().Get("default", gomock.Any(), gomock.Any()).Return(coreApp, nil)
 	sConfig.EXPECT().Get(coreApp.Namespace, gomock.Any(), gomock.Any()).Return(coreConf, nil)
@@ -1148,10 +1151,13 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 	sConfig.EXPECT().Get(initApp.Namespace, gomock.Any(), gomock.Any()).Return(initConf, nil)
 	coreConfBs, _ := json.Marshal(coreConf)
 	sInit.EXPECT().GetResource(gomock.Any(), mNode.Name, service.TemplateCoreConfYaml, gomock.Any()).Return(coreConfBs, nil)
-	facade.EXPECT().UpdateConfig(coreApp.Namespace, gomock.Any()).Return(coreConf, nil)
+	sConfig.EXPECT().Update(nil, coreConf.Namespace, coreConf).Return(coreConf, nil)
+	sApp.EXPECT().Update(nil, gomock.Any(), coreApp).Return(coreApp, nil)
+
 	initConfBs, _ := json.Marshal(initConf)
 	sInit.EXPECT().GetResource(gomock.Any(), mNode.Name, service.TemplateInitConfYaml, gomock.Any()).Return(initConfBs, nil)
-	facade.EXPECT().UpdateConfig(initApp.Namespace, gomock.Any()).Return(initConf, nil)
+	sConfig.EXPECT().Update(nil, initConf.Namespace, initConf).Return(initConf, nil)
+	sApp.EXPECT().Update(nil, gomock.Any(), initApp).Return(initApp, nil)
 
 	sNode.EXPECT().Update(newNode.Namespace, newNode).Return(newNode, nil)
 	// equal case
@@ -1899,7 +1905,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		},
 		System: true,
 	}
-	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(2)
+	mockApp.EXPECT().Get(ns, "baetyl-core-1", "").Return(coreApp, nil).Times(1)
 	module := &models.Module{
 		Name:    "baetyl-core",
 		Version: "v2.0.0",
@@ -1949,7 +1955,10 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	confData, err := json.Marshal(cconfig)
 	assert.NoError(t, err)
 	mockInit.EXPECT().GetResource(ns, node.Name, service.TemplateCoreConfYaml, pparams).Return(confData, nil).Times(1)
-	facade.EXPECT().UpdateConfig(ns, gomock.Any()).Return(cconfig, nil).Times(1)
+	mockConfig.EXPECT().Update(nil, ns, cconfig).Return(cconfig, nil).Times(1)
+
+	mockApp.EXPECT().Update(nil, ns, coreApp).Return(coreApp, nil).Times(1)
+	mockNode.EXPECT().UpdateNodeAppVersion(nil, ns, coreApp).Return(appList, nil).Times(1)
 	mockNode.EXPECT().Update(ns, node).Return(node, nil).Times(1)
 
 	coreConfig = models.NodeCoreConfigs{
