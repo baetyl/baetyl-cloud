@@ -747,12 +747,21 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 			return nil, err
 		}
 
-		// update init config
+		// update init config & app
 		init, err := api.getAppByNodeName(ns, n, v1.BaetylInit)
 		if err != nil {
 			return nil, err
 		}
 		err = api.updateInitAppConfig(init, node, coreConfig.AgentPort)
+		if err != nil {
+			return nil, err
+		}
+
+		updateInit, err := api.App.Update(nil, ns, init)
+		if err != nil {
+			return nil, err
+		}
+		_, err = api.Node.UpdateNodeAppVersion(nil, ns, updateInit)
 		if err != nil {
 			return nil, err
 		}
