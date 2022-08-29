@@ -1858,6 +1858,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Namespace: ns,
 		Name:      n,
 		Version:   "0",
+		NodeMode:  context.RunModeKube,
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.BaetylCoreAPIPort:   common.DefaultCoreAPIPort,
@@ -1946,10 +1947,11 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		"CoreAppName":   "baetyl-core-1",
 		"CoreConfName":  "baetyl-core-conf-ialplsycd",
 		"CoreFrequency": "40s",
+		"NodeMode":      "kube",
 		"AgentPort":     "30080",
-		"GPUStats":      false,
-		"DiskNetStats":  false,
-		"QPSStats":      false,
+		"GPUStats":      true,
+		"DiskNetStats":  true,
+		"QPSStats":      true,
 	}
 
 	confData, err := json.Marshal(cconfig)
