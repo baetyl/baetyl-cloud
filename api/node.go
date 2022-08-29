@@ -1206,6 +1206,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq, ag
 	params := map[string]interface{}{
 		"CoreConfName":  config.Name,
 		"CoreAppName":   app.Name,
+		"NodeMode":      node.NodeMode,
 		"CoreFrequency": fmt.Sprintf("%ds", freq),
 		"AgentPort":     fmt.Sprintf("%d", agentPort),
 		"GPUStats":      node.NodeMode == context.RunModeKube,
