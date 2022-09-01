@@ -113,6 +113,17 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 			return nil, errors.Trace(err)
 		}
 	}
+
+	coreAppName := fmt.Sprintf("baetyl-core-%s", common.RandString(9))
+	// create secret
+	cert, err := s.genNodeCerts(tx, ns, node.Name, coreAppName)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	params["NodeCertName"] = cert.Name
+	params["NodeCertVersion"] = cert.Version
+	params["CoreAppName"] = coreAppName
+
 	if gen, ok := s.Hooks[HookNameGenSyncExtResource]; ok {
 		err := gen.(GenSyncExtResource)(tx, ns, node, params)
 		if err != nil {
@@ -188,9 +199,7 @@ func (s *SystemAppServiceImpl) GenOptionalApps(tx interface{}, ns string, node *
 }
 
 func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-core-%s", common.RandString(9))
 	confName := fmt.Sprintf("baetyl-core-conf-%s", common.RandString(9))
-	params["CoreAppName"] = appName
 	params["CoreConfName"] = confName
 	params["CoreFrequency"] = fmt.Sprintf("%ss", common.DefaultCoreFrequency)
 	params["CoreAPIPort"] = common.DefaultCoreAPIPort
@@ -202,15 +211,7 @@ func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns, nodeName string, p
 		return nil, errors.Trace(err)
 	}
 
-	// create secret
-	cert, err := s.genNodeCerts(tx, ns, nodeName, appName)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
 	params["CoreConfVersion"] = conf.Version
-	params["NodeCertName"] = cert.Name
-	params["NodeCertVersion"] = cert.Version
 
 	// create application
 	return s.GenApp(tx, ns, templateCoreAppYaml, params)
