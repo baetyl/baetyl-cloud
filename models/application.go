@@ -29,6 +29,7 @@ type ApplicationView struct {
 	Workload          string                `json:"workload,omitempty"` // deployment | daemonset | statefulset | job
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty"`
 	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
+	AutoScaleCfg      *specV1.AutoScaleCfg  `json:"autoScaleCfg,omitempty"`
 }
 
 // VolumeView volume view
@@ -61,6 +62,7 @@ type AppItem struct {
 	Workload          string                `json:"workload,omitempty" yaml:"workload,omitempty"` // deployment | daemonset | statefulset | job
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty" yaml:"jobConfig,omitempty"`
 	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
+	AutoScaleCfg      *specV1.AutoScaleCfg  `json:"autoScaleCfg,omitempty"`
 }
 
 // ApplicationList app List
