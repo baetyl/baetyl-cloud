@@ -728,7 +728,7 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "failed to add cron job, time should be set after now"))
 	}
 
-	if app.AutoScaleCfg != nil {
+	if app.AutoScaleCfg != nil && len(app.AutoScaleCfg.Metrics) != 0 {
 		if app.AutoScaleCfg.MinReplicas <= 0 {
 			return common.Error(common.ErrRequestParamInvalid,
 				common.Field("error", "minReplicas must be greater than 0"))
