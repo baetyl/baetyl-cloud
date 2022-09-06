@@ -728,6 +728,23 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "failed to add cron job, time should be set after now"))
 	}
 
+	if app.AutoScaleCfg != nil {
+		if app.AutoScaleCfg.MinReplicas <= 0 {
+			return common.Error(common.ErrRequestParamInvalid,
+				common.Field("error", "minReplicas must be greater than 0"))
+		}
+		if app.AutoScaleCfg.MaxReplicas < app.AutoScaleCfg.MinReplicas {
+			return common.Error(common.ErrRequestParamInvalid,
+				common.Field("error", "minReplicas must be less than maxReplicas"))
+		}
+		for _, metrics := range app.AutoScaleCfg.Metrics {
+			if metrics.Resource.Name != "cpu" && metrics.Resource.Name != "memory" {
+				return common.Error(common.ErrRequestParamInvalid,
+					common.Field("error", "only cpu and memory is supported"))
+			}
+		}
+	}
+
 	app.Labels = common.AddSystemLabel(app.Labels, map[string]string{
 		common.LabelAppMode: app.Mode,
 	})
