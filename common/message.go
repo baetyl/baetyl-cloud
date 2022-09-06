@@ -98,6 +98,7 @@ const (
 
 	ErrPubsubTimeout   = "ErrPubsubTimeout"
 	ErrUpdateSubLabels = "ErrUpdateSubLabels"
+	ErrDataTooLarge    = "ErrDataTooLarge"
 )
 
 var templates = map[Code]string{
@@ -180,6 +181,7 @@ var templates = map[Code]string{
 
 	ErrPubsubTimeout:   "Publish or subscribe message timeout. {{if .error}} ({{.error}}){{end}}",
 	ErrUpdateSubLabels: "Failed to update sub node labels. {{if .error}} ({{.error}}){{end}}",
+	ErrDataTooLarge:    "数据量过大。\nData too large. Resource {{if .name}}({{.name}}){{end}}, size={{if .size}}({{.size}}){{end}}, max={{if .max}}({{.max}}){{end}}",
 }
 
 func getHTTPStatus(c Code) int {
