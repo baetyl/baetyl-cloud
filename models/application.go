@@ -25,7 +25,7 @@ type ApplicationView struct {
 	CronStatus        specV1.CronStatusCode `json:"cronStatus" default:"0"`
 	CronTime          time.Time             `json:"cronTime,omitempty"`
 	HostNetwork       bool                  `json:"hostNetwork,omitempty"` // specifies host network mode of service
-	Replica           int                   `json:"replica,omitempty"`
+	Replica           int                   `json:"replica"`
 	Workload          string                `json:"workload,omitempty"` // deployment | daemonset | statefulset | job
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty"`
 	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
