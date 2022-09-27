@@ -41,6 +41,7 @@ func (api *InitAPI) GetResource(c *common.Context) (interface{}, error) {
 		Node          string `form:"node,omitempty"`
 		InitApplyYaml string `form:"initApplyYaml,omitempty"`
 		Mode          string `form:"mode,omitempty"`
+		Path          string `form:"path,omitempty"`
 	}{}
 	err := c.Bind(query)
 	if err != nil {
@@ -55,10 +56,11 @@ func (api *InitAPI) GetResource(c *common.Context) (interface{}, error) {
 			common.Field("error", err))
 	}
 	return api.Init.GetResource(data[service.InfoNamespace].(string), data[service.InfoName].(string), resourceName, map[string]interface{}{
-		"Token":         query.Token,
-		"KubeNodeName":  query.Node,
-		"InitApplyYaml": query.InitApplyYaml,
-		"Mode":          query.Mode,
+		"Token":          query.Token,
+		"KubeNodeName":   query.Node,
+		"InitApplyYaml":  query.InitApplyYaml,
+		"Mode":           query.Mode,
+		"BaetylHostPath": query.Path,
 	})
 }
 
