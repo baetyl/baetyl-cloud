@@ -56,9 +56,10 @@ type NodePropertiesMetadata struct {
 type NodeCoreConfigs struct {
 	Version string `yaml:"version,omitempty" json:"version,omitempty"`
 	// unit: seconds
-	Frequency int `yaml:"frequency,omitempty" json:"frequency,omitempty"`
-	APIPort   int `yaml:"apiport,omitempty" json:"apiport,omitempty"`
-	AgentPort int `yaml:"agentport,omitempty" json:"agentport,omitempty" default:"30080"`
+	Frequency int    `yaml:"frequency,omitempty" json:"frequency,omitempty"`
+	APIPort   int    `yaml:"apiport,omitempty" json:"apiport,omitempty"`
+	AgentPort int    `yaml:"agentport,omitempty" json:"agentport,omitempty" default:"30080"`
+	LogLevel  string `yaml:"logLevel,omitempty" json:"logLevel,omitempty" default:"debug" validate:"omitempty,oneof=debug info warn error"`
 }
 
 type NodeCoreVersions struct {

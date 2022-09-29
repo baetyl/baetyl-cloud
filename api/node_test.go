@@ -9,13 +9,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	mf "github.com/baetyl/baetyl-cloud/v2/mock/facade"
 	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	mf "github.com/baetyl/baetyl-cloud/v2/mock/facade"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/config"
@@ -1098,6 +1099,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.BaetylAgentPort:     common.DefaultAgentPort,
+			BaetylCoreLogLevel:         LogLevelDebug,
 		},
 		Desire: specV1.Desire{
 			specV1.KeySysApps: []interface{}{
@@ -1920,6 +1922,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Frequency: 20,
 		APIPort:   30050,
 		AgentPort: 30080,
+		LogLevel:  "error",
 	}
 	data, err := json.Marshal(coreConfig)
 	assert.NoError(t, err)
@@ -1944,14 +1947,15 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	mockConfig.EXPECT().Get(ns, "baetyl-core-conf-ialplsycd", "").Return(cconfig, nil).Times(1)
 
 	pparams := map[string]interface{}{
-		"CoreAppName":   "baetyl-core-1",
-		"CoreConfName":  "baetyl-core-conf-ialplsycd",
-		"CoreFrequency": "40s",
-		"NodeMode":      "kube",
-		"AgentPort":     "30080",
-		"GPUStats":      true,
-		"DiskNetStats":  true,
-		"QPSStats":      true,
+		"CoreAppName":      "baetyl-core-1",
+		"CoreConfName":     "baetyl-core-conf-ialplsycd",
+		"CoreFrequency":    "40s",
+		"NodeMode":         "kube",
+		"AgentPort":        "30080",
+		"GPUStats":         true,
+		"DiskNetStats":     true,
+		"QPSStats":         true,
+		BaetylCoreLogLevel: LogLevelDebug,
 	}
 
 	confData, err := json.Marshal(cconfig)
