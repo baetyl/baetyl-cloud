@@ -5,7 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"gopkg.in/go-playground/validator.v9"
+	"github.com/baetyl/baetyl-go/v2/log"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 const (
@@ -21,8 +23,7 @@ const (
 	validLabels      = "validLabels"
 	validConfigKeys  = "validConfigKeys"
 	maxLength        = "maxLength"
-
-	resourceLength = 63
+	resourceLength   = 63
 )
 
 var regexps = map[string]string{
@@ -34,18 +35,27 @@ var regexps = map[string]string{
 	devicemodel:     "^[a-zA-Z0-9\\-_]{1,32}$",
 }
 
-var validate *validator.Validate
-var labelRegex *regexp.Regexp
-var resourceRegex *regexp.Regexp
-var serviceRegex *regexp.Regexp
-var fingerprintRegex *regexp.Regexp
+var (
+	validate         *validator.Validate
+	labelRegex       *regexp.Regexp
+	resourceRegex    *regexp.Regexp
+	serviceRegex     *regexp.Regexp
+	fingerprintRegex *regexp.Regexp
+)
 
 func init() {
+	var ok bool
+	validate, ok = binding.Validator.Engine().(*validator.Validate)
+	if !ok {
+		log.L().Error("failed to get binding validator")
+		return
+	}
+
 	labelRegex, _ = regexp.Compile("^([A-Za-z0-9][-A-Za-z0-9_\\.]*)?[A-Za-z0-9]?$")
 	resourceRegex, _ = regexp.Compile("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
 	serviceRegex, _ = regexp.Compile("^[a-z0-9]([-a-z0-9]*[a-z0-9])?([a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
 	fingerprintRegex, _ = regexp.Compile("^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$")
-	validate = validator.New()
+
 	validate.RegisterValidation(nonBaetyl, nonBaetylFunc())
 	validate.RegisterValidation(validLabels, validLabelsFunc())
 	validate.RegisterValidation(resourceName, validRexAndLengthFunc(resourceLength, resourceRegex))

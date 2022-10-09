@@ -1,7 +1,7 @@
 package models
 
 type Function struct {
-	Name    string       `yaml:"name,omitempty" json:"name,omitempty" validate:"omitempty,resourceName,nonBaetyl"`
+	Name    string       `yaml:"name,omitempty" json:"name,omitempty" binding:"omitempty,resourceName,nonBaetyl"`
 	Handler string       `yaml:"handler,omitempty" json:"handler,omitempty"`
 	Version string       `yaml:"version,omitempty" json:"version,omitempty"`
 	Runtime string       `yaml:"runtime,omitempty" json:"runtime,omitempty"`
