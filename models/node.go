@@ -19,7 +19,7 @@ type NodeList struct {
 }
 
 type NodeNames struct {
-	Names []string `json:"names,"validate:"maxLength=20"`
+	Names []string `json:"names,"binding:"maxLength=20"`
 }
 
 type NodeProperties struct {
@@ -59,7 +59,7 @@ type NodeCoreConfigs struct {
 	Frequency int    `yaml:"frequency,omitempty" json:"frequency,omitempty"`
 	APIPort   int    `yaml:"apiport,omitempty" json:"apiport,omitempty"`
 	AgentPort int    `yaml:"agentport,omitempty" json:"agentport,omitempty" default:"30080"`
-	LogLevel  string `yaml:"logLevel,omitempty" json:"logLevel,omitempty" default:"debug" validate:"omitempty,oneof=debug info warn error"`
+	LogLevel  string `yaml:"logLevel,omitempty" json:"logLevel,omitempty" default:"debug" binding:"omitempty,oneof=debug info warn error"`
 }
 
 type NodeCoreVersions struct {
