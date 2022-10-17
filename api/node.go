@@ -688,10 +688,13 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	logLevel := api.getLogLevel(node)
+
 	if coreConfig.Version == version &&
 		coreConfig.Frequency == freq &&
 		coreConfig.APIPort == port &&
-		coreConfig.AgentPort == agentPort {
+		coreConfig.AgentPort == agentPort &&
+		coreConfig.LogLevel == logLevel {
 		return api.ToApplicationView(app)
 	}
 
