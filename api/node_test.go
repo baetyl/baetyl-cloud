@@ -1922,7 +1922,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		Frequency: 20,
 		APIPort:   30050,
 		AgentPort: 30080,
-		LogLevel:  "error",
+		LogLevel:  "debug",
 	}
 	data, err := json.Marshal(coreConfig)
 	assert.NoError(t, err)
