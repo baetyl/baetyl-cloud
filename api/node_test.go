@@ -682,7 +682,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
+	assert.Contains(t, w.Body.String(), "Field validation for 'Labels' failed on the 'label' tag). If the attempt to retry does not work, please contact us.")
 
 	mNode2 := &specV1.Node{
 		Namespace: "default",
@@ -697,7 +697,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
+	assert.Contains(t, w.Body.String(), "Field validation for 'Labels' failed on the 'label' tag). If the attempt to retry does not work, please contact us.")
 
 	mNode3 := &specV1.Node{
 		Namespace: "default",
@@ -712,7 +712,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
+	assert.Contains(t, w.Body.String(), "Field validation for 'Labels' failed on the 'label' tag). If the attempt to retry does not work, please contact us.")
 
 	mNode4 := &specV1.Node{
 		Namespace: "default",
@@ -727,7 +727,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
+	assert.Contains(t, w.Body.String(), "Field validation for 'Labels' failed on the 'label' tag). If the attempt to retry does not work, please contact us.")
 
 	mNode5 := &specV1.Node{
 		Namespace: "default",
@@ -742,7 +742,7 @@ func TestCreateNodeWithInvalidLabel(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "The field (Labels) must contains labels which can be an empty string or a string which is consist of no more than 63 alphanumeric characters, '-', '_', and must start and end with an alphanumeric character")
+	assert.Contains(t, w.Body.String(), "Field validation for 'Labels' failed on the 'label' tag). If the attempt to retry does not work, please contact us.")
 }
 
 func TestUpdateNodeAddSysApp(t *testing.T) {

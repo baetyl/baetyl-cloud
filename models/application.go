@@ -7,7 +7,7 @@ import (
 )
 
 type ApplicationView struct {
-	Name              string                `json:"name,omitempty" binding:"resourceName"`
+	Name              string                `json:"name,omitempty" binding:"res_name"`
 	Mode              string                `json:"mode,omitempty" default:"kube"`
 	Type              string                `json:"type,omitempty" default:"container"`
 	Labels            map[string]string     `json:"labels,omitempty"`
@@ -35,7 +35,7 @@ type ApplicationView struct {
 // VolumeView volume view
 type VolumeView struct {
 	// specified name of the volume
-	Name        string                       `json:"name,omitempty" binding:"required" binding:"omitempty,resourceName"`
+	Name        string                       `json:"name,omitempty" binding:"required,res_name"`
 	HostPath    *specV1.HostPathVolumeSource `json:"hostPath,omitempty"`
 	Config      *specV1.ObjectReference      `json:"config,omitempty"`
 	Secret      *specV1.ObjectReference      `json:"secret,omitempty"`
@@ -44,7 +44,7 @@ type VolumeView struct {
 }
 
 type AppItem struct {
-	Name              string                `json:"name,omitempty" binding:"omitempty,resourceName"`
+	Name              string                `json:"name,omitempty" binding:"omitempty,res_name"`
 	Mode              string                `json:"mode,omitempty" default:"kube"`
 	Type              string                `json:"type,omitempty" default:"container"`
 	Labels            map[string]string     `json:"labels,omitempty"`

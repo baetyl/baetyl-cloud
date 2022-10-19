@@ -343,7 +343,7 @@ func TestCreateConfig(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, string(w.Body.Bytes()), "{\"code\":\"ErrRequestParamInvalid\",\"message\":\"非法的请求参数。\\nThe request parameter is invalid. (There is a unknown error (Key: 'ConfigurationView.Data[0].Key' Error:Field validation for 'Key' failed on the 'validConfigKeys' tag). If the attempt to retry does not work, please contact us.)\",\"requestId\":\"\"}")
+	assert.Equal(t, string(w.Body.Bytes()), "{\"code\":\"ErrRequestParamInvalid\",\"message\":\"非法的请求参数。\\nThe request parameter is invalid. (There is a unknown error (Key: 'ConfigurationView.Data[0].Key' Error:Field validation for 'Key' failed on the 'config_key' tag). If the attempt to retry does not work, please contact us.)\",\"requestId\":\"\"}")
 
 	mConf = &models.ConfigurationView{
 		Name:      "abc",

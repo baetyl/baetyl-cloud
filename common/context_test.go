@@ -159,7 +159,7 @@ func TestValid(t *testing.T) {
 
 func TestContext_LoadBody(t *testing.T) {
 	var model struct {
-		Name string `json:"name" binding:"nonBaetyl,resourceName"`
+		Name string `json:"name" binding:"nonbaetyl,res_name"`
 	}
 	gCtx, _ := gin.CreateTestContext(httptest.NewRecorder())
 	gCtx.Request = &http.Request{
