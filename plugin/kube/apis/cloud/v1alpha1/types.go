@@ -166,7 +166,7 @@ type Resources struct {
 }
 
 type ServiceFunctionConfig struct {
-	Name    string `json:"name,omitempty" binding:"resourceName"`
+	Name    string `json:"name,omitempty" binding:"res_name"`
 	Runtime string `json:"runtime,omitempty"`
 }
 
