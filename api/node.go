@@ -241,6 +241,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	n.Attributes["BaetylCoreVersion"] = version
+	n.Attributes["UserId"] = c.GetUserInfo().User.ID
 
 	n.SysApps = common.UpdateSysAppByAccelerator(n.Accelerator, n.SysApps)
 
