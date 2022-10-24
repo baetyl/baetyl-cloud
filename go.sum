@@ -31,8 +31,8 @@ github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9Pq
 github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6/go.mod h1:grANhF5doyWs3UAsr3K4I6qtAmlQcZDesFNEHPZAzj8=
 github.com/aws/aws-sdk-go v1.32.8 h1:ULxiQqR1eZ+k2/1gqv3GYAjkunlS7ncVU2eL801t08M=
 github.com/aws/aws-sdk-go v1.32.8/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
-github.com/baetyl/baetyl-go/v2 v2.2.4-0.20221020025314-55243c0e8f44 h1:a8G2xITd+Umwa68x6OCEcusUTqQ4wL3WL9jZ7wn4C+0=
-github.com/baetyl/baetyl-go/v2 v2.2.4-0.20221020025314-55243c0e8f44/go.mod h1:QAW06LtSq6SMz/Z13UCn9Q3wuBhSxEs96+MADRqTd6w=
+github.com/baetyl/baetyl-go/v2 v2.2.4-0.20221024063041-49107570c1bf h1:+bWK41+giNzVR2y4CZHEQXxzOgkvY3ak4nClRX+P7uE=
+github.com/baetyl/baetyl-go/v2 v2.2.4-0.20221024063041-49107570c1bf/go.mod h1:6BFRsODwGb1QNG1YWyz/2lCR/4fu/QjxXQbM3OblsH4=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/blang/semver v3.5.0+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/bradfitz/gomemcache v0.0.0-20180710155616-bc664df96737 h1:rRISKWyXfVxvoa702s91Zl5oREZTrR3yv+tXrrX7G/g=
