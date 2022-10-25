@@ -545,9 +545,10 @@ func translateNativeApp(appView *models.ApplicationView, app *specV1.Application
 		volumeMount, volume := generateVmAndMount(serviceView.ProgramConfig, vmName, ProgramConfigDir)
 
 		var exist bool
-		for _, v := range service.VolumeMounts {
+		for i, v := range service.VolumeMounts {
 			if strings.HasPrefix(v.Name, ProgramConfigPrefix) && v.MountPath == ProgramConfigDir {
 				exist = true
+				service.VolumeMounts[i] = volumeMount
 				break
 			}
 		}
@@ -556,8 +557,9 @@ func translateNativeApp(appView *models.ApplicationView, app *specV1.Application
 		}
 
 		exist = false
-		for _, v := range app.Volumes {
+		for i, v := range app.Volumes {
 			if strings.HasPrefix(v.Name, ProgramConfigPrefix) {
+				app.Volumes[i] = volume
 				exist = true
 				break
 			}
