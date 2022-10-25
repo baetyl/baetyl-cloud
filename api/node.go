@@ -37,6 +37,7 @@ const (
 	PlatformWindows         = "windows"
 	PlatformAndroid         = "android"
 	DeprecatedGPUMetrics    = "baetyl-gpu-metrics"
+	DeprecatedDmp           = "baetyl-dmp"
 
 	HookCreateNodeOta = "hookCreateNodeOta"
 	HookUpdateNodeOta = "hookUpdateNodeOta"
