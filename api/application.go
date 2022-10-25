@@ -556,9 +556,8 @@ func translateNativeApp(appView *models.ApplicationView, app *specV1.Application
 		}
 
 		exist = false
-		for i, v := range app.Volumes {
+		for _, v := range app.Volumes {
 			if strings.HasPrefix(v.Name, ProgramConfigPrefix) {
-				app.Volumes[i] = volume
 				exist = true
 				break
 			}
