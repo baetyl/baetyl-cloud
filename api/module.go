@@ -97,17 +97,11 @@ func (api *API) ListModules(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	// remove deprecated baetyl-gpu-metrics
-	if tp == string(common.TypeSystemKube) {
-		index := -1
-		for i, app := range res {
-			if app.Name == DeprecatedGPUMetrics {
-				index = i
-				break
-			}
-		}
-		if index != -1 {
-			res = append(res[:index], res[index+1:]...)
+	// remove deprecated baetyl-gpu-metrics and dmp
+	for i := 0; i < len(res); i++ {
+		if res[i].Name == DeprecatedGPUMetrics || res[i].Name == DeprecatedDmp {
+			res = append(res[:i], res[i+1:]...)
+			i--
 		}
 	}
 
