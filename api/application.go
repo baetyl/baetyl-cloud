@@ -450,7 +450,7 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 	copier.Copy(app, appView)
 
 	translateSecretLikedModelsToSecrets(appView, app)
-	translateNativeApp(appView, app, oldApp)
+	translateNativeApp(appView, app)
 
 	if app.Type != common.FunctionApp {
 		return app, nil, nil
@@ -533,8 +533,7 @@ func (api *API) ToApplicationListView(apps *models.ApplicationList) {
 	}
 }
 
-func translateNativeApp(appView *models.ApplicationView,
-	app *specV1.Application, oldApp *specV1.Application) {
+func translateNativeApp(appView *models.ApplicationView, app *specV1.Application) {
 	if appView.Mode != context.RunModeNative || appView.Type == common.FunctionApp {
 		return
 	}
@@ -547,7 +546,7 @@ func translateNativeApp(appView *models.ApplicationView,
 
 		var exist bool
 		for _, v := range service.VolumeMounts {
-			if v.Name == vmName {
+			if strings.HasPrefix(v.Name, ProgramConfigPrefix) && v.MountPath == ProgramConfigDir {
 				exist = true
 				break
 			}
@@ -558,7 +557,7 @@ func translateNativeApp(appView *models.ApplicationView,
 
 		exist = false
 		for i, v := range app.Volumes {
-			if v.Name == vmName {
+			if strings.HasPrefix(v.Name, ProgramConfigPrefix) {
 				app.Volumes[i] = volume
 				exist = true
 				break
@@ -575,8 +574,14 @@ func (api *API) translateToNativeAppView(appView *models.ApplicationView) error 
 		return nil
 	}
 	for index := range appView.Services {
+		var vmName string
 		service := &appView.Services[index]
-		vmName := getNameOfNativeProgramVolumeMount(service.Name)
+		for _, v := range service.VolumeMounts {
+			if strings.HasPrefix(v.Name, ProgramConfigPrefix) && v.MountPath == ProgramConfigDir {
+				vmName = v.Name
+				break
+			}
+		}
 		configName, err := getNameOfNativeProgramConfig(appView, vmName)
 		if err != nil {
 			return err
@@ -1035,5 +1040,5 @@ func getNameOfFunctionCodeVolumeMount(serviceName string) string {
 }
 
 func getNameOfNativeProgramVolumeMount(serviceName string) string {
-	return fmt.Sprintf("%s-%s", ProgramConfigPrefix, serviceName)
+	return fmt.Sprintf("%s-%s", ProgramConfigPrefix, common.RandString(9))
 }

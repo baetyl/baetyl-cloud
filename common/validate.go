@@ -1,6 +1,7 @@
 package common
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -37,4 +38,20 @@ func ValidIsInvisible(labels map[string]string) bool {
 		return false
 	}
 	return true
+}
+
+func ValidateResourceName(s string) error {
+	resourceRegex, _ := regexp.Compile("^[a-z0-9][-a-z0-9.]{0,61}[a-z0-9]$")
+	if !resourceRegex.MatchString(s) {
+		return Error(ErrRequestParamInvalid, Field("error", "resource name invalid"))
+	}
+	return nil
+}
+
+func ValidateKeyValue(k string) error {
+	resourceRegex, _ := regexp.Compile("^[-._a-zA-Z0-9]+$")
+	if !resourceRegex.MatchString(k) {
+		return Error(ErrRequestParamInvalid, Field("error", "config data key value invalid"))
+	}
+	return nil
 }
