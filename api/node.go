@@ -925,9 +925,6 @@ func (api *API) NodeModeParamCheck(node *v1.Node) error {
 		if node.Cluster {
 			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "cluster is not supported with native nodeMode"))
 		}
-		if node.Accelerator != "" {
-			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "accelerator is not supported with native nodeMode"))
-		}
 	}
 	return nil
 }
@@ -1220,7 +1217,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq, ag
 		"NodeMode":         node.NodeMode,
 		"CoreFrequency":    fmt.Sprintf("%ds", freq),
 		"AgentPort":        fmt.Sprintf("%d", agentPort),
-		"GPUStats":         node.NodeMode == context.RunModeKube,
+		"GPUStats":         node.Accelerator != "",
 		"DiskNetStats":     node.NodeMode == context.RunModeKube,
 		"QPSStats":         node.NodeMode == context.RunModeKube,
 		BaetylCoreLogLevel: logLevel,
