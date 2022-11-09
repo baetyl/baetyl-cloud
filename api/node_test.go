@@ -441,8 +441,8 @@ func TestCreateNode(t *testing.T) {
 		Config: sConfig,
 		Secret: sSecret,
 	}
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
 	api.Node, api.Index = sNode, sIndex
@@ -462,7 +462,7 @@ func TestCreateNode(t *testing.T) {
 
 	mNode := getMockNode2()
 
-	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	mQuota.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	m := &models.Module{
@@ -483,7 +483,7 @@ func TestCreateNode(t *testing.T) {
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(mNode, nil)
-	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	mQuota.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode)
@@ -493,8 +493,8 @@ func TestCreateNode(t *testing.T) {
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(nil, fmt.Errorf("create node error"))
-	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
-	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	mQuota.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	mQuota.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
@@ -502,7 +502,7 @@ func TestCreateNode(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
-	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(fmt.Errorf("quota error"))
+	mQuota.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(fmt.Errorf("quota error"))
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode)
@@ -550,8 +550,8 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 		Config: sConfig,
 		Secret: sSecret,
 	}
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
 	api.Node, api.Index = sNode, sIndex
@@ -588,7 +588,7 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 
 	sNode.EXPECT().UpdateNodeAppVersion(nil, mNode.Namespace, gomock.Any()).Return(nodeList, nil).AnyTimes()
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, gomock.Any(), nodeList).AnyTimes()
-	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	mQuota.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(mNode, nil)
 	m := &models.Module{
@@ -609,7 +609,7 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(mNode, nil)
-	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	mQuota.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode)
@@ -619,8 +619,8 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 	sNode.EXPECT().Create(nil, mNode.Namespace, gomock.Any()).Return(nil, fmt.Errorf("create node error"))
-	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
-	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	mQuota.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
+	mQuota.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", bytes.NewReader(body))
@@ -628,7 +628,7 @@ func TestCreateNodeWithSysApps(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
-	mLicense.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(fmt.Errorf("quota error"))
+	mQuota.EXPECT().AcquireQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(fmt.Errorf("quota error"))
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode)
@@ -1182,8 +1182,8 @@ func TestDeleteNode(t *testing.T) {
 		Config: sConfig,
 		Secret: sSecret,
 	}
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
 	api.Node, api.Index = sNode, sIndex
@@ -1295,7 +1295,7 @@ func TestDeleteNode(t *testing.T) {
 	sPKI.EXPECT().DeleteClientCertificate("certId1f").Return(nil).Times(1)
 	sSecret.EXPECT().Delete(mNode.Namespace, appFunction.Volumes[1].Secret.Name).Times(1)
 
-	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil).AnyTimes()
+	mQuota.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil).AnyTimes()
 
 	res := &specV1.Configuration{
 		Labels: map[string]string{
@@ -1344,8 +1344,8 @@ func TestDeleteNodeError(t *testing.T) {
 		Config: sConfig,
 		Secret: sSecret,
 	}
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
 	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
 	api.Node, api.Index = sNode, sIndex
@@ -1420,7 +1420,7 @@ func TestDeleteNodeError(t *testing.T) {
 	sNode.EXPECT().Delete(mNode.Namespace, mNode).Return(nil).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appCore.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(mNode.Namespace, appFunction.Name, "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	mLicense.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil).AnyTimes()
+	mQuota.EXPECT().ReleaseQuota(mNode.Namespace, plugin.QuotaNode, 1).Return(nil).AnyTimes()
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appCore.Name, gomock.Any()).Return(nil).Times(1)
 	sIndex.EXPECT().RefreshNodesIndexByApp(nil, mNode.Namespace, appFunction.Name, gomock.Any()).Return(nil).Times(1)
 
