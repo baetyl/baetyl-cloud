@@ -27,6 +27,7 @@ type CloudConfig struct {
 		PKI        string   `yaml:"pki" json:"pki" default:"defaultpki"`
 		Auth       string   `yaml:"auth" json:"auth" default:"defaultauth"`
 		License    string   `yaml:"license" json:"license" default:"defaultlicense"`
+		Quota      string   `yaml:"quota" json:"quota" default:"defaultquota"`
 		Resource   string   `yaml:"resource" json:"resource" default:"kube"`
 		Shadow     string   `yaml:"shadow" json:"shadow" default:"database"`
 		Index      string   `yaml:"index" json:"index" default:"database"`

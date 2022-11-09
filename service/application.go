@@ -15,7 +15,7 @@ import (
 
 //go:generate mockgen -destination=../mock/service/application.go -package=service github.com/baetyl/baetyl-cloud/v2/service ApplicationService
 
-// ApplicationService ApplicationService
+// ApplicationService Application Service
 type ApplicationService interface {
 	Get(namespace, name, version string) (*specV1.Application, error)
 	Create(tx interface{}, namespace string, app *specV1.Application) (*specV1.Application, error)
@@ -33,7 +33,7 @@ type AppServiceImpl struct {
 	IndexService IndexService
 }
 
-// NewApplicationService NewApplicationService
+// NewApplicationService New Application Service
 func NewApplicationService(config *config.CloudConfig) (ApplicationService, error) {
 	cfg, err := plugin.GetPlugin(config.Plugin.Resource)
 	if err != nil {

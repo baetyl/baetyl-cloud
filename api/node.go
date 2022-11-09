@@ -229,7 +229,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
 
-	err = api.License.AcquireQuota(ns, plugin.QuotaNode, NodeNumber)
+	err = api.Quota.AcquireQuota(ns, plugin.QuotaNode, NodeNumber)
 	if err != nil {
 		return nil, err
 	}
