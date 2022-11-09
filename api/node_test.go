@@ -1857,10 +1857,11 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	api.Facade = facade
 
 	node := &specV1.Node{
-		Namespace: ns,
-		Name:      n,
-		Version:   "0",
-		NodeMode:  context.RunModeKube,
+		Namespace:   ns,
+		Name:        n,
+		Version:     "0",
+		NodeMode:    context.RunModeKube,
+		Accelerator: specV1.NVAccelerator,
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.BaetylCoreAPIPort:   common.DefaultCoreAPIPort,
