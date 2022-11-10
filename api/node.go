@@ -1294,9 +1294,10 @@ func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node, agentPor
 		"InitConfName": config.Name,
 		"InitAppName":  app.Name,
 		"AgentPort":    fmt.Sprintf("%d", agentPort),
-		"GPUStats":     node.NodeMode == context.RunModeKube,
+		"GPUStats":     node.Accelerator != "",
 		"DiskNetStats": node.NodeMode == context.RunModeKube,
 		"QPSStats":     node.NodeMode == context.RunModeKube,
+		"NodeMode":     node.NodeMode,
 	}
 	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateInitConfYaml, params)
 	if err != nil {
