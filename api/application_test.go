@@ -939,7 +939,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		Selector:          "",
 		Replica:           1,
 		Workload:          specV1.WorkloadDeployment,
-		JobConfig:         &specV1.AppJobConfig{RestartPolicy: "Never", Completions: 1},
+		JobConfig:         &specV1.AppJobConfig{RestartPolicy: "Never"},
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -972,7 +972,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 						Value: "value",
 					},
 				},
-				JobConfig: &specV1.ServiceJobConfig{RestartPolicy: "Never", Completions: 1},
+				JobConfig: &specV1.ServiceJobConfig{RestartPolicy: "Never"},
 			},
 		},
 		Volumes: []specV1.Volume{
@@ -3245,7 +3245,7 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 		},
 	}
 
-	api.compatibleAppDeprecatedFiled(app0)
+	api.compatibleAppDeprecatedField(app0)
 	assert.EqualValues(t, expectApp0, app0)
 
 	// case 1
@@ -3257,9 +3257,9 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 	expectApp1 := &models.ApplicationView{
 		Name:        "a1",
 		HostNetwork: false,
-		Replica:     1,
+		Replica:     0,
 		JobConfig: &specV1.AppJobConfig{
-			Completions:   1,
+			Completions:   0,
 			Parallelism:   0,
 			BackoffLimit:  0,
 			RestartPolicy: "Never",
@@ -3268,7 +3268,7 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 		Services: []models.ServiceView{},
 	}
 
-	api.compatibleAppDeprecatedFiled(app1)
+	api.compatibleAppDeprecatedField(app1)
 	assert.EqualValues(t, expectApp1, app1)
 
 	// case 2
@@ -3323,7 +3323,7 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 		},
 	}
 
-	api.compatibleAppDeprecatedFiled(app2)
+	api.compatibleAppDeprecatedField(app2)
 	assert.EqualValues(t, expectApp2.Services[0].JobConfig, app2.Services[0].JobConfig)
 	expectApp2.Services[0].JobConfig = nil
 	app2.Services[0].JobConfig = nil

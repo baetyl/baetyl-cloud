@@ -306,7 +306,7 @@ func (api *API) ParseApplication(c *common.Context) (*models.ApplicationView, er
 	}
 
 	// multi-container compatibility
-	api.compatibleAppDeprecatedFiled(app)
+	api.compatibleAppDeprecatedField(app)
 
 	if app.Workload != specV1.WorkloadDeployment &&
 		app.Workload != specV1.WorkloadDaemonSet &&
@@ -378,7 +378,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 		return nil, err
 	}
 
-	api.compatibleAppDeprecatedFiled(appView)
+	api.compatibleAppDeprecatedField(appView)
 	populateAppDefaultField(appView)
 
 	if app.Type != common.FunctionApp {
@@ -450,7 +450,7 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 	copier.Copy(app, appView)
 
 	translateSecretLikedModelsToSecrets(appView, app)
-	translateNativeApp(appView, app, oldApp)
+	translateNativeApp(appView, app)
 
 	if app.Type != common.FunctionApp {
 		return app, nil, nil
@@ -533,8 +533,7 @@ func (api *API) ToApplicationListView(apps *models.ApplicationList) {
 	}
 }
 
-func translateNativeApp(appView *models.ApplicationView,
-	app *specV1.Application, oldApp *specV1.Application) {
+func translateNativeApp(appView *models.ApplicationView, app *specV1.Application) {
 	if appView.Mode != context.RunModeNative || appView.Type == common.FunctionApp {
 		return
 	}
@@ -546,9 +545,10 @@ func translateNativeApp(appView *models.ApplicationView,
 		volumeMount, volume := generateVmAndMount(serviceView.ProgramConfig, vmName, ProgramConfigDir)
 
 		var exist bool
-		for _, v := range service.VolumeMounts {
-			if v.Name == vmName {
+		for i, v := range service.VolumeMounts {
+			if strings.HasPrefix(v.Name, ProgramConfigPrefix) && v.MountPath == ProgramConfigDir {
 				exist = true
+				service.VolumeMounts[i] = volumeMount
 				break
 			}
 		}
@@ -558,7 +558,7 @@ func translateNativeApp(appView *models.ApplicationView,
 
 		exist = false
 		for i, v := range app.Volumes {
-			if v.Name == vmName {
+			if strings.HasPrefix(v.Name, ProgramConfigPrefix) {
 				app.Volumes[i] = volume
 				exist = true
 				break
@@ -575,8 +575,14 @@ func (api *API) translateToNativeAppView(appView *models.ApplicationView) error 
 		return nil
 	}
 	for index := range appView.Services {
+		var vmName string
 		service := &appView.Services[index]
-		vmName := getNameOfNativeProgramVolumeMount(service.Name)
+		for _, v := range service.VolumeMounts {
+			if strings.HasPrefix(v.Name, ProgramConfigPrefix) && v.MountPath == ProgramConfigDir {
+				vmName = v.Name
+				break
+			}
+		}
 		configName, err := getNameOfNativeProgramConfig(appView, vmName)
 		if err != nil {
 			return err
@@ -800,7 +806,7 @@ func (api *API) IsAppCanDelete(namesapce, name string) (bool, error) {
 	return true, nil
 }
 
-func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
+func (api *API) compatibleAppDeprecatedField(app *models.ApplicationView) {
 	// Workload
 	if app.Workload == "" {
 		// compatible with the original one service corresponding to one workload
@@ -846,8 +852,6 @@ func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
 					api.log.Warn("app service replica is inconsistent", log.Any("index", i), log.Any("name", app.Services[i].Name))
 				}
 			}
-		} else {
-			app.Replica = 1
 		}
 	} else {
 		for i, svc := range app.Services {
@@ -869,7 +873,7 @@ func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
 				RestartPolicy: app.Services[0].JobConfig.RestartPolicy,
 			}
 		} else {
-			app.JobConfig = &specV1.AppJobConfig{RestartPolicy: "Never", Completions: 1}
+			app.JobConfig = &specV1.AppJobConfig{RestartPolicy: "Never"}
 			for i, svc := range app.Services {
 				if svc.JobConfig == nil || svc.JobConfig.RestartPolicy == "" {
 					app.Services[i].JobConfig = &specV1.ServiceJobConfig{
@@ -1037,5 +1041,5 @@ func getNameOfFunctionCodeVolumeMount(serviceName string) string {
 }
 
 func getNameOfNativeProgramVolumeMount(serviceName string) string {
-	return fmt.Sprintf("%s-%s", ProgramConfigPrefix, serviceName)
+	return fmt.Sprintf("%s-%s", ProgramConfigPrefix, common.RandString(9))
 }

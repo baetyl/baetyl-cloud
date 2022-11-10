@@ -45,7 +45,7 @@ type CertStorage struct {
 
 // Certificate Certificate
 type Certificate struct {
-	Name               string              `json:"name,omitempty" validate:"omitempty,resourceName"`
+	Name               string              `json:"name,omitempty" binding:"omitempty,res_name"`
 	Namespace          string              `json:"namespace,omitempty"`
 	SignatureAlgorithm string              `json:"signatureAlgorithm,omitempty"`
 	EffectiveTime      string              `json:"effectiveTime,omitempty"`

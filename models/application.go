@@ -7,7 +7,7 @@ import (
 )
 
 type ApplicationView struct {
-	Name              string                `json:"name,omitempty" validate:"resourceName"`
+	Name              string                `json:"name,omitempty" binding:"res_name"`
 	Mode              string                `json:"mode,omitempty" default:"kube"`
 	Type              string                `json:"type,omitempty" default:"container"`
 	Labels            map[string]string     `json:"labels,omitempty"`
@@ -16,16 +16,16 @@ type ApplicationView struct {
 	Version           string                `json:"version,omitempty"`
 	Selector          string                `json:"selector,omitempty"`
 	NodeSelector      string                `json:"nodeSelector,omitempty"`
-	InitServices      []ServiceView         `json:"initServices,omitempty" validate:"dive"`
-	Services          []ServiceView         `json:"services,omitempty" validate:"dive"`
-	Volumes           []VolumeView          `json:"volumes,omitempty" validate:"dive"`
+	InitServices      []ServiceView         `json:"initServices,omitempty" binding:"dive"`
+	Services          []ServiceView         `json:"services,omitempty" binding:"dive"`
+	Volumes           []VolumeView          `json:"volumes,omitempty" binding:"dive"`
 	Description       string                `json:"description,omitempty"`
 	System            bool                  `json:"system,omitempty"`
 	Registries        []RegistryView        `json:"registries,omitempty"`
 	CronStatus        specV1.CronStatusCode `json:"cronStatus" default:"0"`
 	CronTime          time.Time             `json:"cronTime,omitempty"`
 	HostNetwork       bool                  `json:"hostNetwork,omitempty"` // specifies host network mode of service
-	Replica           int                   `json:"replica,omitempty"`
+	Replica           int                   `json:"replica"`
 	Workload          string                `json:"workload,omitempty"` // deployment | daemonset | statefulset | job
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty"`
 	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
@@ -35,7 +35,7 @@ type ApplicationView struct {
 // VolumeView volume view
 type VolumeView struct {
 	// specified name of the volume
-	Name        string                       `json:"name,omitempty" binding:"required" validate:"omitempty,resourceName"`
+	Name        string                       `json:"name,omitempty" binding:"required,res_name"`
 	HostPath    *specV1.HostPathVolumeSource `json:"hostPath,omitempty"`
 	Config      *specV1.ObjectReference      `json:"config,omitempty"`
 	Secret      *specV1.ObjectReference      `json:"secret,omitempty"`
@@ -44,7 +44,7 @@ type VolumeView struct {
 }
 
 type AppItem struct {
-	Name              string                `json:"name,omitempty" validate:"omitempty,resourceName"`
+	Name              string                `json:"name,omitempty" binding:"omitempty,res_name"`
 	Mode              string                `json:"mode,omitempty" default:"kube"`
 	Type              string                `json:"type,omitempty" default:"container"`
 	Labels            map[string]string     `json:"labels,omitempty"`

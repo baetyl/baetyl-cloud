@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
@@ -23,16 +21,18 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/kubectl/pkg/scheme"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 const (
-	resourceLength = 63
-	TypeSecret     = "Secret"
-	TypeConfig     = "ConfigMap"
-	TypeDeploy     = "Deployment"
-	TypeDaemonset  = "DaemonSet"
-	TypeJob        = "Job"
-	TypeService    = "Service"
+	TypeSecret    = "Secret"
+	TypeConfig    = "ConfigMap"
+	TypeDeploy    = "Deployment"
+	TypeDaemonset = "DaemonSet"
+	TypeJob       = "Job"
+	TypeService   = "Service"
 )
 
 // yaml resources api
@@ -279,7 +279,7 @@ func (api *API) deleteSecret(ns string, r runtime.Object) (string, error) {
 		return "", common.Error(common.ErrRequestParamInvalid, common.Field("error", "k8s secret typecasting failed"))
 	}
 
-	err := validateResourceName(sec.Name)
+	err := common.ValidateResourceName(sec.Name)
 	if err != nil {
 		return "", err
 	}
@@ -419,7 +419,7 @@ func validateSecret(s *specV1.Secret) error {
 	if s.Name == "" {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "secret name is required"))
 	}
-	return validateResourceName(s.Name)
+	return common.ValidateResourceName(s.Name)
 }
 
 // config resource
@@ -521,7 +521,7 @@ func (api *API) deleteConfig(ns string, r runtime.Object) (string, error) {
 		return "", common.Error(common.ErrRequestParamInvalid, common.Field("error", "k8s config typecasting failed"))
 	}
 
-	err := validateResourceName(cfg.Name)
+	err := common.ValidateResourceName(cfg.Name)
 	if err != nil {
 		return "", err
 	}
@@ -630,12 +630,12 @@ func validateConfig(c *specV1.Configuration) error {
 	if c.Name == "" {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "config name is required"))
 	}
-	err := validateResourceName(c.Name)
+	err := common.ValidateResourceName(c.Name)
 	if err != nil {
 		return err
 	}
 	for k, _ := range c.Data {
-		err = validateKeyValue(k)
+		err = common.ValidateKeyValue(k)
 		if err != nil {
 			return err
 		}
@@ -740,7 +740,7 @@ func (api *API) deleteApplication(ns string, r runtime.Object) (string, error) {
 		name = job.Name
 	}
 
-	err = validateResourceName(name)
+	err = common.ValidateResourceName(name)
 	if err != nil {
 		return "", err
 	}
@@ -1018,14 +1018,14 @@ func validateApp(app *specV1.Application) error {
 	if app.Name == "" {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "app name is required"))
 	}
-	err := validateResourceName(app.Name)
+	err := common.ValidateResourceName(app.Name)
 	if err != nil {
 		return err
 	}
 
 	ports := make(map[int32]bool)
 	for _, svc := range app.Services {
-		err = validateResourceName(svc.Name)
+		err = common.ValidateResourceName(svc.Name)
 		if err != nil {
 			return nil
 		}
@@ -1043,7 +1043,7 @@ func validateApp(app *specV1.Application) error {
 	}
 
 	for _, svc := range app.InitServices {
-		err = validateResourceName(svc.Name)
+		err = common.ValidateResourceName(svc.Name)
 		if err != nil {
 			return nil
 		}
@@ -1061,7 +1061,7 @@ func validateApp(app *specV1.Application) error {
 	}
 
 	for _, v := range app.Volumes {
-		err = validateResourceName(v.Name)
+		err = common.ValidateResourceName(v.Name)
 		if err != nil {
 			return nil
 		}
@@ -1209,20 +1209,4 @@ func resetAppPort(app *specV1.Application, svc *corev1.Service) {
 			}
 		}
 	}
-}
-
-func validateResourceName(s string) error {
-	resourceRegex, _ := regexp.Compile("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
-	if len(s) > resourceLength || !resourceRegex.MatchString(s) {
-		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "resource name invalid"))
-	}
-	return nil
-}
-
-func validateKeyValue(k string) error {
-	resourceRegex, _ := regexp.Compile("^[-._a-zA-Z0-9]+$")
-	if !resourceRegex.MatchString(k) {
-		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "config data key value invalid"))
-	}
-	return nil
 }

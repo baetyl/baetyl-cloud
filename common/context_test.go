@@ -146,12 +146,12 @@ func TestWrapperRaw(t *testing.T) {
 
 func TestValid(t *testing.T) {
 	test1 := &struct {
-		Mem string `validate:"memory"`
+		Mem string `binding:"memory"`
 	}{Mem: "10g"}
 	err := validate.Struct(test1)
 	assert.NoError(t, err)
 	test2 := &struct {
-		Mem string `validate:"memory"`
+		Mem string `binding:"memory"`
 	}{Mem: "tt"}
 	err = validate.Struct(test2)
 	assert.NotNil(t, err)
@@ -159,12 +159,11 @@ func TestValid(t *testing.T) {
 
 func TestContext_LoadBody(t *testing.T) {
 	var model struct {
-		Name string `json:"name" validate:"nonBaetyl,resourceName"`
+		Name string `json:"name" binding:"nonbaetyl,res_name"`
 	}
-	gCtx := &gin.Context{
-		Request: &http.Request{
-			Body: newStringReaderColser(`{"name":"baetyl-test"}`),
-		},
+	gCtx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	gCtx.Request = &http.Request{
+		Body: newStringReaderColser(`{"name":"baetyl-test"}`),
 	}
 	ctx := NewContext(gCtx)
 	err := ctx.LoadBody(&model)
@@ -174,20 +173,19 @@ func TestContext_LoadBody(t *testing.T) {
 func TestContext_LoadBody2(t *testing.T) {
 	var model struct {
 		Names []struct {
-			Name string `json:"name" validate:"required"`
+			Name string `json:"name" binding:"required"`
 			Age  int    `json:"age"`
-		} `json:"names" default:"[]" validate:"dive"`
+		} `json:"names" default:"[]" binding:"dive"`
 	}
-	gCtx := &gin.Context{
-		Request: &http.Request{
-			Body: newStringReaderColser(`{
+	gCtx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	gCtx.Request = &http.Request{
+		Body: newStringReaderColser(`{
     "names":[
         {
             "age":12
         }
     ]
 }`),
-		},
 	}
 	ctx := NewContext(gCtx)
 	err := ctx.LoadBody(&model)
@@ -213,9 +211,9 @@ func TestContext_LoadBody2(t *testing.T) {
 func TestContext_LoadBodyMulti(t *testing.T) {
 	var model struct {
 		Names []struct {
-			Name string `json:"name" validate:"required"`
+			Name string `json:"name" binding:"required"`
 			Age  int    `json:"age"`
-		} `json:"names" default:"[]" validate:"dive"`
+		} `json:"names" default:"[]" binding:"dive"`
 	}
 	gCtx := &gin.Context{
 		Request: &http.Request{

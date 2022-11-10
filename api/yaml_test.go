@@ -9,14 +9,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	mf "github.com/baetyl/baetyl-cloud/v2/mock/facade"
-	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
-	"github.com/baetyl/baetyl-cloud/v2/service"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	mf "github.com/baetyl/baetyl-cloud/v2/mock/facade"
+	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
+	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 var (
@@ -142,23 +143,6 @@ data:
     account: current
     bucket: bie-document
     object: test-images/123.jpg`
-
-	bosCfg = `
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: bos-cm
-data:
-  download1616485040271.zip: |-
-    type: object
-    source: baidubos
-    account: other
-    endpoint: http://bj-bos-sandbox.baidu-int.com
-    bucket: baetyl-test1616485040271
-    object: download1616485040271.zip
-    unpack: zip
-    ak: 618466d309734d1b908590ec2ee46932
-    sk: 9891e1e22a34463ea1d3d5c673e2bfd0`
 
 	httpCfg = `
 apiVersion: v1
@@ -735,30 +719,6 @@ func TestAPI_CreateConfig(t *testing.T) {
 	w = multipart.NewWriter(buf)
 	fw, _ = w.CreateFormFile("file", "config.yaml")
 	io.Copy(fw, strings.NewReader(objectTypeCfg))
-	w.Close()
-
-	req, _ = http.NewRequest(http.MethodPost, "/v1/yaml", buf)
-	req.Header.Set("Content-Type", w.FormDataContentType())
-
-	re = httptest.NewRecorder()
-	router.ServeHTTP(re, req)
-	assert.Equal(t, http.StatusOK, re.Code)
-
-	// good case: create object cfg bos other account
-	bosConfig := &specV1.Configuration{
-		Name:      "bos-cm",
-		Namespace: "default",
-		Data: map[string]string{
-			"_object_download1616485040271.zip": "{\"unpack\":\"zip\",\"metadata\":{\"account\":\"other\",\"ak\":\"618466d309734d1b908590ec2ee46932\",\"bucket\":\"baetyl-test1616485040271\",\"endpoint\":\"http://bj-bos-sandbox.baidu-int.com\",\"object\":\"download1616485040271.zip\",\"sk\":\"9891e1e22a34463ea1d3d5c673e2bfd0\",\"source\":\"baidubos\",\"type\":\"object\",\"unpack\":\"zip\",\"userID\":\"\"}}",
-		},
-	}
-	sConfig.EXPECT().Get("default", "bos-cm", "").Return(nil, nil).Times(1)
-	sFacade.EXPECT().CreateConfig("default", bosConfig).Return(bosConfig, nil).Times(1)
-
-	buf = new(bytes.Buffer)
-	w = multipart.NewWriter(buf)
-	fw, _ = w.CreateFormFile("file", "config.yaml")
-	io.Copy(fw, strings.NewReader(bosCfg))
 	w.Close()
 
 	req, _ = http.NewRequest(http.MethodPost, "/v1/yaml", buf)

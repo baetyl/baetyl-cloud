@@ -37,6 +37,7 @@ const (
 	PlatformWindows         = "windows"
 	PlatformAndroid         = "android"
 	DeprecatedGPUMetrics    = "baetyl-gpu-metrics"
+	DeprecatedDmp           = "baetyl-dmp"
 
 	HookCreateNodeOta = "hookCreateNodeOta"
 	HookUpdateNodeOta = "hookUpdateNodeOta"
@@ -45,6 +46,9 @@ const (
 	HookCreateNodeDmp = "hookCreateNodeDmp"
 	HookUpdateNodeDmp = "hookUpdateNodeDmp"
 	HookDeleteNodeDmp = "hookDeleteNodeDmp"
+
+	BaetylCoreLogLevel = "BaetylCoreLogLevel"
+	LogLevelDebug      = "debug"
 )
 
 var (
@@ -225,7 +229,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
 
-	err = api.License.AcquireQuota(ns, plugin.QuotaNode, NodeNumber)
+	err = api.Quota.AcquireQuota(ns, plugin.QuotaNode, NodeNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -238,6 +242,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	n.Attributes["BaetylCoreVersion"] = version
+	n.Attributes["UserId"] = c.GetUserInfo().User.ID
 
 	n.SysApps = common.UpdateSysAppByAccelerator(n.Accelerator, n.SysApps)
 
@@ -685,10 +690,13 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	logLevel := api.getLogLevel(node)
+
 	if coreConfig.Version == version &&
 		coreConfig.Frequency == freq &&
 		coreConfig.APIPort == port &&
-		coreConfig.AgentPort == agentPort {
+		coreConfig.AgentPort == agentPort &&
+		coreConfig.LogLevel == logLevel {
 		return api.ToApplicationView(app)
 	}
 
@@ -705,8 +713,9 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	node.Attributes[v1.BaetylCoreAPIPort] = fmt.Sprintf("%d", coreConfig.APIPort)
+	node.Attributes[BaetylCoreLogLevel] = coreConfig.LogLevel
 
-	err = api.updateCoreAppConfig(app, node, coreConfig.Frequency, coreConfig.AgentPort)
+	err = api.updateCoreAppConfig(app, node, coreConfig.Frequency, coreConfig.AgentPort, coreConfig.LogLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -817,6 +826,8 @@ func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 
+	coreInfo.LogLevel = api.getLogLevel(node)
+
 	return coreInfo, nil
 }
 
@@ -913,9 +924,6 @@ func (api *API) NodeModeParamCheck(node *v1.Node) error {
 	if node.NodeMode == context.RunModeNative {
 		if node.Cluster {
 			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "cluster is not supported with native nodeMode"))
-		}
-		if node.Accelerator != "" {
-			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "accelerator is not supported with native nodeMode"))
 		}
 	}
 	return nil
@@ -1198,20 +1206,21 @@ func (api *API) updateCoreVersions(node *v1.Node, currentVersion, updateVersion 
 	node.Attributes[BaetylCorePrevVersion] = currentVersion
 }
 
-func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq, agentPort int) error {
+func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq, agentPort int, logLevel string) error {
 	config, err := api.getAppConfig(app, BaetylCoreConfPrefix)
 	if err != nil {
 		return err
 	}
 	params := map[string]interface{}{
-		"CoreConfName":  config.Name,
-		"CoreAppName":   app.Name,
-		"NodeMode":      node.NodeMode,
-		"CoreFrequency": fmt.Sprintf("%ds", freq),
-		"AgentPort":     fmt.Sprintf("%d", agentPort),
-		"GPUStats":      node.NodeMode == context.RunModeKube,
-		"DiskNetStats":  node.NodeMode == context.RunModeKube,
-		"QPSStats":      node.NodeMode == context.RunModeKube,
+		"CoreConfName":     config.Name,
+		"CoreAppName":      app.Name,
+		"NodeMode":         node.NodeMode,
+		"CoreFrequency":    fmt.Sprintf("%ds", freq),
+		"AgentPort":        fmt.Sprintf("%d", agentPort),
+		"GPUStats":         node.Accelerator != "",
+		"DiskNetStats":     node.NodeMode == context.RunModeKube,
+		"QPSStats":         node.NodeMode == context.RunModeKube,
+		BaetylCoreLogLevel: logLevel,
 	}
 	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateCoreConfYaml, params)
 	if err != nil {
@@ -1351,6 +1360,16 @@ func (api *API) getAgentPort(node *v1.Node) (int, error) {
 	return res, nil
 }
 
+func (api *API) getLogLevel(node *v1.Node) string {
+	if node.Attributes == nil {
+		return LogLevelDebug
+	}
+	if _, ok := node.Attributes[BaetylCoreLogLevel]; !ok {
+		node.Attributes[BaetylCoreLogLevel] = LogLevelDebug
+	}
+	return node.Attributes[BaetylCoreLogLevel].(string)
+}
+
 func (api *API) updateAgentAppPort(ns string, agent *v1.Application, oldPort, newPort int) error {
 	for i, v := range agent.Services[0].Ports {
 		if v.HostPort == int32(oldPort) {
@@ -1427,7 +1446,8 @@ func (api *API) UpdateConfigByAccelerator(ns string, node *v1.Node) error {
 	if err != nil {
 		return err
 	}
-	err = api.updateCoreAppConfig(core, node, freq, agentPort)
+	logLevel := api.getLogLevel(node)
+	err = api.updateCoreAppConfig(core, node, freq, agentPort, logLevel)
 	if err != nil {
 		return err
 	}
