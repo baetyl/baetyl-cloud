@@ -3441,3 +3441,36 @@ func TestAPI_ToApplication(t *testing.T) {
 	assert.EqualValues(t, expApp, app)
 	fmt.Println(cfg)
 }
+
+func TestIsValidPort(t *testing.T) {
+	svc := &models.ServiceView{
+		Service: specV1.Service{
+			Ports: []specV1.ContainerPort{
+				{
+					HostPort:      20,
+					ContainerPort: 20,
+					Protocol:      string(v1.ProtocolUDP),
+				},
+				{
+					HostPort:      20,
+					ContainerPort: 20,
+					Protocol:      string(v1.ProtocolTCP),
+				},
+			},
+		},
+	}
+	tcpPorts := make(map[int32]bool)
+	udpPorts := make(map[int32]bool)
+	_, err := isValidPort(svc, tcpPorts, udpPorts)
+	assert.NoError(t, err)
+
+	svc.Ports = []specV1.ContainerPort{
+		{
+			HostPort:      20,
+			ContainerPort: 20,
+			Protocol:      string(v1.ProtocolUDP),
+		},
+	}
+	_, err = isValidPort(svc, tcpPorts, udpPorts)
+	assert.NotNil(t, err)
+}
