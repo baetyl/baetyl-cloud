@@ -702,7 +702,8 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 		}
 	}
 
-	ports := make(map[int32]bool)
+	tcpPorts := make(map[int32]bool)
+	updPorts := make(map[int32]bool)
 	for _, service := range app.Services {
 		if service.ProgramConfig != "" {
 			_, err := api.Config.Get(namespace, service.ProgramConfig, "")
@@ -710,7 +711,7 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 				return err
 			}
 		}
-		hostPortNum, err := isValidPort(&service, ports)
+		hostPortNum, err := isValidPort(&service, tcpPorts, updPorts)
 		if err != nil {
 			return err
 		}
@@ -720,7 +721,7 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 		}
 	}
 	for _, service := range app.InitServices {
-		hostPortNum, err := isValidPort(&service, ports)
+		hostPortNum, err := isValidPort(&service, tcpPorts, updPorts)
 		if err != nil {
 			return err
 		}
@@ -757,31 +758,42 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 	return nil
 }
 
-func isValidPort(service *models.ServiceView, ports map[int32]bool) (int, error) {
+func isValidPort(service *models.ServiceView, tcpPorts, updPorts map[int32]bool) (int, error) {
 	hostPortNum := 0
 	for _, port := range service.Ports {
 		if port.ServiceType == string(v1.ServiceTypeNodePort) {
 			if port.NodePort <= 0 {
 				return hostPortNum, common.Error(common.ErrRequestParamInvalid, common.Field("error", "invalid NodePort"))
 			}
-			if _, ok := ports[port.NodePort]; ok {
-				return hostPortNum, common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate node ports"))
-			} else {
-				ports[port.NodePort] = true
+			if err := checkDuplicatePort(port.Protocol, port.NodePort, tcpPorts, updPorts); err != nil {
+				return hostPortNum, errors.Trace(err)
 			}
 		} else {
 			if port.HostPort == 0 {
 				continue
 			}
-			if _, ok := ports[port.HostPort]; ok {
-				return hostPortNum, common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate host ports"))
-			} else {
-				hostPortNum++
-				ports[port.HostPort] = true
+			if err := checkDuplicatePort(port.Protocol, port.HostPort, tcpPorts, updPorts); err != nil {
+				return hostPortNum, errors.Trace(err)
 			}
+			hostPortNum++
 		}
 	}
 	return hostPortNum, nil
+}
+
+func checkDuplicatePort(protocol string, port int32, tcpPorts, updPorts map[int32]bool) error {
+	if protocol == string(v1.ProtocolUDP) {
+		if _, ok := updPorts[port]; ok {
+			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate udp ports"))
+		}
+		updPorts[port] = true
+	} else {
+		if _, ok := tcpPorts[port]; ok {
+			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate tcp ports"))
+		}
+		tcpPorts[port] = true
+	}
+	return nil
 }
 
 func isProgramConfig(volume string) bool {
