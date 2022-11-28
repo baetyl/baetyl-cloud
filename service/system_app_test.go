@@ -127,8 +127,9 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-function-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-conf.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sTemplate.EXPECT().UnmarshalTemplate("baetyl-rule-app.yml", gomock.Any(), gomock.Any()).Return(nil)
+	sTemplate.EXPECT().UnmarshalTemplate("baetyl-ekuiper-app.yml", gomock.Any(), gomock.Any()).Return(nil)
 	sConfig.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(config, nil).Times(2)
-	sApp.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(app, nil).Times(2)
+	sApp.EXPECT().Create(gomock.Any(), "ns", gomock.Any()).Return(app, nil).Times(3)
 	ps.EXPECT().GetPropertyValue(common.RegistryAuth).Return("", errors.New("resource not found")).AnyTimes()
 
 	node := &v1.Node{
@@ -137,17 +138,19 @@ func TestInitService_GenOptionalApps(t *testing.T) {
 		SysApps: []string{
 			"baetyl-function",
 			"baetyl-rule",
+			"baetyl-ekuiper",
 		},
 	}
 
 	is.OptionalAppFuncs = map[string]GenAppFunc{
 		"baetyl-function": is.genFunctionApp,
 		"baetyl-rule":     is.genRuleApp,
+		"baetyl-ekuiper":  is.genEkuiperApp,
 	}
 
 	out, err := is.GenOptionalApps(gomock.Any(), "ns", node, node.SysApps)
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(out))
+	assert.Equal(t, 3, len(out))
 }
 
 func TestInitService_GetOptionalApps(t *testing.T) {
