@@ -1,16 +1,10 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/baetyl/baetyl-go/v2/log"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
-)
-
-const (
-	HookSupportSysApps = "baetyl-hook-support-sys-apps"
 )
 
 func (api *API) GetModules(c *common.Context) (interface{}, error) {
@@ -123,25 +117,6 @@ func (api *API) parseAndCheckModule(module *models.Module, c *common.Context) er
 	}
 	if module.Version == "" {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "version is required"))
-	}
-	if module.Type == string(common.TypeSystemOptional) {
-		var supportSysApps []string
-		if f, exist := api.Hooks[HookSupportSysApps]; exist {
-			if apps, ok := f.([]string); ok {
-				supportSysApps = apps
-			}
-		} else {
-			supportSysApps = api.SysApp.GetOptionalApps()
-		}
-		var ok bool
-		for _, v := range supportSysApps {
-			if v == module.Name {
-				ok = true
-			}
-		}
-		if !ok {
-			return common.Error(common.ErrRequestParamInvalid, common.Field("error", fmt.Sprintf("the module (%s) isn't optional system module", module.Name)))
-		}
 	}
 	return nil
 }
