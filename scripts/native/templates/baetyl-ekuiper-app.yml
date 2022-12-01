@@ -1,0 +1,26 @@
+name: "{{.EkuiperAppName}}"
+namespace: "{{.Namespace}}"
+selector: "baetyl-node-name={{.NodeName}}"
+labels:
+  baetyl-cloud-system: "true"
+  baetyl-app-mode: "{{.AppMode}}"
+type: "container"
+mode: "{{.NodeMode}}"
+system: true
+replica: 1
+services:
+  - name: "baetyl-ekuiper"
+    type: "deployment"
+    image: {{GetModuleImage "baetyl-ekuiper"}}
+    replica: 1
+    volumeMounts:
+      - name: "kuiper-data"
+        mountPath: "/kuiper/data"
+    ports:
+      - containerPort: 9081
+        protocol: "TCP"
+volumes:
+  - name: "kuiper-data"
+    hostPath:
+      path: "/var/lib/baetyl/kuiper/data"
+      type: "DirectoryOrCreate"
