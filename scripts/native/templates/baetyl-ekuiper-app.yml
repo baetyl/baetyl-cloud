@@ -19,6 +19,7 @@ services:
     ports:
       - containerPort: 9081
         protocol: "TCP"
+        hostPort: 9081
 volumes:
   - name: "kuiper-data"
     hostPath:
