@@ -2,13 +2,6 @@ package models
 
 import "strings"
 
-type ListView struct {
-	Total    int         `json:"total"`
-	PageNo   int         `json:"pageNo,omitempty"`
-	PageSize int         `json:"pageSize,omitempty"`
-	Items    interface{} `json:"items"`
-}
-
 type Filter struct {
 	PageNo   int    `form:"pageNo" json:"pageNo,omitempty"`
 	PageSize int    `form:"pageSize" json:"pageSize,omitempty"`

@@ -12,7 +12,7 @@ func (api *API) GetModules(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return models.ListView{
+	return models.ModuleList{
 		Total: len(res),
 		Items: res,
 	}, nil
@@ -99,7 +99,7 @@ func (api *API) ListModules(c *common.Context) (interface{}, error) {
 		}
 	}
 
-	return models.ListView{
+	return models.ModuleList{
 		Total:    len(res),
 		PageNo:   params.PageNo,
 		PageSize: params.PageSize,

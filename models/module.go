@@ -22,3 +22,10 @@ type InitCMD struct {
 	APK    string `json:"apk,omitempty"`
 	APKSys string `json:"apk_sys,omitempty"`
 }
+
+type ModuleList struct {
+	Total    int         `json:"total"`
+	PageNo   int         `json:"pageNo,omitempty"`
+	PageSize int         `json:"pageSize,omitempty"`
+	Items    interface{} `json:"items"`
+}
