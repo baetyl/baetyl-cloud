@@ -1846,6 +1846,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	mockConfig := ms.NewMockConfigService(mockCtl)
 	mockInit := ms.NewMockInitService(mockCtl)
 	mockModule := ms.NewMockModuleService(mockCtl)
+	mockTemplate := ms.NewMockTemplateService(mockCtl)
 	facade := mf.NewMockFacade(mockCtl)
 	api.Init = mockInit
 	api.Node = mockNode
@@ -1855,6 +1856,7 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	api.Config = mockConfig
 	api.Module = mockModule
 	api.Facade = facade
+	api.Template = mockTemplate
 
 	node := &specV1.Node{
 		Namespace:   ns,
@@ -1906,6 +1908,15 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 					},
 				},
 			},
+			{
+				Name: "program-conf",
+				VolumeSource: specV1.VolumeSource{
+					Config: &specV1.ObjectReference{
+						Name:    "baetyl-program-config-baetyl-core",
+						Version: "879303",
+					},
+				},
+			},
 		},
 		System: true,
 	}
@@ -1945,7 +1956,19 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 			common.DefaultMasterConfFile: "conf",
 		},
 	}
+
+	pconfig := &specV1.Configuration{
+		Name:      "baetyl-program-config-baetyl-core",
+		Namespace: ns,
+		Data: map[string]string{
+			"_object_baetyl_darwin-amd64.zip": " {\"url\":\"{{GetModuleProgram \"baetyl\" \"darwin-amd64\"}}\",\"unpack\":\"zip\"}",
+		},
+	}
+	pconfigNew := &specV1.Configuration{
+		Name: "baetyl-program-config-baetyl-core",
+	}
 	mockConfig.EXPECT().Get(ns, "baetyl-core-conf-ialplsycd", "").Return(cconfig, nil).Times(1)
+	mockConfig.EXPECT().Get(ns, "baetyl-program-config-baetyl-core", "").Return(pconfig, nil).Times(1)
 
 	pparams := map[string]interface{}{
 		"CoreAppName":      "baetyl-core-1",
@@ -1959,10 +1982,17 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 		BaetylCoreLogLevel: LogLevelDebug,
 	}
 
+	params := map[string]interface{}{
+		"Namespace": ns,
+	}
+
 	confData, err := json.Marshal(cconfig)
 	assert.NoError(t, err)
 	mockInit.EXPECT().GetResource(ns, node.Name, service.TemplateCoreConfYaml, pparams).Return(confData, nil).Times(1)
 	mockConfig.EXPECT().Update(nil, ns, cconfig).Return(cconfig, nil).Times(1)
+
+	mockTemplate.EXPECT().UnmarshalTemplate(templateCoreProgramYaml, params, gomock.Any()).Return(nil).Times(1)
+	mockConfig.EXPECT().Update(nil, ns, pconfigNew).Return(pconfigNew, nil).Times(1)
 
 	mockApp.EXPECT().Update(nil, ns, coreApp).Return(coreApp, nil).Times(1)
 	mockNode.EXPECT().UpdateNodeAppVersion(nil, ns, coreApp).Return(appList, nil).Times(1)
