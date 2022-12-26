@@ -29,6 +29,7 @@ const (
 	BaetylCoreConfPrefix    = "baetyl-core-conf"
 	BaetylInitConfPrefix    = "baetyl-init-conf"
 	BaetylAgentConfPrefix   = "baetyl-agent-conf"
+	BaetylCoreProgramPrefix = "baetyl-program-config-baetyl-core"
 	BaetylCoreContainerPort = 80
 	BaetylModule            = "baetyl"
 	BaetylCoreAPIPort       = "BaetylCoreAPIPort"
@@ -38,6 +39,9 @@ const (
 	PlatformAndroid         = "android"
 	DeprecatedGPUMetrics    = "baetyl-gpu-metrics"
 	DeprecatedDmp           = "baetyl-dmp"
+
+	templateInitProgramYaml = "baetyl-init-program.yml"
+	templateCoreProgramYaml = "baetyl-core-program.yml"
 
 	HookCreateNodeOta = "hookCreateNodeOta"
 	HookUpdateNodeOta = "hookUpdateNodeOta"
@@ -721,6 +725,11 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	node.Attributes[v1.BaetylCoreFrequency] = fmt.Sprintf("%d", coreConfig.Frequency)
 
+	err = api.updateCoreProgramConfig(app)
+	if err != nil {
+		return nil, err
+	}
+
 	coreApp, err := api.App.Update(nil, ns, app)
 	if err != nil {
 		return nil, err
@@ -1314,6 +1323,30 @@ func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node, agentPor
 	err = yaml.Unmarshal(data, &newConf)
 	if err != nil {
 		return common.Error(common.ErrTemplate, common.Field("error", err))
+	}
+
+	newConf.Name = config.Name
+	newConf.Version = config.Version
+	_, err = api.Config.Update(nil, config.Namespace, &newConf)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (api *API) updateCoreProgramConfig(app *v1.Application) error {
+	config, err := api.getAppConfig(app, BaetylCoreProgramPrefix)
+	if err != nil {
+		return err
+	}
+	params := map[string]interface{}{
+		"Namespace": config.Namespace,
+	}
+
+	var newConf v1.Configuration
+	err = api.Template.UnmarshalTemplate(templateCoreProgramYaml, params, &newConf)
+	if err != nil {
+		return err
 	}
 
 	newConf.Name = config.Name
