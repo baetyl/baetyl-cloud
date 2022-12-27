@@ -725,9 +725,11 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	node.Attributes[v1.BaetylCoreFrequency] = fmt.Sprintf("%d", coreConfig.Frequency)
 
-	err = api.updateCoreProgramConfig(app)
-	if err != nil {
-		return nil, err
+	if node.NodeMode == context.RunModeNative {
+		err = api.updateCoreProgramConfig(app)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	coreApp, err := api.App.Update(nil, ns, app)
