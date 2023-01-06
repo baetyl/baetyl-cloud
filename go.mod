@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/ZZMarquis/gm v1.3.2
-	github.com/aws/aws-sdk-go v1.32.8
+	github.com/aws/aws-sdk-go v1.33.0
 	github.com/baetyl/baetyl-go/v2 v2.2.4-0.20221128032312-d8c3fe79e376
 	github.com/gin-contrib/cache v1.1.0
 	github.com/gin-gonic/gin v1.8.1
