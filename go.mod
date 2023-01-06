@@ -74,7 +74,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
-	github.com/ulikunitz/xz v0.5.7 // indirect
+	github.com/ulikunitz/xz v0.5.8 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.9.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
