@@ -162,7 +162,7 @@ func TestDefaultPkiClient_CheckRootCertId(t *testing.T) {
 
 func TestDefaultPkiClient_GetRootCertId(t *testing.T) {
 	p, _ := genDefaultPkiClient(t)
-	res := p.GetRootCertId()
+	res := p.GetRootCertID()
 	assert.Equal(t, RootCertId, res)
 }
 
