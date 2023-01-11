@@ -51,7 +51,7 @@ func NewPKIService(config *config.CloudConfig) (PKIService, error) {
 }
 
 func (p *pkiService) GetCA() ([]byte, error) {
-	return p.pki.GetRootCert(p.pki.GetRootCertId())
+	return p.pki.GetRootCert(p.pki.GetRootCertID())
 }
 
 func (p *pkiService) DeleteServerCertificate(certId string) error {
@@ -92,7 +92,7 @@ func (p *pkiService) signCertificate(cn string, altNames models.AltNames, create
 		return nil, err
 	}
 
-	certId, err := create(csr, p.pki.GetRootCertId())
+	certId, err := create(csr, p.pki.GetRootCertID())
 	if err != nil {
 		return nil, err
 	}

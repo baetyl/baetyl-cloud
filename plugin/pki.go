@@ -23,7 +23,7 @@ type Cert struct {
 
 type PKI interface {
 	// root cert
-	GetRootCertId() string
+	GetRootCertID() string
 	// info : 生成根证书的相关信息   parentId : 上一级根证书id，可为空
 	CreateRootCert(info *x509.CertificateRequest, parentId string) (string, error)
 	GetRootCert(rootId string) ([]byte, error)

@@ -35,9 +35,9 @@ func (m *MockPKI) EXPECT() *MockPKIMockRecorder {
 }
 
 // GetRootCertId mocks base method
-func (m *MockPKI) GetRootCertId() string {
+func (m *MockPKI) GetRootCertID() string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRootCertId")
+	ret := m.ctrl.Call(m, "GetRootCertID")
 	ret0, _ := ret[0].(string)
 	return ret0
 }
@@ -45,7 +45,7 @@ func (m *MockPKI) GetRootCertId() string {
 // GetRootCertId indicates an expected call of GetRootCertId
 func (mr *MockPKIMockRecorder) GetRootCertId() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRootCertId", reflect.TypeOf((*MockPKI)(nil).GetRootCertId))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRootCertID", reflect.TypeOf((*MockPKI)(nil).GetRootCertID))
 }
 
 // CreateRootCert mocks base method
