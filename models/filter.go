@@ -14,6 +14,7 @@ type ListOptions struct {
 	FieldSelector string `form:"fieldSelector,omitempty" json:"fieldSelector,omitempty"`
 	KeywordType   string `form:"keywordType,omitempty" json:"keywordType,omitempty"`
 	Keyword       string `form:"keyword,omitempty" json:"keyword,omitempty"`
+	Alias         string `form:"alias,omitempty" json:"alias,omitempty"`
 	Limit         int64  `form:"limit,omitempty" json:"limit,omitempty"`
 	Continue      string `form:"continue,omitempty" json:"continue,omitempty"`
 	Filter        `json:",inline"`
@@ -46,6 +47,15 @@ func (l *ListOptions) GetFuzzyKeyword() string {
 		return "%" + l.Keyword + "%"
 	}
 	return l.Keyword
+}
+
+func (l *ListOptions) GetFuzzyAlias() string {
+	if l.Alias == "" {
+		return "%"
+	} else if !strings.Contains(l.Alias, "%") {
+		return "%" + l.Alias + "%"
+	}
+	return l.Alias
 }
 
 func GetPagingParam(listOptions *ListOptions, resLen int) (start, end int) {
