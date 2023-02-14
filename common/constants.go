@@ -138,12 +138,16 @@ const (
 	Metadata         = "matadata"
 	PkiCertID        = "pkiCertID"
 	NodeSelector     = "nodeSelector"
+	WorkLoad         = "workLoad"
+	JobConfig        = "jobConfig"
 
 	AnnotationDescription     = BaetylCloudGroup + "/" + Description
 	AnnotationUpdateTimestamp = BaetylCloudGroup + "/" + UpdateTimestamp
 	AnnotationMetadata        = BaetylCloudGroup + "/" + Metadata
 	AnnotationPkiCertID       = BaetylCloudGroup + "/" + PkiCertID
 	AnnotationNodeSelector    = BaetylCloudGroup + "/" + NodeSelector
+	AnnotationWorkLoad        = BaetylCloudGroup + "/" + WorkLoad
+	AnnotationJobConfig       = BaetylCloudGroup + "/" + JobConfig
 )
 
 const (
