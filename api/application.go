@@ -279,8 +279,8 @@ func (api *API) ParseApplication(c *common.Context) (*models.ApplicationView, er
 	if app.Name == "" {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is required"))
 	}
-
 	if app.Type == common.ContainerApp {
+		app.ImageTrim()
 		for _, v := range app.Services {
 			if v.FunctionConfig != nil || v.Functions != nil {
 				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "add function info in container app"))
