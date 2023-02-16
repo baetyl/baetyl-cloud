@@ -858,7 +858,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 				Service: specV1.Service{
 					Name:     "agent",
 					Hostname: "test-agent",
-					Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+					Image:    "  hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
 					Replica:  1,
 					VolumeMounts: []specV1.VolumeMount{
 						{
@@ -1024,7 +1024,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	fApp.EXPECT().CreateApp(appView.Namespace, nil, app, gomock.Any()).Return(app1, nil)
+	fApp.EXPECT().CreateApp(appView.Namespace, nil, gomock.Any(), gomock.Any()).Return(app1, nil)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secretRegistry, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secretCertificate, nil).Times(1)
@@ -1037,6 +1037,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 
 	appViewRes := &models.ApplicationView{}
 	err := json.Unmarshal(w.Body.Bytes(), appViewRes)
+	assert.Equal(t, app.Services[0].Image, "hub.baidubce.com/baetyl/baetyl-agent:1.0.0")
 	assert.NoError(t, err)
 	assert.Len(t, appViewRes.Volumes, 3)
 	assert.Len(t, appViewRes.Registries, 1)

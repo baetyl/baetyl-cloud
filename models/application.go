@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strings"
 	"time"
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
@@ -30,6 +31,12 @@ type ApplicationView struct {
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty"`
 	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
 	AutoScaleCfg      *specV1.AutoScaleCfg  `json:"autoScaleCfg,omitempty"`
+}
+
+func (a *ApplicationView) ImageTrim() {
+	for index, service := range a.Services {
+		a.Services[index].Image = strings.TrimSpace(service.Image)
+	}
 }
 
 // VolumeView volume view
