@@ -1038,7 +1038,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 	appViewRes := &models.ApplicationView{}
 	err := json.Unmarshal(w.Body.Bytes(), appViewRes)
 	assert.NoError(t, err)
-	assert.NotEqual(t, app.Services[0].Image, "  hub.baidubce.com/baetyl/baetyl-agent:1.0.0\"")
+	assert.NotEqual(t, app.Services[0].Image, "  hub.baidubce.com/baetyl/baetyl-agent:1.0.0")
 	assert.Len(t, appViewRes.Volumes, 3)
 	assert.Len(t, appViewRes.Registries, 1)
 	assert.Equal(t, appViewRes.Registries, appView.Registries)
