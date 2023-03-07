@@ -53,6 +53,7 @@ const (
 
 	BaetylCoreLogLevel = "BaetylCoreLogLevel"
 	LogLevelDebug      = "debug"
+	UserID             = "UserId"
 )
 
 var (
@@ -246,7 +247,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, err
 	}
 	n.Attributes["BaetylCoreVersion"] = version
-	n.Attributes["UserId"] = c.GetUserInfo().User.ID
+	n.Attributes[UserID] = c.GetUserInfo().User.ID
 
 	n.SysApps = common.UpdateSysAppByAccelerator(n.Accelerator, n.SysApps)
 
@@ -299,6 +300,11 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 	})
 	node.Version = oldNode.Version
 	node.Attributes = oldNode.Attributes
+	if node.Attributes != nil {
+		if _, ok := node.Attributes[UserID]; !ok {
+			node.Attributes[UserID] = c.GetUserInfo().User.ID
+		}
+	}
 	node.CreationTimestamp = oldNode.CreationTimestamp
 	// Cluster cannot be updated, Mode can be updated via attribute
 	node.Cluster = oldNode.Cluster
