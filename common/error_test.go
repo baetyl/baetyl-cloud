@@ -21,15 +21,15 @@ func TestError(t *testing.T) {
 			args: args{
 				c: ErrRequestAccessDenied,
 			},
-			wantErr: templates[ErrRequestAccessDenied],
+			wantErr: "访问已被拒绝。\nThe request access is denied.",
 		},
 		{
 			name: "ErrRequestAccessDenied-2",
 			args: args{
 				c:  ErrRequestAccessDenied,
-				fs: []*F{Field("dummy", "dummy")},
+				fs: []*F{Field("error", "err")},
 			},
-			wantErr: templates[ErrRequestAccessDenied],
+			wantErr: "访问已被拒绝。\nThe request access is denied. (err)",
 		},
 		{
 			name: "ErrRequestParamInvalid-1",
