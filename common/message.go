@@ -106,7 +106,7 @@ var templates = map[Code]string{
 	ErrPluginNotFound: "The plugin{{if .name}} ({{.name}}){{end}} is not found.",
 	ErrPluginInvalid:  "The plugin {{.name}} is invalid, not implement all interfaces of {{.kind}}.",
 	// * request
-	ErrRequestAccessDenied:   "访问已被拒绝。\nThe request access is denied.",
+	ErrRequestAccessDenied:   "访问已被拒绝。\nThe request access is denied.{{if .error}} ({{.error}}){{end}}",
 	ErrRequestMethodNotFound: "访问了不存在的api接口。\nThe request method is not found.",
 	ErrRequestParamInvalid:   "非法的请求参数。\nThe request parameter is invalid.{{if .error}} ({{.error}}){{end}}",
 	// * resource

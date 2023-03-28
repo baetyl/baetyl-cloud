@@ -15,7 +15,7 @@ func (api *API) GetQuota(c *common.Context) (interface{}, error) {
 }
 
 // GetQuota for mis server api
-//  - param namespace string
+//   - param namespace string
 func (api *API) GetQuotaForMis(c *common.Context) (interface{}, error) {
 	ns := c.Param(common.KeyContextNamespace)
 	quota := &models.Quota{
@@ -44,9 +44,9 @@ func (api *API) GetQuotaForMis(c *common.Context) (interface{}, error) {
 }
 
 // CreateQuota for mis server api
-//  - param namespace string
-//  - param quotaName string
-//  - param quota int
+//   - param namespace string
+//   - param quotaName string
+//   - param quota int
 func (api *API) CreateQuota(c *common.Context) (interface{}, error) {
 	quota := &models.Quota{}
 	if err := c.LoadBody(quota); err != nil {
@@ -60,9 +60,9 @@ func (api *API) CreateQuota(c *common.Context) (interface{}, error) {
 }
 
 // UpdateQuota for mis server api
-//  - param namespace string
-//  - param quotaName string
-//  - param quota int
+//   - param namespace string
+//   - param quotaName string
+//   - param quota int
 func (api *API) UpdateQuota(c *common.Context) (interface{}, error) {
 	quota := &models.Quota{}
 	if err := c.LoadBody(quota); err != nil {
@@ -73,8 +73,8 @@ func (api *API) UpdateQuota(c *common.Context) (interface{}, error) {
 }
 
 // DeleteQuota for mis server api
-//  - param namespace string
-//  - param quotaName string
+//   - param namespace string
+//   - param quotaName string
 func (api *API) DeleteQuota(c *common.Context) (interface{}, error) {
 	quota := &models.Quota{}
 	if err := c.LoadBody(quota); err != nil {
@@ -85,7 +85,7 @@ func (api *API) DeleteQuota(c *common.Context) (interface{}, error) {
 }
 
 // InitQuotas
-//  - param namespace string
+//   - param namespace string
 func (api *API) InitQuotas(namespace string) error {
 	quotas, err := api.Quota.GetDefaultQuotas(namespace)
 	if err != nil {
@@ -95,7 +95,7 @@ func (api *API) InitQuotas(namespace string) error {
 }
 
 // DeleteQuotaByNamespace
-//  - param namespace string
+//   - param namespace string
 func (api *API) DeleteQuotaByNamespace(namespace string) error {
 	if err := api.Quota.DeleteQuotaByNamespace(namespace); err != nil {
 		common.LogDirtyData(err,
