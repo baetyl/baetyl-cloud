@@ -278,7 +278,7 @@ func (s *AdminServer) AuthHandler(c *gin.Context) {
 			log.Any("namespace", cc.GetNamespace()),
 			log.Any("authorization", c.Request.Header.Get("Authorization")),
 			log.Error(err))
-		common.PopulateFailedResponse(cc, common.Error(common.ErrRequestAccessDenied), true)
+		common.PopulateFailedResponse(cc, common.Error(common.ErrRequestAccessDenied, common.Field("error", err)), true)
 	}
 }
 
