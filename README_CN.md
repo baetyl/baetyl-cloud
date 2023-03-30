@@ -167,6 +167,14 @@ curl http://0.0.0.0:30004/v1/nodes/demo-node
 # {"namespace":"baetyl-cloud","name":"demo-node","version":"1939112",...,"report":{"time":"2020-07-22T07:25:27.495362661Z","sysapps":...,"node":...,"nodestats":...,"ready":true}
 ```
 
+## ekuiper集成
+
+BIE从v2.4.3版本开始集成了[eKuiper](https://github.com/lf-edge/ekuiper)，现在，你可以通过BIE的系统应用一键下发并运行
+eKuiper:1.8.0-alpha.2版本，只需要在节点创建或修改时的sysApps字段中，新增'baetyl-ekuiper'字段即可。
+
+下发的eKuiper将默认连接到baetyl-broker，这样，你就可以通过baetyl-broker作为输入源，利用eKuiper
+的流式数据处理和规则引擎能力对边缘数据进行处理了。
+
 ## 联系我们
 
 Baetyl 作为中国首发的开源边缘计算框架，

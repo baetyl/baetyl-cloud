@@ -779,6 +779,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
+			UserID:                     "",
 		},
 	}
 
@@ -836,6 +837,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
 			specV1.KeyOptionalSysApps:  interface{}([]interface{}{"a"}),
+			UserID:                     "",
 		},
 		SysApps: []string{"a"},
 	}
@@ -885,6 +887,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
+			UserID:                     "",
 		},
 		SysApps: []string{"a"},
 	}
@@ -1005,6 +1008,7 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 		Attributes: map[string]interface{}{
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
+			UserID:                     "",
 		},
 	}
 	sNode.EXPECT().Update(mNode7.Namespace, mNode9).Return(mNode9, nil)
@@ -1100,6 +1104,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.BaetylAgentPort:     common.DefaultAgentPort,
 			BaetylCoreLogLevel:         LogLevelDebug,
+			UserID:                     "",
 		},
 		Desire: specV1.Desire{
 			specV1.KeySysApps: []interface{}{

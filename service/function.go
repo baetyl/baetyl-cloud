@@ -55,7 +55,7 @@ func (c *functionService) List(userID string, source string) ([]models.Function,
 	return functionPlugin.List(userID)
 }
 
-//ListVersions List all versions of a function
+// ListVersions List all versions of a function
 func (c *functionService) ListFunctionVersions(userID, name string, source string) ([]models.Function, error) {
 	functionPlugin, ok := c.functions[source]
 	if !ok {

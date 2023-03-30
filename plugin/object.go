@@ -9,7 +9,7 @@ import (
 //go:generate mockgen -destination=../mock/plugin/object.go -package=plugin github.com/baetyl/baetyl-cloud/v2/plugin Object
 
 // Object Object
-//TODO: userID doesn't belong to Object, should in the metedata
+// TODO: userID doesn't belong to Object, should in the metedata
 type Object interface {
 	IsAccountEnabled() bool
 

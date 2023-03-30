@@ -53,7 +53,7 @@ func NewObjectService(config *config.CloudConfig) (ObjectService, error) {
 	}, nil
 }
 
-//ListSource ListSource
+// ListSource ListSource
 func (c *objectService) ListSources() map[string]models.ObjectStorageSourceV2 {
 	sources := map[string]models.ObjectStorageSourceV2{}
 	for name, object := range c.objects {
@@ -73,7 +73,7 @@ func (c *objectService) ListInternalBuckets(userID, source string) ([]models.Buc
 	return objectPlugin.ListInternalBuckets(userID)
 }
 
-//ListInternalBucketObjects ListInternalBucketObjects
+// ListInternalBucketObjects ListInternalBucketObjects
 func (c *objectService) ListInternalBucketObjects(userID, bucket, source string) (*models.ListObjectsResult, error) {
 	objectPlugin, ok := c.objects[source]
 	if !ok {

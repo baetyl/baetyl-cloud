@@ -30,6 +30,7 @@ const (
 	HookCreateApplicationOta = "hookCreateApplicationOta"
 	HookUpdateApplicationOta = "hookUpdateApplicationOta"
 	HookDeleteApplicationOta = "hookDeleteApplicationOta"
+	AppNameMaxLength         = 55 // expect svc name with "-Nodeport", 64-9=55
 )
 
 type CreateApplicationOta = func(c *common.Context, app *specV1.Application) (*specV1.Application, error)
@@ -279,8 +280,11 @@ func (api *API) ParseApplication(c *common.Context) (*models.ApplicationView, er
 	if app.Name == "" {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is required"))
 	}
-
+	if len(app.Name) > AppNameMaxLength {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is too long"))
+	}
 	if app.Type == common.ContainerApp {
+		app.ImageTrim()
 		for _, v := range app.Services {
 			if v.FunctionConfig != nil || v.Functions != nil {
 				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "add function info in container app"))

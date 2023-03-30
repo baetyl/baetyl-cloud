@@ -160,6 +160,14 @@ curl http://0.0.0.0:30004/v1/nodes/demo-node
 # {"namespace":"baetyl-cloud","name":"demo-node","version":"1939112",...,"report":{"time":"2020-07-22T07:25:27.495362661Z","sysapps":...,"node":...,"nodestats":...,"ready":true}
 ```
 
+## Integration with eKuiper
+
+BIE has integrated [eKuiper](https://github.com/lf-edge/ekuiper) since v2.4.3. Now, you can deploy and run it with one click through BIE's system application
+For eKuiper:version 1.8.0-alpha.2, you only need to add 'baetyl-ekuiper' field to the sysApps field when the node is created or modified.
+
+The eKuiper will connect to baetyl-broker by default, so that you can use baetyl-broker as an input source to leverage eKuiper
+s streaming data processing and rules engine capabilities for edge data.
+
 ## Contact us
 
 As the first open edge computing framework in China,
