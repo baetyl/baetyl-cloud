@@ -144,7 +144,7 @@ func (s *AdminServer) InitRoute() {
 		nodes.GET("/:name/stats", common.Wrapper(s.api.GetNodeStats))
 		nodes.PUT("/:name", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.UpdateNode))
 		nodes.DELETE("/:name", common.Wrapper(s.api.DeleteNode))
-		nodes.POST("", s.NodeQuotaHandler, common.Wrapper(s.api.CreateNode))
+		nodes.POST("", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), s.NodeQuotaHandler, common.Wrapper(s.api.CreateNode))
 		nodes.GET("", common.Wrapper(s.api.ListNode))
 		nodes.GET("/:name/deploys", common.Wrapper(s.api.GetNodeDeployHistory))
 		nodes.GET("/:name/init", common.Wrapper(s.api.GenInitCmdFromNode))
