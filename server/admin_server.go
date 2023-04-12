@@ -305,7 +305,14 @@ func (s *AdminServer) NodeQuotaHandler(c *gin.Context) {
 }
 
 func (s *AdminServer) WrapperCache(handler common.HandlerFunc) func(c *gin.Context) {
-	return s.WrapperCacheDuration(handler, DefaultAPICacheDuration)
+	if s.cfg.AdminServer.CacheEnable {
+		dur := DefaultAPICacheDuration
+		if s.cfg.AdminServer.CacheDuration > 0 {
+			dur = s.cfg.AdminServer.CacheDuration
+		}
+		return s.WrapperCacheDuration(handler, dur)
+	}
+	return common.Wrapper(handler)
 }
 
 func (s *AdminServer) WrapperCacheDuration(handler common.HandlerFunc, dur time.Duration) func(c *gin.Context) {
