@@ -2,8 +2,12 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/baetyl/baetyl-go/v2/cache"
+	"github.com/baetyl/baetyl-go/v2/cache/persist"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/gin-gonic/gin"
@@ -21,6 +25,7 @@ type AdminServer struct {
 	License          service.LicenseService
 	Quota            service.QuotaService
 	ExternalHandlers []gin.HandlerFunc
+	APICache         persist.CacheStore
 
 	cfg    *config.CloudConfig
 	router *gin.Engine
@@ -28,6 +33,10 @@ type AdminServer struct {
 	api    *api.API
 	log    *log.Logger
 }
+
+const (
+	DefaultAPICacheDuration = time.Second * 2
+)
 
 var (
 	NodeCollector plugin.QuotaCollector
@@ -59,13 +68,14 @@ func NewAdminServer(config *config.CloudConfig) (*AdminServer, error) {
 		MaxHeaderBytes: 1 << 20,
 	}
 	return &AdminServer{
-		cfg:     config,
-		router:  router,
-		server:  server,
-		Auth:    auth,
-		License: ls,
-		Quota:   qs,
-		log:     log.L().With(log.Any("server", "AdminServer")),
+		cfg:      config,
+		router:   router,
+		server:   server,
+		Auth:     auth,
+		License:  ls,
+		Quota:    qs,
+		APICache: persist.NewInMemoryStore(DefaultAPICacheDuration),
+		log:      log.L().With(log.Any("server", "AdminServer")),
 	}, nil
 }
 
@@ -101,11 +111,11 @@ func (s *AdminServer) InitRoute() {
 	v1 := s.router.Group("v1")
 	{
 		configs := v1.Group("/configs")
-		configs.GET("/:name", common.Wrapper(s.api.GetConfig))
+		configs.GET("/:name", s.WrapperCache(s.api.GetConfig))
 		configs.PUT("/:name", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.UpdateConfig))
 		configs.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceForDeleting, true), common.Wrapper(s.api.DeleteConfig))
 		configs.POST("", common.WrapperRaw(s.api.ValidateResourceForCreating, true), common.Wrapper(s.api.CreateConfig))
-		configs.GET("", common.Wrapper(s.api.ListConfig))
+		configs.GET("", s.WrapperCache(s.api.ListConfig))
 		configs.GET("/:name/apps", common.Wrapper(s.api.GetAppByConfig))
 	}
 	{
@@ -115,7 +125,7 @@ func (s *AdminServer) InitRoute() {
 		registry.POST("/:name/refresh", common.Wrapper(s.api.RefreshRegistryPassword))
 		registry.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceForDeleting, true), common.Wrapper(s.api.DeleteRegistry))
 		registry.POST("", common.WrapperRaw(s.api.ValidateResourceForCreating, true), common.Wrapper(s.api.CreateRegistry))
-		registry.GET("", common.Wrapper(s.api.ListRegistry))
+		registry.GET("", s.WrapperCache(s.api.ListRegistry))
 		registry.GET("/:name/apps", common.Wrapper(s.api.GetAppByRegistry))
 	}
 	{
@@ -124,53 +134,53 @@ func (s *AdminServer) InitRoute() {
 		certificate.PUT("/:name", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.UpdateCertificate))
 		certificate.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceForDeleting, true), common.Wrapper(s.api.DeleteCertificate))
 		certificate.POST("", common.WrapperRaw(s.api.ValidateResourceForCreating, true), common.Wrapper(s.api.CreateCertificate))
-		certificate.GET("", common.Wrapper(s.api.ListCertificate))
+		certificate.GET("", s.WrapperCache(s.api.ListCertificate))
 		certificate.GET("/:name/apps", common.Wrapper(s.api.GetAppByCertificate))
 	}
 	{
-		configs := v1.Group("/secrets")
-		configs.GET("/:name", common.Wrapper(s.api.GetSecret))
-		configs.PUT("/:name", common.Wrapper(s.api.UpdateSecret))
-		configs.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceForDeleting, true), common.Wrapper(s.api.DeleteSecret))
-		configs.POST("", common.WrapperRaw(s.api.ValidateResourceForCreating, true), common.Wrapper(s.api.CreateSecret))
-		configs.GET("", common.Wrapper(s.api.ListSecret))
-		configs.GET("/:name/apps", common.Wrapper(s.api.GetAppBySecret))
+		secrets := v1.Group("/secrets")
+		secrets.GET("/:name", common.Wrapper(s.api.GetSecret))
+		secrets.PUT("/:name", common.Wrapper(s.api.UpdateSecret))
+		secrets.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceForDeleting, true), common.Wrapper(s.api.DeleteSecret))
+		secrets.POST("", common.WrapperRaw(s.api.ValidateResourceForCreating, true), common.Wrapper(s.api.CreateSecret))
+		secrets.GET("", s.WrapperCache(s.api.ListSecret))
+		secrets.GET("/:name/apps", common.Wrapper(s.api.GetAppBySecret))
 	}
 	{
 		nodes := v1.Group("/nodes")
-		nodes.GET("/:name", common.Wrapper(s.api.GetNode))
+		nodes.GET("/:name", s.WrapperCache(s.api.GetNode))
 		nodes.PUT("", common.Wrapper(s.api.GetNodes))
-		nodes.GET("/:name/apps", common.Wrapper(s.api.GetAppByNode))
-		nodes.GET("/:name/stats", common.Wrapper(s.api.GetNodeStats))
+		nodes.GET("/:name/apps", s.WrapperCache(s.api.GetAppByNode))
+		nodes.GET("/:name/stats", s.WrapperCache(s.api.GetNodeStats))
 		nodes.PUT("/:name", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.UpdateNode))
 		nodes.DELETE("/:name", common.Wrapper(s.api.DeleteNode))
 		nodes.POST("", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), s.NodeQuotaHandler, common.Wrapper(s.api.CreateNode))
-		nodes.GET("", common.Wrapper(s.api.ListNode))
-		nodes.GET("/:name/deploys", common.Wrapper(s.api.GetNodeDeployHistory))
-		nodes.GET("/:name/init", common.Wrapper(s.api.GenInitCmdFromNode))
+		nodes.GET("", s.WrapperCache(s.api.ListNode))
+		nodes.GET("/:name/deploys", s.WrapperCache(s.api.GetNodeDeployHistory))
+		nodes.GET("/:name/init", s.WrapperCache(s.api.GenInitCmdFromNode))
 		nodes.PUT("/:name/mode", common.Wrapper(s.api.UpdateNodeMode))
 		nodes.PUT("/:name/properties", common.Wrapper(s.api.UpdateNodeProperties))
-		nodes.GET("/:name/properties", common.Wrapper(s.api.GetNodeProperties))
+		nodes.GET("/:name/properties", s.WrapperCache(s.api.GetNodeProperties))
 		nodes.PUT("/:name/core/configs", common.Wrapper(s.api.UpdateCoreApp))
-		nodes.GET("/:name/core/configs", common.Wrapper(s.api.GetCoreAppConfigs))
-		nodes.GET("/:name/core/versions", common.Wrapper(s.api.GetCoreAppVersions))
+		nodes.GET("/:name/core/configs", s.WrapperCache(s.api.GetCoreAppConfigs))
+		nodes.GET("/:name/core/versions", s.WrapperCache(s.api.GetCoreAppVersions))
 	}
 	{
 		apps := v1.Group("/apps")
-		apps.GET("/:name", common.Wrapper(s.api.GetApplication))
-		apps.GET("/:name/configs", common.Wrapper(s.api.GetSysAppConfigs))
-		apps.GET("/:name/secrets", common.Wrapper(s.api.GetSysAppSecrets))
-		apps.GET("/:name/certificates", common.Wrapper(s.api.GetSysAppCertificates))
-		apps.GET("/:name/registries", common.Wrapper(s.api.GetSysAppRegistries))
+		apps.GET("/:name", s.WrapperCache(s.api.GetApplication))
+		apps.GET("/:name/configs", s.WrapperCache(s.api.GetSysAppConfigs))
+		apps.GET("/:name/secrets", s.WrapperCache(s.api.GetSysAppSecrets))
+		apps.GET("/:name/certificates", s.WrapperCache(s.api.GetSysAppCertificates))
+		apps.GET("/:name/registries", s.WrapperCache(s.api.GetSysAppRegistries))
 		apps.PUT("/:name", common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.UpdateApplication))
 		apps.DELETE("/:name", common.WrapperRaw(s.api.ValidateResourceForDeleting, true), common.Wrapper(s.api.DeleteApplication))
 		apps.POST("", common.WrapperRaw(s.api.ValidateResourceForCreating, true), common.WrapperWithLock(s.api.Locker.Lock, s.api.Locker.Unlock), common.Wrapper(s.api.CreateApplication))
-		apps.GET("", common.Wrapper(s.api.ListApplication))
+		apps.GET("", s.WrapperCache(s.api.ListApplication))
 	}
 	{
 		namespace := v1.Group("/namespace")
 		namespace.POST("", common.Wrapper(s.api.CreateNamespace))
-		namespace.GET("", common.Wrapper(s.api.GetNamespace))
+		namespace.GET("", s.WrapperCache(s.api.GetNamespace))
 		namespace.DELETE("", common.Wrapper(s.api.DeleteNamespace))
 	}
 	{
@@ -230,10 +240,10 @@ func (s *AdminServer) InitRoute() {
 	}
 	{
 		module := v1.Group("modules")
-		module.GET("", common.Wrapper(s.api.ListModules))
-		module.GET("/:name", common.Wrapper(s.api.GetModules))
-		module.GET("/:name/version/:version", common.Wrapper(s.api.GetModuleByVersion))
-		module.GET("/:name/latest", common.Wrapper(s.api.GetLatestModule))
+		module.GET("", s.WrapperCache(s.api.ListModules))
+		module.GET("/:name", s.WrapperCache(s.api.GetModules))
+		module.GET("/:name/version/:version", s.WrapperCache(s.api.GetModuleByVersion))
+		module.GET("/:name/latest", s.WrapperCache(s.api.GetLatestModule))
 		module.POST("", common.Wrapper(s.api.CreateModule))
 		module.PUT("/:name/version/:version", common.Wrapper(s.api.UpdateModule))
 		module.DELETE("/:name", common.Wrapper(s.api.DeleteModules))
@@ -241,7 +251,7 @@ func (s *AdminServer) InitRoute() {
 	}
 	{
 		quotas := v1.Group("/quotas")
-		quotas.GET("", common.Wrapper(s.api.GetQuota))
+		quotas.GET("", s.WrapperCache(s.api.GetQuota))
 	}
 	{
 		yaml := v1.Group("yaml")
@@ -253,7 +263,7 @@ func (s *AdminServer) InitRoute() {
 	v2 := s.router.Group("v2")
 	{
 		objects := v2.Group("/objects")
-		objects.GET("", common.Wrapper(s.api.ListObjectSourcesV2))
+		objects.GET("", s.WrapperCache(s.api.ListObjectSourcesV2))
 		if len(s.cfg.Plugin.Objects) != 0 {
 			objects.GET("/:source/buckets", common.Wrapper(s.api.ListBucketsV2))
 			objects.GET("/:source/buckets/:bucket/objects", common.Wrapper(s.api.ListBucketObjectsV2))
@@ -292,4 +302,24 @@ func (s *AdminServer) NodeQuotaHandler(c *gin.Context) {
 			log.Error(err))
 		common.PopulateFailedResponse(cc, err, true)
 	}
+}
+
+func (s *AdminServer) WrapperCache(handler common.HandlerFunc) func(c *gin.Context) {
+	return s.WrapperCacheDuration(handler, DefaultAPICacheDuration)
+}
+
+func (s *AdminServer) WrapperCacheDuration(handler common.HandlerFunc, dur time.Duration) func(c *gin.Context) {
+	return cache.WCacheByRequestURI(
+		s.APICache,
+		dur,
+		common.Wrapper(handler),
+		cache.WithLogger(s),
+		cache.KeyWithGinContext([]string{"namespace"}),
+		cache.WithoutHeader(),
+		cache.WithoutHeaderIgnore([]string{"Content-Type"}),
+	)
+}
+
+func (s *AdminServer) Errorf(msg string, vals ...interface{}) {
+	s.log.Error(fmt.Sprintf(msg, vals...))
 }
