@@ -141,6 +141,9 @@ func TestAdminServer_Handler(t *testing.T) {
 	s, mkAuth, _, mockCtl := initAdminServerMock(t)
 	defer mockCtl.Finish()
 
+	mLock := service.NewMockLockerService(mockCtl)
+	s.api.Locker = mLock
+
 	s.InitRoute()
 	r := s.GetRoute()
 	assert.NotNil(t, r)
@@ -186,6 +189,8 @@ func TestAdminServer_Handler(t *testing.T) {
 	mQuota := service.NewMockQuotaService(mockCtl)
 	s.api.Quota = mQuota
 	mQuota.EXPECT().CheckQuota(gomock.Any(), gomock.Any()).Return(fmt.Errorf("quota error"))
+	mLock.EXPECT().Lock(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+	mLock.EXPECT().Unlock(gomock.Any(), gomock.Any(), gomock.Any()).Return()
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", nil)
 	w4 = httptest.NewRecorder()
 	s.GetRoute().ServeHTTP(w4, req)

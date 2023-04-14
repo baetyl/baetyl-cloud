@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS `baetyl_certificate` (
   `parent_id` varchar(64) NOT NULL DEFAULT '' COMMENT '上级证书id',
   `type` varchar(64) NOT NULL DEFAULT '' COMMENT '证书类型（根 CA、二级 CA、节点客户端证书、模块客户端证书、模块服务端证书）',
   `common_name` varchar(128) NOT NULL DEFAULT '' COMMENT '常用名',
-  `description` varchar(256) NOT NULL DEFAULT '' COMMENT '描述信息',
+  `description` varchar(1024) NOT NULL DEFAULT '' COMMENT '描述信息',
   `not_before` datetime NOT NULL DEFAULT '2017-01-01 00:00:00' COMMENT '证书生效时间',
   `not_after` datetime NOT NULL DEFAULT '2017-01-01 00:00:00' COMMENT '记录失效时间',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
