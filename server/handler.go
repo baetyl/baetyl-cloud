@@ -33,7 +33,7 @@ func RequestIDHandler(c *gin.Context) {
 
 func LoggerHandler(c *gin.Context) {
 	cc := common.NewContext(c)
-	log.L().Info("logger handler start request",
+	log.L().Debug("logger handler start request",
 		log.Any(cc.GetTrace()),
 		log.Any("method", cc.Request.Method),
 		log.Any("url", cc.Request.URL.Path),
@@ -44,7 +44,7 @@ func LoggerHandler(c *gin.Context) {
 	if c.Request.Header.Get("Content-type") == "application/json" && c.Request.Body != nil {
 		if buf, err := io.ReadAll(c.Request.Body); err == nil {
 			c.Request.Body = io.NopCloser(bytes.NewReader(buf[:]))
-			log.L().Info("logger handler request body",
+			log.L().Debug("logger handler request body",
 				log.Any(cc.GetTrace()),
 				log.Any("body", string(buf)),
 			)
@@ -52,7 +52,7 @@ func LoggerHandler(c *gin.Context) {
 	}
 	start := time.Now()
 	c.Next()
-	log.L().Info("logger handler finish request",
+	log.L().Debug("logger handler finish request",
 		log.Any(cc.GetTrace()),
 		log.Any("status", strconv.Itoa(c.Writer.Status())),
 		log.Any("latency", time.Since(start)),
