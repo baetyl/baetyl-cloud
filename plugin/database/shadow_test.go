@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/triggerfunc"
+	"github.com/baetyl/baetyl-go/v2/trigger"
 )
 
 var (
@@ -43,6 +45,16 @@ func TestShadow(t *testing.T) {
 	isSysApp := false
 	assert.NoError(t, err)
 	db.MockCreateShadowTable()
+
+	err = trigger.Register(triggerfunc.ShadowCreateOrUpdateTrigger, trigger.EventFunc{
+		Args:  []interface{}{},
+		Event: func(data models.Shadow) string { return "hello " + data.Name },
+	})
+
+	err = trigger.Register(triggerfunc.ShadowDelete, trigger.EventFunc{
+		Args:  []interface{}{},
+		Event: func(name string) string { return "hello " + name },
+	})
 
 	namespace := "test"
 	shadow := &models.Shadow{
@@ -229,6 +241,12 @@ func TestBatchShadows(t *testing.T) {
 	tx, err := db.BeginTx()
 	assert.NoError(t, err)
 
+	err = trigger.Register(triggerfunc.ShadowCreateOrUpdateTrigger, trigger.EventFunc{
+		Args:  []interface{}{},
+		Event: func(shandow models.Shadow) { fmt.Println(shandow.Name) },
+	})
+	assert.NoError(t, err)
+
 	_, err = db.Create(tx, shadow1)
 	assert.NoError(t, err)
 
@@ -250,4 +268,8 @@ func TestBatchShadows(t *testing.T) {
 	assert.NoError(t, err)
 	err = db.UpdateDesires(nil, updateShadows)
 	assert.NotNil(t, err)
+
+	shadowsList, err := db.ListAll(namespace)
+	assert.NoError(t, err)
+	assert.Equal(t, len(shadowsList.Items), 2)
 }

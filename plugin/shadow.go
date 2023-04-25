@@ -18,5 +18,6 @@ type Shadow interface {
 	UpdateDesires(tx interface{}, shadows []*models.Shadow) error
 	UpdateReport(shadow *models.Shadow) (*models.Shadow, error)
 	List(namespace string, nodeList *models.NodeList) (*models.ShadowList, error)
+	ListAll(namespace string) (*models.ShadowList, error)
 	io.Closer
 }

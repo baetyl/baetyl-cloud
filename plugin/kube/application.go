@@ -1,9 +1,9 @@
 package kube
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"github.com/baetyl/baetyl-go/v2/json"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/jinzhu/copier"

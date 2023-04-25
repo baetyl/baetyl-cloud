@@ -12,6 +12,7 @@ import (
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/awss3"
+	_ "github.com/baetyl/baetyl-cloud/v2/plugin/cache/localcache"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/database"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/decryption"
 	_ "github.com/baetyl/baetyl-cloud/v2/plugin/default/auth"

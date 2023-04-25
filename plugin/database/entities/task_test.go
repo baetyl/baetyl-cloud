@@ -1,11 +1,12 @@
 package entities
 
 import (
-	"encoding/json"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
 func TestFromTaskModel(t *testing.T) {
