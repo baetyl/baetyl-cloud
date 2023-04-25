@@ -1,11 +1,11 @@
-package triggerfunc
+package triggerFunc
 
 import (
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/log"
 
-	"github.com/baetyl/baetyl-cloud/v2/cachemsg"
+	"github.com/baetyl/baetyl-cloud/v2/cacheMsg"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
@@ -17,11 +17,11 @@ const (
 
 // ShadowCreateOrUpdateCacheSet update shadow cache when shadow update or create
 func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) {
-	err := cache.Set(cachemsg.GetShadowReportTimeCacheKey(shadow.Name), shadow.Time.Format(time.RFC3339Nano))
+	err := cache.Set(cacheMsg.GetShadowReportTimeCacheKey(shadow.Name), shadow.Time.Format(time.RFC3339Nano))
 	if err != nil {
 		log.L().Error("set shadow cache error", log.Error(err))
 	}
-	err = cache.Set(cachemsg.GetShadowReportCacheKey(shadow.Name), shadow.ReportStr)
+	err = cache.Set(cacheMsg.GetShadowReportCacheKey(shadow.Name), shadow.ReportStr)
 	if err != nil {
 		log.L().Error("set shadow cache error", log.Error(err))
 	}
@@ -30,11 +30,11 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 
 // ShadowDeleteCache delete shadow cache when shadow delete
 func ShadowDeleteCache(cache plugin.DataCache, name string) {
-	err := cache.Delete(cachemsg.GetShadowReportTimeCacheKey(name))
+	err := cache.Delete(cacheMsg.GetShadowReportTimeCacheKey(name))
 	if err != nil {
 		log.L().Error("delete shadow cache error", log.Error(err))
 	}
-	err = cache.Delete(cachemsg.GetShadowReportCacheKey(name))
+	err = cache.Delete(cacheMsg.GetShadowReportCacheKey(name))
 	if err != nil {
 		log.L().Error("delete shadow cache error", log.Error(err))
 	}
