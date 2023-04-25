@@ -1,9 +1,9 @@
 package entities
 
 import (
-	"encoding/json"
 	"testing"
 
+	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/stretchr/testify/assert"
 

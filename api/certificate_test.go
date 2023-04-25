@@ -2,13 +2,13 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/json"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"

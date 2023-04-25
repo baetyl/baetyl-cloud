@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/baetyl/baetyl-cloud/v2/cachemsg"
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"
@@ -79,32 +81,35 @@ func TestDefaultNodeService_List(t *testing.T) {
 			{
 				Name:      "node01",
 				Namespace: ns,
+				Attributes: map[string]interface{}{
+					specV1.BaetylCoreFrequency: "10",
+				},
 			},
 		},
-	}
-
-	shadowList := &models.ShadowList{
-		Items: []models.Shadow{},
+		Total: 1,
 	}
 
 	nsvc := NodeServiceImpl{
 		Shadow: mockObject.shadow,
 		Node:   mockObject.node,
+		Cache:  mockObject.cache,
 	}
 
+	mockObject.node.EXPECT().ListNode(nil, ns, s).Return(nil, fmt.Errorf("error"))
+	_, err := nsvc.List(ns, s)
+	assert.Error(t, err)
+
 	mockObject.node.EXPECT().ListNode(nil, ns, s).Return(list, nil)
-	mockObject.shadow.EXPECT().List(ns, gomock.Any()).Return(shadowList, nil)
+	mockObject.cache.EXPECT().Exist(gomock.Any()).Return(true, nil).AnyTimes()
+	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportTimeCacheKey(list.Items[0].Name)).Return(time.Now().Format(time.RFC3339Nano), nil).AnyTimes()
+	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportCacheKey(list.Items[0].Name)).Return(`{"apps":[],"sysapps":[]}`, nil).AnyTimes()
 	res, err := nsvc.List(ns, s)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(res.Items))
 	assert.Equal(t, ns, res.Items[0].Namespace)
 
-	mockObject.node.EXPECT().ListNode(nil, ns, s).Return(nil, fmt.Errorf("error"))
-	_, err = nsvc.List(ns, s)
-	assert.Error(t, err)
-
+	list.Items[0].Attributes = map[string]interface{}{}
 	mockObject.node.EXPECT().ListNode(nil, ns, s).Return(list, nil)
-	mockObject.shadow.EXPECT().List(ns, gomock.Any()).Return(nil, fmt.Errorf("error"))
 	_, err = nsvc.List(ns, s)
 	assert.Error(t, err)
 }

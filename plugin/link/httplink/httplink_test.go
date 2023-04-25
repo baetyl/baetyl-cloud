@@ -1,7 +1,6 @@
 package httplink
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path"
@@ -9,6 +8,7 @@ import (
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/http"
+	"github.com/baetyl/baetyl-go/v2/json"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/stretchr/testify/assert"
 

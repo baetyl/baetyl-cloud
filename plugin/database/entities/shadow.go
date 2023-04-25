@@ -1,9 +1,9 @@
 package entities
 
 import (
-	"encoding/json"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/baetyl/baetyl-go/v2/spec/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/models"
@@ -60,6 +60,34 @@ func (s *Shadow) ToShadowModel() (*models.Shadow, error) {
 		}
 	}
 	shadow.DesireMeta = desireMeta
+	shadow.ReportStr = s.Report
+	if reportTime, ok := shadow.Report["time"]; ok && reportTime != nil {
+		shadow.Time, err = time.Parse(time.RFC3339Nano, reportTime.(string))
+		if err != nil {
+			return nil, err
+		}
+	}
+	return shadow, nil
+}
+
+func (s *Shadow) ToReportShadow() (*models.Shadow, error) {
+	shadow := &models.Shadow{
+		Namespace:         s.Namespace,
+		Name:              s.Name,
+		Report:            models.BuildEmptyApps(),
+		Desire:            models.BuildEmptyApps(),
+		CreationTimestamp: s.CreateTime.UTC(),
+		DesireVersion:     s.DesireVersion,
+	}
+	report := struct {
+		Time time.Time `json:"time"`
+	}{}
+	err := json.Unmarshal([]byte(s.Report), &report)
+	if err != nil {
+		return nil, err
+	}
+	shadow.Time = report.Time
+	shadow.ReportStr = s.Report
 	return shadow, nil
 }
 

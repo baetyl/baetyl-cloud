@@ -713,7 +713,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 		},
 	}
 	sConfig.EXPECT().Get("default", "object-cm", "").Return(nil, nil).Times(1)
-	sFacade.EXPECT().CreateConfig("default", objectCfg).Return(objectCfg, nil).Times(1)
+	sFacade.EXPECT().CreateConfig("default", gomock.Any()).Return(objectCfg, nil).Times(1)
 
 	buf = new(bytes.Buffer)
 	w = multipart.NewWriter(buf)
@@ -737,7 +737,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 		},
 	}
 	sConfig.EXPECT().Get("default", "http-cm", "").Return(nil, nil).Times(1)
-	sFacade.EXPECT().CreateConfig("default", httpConfig).Return(httpConfig, nil).Times(1)
+	sFacade.EXPECT().CreateConfig("default", gomock.Any()).Return(httpConfig, nil).Times(1)
 
 	buf = new(bytes.Buffer)
 	w = multipart.NewWriter(buf)
@@ -764,7 +764,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 		},
 	}
 	sConfig.EXPECT().Get("default", "image-cm", "").Return(nil, nil).Times(1)
-	sFacade.EXPECT().CreateConfig("default", imageConfig).Return(imageConfig, nil).Times(1)
+	sFacade.EXPECT().CreateConfig("default", gomock.Any()).Return(imageConfig, nil).Times(1)
 
 	buf = new(bytes.Buffer)
 	w = multipart.NewWriter(buf)
@@ -791,7 +791,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 		},
 	}
 	sConfig.EXPECT().Get("default", "program-cm", "").Return(nil, nil).Times(1)
-	sFacade.EXPECT().CreateConfig("default", programConfig).Return(programConfig, nil).Times(1)
+	sFacade.EXPECT().CreateConfig("default", gomock.Any()).Return(programConfig, nil).Times(1)
 
 	buf = new(bytes.Buffer)
 	w = multipart.NewWriter(buf)
@@ -819,7 +819,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 		},
 	}
 	sConfig.EXPECT().Get("default", "function-cm", "").Return(nil, nil).Times(1)
-	sFacade.EXPECT().CreateConfig("default", functionConfig).Return(functionConfig, nil).Times(1)
+	sFacade.EXPECT().CreateConfig("default", gomock.Any()).Return(functionConfig, nil).Times(1)
 
 	buf = new(bytes.Buffer)
 	w = multipart.NewWriter(buf)
