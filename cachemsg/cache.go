@@ -1,4 +1,4 @@
-package cacheMsg
+package cachemsg
 
 import "fmt"
 
