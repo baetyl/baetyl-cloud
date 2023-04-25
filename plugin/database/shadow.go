@@ -6,11 +6,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/trigger"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
+	"github.com/baetyl/baetyl-cloud/v2/triggerFunc"
 )
 
 const batchSize = 200
@@ -33,7 +35,12 @@ func (d *DB) Create(tx interface{}, shadow *models.Shadow) (*models.Shadow, erro
 	} else {
 		transaction := tx.(*sqlx.Tx)
 		err = d.createAndGetShadow(transaction, shadow, &shd)
+		if err != nil {
+			return shd, err
+		}
 	}
+	//exec triggerFunc trigger.go  ShadowCreateOrUpdateCacheSet
+	_, err = trigger.Exec(triggerFunc.ShadowCreateOrUpdateTrigger, *shd)
 	return shd, err
 }
 
@@ -85,6 +92,12 @@ func (d *DB) ListShadowByNames(tx interface{}, namespace string, names []string)
 
 func (d *DB) Delete(namespace, name string) error {
 	_, err := d.DeleteShadowTx(nil, namespace, name)
+
+	if err != nil {
+		return err
+	}
+	//exec common trigger.go  ShadowDelete
+	_, err = trigger.Exec(triggerFunc.ShadowDelete, name)
 	return err
 }
 
@@ -107,7 +120,8 @@ func (d *DB) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
 		shd, err = d.GetShadowTx(tx, shadow.Namespace, shadow.Name)
 		return err
 	})
-
+	//exec common trigger.go  ShadowCreateOrUpdateCacheSet
+	_, err = trigger.Exec(triggerFunc.ShadowCreateOrUpdateTrigger, *shd)
 	return shd, err
 }
 
@@ -277,6 +291,41 @@ FROM baetyl_node_shadow WHERE namespace=? AND name in (?)
 	return result, nil
 }
 
+func (d *DB) ListShadowTx(tx *sqlx.Tx, namespace string) ([]entities.Shadow, error) {
+	selectSQL := `
+SELECT 
+id, name, namespace, report, desire, report_meta, desire_meta, create_time, update_time, desire_version
+FROM baetyl_node_shadow WHERE namespace=?
+`
+	var shadows []entities.Shadow
+
+	if err := d.Query(tx, selectSQL, &shadows, namespace); err != nil {
+		return nil, err
+	}
+	return shadows, nil
+}
+
 func genResourceVersion() string {
 	return fmt.Sprintf("%d%s", time.Now().UTC().Unix(), common.RandString(6))
+}
+
+func (d *DB) ListAll(namespace string) (*models.ShadowList, error) {
+
+	shadows, err := d.ListShadowTx(nil, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	total := len(shadows)
+	items := make([]models.Shadow, 0, total)
+
+	for _, s := range shadows {
+		shd, _ := s.ToReportShadow()
+		items = append(items, *shd)
+	}
+	result := &models.ShadowList{
+		Total: total,
+		Items: items,
+	}
+	return result, nil
 }

@@ -48,6 +48,7 @@ type CloudConfig struct {
 		Cron       string   `yaml:"cron" json:"cron" default:"database"`
 		Csrf       string   `yaml:"csrf" json:"csrf" default:"defaultcsrf"`
 		JWT        string   `yaml:"jwt" json:"jwt" default:"defaultjwt"`
+		Cache      string   `yaml:"cache" json:"cache" default:"fastcache"`
 	} `yaml:"plugin" json:"plugin"`
 }
 

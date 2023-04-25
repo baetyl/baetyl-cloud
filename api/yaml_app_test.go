@@ -2,7 +2,6 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -17,6 +16,7 @@ import (
 	gmodels "github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/service"
 	"github.com/baetyl/baetyl-go/v2/context"
+	"github.com/baetyl/baetyl-go/v2/json"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"gotest.tools/assert"
