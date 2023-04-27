@@ -114,6 +114,107 @@ func TestDefaultNodeService_List(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestFilterNodeService_List(t *testing.T) {
+	mockObject := InitMockEnvironment(t)
+	defer mockObject.Close()
+
+	ns, s := "default", &models.ListOptions{
+		NodeOptions: models.NodeOptions{
+			Cluster:    "single",
+			Ready:      "online",
+			CreateSort: "desc",
+		},
+	}
+	list := genNodeList(t, ns)
+
+	nsvc := NodeServiceImpl{
+		Shadow: mockObject.shadow,
+		Node:   mockObject.node,
+		Cache:  mockObject.cache,
+	}
+
+	mockObject.node.EXPECT().ListNode(nil, ns, s).Return(nil, fmt.Errorf("error"))
+	_, err := nsvc.List(ns, s)
+	assert.Error(t, err)
+
+	mockObject.node.EXPECT().ListNode(nil, ns, gomock.Any()).Return(&list, nil).AnyTimes()
+	mockObject.cache.EXPECT().Exist(gomock.Any()).Return(true, nil).AnyTimes()
+	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportTimeCacheKey(list.Items[0].Name)).Return(time.Now().Format(time.RFC3339Nano), nil).AnyTimes()
+	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportTimeCacheKey(list.Items[1].Name)).Return(time.Now().Add(-100*time.Second).Format(time.RFC3339Nano), nil).AnyTimes()
+	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportCacheKey(list.Items[0].Name)).Return(`{"apps":[],"sysapps":[]}`, nil).AnyTimes()
+	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportCacheKey(list.Items[1].Name)).Return(`{"apps":[],"sysapps":[]}`, nil).AnyTimes()
+
+	s = &models.ListOptions{
+		NodeOptions: models.NodeOptions{
+			Cluster:    "single",
+			Ready:      "",
+			CreateSort: "",
+		},
+	}
+	res, err := nsvc.List(ns, s)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(res.Items))
+	assert.Equal(t, "node02", res.Items[0].Name)
+
+	s = &models.ListOptions{
+		NodeOptions: models.NodeOptions{
+			Cluster:    "",
+			Ready:      "online",
+			CreateSort: "",
+		},
+	}
+
+	list = genNodeList(t, ns)
+	res, err = nsvc.List(ns, s)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(res.Items))
+	assert.Equal(t, "node01", res.Items[0].Name)
+
+	s = &models.ListOptions{
+		NodeOptions: models.NodeOptions{
+			Cluster:    "",
+			Ready:      "",
+			CreateSort: "asc",
+		},
+	}
+	list = genNodeList(t, ns)
+
+	res, err = nsvc.List(ns, s)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(res.Items))
+	assert.Equal(t, "node02", res.Items[0].Name)
+
+}
+
+func genNodeList(t *testing.T, ns string) models.NodeList {
+	timeCreate, err := time.Parse("2006-01-02 03:04:05", "2023-04-03 03:04:05")
+	assert.NoError(t, err)
+	return models.NodeList{
+		Items: []specV1.Node{
+			{
+				Name:              "node01",
+				Namespace:         ns,
+				Cluster:           true,
+				CreationTimestamp: timeCreate.Add(100 * time.Second),
+				Attributes: map[string]interface{}{
+					specV1.BaetylCoreFrequency: "10",
+				},
+			},
+			{
+				Name:              "node02",
+				Namespace:         ns,
+				CreationTimestamp: timeCreate,
+				Cluster:           false,
+				Attributes: map[string]interface{}{
+					specV1.BaetylCoreFrequency: "10",
+				},
+			},
+		},
+
+		Total: 2,
+	}
+}
+
 func TestDefaultNodeService_Delete(t *testing.T) {
 	mockObject := InitMockEnvironment(t)
 	defer mockObject.Close()

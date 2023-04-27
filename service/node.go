@@ -194,6 +194,7 @@ func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.N
 
 // List get list node
 func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
+	//get list default create desc
 	list, err := n.Node.ListNode(nil, namespace, listOptions)
 	if err != nil {
 		return nil, err
@@ -201,57 +202,28 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 	if len(list.Items) == 0 {
 		return list, nil
 	}
+	var resNode []specV1.Node
 
-	var onlineNode, offlineNode, resNode []specV1.Node
-	for idx := range list.Items {
-		node := list.Items[idx]
-		if node.Attributes == nil {
-			return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
-		}
-		freq, ok := node.Attributes[specV1.BaetylCoreFrequency].(string)
-		if !ok {
-			return nil, common.Error(common.ErrResourceNotFound, common.Field("type", specV1.BaetylCoreFrequency), common.Field("namespace", node.Namespace))
-		}
-		freqTime, err := strconv.Atoi(freq)
-		if err != nil {
-			return nil, err
-		}
-		after := time.Duration(freqTime+20) * time.Second
-		onLineFlag := false
-
-		ok, err = n.Cache.Exist(cachemsg.GetShadowReportTimeCacheKey(node.Name))
-		if err != nil {
-			return nil, err
-		}
-		if !ok {
-			err = n.SetNodeShadowCache(node.Name, namespace)
-			if err != nil {
-				return nil, err
-			}
-		}
-		reportTime, err := n.Cache.Get(cachemsg.GetShadowReportTimeCacheKey(node.Name))
-
-		if reportTime != "" {
-			t, _ := time.Parse(time.RFC3339Nano, reportTime)
-			if time.Now().UTC().Before(t.Add(after)) {
-				onLineFlag = true
-			}
-		}
-
-		if onLineFlag == true {
-			onlineNode = append(onlineNode, node)
-		} else {
-			offlineNode = append(offlineNode, node)
-		}
+	if listOptions.CreateSort != "" || listOptions.Ready != "" || listOptions.Cluster != "" {
+		//filter sort
+		resNode, err = n.filterListNode(list, namespace, listOptions)
+		list.Total = len(resNode)
+	} else {
+		//default sort  online ranked first then  crateTim desc
+		resNode, err = n.defaultListNode(list, namespace)
 	}
-	resNode = append(resNode, onlineNode...)
-	resNode = append(resNode, offlineNode...)
-
+	if err != nil {
+		return nil, err
+	}
 	start, end := models.GetPagingParam(listOptions, list.Total)
 	list.Items = resNode[start:end]
 
 	for i := range list.Items {
 		report := specV1.Report{}
+		err = n.UpdateNodeCacheByKey(cachemsg.GetShadowReportCacheKey(list.Items[i].Name), namespace)
+		if err != nil {
+			return nil, err
+		}
 		data, err := n.Cache.Get(cachemsg.GetShadowReportCacheKey(list.Items[i].Name))
 		if err != nil {
 			return nil, err
@@ -268,7 +240,138 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 	return list, nil
 }
 
-func (n *NodeServiceImpl) SetNodeShadowCache(name, namespace string) error {
+func Reverse(s []interface{}) {
+	for i := 0; i < len(s)/2; i++ {
+		j := len(s) - i - 1
+		s[i], s[j] = s[j], s[i]
+	}
+}
+
+func (n *NodeServiceImpl) filterListNode(list *models.NodeList, namespace string, listOptions *models.ListOptions) ([]specV1.Node, error) {
+	var resNode []specV1.Node
+	if listOptions.Ready != "" || listOptions.Cluster != "" {
+		for i := range list.Items {
+			node := list.Items[i]
+			if listOptions.Cluster != "" {
+				if node.Cluster != (listOptions.Cluster == models.NodeTypeCluster) {
+					continue
+				}
+			}
+			if listOptions.Ready != "" {
+				reportTime, after, err := n.GetNodeShadowReportTime(node, namespace)
+				if err != nil {
+					return nil, err
+				}
+				t, _ := time.Parse(time.RFC3339Nano, reportTime)
+				switch listOptions.Ready {
+				case models.ReadyTypeOnline:
+					if time.Now().UTC().After(t.Add(after)) {
+						continue
+					}
+				case models.ReadyTypOffline:
+					noTime, err := time.Parse("2006-01-02 03:04:05", "0001-01-01 00:00:00")
+					if err != nil {
+						return nil, err
+					}
+					if t == noTime || time.Now().UTC().Before(t.Add(after)) {
+						continue
+					}
+				case models.ReadyTypeUninstall:
+					noTime, err := time.Parse("2006-01-02 03:04:05", "0001-01-01 00:00:00")
+					if err != nil {
+						return nil, err
+					}
+					if t != noTime {
+						continue
+					}
+				default:
+
+				}
+			}
+			resNode = append(resNode, node)
+		}
+	} else {
+		resNode = list.Items
+	}
+
+	if listOptions.CreateSort != "" {
+		if listOptions.CreateSort == models.NodeSortAsc {
+			resNode = reverseLieNodeSlice(resNode)
+		}
+	}
+	return resNode, nil
+}
+
+func reverseLieNodeSlice(s []specV1.Node) []specV1.Node {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
+}
+
+func (n *NodeServiceImpl) defaultListNode(list *models.NodeList, namespace string) ([]specV1.Node, error) {
+	var onlineNode, offlineNode, resNode []specV1.Node
+	for idx := range list.Items {
+		node := list.Items[idx]
+		reportTime, after, err := n.GetNodeShadowReportTime(node, namespace)
+		if err != nil {
+			return nil, err
+		}
+		onLineFlag := false
+		if reportTime != "" {
+			t, _ := time.Parse(time.RFC3339Nano, reportTime)
+			if time.Now().UTC().Before(t.Add(after)) {
+				onLineFlag = true
+			}
+		}
+		if onLineFlag == true {
+			onlineNode = append(onlineNode, node)
+		} else {
+			offlineNode = append(offlineNode, node)
+		}
+	}
+	resNode = append(resNode, onlineNode...)
+	resNode = append(resNode, offlineNode...)
+	return resNode, nil
+}
+
+func (n *NodeServiceImpl) GetNodeShadowReportTime(node specV1.Node, namespace string) (string, time.Duration, error) {
+	if node.Attributes == nil {
+		return "", 0, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
+	}
+	freq, ok := node.Attributes[specV1.BaetylCoreFrequency].(string)
+	if !ok {
+		return "", 0, common.Error(common.ErrResourceNotFound, common.Field("type", specV1.BaetylCoreFrequency), common.Field("namespace", node.Namespace))
+	}
+	freqTime, err := strconv.Atoi(freq)
+	if err != nil {
+		return "", 0, err
+	}
+	after := time.Duration(freqTime+20) * time.Second
+
+	err = n.UpdateNodeCacheByKey(cachemsg.GetShadowReportTimeCacheKey(node.Name), namespace)
+	if err != nil {
+		return "", 0, err
+	}
+	reportTime, err := n.Cache.Get(cachemsg.GetShadowReportTimeCacheKey(node.Name))
+	return reportTime, after, err
+}
+
+func (n *NodeServiceImpl) UpdateNodeCacheByKey(key, namespace string) error {
+	ok, err := n.Cache.Exist(key)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		err = n.SetNodeShadowCache(namespace)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (n *NodeServiceImpl) SetNodeShadowCache(namespace string) error {
 	shadowList, err := n.Shadow.ListAll(namespace)
 	if err != nil {
 		return err
