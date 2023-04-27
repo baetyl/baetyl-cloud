@@ -806,7 +806,11 @@ func (api *API) generateDeployApp(ns string, deploy *appv1.Deployment) (*specV1.
 	}
 	app.Name = deploy.Name
 	app.Namespace = ns
-	app.Replica = int(*deploy.Spec.Replicas)
+	if (deploy.Spec.Replicas) != nil {
+		app.Replica = int(*deploy.Spec.Replicas)
+	} else {
+		app.Replica = 1
+	}
 
 	labels := map[string]string{}
 	for k, v := range deploy.Labels {
