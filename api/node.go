@@ -140,9 +140,12 @@ func (api *API) ListNode(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := params.NodeOptionsCheck(); err != nil {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+	}
 	nodeList, err := api.Node.List(ns, params)
 	if err != nil {
-		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
+		return nil, err
 	}
 	nodeViewList := models.NodeViewList{
 		Total:       nodeList.Total,

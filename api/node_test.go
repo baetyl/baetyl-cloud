@@ -410,11 +410,21 @@ func TestListNode(t *testing.T) {
 
 	sNode.EXPECT().List("default", &models.ListOptions{
 		NodeSelector: "test=test",
+		NodeOptions: models.NodeOptions{
+			Cluster:    "single",
+			Ready:      "offline",
+			CreateSort: "desc",
+		},
 	}).Return(mClist, nil)
 
-	// 200
-	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes?nodeSelector=test=test", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/v1/nodes?nodeSelector=test=test&createSort=desc&cluster=single&ready=aaaa", nil)
 	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// 200
+	req, _ = http.NewRequest(http.MethodGet, "/v1/nodes?nodeSelector=test=test&createSort=desc&cluster=single&ready=offline", nil)
+	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 	bytes := w.Body.Bytes()
