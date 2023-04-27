@@ -53,8 +53,12 @@ const (
 	Device Resource = "device"
 	// Driver driver resource
 	Driver Resource = "driver"
+	// AccessTemplate accesstemplate resource
+	AccessTemplate Resource = "accesstemplate"
 	// DeviceModel devicemodel resource
 	DeviceModel Resource = "devicemodel"
+	// BusinessTemplate businesstemplate resource
+	BusinessTemplate Resource = "businesstemplate"
 	// Index index resource
 	Index Resource = "index"
 	// !deprecated
