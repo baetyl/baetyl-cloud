@@ -76,31 +76,60 @@ func (mr *MockDataCacheMockRecorder) Exist(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exist", reflect.TypeOf((*MockDataCache)(nil).Exist), arg0)
 }
 
-// Get mocks base method.
-func (m *MockDataCache) Get(arg0 string) (string, error) {
+// GetByte mocks base method.
+func (m *MockDataCache) GetByte(arg0 string) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0)
+	ret := m.ctrl.Call(m, "GetByte", arg0)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByte indicates an expected call of GetByte.
+func (mr *MockDataCacheMockRecorder) GetByte(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByte", reflect.TypeOf((*MockDataCache)(nil).GetByte), arg0)
+}
+
+// GetString mocks base method.
+func (m *MockDataCache) GetString(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetString", arg0)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Get indicates an expected call of Get.
-func (mr *MockDataCacheMockRecorder) Get(arg0 interface{}) *gomock.Call {
+// GetString indicates an expected call of GetString.
+func (mr *MockDataCacheMockRecorder) GetString(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockDataCache)(nil).Get), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetString", reflect.TypeOf((*MockDataCache)(nil).GetString), arg0)
 }
 
-// Set mocks base method.
-func (m *MockDataCache) Set(arg0, arg1 string) error {
+// SetByte mocks base method.
+func (m *MockDataCache) SetByte(arg0 string, arg1 []byte) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Set", arg0, arg1)
+	ret := m.ctrl.Call(m, "SetByte", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Set indicates an expected call of Set.
-func (mr *MockDataCacheMockRecorder) Set(arg0, arg1 interface{}) *gomock.Call {
+// SetByte indicates an expected call of SetByte.
+func (mr *MockDataCacheMockRecorder) SetByte(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockDataCache)(nil).Set), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetByte", reflect.TypeOf((*MockDataCache)(nil).SetByte), arg0, arg1)
+}
+
+// SetString mocks base method.
+func (m *MockDataCache) SetString(arg0, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetString", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetString indicates an expected call of SetString.
+func (mr *MockDataCacheMockRecorder) SetString(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetString", reflect.TypeOf((*MockDataCache)(nil).SetString), arg0, arg1)
 }

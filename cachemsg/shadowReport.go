@@ -70,21 +70,21 @@ func (s *shadowReport) SetAllShadowReportCache(cache plugin.DataCache, cacheData
 
 func (s *shadowReport) GetAllShadowReportCache(cache plugin.DataCache) (map[string]string, error) {
 	var keys []string
-	data, err := cache.Get(AllShadowReportCacheKeys)
+	data, err := cache.GetByte(AllShadowReportCacheKeys)
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal([]byte(data), &keys)
+	err = json.Unmarshal(data, &keys)
 	if err != nil {
 		return nil, err
 	}
 	returnData := map[string]string{}
 	for i := range keys {
-		tempData, err := cache.Get(keys[i])
+		tempData, err := cache.GetByte(keys[i])
 		if err != nil {
 			return nil, err
 		}
-		err = json.Unmarshal([]byte(tempData), &returnData)
+		err = json.Unmarshal(tempData, &returnData)
 		if err != nil {
 			return nil, err
 		}
@@ -125,7 +125,7 @@ func (s *shadowReport) setShadowReportCache(cache plugin.DataCache, key string, 
 	if err != nil {
 		return err
 	}
-	err = cache.Set(key, string(marshalData))
+	err = cache.SetByte(key, marshalData)
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func (s *shadowReport) setShadowReportCacheKey(cache plugin.DataCache, keys []st
 	if err != nil {
 		return err
 	}
-	err = cache.Set(AllShadowReportCacheKeys, string(marshalData))
+	err = cache.SetByte(AllShadowReportCacheKeys, marshalData)
 	if err != nil {
 		return err
 	}

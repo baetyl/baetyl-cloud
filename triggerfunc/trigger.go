@@ -18,13 +18,13 @@ const (
 
 // ShadowCreateOrUpdateCacheSet update shadow cache when shadow update or create
 func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) {
-	reportTimeData, err := cache.Get(cachemsg.AllShadowReportTimeCache)
+	reportTimeData, err := cache.GetByte(cachemsg.AllShadowReportTimeCache)
 	if err != nil {
 		log.L().Error("get shadow cache error", log.Error(err))
 		return
 	}
 	reportTimeMap := map[string]string{}
-	err = json.Unmarshal([]byte(reportTimeData), &reportTimeMap)
+	err = json.Unmarshal(reportTimeData, &reportTimeMap)
 	if err != nil {
 		log.L().Error("unmarshal err", log.Error(err))
 		return
@@ -36,7 +36,7 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 		log.L().Error("Marshal err", log.Error(err))
 		return
 	}
-	err = cache.Set(cachemsg.AllShadowReportTimeCache, string(returnTimeData))
+	err = cache.SetByte(cachemsg.AllShadowReportTimeCache, returnTimeData)
 	if err != nil {
 		log.L().Error("set report time err", log.Error(err))
 		return
@@ -51,13 +51,13 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 
 // ShadowDeleteCache delete shadow cache when shadow delete
 func ShadowDeleteCache(cache plugin.DataCache, name string) {
-	reportTimeData, err := cache.Get(cachemsg.AllShadowReportTimeCache)
+	reportTimeData, err := cache.GetByte(cachemsg.AllShadowReportTimeCache)
 	if err != nil {
 		log.L().Error("get shadow cache error", log.Error(err))
 		return
 	}
 	reportTimeMap := map[string]string{}
-	err = json.Unmarshal([]byte(reportTimeData), &reportTimeMap)
+	err = json.Unmarshal(reportTimeData, &reportTimeMap)
 	if err != nil {
 		log.L().Error("unmarshal err", log.Error(err))
 		return
@@ -68,7 +68,7 @@ func ShadowDeleteCache(cache plugin.DataCache, name string) {
 		log.L().Error("Marshal err", log.Error(err))
 		return
 	}
-	err = cache.Set(cachemsg.AllShadowReportTimeCache, string(returnTimeData))
+	err = cache.SetByte(cachemsg.AllShadowReportTimeCache, returnTimeData)
 	if err != nil {
 		log.L().Error("set report time err", log.Error(err))
 		return
