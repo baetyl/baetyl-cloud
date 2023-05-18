@@ -233,3 +233,7 @@ func (c *client) CountAllNode(tx interface{}) (int, error) {
 	}
 	return total, nil
 }
+
+func (c *client) GetNodeByNames(tx interface{}, namespace string, name []string) ([]specV1.Node, error) {
+	return nil, nil
+}

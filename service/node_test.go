@@ -101,8 +101,9 @@ func TestDefaultNodeService_List(t *testing.T) {
 
 	mockObject.node.EXPECT().ListNode(nil, ns, s).Return(list, nil)
 	mockObject.cache.EXPECT().Exist(gomock.Any()).Return(true, nil).AnyTimes()
-	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportTimeCacheKey(list.Items[0].Name)).Return(time.Now().Format(time.RFC3339Nano), nil).AnyTimes()
-	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportCacheKey(list.Items[0].Name)).Return(`{"apps":[],"sysapps":[]}`, nil).AnyTimes()
+	mockObject.cache.EXPECT().Get(cachemsg.AllShadowReportCacheKeys).Return("[\"shadow-report-0\"]", nil).AnyTimes()
+	mockObject.cache.EXPECT().Get("shadow-report-0").Return("{\"node01\":\"{\\\"apps\\\": []}\"}", nil).AnyTimes()
+	mockObject.cache.EXPECT().Get(cachemsg.AllShadowReportTimeCache).Return("{\"node01\":\""+time.Now().Format(time.RFC3339Nano)+"\"}", nil).AnyTimes()
 	res, err := nsvc.List(ns, s)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(res.Items))
@@ -139,10 +140,10 @@ func TestFilterNodeService_List(t *testing.T) {
 
 	mockObject.node.EXPECT().ListNode(nil, ns, gomock.Any()).Return(&list, nil).AnyTimes()
 	mockObject.cache.EXPECT().Exist(gomock.Any()).Return(true, nil).AnyTimes()
-	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportTimeCacheKey(list.Items[0].Name)).Return(time.Now().Format(time.RFC3339Nano), nil).AnyTimes()
-	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportTimeCacheKey(list.Items[1].Name)).Return(time.Now().Add(-100*time.Second).Format(time.RFC3339Nano), nil).AnyTimes()
-	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportCacheKey(list.Items[0].Name)).Return(`{"apps":[],"sysapps":[]}`, nil).AnyTimes()
-	mockObject.cache.EXPECT().Get(cachemsg.GetShadowReportCacheKey(list.Items[1].Name)).Return(`{"apps":[],"sysapps":[]}`, nil).AnyTimes()
+
+	mockObject.cache.EXPECT().Get(cachemsg.AllShadowReportCacheKeys).Return("[\"shadow-report-0\"]", nil).AnyTimes()
+	mockObject.cache.EXPECT().Get("shadow-report-0").Return("{\"node01\":\"{\\\"apps\\\": []}\",\"node02\":\"{\\\"apps\\\": []}\"}", nil).AnyTimes()
+	mockObject.cache.EXPECT().Get(cachemsg.AllShadowReportTimeCache).Return("{\"node01\":\""+time.Now().Format(time.RFC3339Nano)+"\",\"node02\":\""+time.Now().Add(-100*time.Second).Format(time.RFC3339Nano)+"\"}", nil).AnyTimes()
 
 	s = &models.ListOptions{
 		NodeOptions: models.NodeOptions{
