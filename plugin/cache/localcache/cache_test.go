@@ -29,10 +29,10 @@ fastCacheConfig:
 
 	cache := p.(plugin.DataCache)
 
-	err = cache.Set("a", "abc")
+	err = cache.SetString("a", "abc")
 	assert.NoError(t, err)
 
-	data, err := cache.Get("a")
+	data, err := cache.GetString("a")
 	assert.NoError(t, err)
 	assert.Equal(t, "abc", data)
 
@@ -53,10 +53,10 @@ fastCacheConfig:
 		}
 	}
 
-	err = cache.Set("b", str)
+	err = cache.SetString("b", str)
 	assert.NoError(t, err)
 
-	data, err = cache.Get("b")
+	data, err = cache.GetString("b")
 	assert.NoError(t, err)
 	assert.Equal(t, str, data)
 

@@ -5,36 +5,37 @@
 package plugin
 
 import (
+	reflect "reflect"
+
 	models "github.com/baetyl/baetyl-cloud/v2/models"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
-// MockResource is a mock of Resource interface
+// MockResource is a mock of Resource interface.
 type MockResource struct {
 	ctrl     *gomock.Controller
 	recorder *MockResourceMockRecorder
 }
 
-// MockResourceMockRecorder is the mock recorder for MockResource
+// MockResourceMockRecorder is the mock recorder for MockResource.
 type MockResourceMockRecorder struct {
 	mock *MockResource
 }
 
-// NewMockResource creates a new mock instance
+// NewMockResource creates a new mock instance.
 func NewMockResource(ctrl *gomock.Controller) *MockResource {
 	mock := &MockResource{ctrl: ctrl}
 	mock.recorder = &MockResourceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockResource) EXPECT() *MockResourceMockRecorder {
 	return m.recorder
 }
 
-// Close mocks base method
+// Close mocks base method.
 func (m *MockResource) Close() error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Close")
@@ -42,13 +43,13 @@ func (m *MockResource) Close() error {
 	return ret0
 }
 
-// Close indicates an expected call of Close
+// Close indicates an expected call of Close.
 func (mr *MockResourceMockRecorder) Close() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockResource)(nil).Close))
 }
 
-// CountAllNode mocks base method
+// CountAllNode mocks base method.
 func (m *MockResource) CountAllNode(arg0 interface{}) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CountAllNode", arg0)
@@ -57,13 +58,13 @@ func (m *MockResource) CountAllNode(arg0 interface{}) (int, error) {
 	return ret0, ret1
 }
 
-// CountAllNode indicates an expected call of CountAllNode
+// CountAllNode indicates an expected call of CountAllNode.
 func (mr *MockResourceMockRecorder) CountAllNode(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountAllNode", reflect.TypeOf((*MockResource)(nil).CountAllNode), arg0)
 }
 
-// CreateApplication mocks base method
+// CreateApplication mocks base method.
 func (m *MockResource) CreateApplication(arg0 interface{}, arg1 string, arg2 *v1.Application) (*v1.Application, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateApplication", arg0, arg1, arg2)
@@ -72,13 +73,13 @@ func (m *MockResource) CreateApplication(arg0 interface{}, arg1 string, arg2 *v1
 	return ret0, ret1
 }
 
-// CreateApplication indicates an expected call of CreateApplication
+// CreateApplication indicates an expected call of CreateApplication.
 func (mr *MockResourceMockRecorder) CreateApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApplication", reflect.TypeOf((*MockResource)(nil).CreateApplication), arg0, arg1, arg2)
 }
 
-// CreateConfig mocks base method
+// CreateConfig mocks base method.
 func (m *MockResource) CreateConfig(arg0 interface{}, arg1 string, arg2 *v1.Configuration) (*v1.Configuration, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateConfig", arg0, arg1, arg2)
@@ -87,13 +88,13 @@ func (m *MockResource) CreateConfig(arg0 interface{}, arg1 string, arg2 *v1.Conf
 	return ret0, ret1
 }
 
-// CreateConfig indicates an expected call of CreateConfig
+// CreateConfig indicates an expected call of CreateConfig.
 func (mr *MockResourceMockRecorder) CreateConfig(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateConfig", reflect.TypeOf((*MockResource)(nil).CreateConfig), arg0, arg1, arg2)
 }
 
-// CreateNamespace mocks base method
+// CreateNamespace mocks base method.
 func (m *MockResource) CreateNamespace(arg0 *models.Namespace) (*models.Namespace, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateNamespace", arg0)
@@ -102,13 +103,13 @@ func (m *MockResource) CreateNamespace(arg0 *models.Namespace) (*models.Namespac
 	return ret0, ret1
 }
 
-// CreateNamespace indicates an expected call of CreateNamespace
+// CreateNamespace indicates an expected call of CreateNamespace.
 func (mr *MockResourceMockRecorder) CreateNamespace(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNamespace", reflect.TypeOf((*MockResource)(nil).CreateNamespace), arg0)
 }
 
-// CreateNode mocks base method
+// CreateNode mocks base method.
 func (m *MockResource) CreateNode(arg0 interface{}, arg1 string, arg2 *v1.Node) (*v1.Node, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateNode", arg0, arg1, arg2)
@@ -117,13 +118,13 @@ func (m *MockResource) CreateNode(arg0 interface{}, arg1 string, arg2 *v1.Node) 
 	return ret0, ret1
 }
 
-// CreateNode indicates an expected call of CreateNode
+// CreateNode indicates an expected call of CreateNode.
 func (mr *MockResourceMockRecorder) CreateNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNode", reflect.TypeOf((*MockResource)(nil).CreateNode), arg0, arg1, arg2)
 }
 
-// CreateSecret mocks base method
+// CreateSecret mocks base method.
 func (m *MockResource) CreateSecret(arg0 interface{}, arg1 string, arg2 *v1.Secret) (*v1.Secret, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSecret", arg0, arg1, arg2)
@@ -132,13 +133,13 @@ func (m *MockResource) CreateSecret(arg0 interface{}, arg1 string, arg2 *v1.Secr
 	return ret0, ret1
 }
 
-// CreateSecret indicates an expected call of CreateSecret
+// CreateSecret indicates an expected call of CreateSecret.
 func (mr *MockResourceMockRecorder) CreateSecret(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSecret", reflect.TypeOf((*MockResource)(nil).CreateSecret), arg0, arg1, arg2)
 }
 
-// DeleteApplication mocks base method
+// DeleteApplication mocks base method.
 func (m *MockResource) DeleteApplication(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteApplication", arg0, arg1, arg2)
@@ -146,13 +147,13 @@ func (m *MockResource) DeleteApplication(arg0 interface{}, arg1, arg2 string) er
 	return ret0
 }
 
-// DeleteApplication indicates an expected call of DeleteApplication
+// DeleteApplication indicates an expected call of DeleteApplication.
 func (mr *MockResourceMockRecorder) DeleteApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteApplication", reflect.TypeOf((*MockResource)(nil).DeleteApplication), arg0, arg1, arg2)
 }
 
-// DeleteConfig mocks base method
+// DeleteConfig mocks base method.
 func (m *MockResource) DeleteConfig(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteConfig", arg0, arg1, arg2)
@@ -160,13 +161,13 @@ func (m *MockResource) DeleteConfig(arg0 interface{}, arg1, arg2 string) error {
 	return ret0
 }
 
-// DeleteConfig indicates an expected call of DeleteConfig
+// DeleteConfig indicates an expected call of DeleteConfig.
 func (mr *MockResourceMockRecorder) DeleteConfig(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteConfig", reflect.TypeOf((*MockResource)(nil).DeleteConfig), arg0, arg1, arg2)
 }
 
-// DeleteNamespace mocks base method
+// DeleteNamespace mocks base method.
 func (m *MockResource) DeleteNamespace(arg0 *models.Namespace) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteNamespace", arg0)
@@ -174,13 +175,13 @@ func (m *MockResource) DeleteNamespace(arg0 *models.Namespace) error {
 	return ret0
 }
 
-// DeleteNamespace indicates an expected call of DeleteNamespace
+// DeleteNamespace indicates an expected call of DeleteNamespace.
 func (mr *MockResourceMockRecorder) DeleteNamespace(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNamespace", reflect.TypeOf((*MockResource)(nil).DeleteNamespace), arg0)
 }
 
-// DeleteNode mocks base method
+// DeleteNode mocks base method.
 func (m *MockResource) DeleteNode(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteNode", arg0, arg1, arg2)
@@ -188,13 +189,13 @@ func (m *MockResource) DeleteNode(arg0 interface{}, arg1, arg2 string) error {
 	return ret0
 }
 
-// DeleteNode indicates an expected call of DeleteNode
+// DeleteNode indicates an expected call of DeleteNode.
 func (mr *MockResourceMockRecorder) DeleteNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNode", reflect.TypeOf((*MockResource)(nil).DeleteNode), arg0, arg1, arg2)
 }
 
-// DeleteSecret mocks base method
+// DeleteSecret mocks base method.
 func (m *MockResource) DeleteSecret(arg0, arg1 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteSecret", arg0, arg1)
@@ -202,13 +203,13 @@ func (m *MockResource) DeleteSecret(arg0, arg1 string) error {
 	return ret0
 }
 
-// DeleteSecret indicates an expected call of DeleteSecret
+// DeleteSecret indicates an expected call of DeleteSecret.
 func (mr *MockResourceMockRecorder) DeleteSecret(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSecret", reflect.TypeOf((*MockResource)(nil).DeleteSecret), arg0, arg1)
 }
 
-// GetApplication mocks base method
+// GetApplication mocks base method.
 func (m *MockResource) GetApplication(arg0, arg1, arg2 string) (*v1.Application, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetApplication", arg0, arg1, arg2)
@@ -217,13 +218,13 @@ func (m *MockResource) GetApplication(arg0, arg1, arg2 string) (*v1.Application,
 	return ret0, ret1
 }
 
-// GetApplication indicates an expected call of GetApplication
+// GetApplication indicates an expected call of GetApplication.
 func (mr *MockResourceMockRecorder) GetApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetApplication", reflect.TypeOf((*MockResource)(nil).GetApplication), arg0, arg1, arg2)
 }
 
-// GetConfig mocks base method
+// GetConfig mocks base method.
 func (m *MockResource) GetConfig(arg0 interface{}, arg1, arg2, arg3 string) (*v1.Configuration, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetConfig", arg0, arg1, arg2, arg3)
@@ -232,13 +233,13 @@ func (m *MockResource) GetConfig(arg0 interface{}, arg1, arg2, arg3 string) (*v1
 	return ret0, ret1
 }
 
-// GetConfig indicates an expected call of GetConfig
+// GetConfig indicates an expected call of GetConfig.
 func (mr *MockResourceMockRecorder) GetConfig(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConfig", reflect.TypeOf((*MockResource)(nil).GetConfig), arg0, arg1, arg2, arg3)
 }
 
-// GetNamespace mocks base method
+// GetNamespace mocks base method.
 func (m *MockResource) GetNamespace(arg0 string) (*models.Namespace, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNamespace", arg0)
@@ -247,13 +248,13 @@ func (m *MockResource) GetNamespace(arg0 string) (*models.Namespace, error) {
 	return ret0, ret1
 }
 
-// GetNamespace indicates an expected call of GetNamespace
+// GetNamespace indicates an expected call of GetNamespace.
 func (mr *MockResourceMockRecorder) GetNamespace(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNamespace", reflect.TypeOf((*MockResource)(nil).GetNamespace), arg0)
 }
 
-// GetNode mocks base method
+// GetNode mocks base method.
 func (m *MockResource) GetNode(arg0 interface{}, arg1, arg2 string) (*v1.Node, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNode", arg0, arg1, arg2)
@@ -262,13 +263,28 @@ func (m *MockResource) GetNode(arg0 interface{}, arg1, arg2 string) (*v1.Node, e
 	return ret0, ret1
 }
 
-// GetNode indicates an expected call of GetNode
+// GetNode indicates an expected call of GetNode.
 func (mr *MockResourceMockRecorder) GetNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNode", reflect.TypeOf((*MockResource)(nil).GetNode), arg0, arg1, arg2)
 }
 
-// GetSecret mocks base method
+// GetNodeByNames mocks base method.
+func (m *MockResource) GetNodeByNames(arg0 interface{}, arg1 string, arg2 []string) ([]v1.Node, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNodeByNames", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]v1.Node)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNodeByNames indicates an expected call of GetNodeByNames.
+func (mr *MockResourceMockRecorder) GetNodeByNames(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNodeByNames", reflect.TypeOf((*MockResource)(nil).GetNodeByNames), arg0, arg1, arg2)
+}
+
+// GetSecret mocks base method.
 func (m *MockResource) GetSecret(arg0 interface{}, arg1, arg2, arg3 string) (*v1.Secret, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSecret", arg0, arg1, arg2, arg3)
@@ -277,13 +293,13 @@ func (m *MockResource) GetSecret(arg0 interface{}, arg1, arg2, arg3 string) (*v1
 	return ret0, ret1
 }
 
-// GetSecret indicates an expected call of GetSecret
+// GetSecret indicates an expected call of GetSecret.
 func (mr *MockResourceMockRecorder) GetSecret(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSecret", reflect.TypeOf((*MockResource)(nil).GetSecret), arg0, arg1, arg2, arg3)
 }
 
-// ListApplication mocks base method
+// ListApplication mocks base method.
 func (m *MockResource) ListApplication(arg0 interface{}, arg1 string, arg2 *models.ListOptions) (*models.ApplicationList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListApplication", arg0, arg1, arg2)
@@ -292,13 +308,13 @@ func (m *MockResource) ListApplication(arg0 interface{}, arg1 string, arg2 *mode
 	return ret0, ret1
 }
 
-// ListApplication indicates an expected call of ListApplication
+// ListApplication indicates an expected call of ListApplication.
 func (mr *MockResourceMockRecorder) ListApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListApplication", reflect.TypeOf((*MockResource)(nil).ListApplication), arg0, arg1, arg2)
 }
 
-// ListApplicationsByNames mocks base method
+// ListApplicationsByNames mocks base method.
 func (m *MockResource) ListApplicationsByNames(arg0 interface{}, arg1 string, arg2 []string) ([]models.AppItem, int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListApplicationsByNames", arg0, arg1, arg2)
@@ -308,13 +324,13 @@ func (m *MockResource) ListApplicationsByNames(arg0 interface{}, arg1 string, ar
 	return ret0, ret1, ret2
 }
 
-// ListApplicationsByNames indicates an expected call of ListApplicationsByNames
+// ListApplicationsByNames indicates an expected call of ListApplicationsByNames.
 func (mr *MockResourceMockRecorder) ListApplicationsByNames(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListApplicationsByNames", reflect.TypeOf((*MockResource)(nil).ListApplicationsByNames), arg0, arg1, arg2)
 }
 
-// ListConfig mocks base method
+// ListConfig mocks base method.
 func (m *MockResource) ListConfig(arg0 string, arg1 *models.ListOptions) (*models.ConfigurationList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListConfig", arg0, arg1)
@@ -323,13 +339,13 @@ func (m *MockResource) ListConfig(arg0 string, arg1 *models.ListOptions) (*model
 	return ret0, ret1
 }
 
-// ListConfig indicates an expected call of ListConfig
+// ListConfig indicates an expected call of ListConfig.
 func (mr *MockResourceMockRecorder) ListConfig(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListConfig", reflect.TypeOf((*MockResource)(nil).ListConfig), arg0, arg1)
 }
 
-// ListNamespace mocks base method
+// ListNamespace mocks base method.
 func (m *MockResource) ListNamespace(arg0 *models.ListOptions) (*models.NamespaceList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListNamespace", arg0)
@@ -338,13 +354,13 @@ func (m *MockResource) ListNamespace(arg0 *models.ListOptions) (*models.Namespac
 	return ret0, ret1
 }
 
-// ListNamespace indicates an expected call of ListNamespace
+// ListNamespace indicates an expected call of ListNamespace.
 func (mr *MockResourceMockRecorder) ListNamespace(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNamespace", reflect.TypeOf((*MockResource)(nil).ListNamespace), arg0)
 }
 
-// ListNode mocks base method
+// ListNode mocks base method.
 func (m *MockResource) ListNode(arg0 interface{}, arg1 string, arg2 *models.ListOptions) (*models.NodeList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListNode", arg0, arg1, arg2)
@@ -353,13 +369,13 @@ func (m *MockResource) ListNode(arg0 interface{}, arg1 string, arg2 *models.List
 	return ret0, ret1
 }
 
-// ListNode indicates an expected call of ListNode
+// ListNode indicates an expected call of ListNode.
 func (mr *MockResourceMockRecorder) ListNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNode", reflect.TypeOf((*MockResource)(nil).ListNode), arg0, arg1, arg2)
 }
 
-// ListSecret mocks base method
+// ListSecret mocks base method.
 func (m *MockResource) ListSecret(arg0 string, arg1 *models.ListOptions) (*models.SecretList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListSecret", arg0, arg1)
@@ -368,13 +384,13 @@ func (m *MockResource) ListSecret(arg0 string, arg1 *models.ListOptions) (*model
 	return ret0, ret1
 }
 
-// ListSecret indicates an expected call of ListSecret
+// ListSecret indicates an expected call of ListSecret.
 func (mr *MockResourceMockRecorder) ListSecret(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSecret", reflect.TypeOf((*MockResource)(nil).ListSecret), arg0, arg1)
 }
 
-// UpdateApplication mocks base method
+// UpdateApplication mocks base method.
 func (m *MockResource) UpdateApplication(arg0 interface{}, arg1 string, arg2 *v1.Application) (*v1.Application, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateApplication", arg0, arg1, arg2)
@@ -383,13 +399,13 @@ func (m *MockResource) UpdateApplication(arg0 interface{}, arg1 string, arg2 *v1
 	return ret0, ret1
 }
 
-// UpdateApplication indicates an expected call of UpdateApplication
+// UpdateApplication indicates an expected call of UpdateApplication.
 func (mr *MockResourceMockRecorder) UpdateApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplication", reflect.TypeOf((*MockResource)(nil).UpdateApplication), arg0, arg1, arg2)
 }
 
-// UpdateConfig mocks base method
+// UpdateConfig mocks base method.
 func (m *MockResource) UpdateConfig(arg0 interface{}, arg1 string, arg2 *v1.Configuration) (*v1.Configuration, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateConfig", arg0, arg1, arg2)
@@ -398,13 +414,13 @@ func (m *MockResource) UpdateConfig(arg0 interface{}, arg1 string, arg2 *v1.Conf
 	return ret0, ret1
 }
 
-// UpdateConfig indicates an expected call of UpdateConfig
+// UpdateConfig indicates an expected call of UpdateConfig.
 func (mr *MockResourceMockRecorder) UpdateConfig(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfig", reflect.TypeOf((*MockResource)(nil).UpdateConfig), arg0, arg1, arg2)
 }
 
-// UpdateNode mocks base method
+// UpdateNode mocks base method.
 func (m *MockResource) UpdateNode(arg0 interface{}, arg1 string, arg2 []*v1.Node) ([]*v1.Node, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateNode", arg0, arg1, arg2)
@@ -413,13 +429,13 @@ func (m *MockResource) UpdateNode(arg0 interface{}, arg1 string, arg2 []*v1.Node
 	return ret0, ret1
 }
 
-// UpdateNode indicates an expected call of UpdateNode
+// UpdateNode indicates an expected call of UpdateNode.
 func (mr *MockResourceMockRecorder) UpdateNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNode", reflect.TypeOf((*MockResource)(nil).UpdateNode), arg0, arg1, arg2)
 }
 
-// UpdateSecret mocks base method
+// UpdateSecret mocks base method.
 func (m *MockResource) UpdateSecret(arg0 string, arg1 *v1.Secret) (*v1.Secret, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateSecret", arg0, arg1)
@@ -428,7 +444,7 @@ func (m *MockResource) UpdateSecret(arg0 string, arg1 *v1.Secret) (*v1.Secret, e
 	return ret0, ret1
 }
 
-// UpdateSecret indicates an expected call of UpdateSecret
+// UpdateSecret indicates an expected call of UpdateSecret.
 func (mr *MockResourceMockRecorder) UpdateSecret(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSecret", reflect.TypeOf((*MockResource)(nil).UpdateSecret), arg0, arg1)

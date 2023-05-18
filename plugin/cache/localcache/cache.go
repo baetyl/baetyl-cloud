@@ -2,9 +2,10 @@ package localcache
 
 import (
 	"github.com/VictoriaMetrics/fastcache"
+	"github.com/baetyl/baetyl-go/v2/errors"
+
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
-	"github.com/baetyl/baetyl-go/v2/errors"
 )
 
 const BigSize = 65535
@@ -28,7 +29,7 @@ func New() (plugin.Plugin, error) {
 	}, nil
 }
 
-func (f localFastCache) Set(key string, value string) error {
+func (f localFastCache) SetString(key string, value string) error {
 	if len(value) > BigSize {
 		f.c.SetBig([]byte(key), []byte(value))
 	} else {
@@ -41,12 +42,29 @@ func (f localFastCache) Exist(key string) (bool, error) {
 	return f.c.Has([]byte(key)), nil
 }
 
-func (f localFastCache) Get(key string) (string, error) {
+func (f localFastCache) GetString(key string) (string, error) {
 	getData := f.c.GetBig(nil, []byte(key))
 	if getData == nil {
 		getData = f.c.Get(nil, []byte(key))
 	}
 	return string(getData), nil
+}
+
+func (f localFastCache) SetByte(key string, value []byte) error {
+	if len(value) > BigSize {
+		f.c.SetBig([]byte(key), value)
+	} else {
+		f.c.Set([]byte(key), value)
+	}
+	return nil
+}
+
+func (f localFastCache) GetByte(key string) ([]byte, error) {
+	getData := f.c.GetBig(nil, []byte(key))
+	if getData == nil {
+		getData = f.c.Get(nil, []byte(key))
+	}
+	return getData, nil
 }
 
 func (f localFastCache) Delete(key string) error {

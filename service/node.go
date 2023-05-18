@@ -204,13 +204,17 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 	}
 	var resNode []specV1.Node
 
+	shadowReportTimeMap, shadowReportMap, err := n.GetAllShadowReportTime(namespace, len(list.Items))
+	if err != nil {
+		return nil, err
+	}
 	if listOptions.CreateSort != "" || listOptions.Ready != "" || listOptions.Cluster != "" {
 		//filter sort
-		resNode, err = n.filterListNode(list, namespace, listOptions)
+		resNode, err = n.filterListNode(list, namespace, listOptions, shadowReportTimeMap)
 		list.Total = len(resNode)
 	} else {
 		//default sort  online ranked first then  crateTim desc
-		resNode, err = n.defaultListNode(list, namespace)
+		resNode, err = n.defaultListNode(list, namespace, shadowReportTimeMap)
 	}
 	if err != nil {
 		return nil, err
@@ -220,14 +224,7 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 
 	for i := range list.Items {
 		report := specV1.Report{}
-		err = n.UpdateNodeCacheByKey(cachemsg.GetShadowReportCacheKey(list.Items[i].Name), namespace)
-		if err != nil {
-			return nil, err
-		}
-		data, err := n.Cache.Get(cachemsg.GetShadowReportCacheKey(list.Items[i].Name))
-		if err != nil {
-			return nil, err
-		}
+		data := shadowReportMap[list.Items[i].Name]
 		if data != "" {
 			err = json.Unmarshal([]byte(data), &report)
 			if err != nil {
@@ -247,7 +244,7 @@ func Reverse(s []interface{}) {
 	}
 }
 
-func (n *NodeServiceImpl) filterListNode(list *models.NodeList, namespace string, listOptions *models.ListOptions) ([]specV1.Node, error) {
+func (n *NodeServiceImpl) filterListNode(list *models.NodeList, namespace string, listOptions *models.ListOptions, shadowReportTimeMap map[string]string) ([]specV1.Node, error) {
 	var resNode []specV1.Node
 	if listOptions.Ready != "" || listOptions.Cluster != "" {
 		for i := range list.Items {
@@ -258,7 +255,8 @@ func (n *NodeServiceImpl) filterListNode(list *models.NodeList, namespace string
 				}
 			}
 			if listOptions.Ready != "" {
-				reportTime, after, err := n.GetNodeShadowReportTime(node, namespace)
+				reportTime := shadowReportTimeMap[node.Name]
+				after, err := n.GetNodeAfterTime(node, namespace)
 				if err != nil {
 					return nil, err
 				}
@@ -309,11 +307,15 @@ func reverseLieNodeSlice(s []specV1.Node) []specV1.Node {
 	return s
 }
 
-func (n *NodeServiceImpl) defaultListNode(list *models.NodeList, namespace string) ([]specV1.Node, error) {
+func (n *NodeServiceImpl) defaultListNode(list *models.NodeList, namespace string, shadowReportMap map[string]string) ([]specV1.Node, error) {
 	var onlineNode, offlineNode, resNode []specV1.Node
 	for idx := range list.Items {
 		node := list.Items[idx]
-		reportTime, after, err := n.GetNodeShadowReportTime(node, namespace)
+		reportTime, ok := shadowReportMap[node.Name]
+		if !ok {
+			reportTime = ""
+		}
+		after, err := n.GetNodeAfterTime(node, namespace)
 		if err != nil {
 			return nil, err
 		}
@@ -335,59 +337,87 @@ func (n *NodeServiceImpl) defaultListNode(list *models.NodeList, namespace strin
 	return resNode, nil
 }
 
-func (n *NodeServiceImpl) GetNodeShadowReportTime(node specV1.Node, namespace string) (string, time.Duration, error) {
+func (n *NodeServiceImpl) GetNodeAfterTime(node specV1.Node, namespace string) (time.Duration, error) {
 	if node.Attributes == nil {
-		return "", 0, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", "Attributes"), common.Field("namespace", node.Namespace))
 	}
 	freq, ok := node.Attributes[specV1.BaetylCoreFrequency].(string)
 	if !ok {
-		return "", 0, common.Error(common.ErrResourceNotFound, common.Field("type", specV1.BaetylCoreFrequency), common.Field("namespace", node.Namespace))
+		return 0, common.Error(common.ErrResourceNotFound, common.Field("type", specV1.BaetylCoreFrequency), common.Field("namespace", node.Namespace))
 	}
 	freqTime, err := strconv.Atoi(freq)
 	if err != nil {
-		return "", 0, err
+		return 0, err
 	}
 	after := time.Duration(freqTime+20) * time.Second
 
-	err = n.UpdateNodeCacheByKey(cachemsg.GetShadowReportTimeCacheKey(node.Name), namespace)
-	if err != nil {
-		return "", 0, err
-	}
-	reportTime, err := n.Cache.Get(cachemsg.GetShadowReportTimeCacheKey(node.Name))
-	return reportTime, after, err
+	return after, err
 }
 
-func (n *NodeServiceImpl) UpdateNodeCacheByKey(key, namespace string) error {
-	ok, err := n.Cache.Exist(key)
+func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) (reportTimeMap, reportMap map[string]string, err error) {
+
+	reportTimeMap = map[string]string{}
+	reportMap = map[string]string{}
+
+	reportTimeOk, err := n.Cache.Exist(cachemsg.AllShadowReportTimeCache)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
-	if !ok {
-		err = n.SetNodeShadowCache(namespace)
+	reportOk, err := n.Cache.Exist(cachemsg.AllShadowReportCacheKeys)
+	if err != nil {
+		return nil, nil, err
+	}
+	if !reportOk || !reportTimeOk {
+		return n.SetNodeShadowCache(namespace)
+	} else {
+		dataReportTime, err := n.Cache.GetByte(cachemsg.AllShadowReportTimeCache)
 		if err != nil {
-			return err
+			return nil, nil, err
+		}
+		err = json.Unmarshal(dataReportTime, &reportTimeMap)
+		if err != nil {
+			return nil, nil, err
+		}
+		if len(reportTimeMap) < lenNode {
+			return n.SetNodeShadowCache(namespace)
+		}
+		reportMap, err = cachemsg.ShadowReportCache.GetAllShadowReportCache(n.Cache)
+		if err != nil {
+			return nil, nil, err
+		}
+		if len(reportMap) < lenNode {
+			return n.SetNodeShadowCache(namespace)
 		}
 	}
-	return nil
+	return reportTimeMap, reportMap, nil
 }
 
-func (n *NodeServiceImpl) SetNodeShadowCache(namespace string) error {
+func (n *NodeServiceImpl) SetNodeShadowCache(namespace string) (reportTimeMap, reportMap map[string]string, err error) {
+	log.L().Info("set report and reportTime cache")
+	reportTimeMap = map[string]string{}
+	reportMap = map[string]string{}
 	shadowList, err := n.Shadow.ListAll(namespace)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
-	for _, item := range shadowList.Items {
-		err = n.Cache.Set(cachemsg.GetShadowReportTimeCacheKey(item.Name), item.Time.Format(time.RFC3339Nano))
-		if err != nil {
-			return err
-		}
-		err = n.Cache.Set(cachemsg.GetShadowReportCacheKey(item.Name), item.ReportStr)
-		if err != nil {
-			return err
-		}
+	for i := range shadowList.Items {
+		shadowMode := shadowList.Items[i]
+		reportTimeMap[shadowMode.Name] = shadowMode.Time.Format(time.RFC3339Nano)
+		reportMap[shadowMode.Name] = shadowMode.ReportStr
 	}
-
-	return nil
+	reportTimeData, err := json.Marshal(reportTimeMap)
+	if err != nil {
+		return nil, nil, err
+	}
+	err = n.Cache.SetByte(cachemsg.AllShadowReportTimeCache, reportTimeData)
+	if err != nil {
+		return nil, nil, err
+	}
+	err = cachemsg.ShadowReportCache.SetAllShadowReportCache(n.Cache, reportMap)
+	if err != nil {
+		return nil, nil, err
+	}
+	return
 }
 
 // Count get current node number

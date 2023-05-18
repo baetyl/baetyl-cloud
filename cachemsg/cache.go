@@ -3,14 +3,11 @@ package cachemsg
 import "fmt"
 
 const (
-	ShadowReportTImeCache = "shadow-%s-time"
-	ShadowReportCache     = "shadow-%s-report"
+	AllShadowReportTimeCache = "shadow-time"
+	AllShadowReportCache     = "shadow-report-%d"
+	AllShadowReportCacheKeys = "shadow-report-keys"
 )
 
-func GetShadowReportTimeCacheKey(nodeName string) string {
-	return fmt.Sprintf(ShadowReportTImeCache, nodeName)
-}
-
-func GetShadowReportCacheKey(nodeName string) string {
-	return fmt.Sprintf(ShadowReportCache, nodeName)
+func AllShadowReportCacheKey(num int) string {
+	return fmt.Sprintf(AllShadowReportCache, num)
 }
