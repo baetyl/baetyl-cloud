@@ -42,7 +42,7 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 		return
 	}
 
-	err = cachemsg.ShadowReportCache.UpdateShadowReportCache(cache, shadow.Name, shadow.ReportStr)
+	err = cache.SetByte(cachemsg.GetShadowReportCacheKey(shadow.Name), []byte(shadow.ReportStr))
 	if err != nil {
 		log.L().Error("update report  err", log.Error(err))
 		return
@@ -74,10 +74,9 @@ func ShadowDeleteCache(cache plugin.DataCache, name string) {
 		return
 	}
 
-	err = cachemsg.ShadowReportCache.DeleteShadowReportCache(cache, name)
+	err = cache.Delete(cachemsg.GetShadowReportCacheKey(name))
 	if err != nil {
-		log.L().Error("delete report  err", log.Error(err))
+		log.L().Error("update report  err", log.Error(err))
 		return
 	}
-
 }

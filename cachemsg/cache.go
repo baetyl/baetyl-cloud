@@ -4,10 +4,11 @@ import "fmt"
 
 const (
 	AllShadowReportTimeCache = "shadow-time"
-	AllShadowReportCache     = "shadow-report-%d"
-	AllShadowReportCacheKeys = "shadow-report-keys"
+	ShadowReportDataCache    = "shadow-%s-report"
 )
 
-func AllShadowReportCacheKey(num int) string {
-	return fmt.Sprintf(AllShadowReportCache, num)
+var CacheReportSetLock = false
+
+func GetShadowReportCacheKey(nodeName string) string {
+	return fmt.Sprintf(ShadowReportDataCache, nodeName)
 }
