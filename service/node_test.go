@@ -101,8 +101,7 @@ func TestDefaultNodeService_List(t *testing.T) {
 
 	mockObject.node.EXPECT().ListNode(nil, ns, s).Return(list, nil)
 	mockObject.cache.EXPECT().Exist(gomock.Any()).Return(true, nil).AnyTimes()
-	mockObject.cache.EXPECT().GetByte(cachemsg.AllShadowReportCacheKeys).Return([]byte("[\"shadow-report-0\"]"), nil).AnyTimes()
-	mockObject.cache.EXPECT().GetByte("shadow-report-0").Return([]byte("{\"node01\":\"{\\\"apps\\\": []}\"}"), nil).AnyTimes()
+	mockObject.cache.EXPECT().GetByte(cachemsg.GetShadowReportCacheKey(list.Items[0].Name)).Return([]byte(`{"apps":[],"sysapps":[]}`), nil).AnyTimes()
 	mockObject.cache.EXPECT().GetByte(cachemsg.AllShadowReportTimeCache).Return([]byte("{\"node01\":\""+time.Now().Format(time.RFC3339Nano)+"\"}"), nil).AnyTimes()
 	res, err := nsvc.List(ns, s)
 	assert.NoError(t, err)
@@ -141,8 +140,8 @@ func TestFilterNodeService_List(t *testing.T) {
 	mockObject.node.EXPECT().ListNode(nil, ns, gomock.Any()).Return(&list, nil).AnyTimes()
 	mockObject.cache.EXPECT().Exist(gomock.Any()).Return(true, nil).AnyTimes()
 
-	mockObject.cache.EXPECT().GetByte(cachemsg.AllShadowReportCacheKeys).Return([]byte("[\"shadow-report-0\"]"), nil).AnyTimes()
-	mockObject.cache.EXPECT().GetByte("shadow-report-0").Return([]byte("{\"node01\":\"{\\\"apps\\\": []}\",\"node02\":\"{\\\"apps\\\": []}\"}"), nil).AnyTimes()
+	mockObject.cache.EXPECT().GetByte(cachemsg.GetShadowReportCacheKey(list.Items[0].Name)).Return([]byte(`{"apps":[],"sysapps":[]}`), nil).AnyTimes()
+	mockObject.cache.EXPECT().GetByte(cachemsg.GetShadowReportCacheKey(list.Items[1].Name)).Return([]byte(`{"apps":[],"sysapps":[]}`), nil).AnyTimes()
 	mockObject.cache.EXPECT().GetByte(cachemsg.AllShadowReportTimeCache).Return([]byte("{\"node01\":\""+time.Now().Format(time.RFC3339Nano)+"\",\"node02\":\""+time.Now().Add(-100*time.Second).Format(time.RFC3339Nano)+"\"}"), nil).AnyTimes()
 
 	s = &models.ListOptions{
