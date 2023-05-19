@@ -374,7 +374,7 @@ func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) 
 
 	reportTimeOk, err := n.Cache.Exist(cachemsg.AllShadowReportTimeCache)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 	if !reportTimeOk {
 		//cache not exist set cache
@@ -382,11 +382,11 @@ func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) 
 	} else {
 		dataReportTime, err := n.Cache.GetByte(cachemsg.AllShadowReportTimeCache)
 		if err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 		err = json.Unmarshal(dataReportTime, &reportTimeMap)
 		if err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 		//check time cache len == lenNode
 		if len(reportTimeMap) != lenNode {

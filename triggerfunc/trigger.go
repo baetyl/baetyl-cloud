@@ -70,13 +70,13 @@ func ShadowDeleteCache(cache plugin.DataCache, name string) {
 	}
 	err = cache.SetByte(cachemsg.AllShadowReportTimeCache, returnTimeData)
 	if err != nil {
-		log.L().Error("set report time err", log.Error(err))
+		log.L().Error("delete report time err", log.Error(err))
 		return
 	}
 
 	err = cache.Delete(cachemsg.GetShadowReportCacheKey(name))
 	if err != nil {
-		log.L().Error("update report  err", log.Error(err))
+		log.L().Error("delete report  err", log.Error(err))
 		return
 	}
 }
