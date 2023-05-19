@@ -196,7 +196,7 @@ func (n *NodeServiceImpl) Update(namespace string, node *specV1.Node) (*specV1.N
 
 // List get list node
 func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
-	//get list default create desc
+	// get list default create desc
 	list, err := n.Node.ListNode(nil, namespace, listOptions)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -212,11 +212,11 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 		return nil, errors.Trace(err)
 	}
 	if listOptions.CreateSort != "" || listOptions.Ready != "" || listOptions.Cluster != "" {
-		//filter sort
+		// filter sort
 		resNode, err = n.filterListNode(list, namespace, listOptions, shadowReportTimeMap)
 		list.Total = len(resNode)
 	} else {
-		//default sort  online ranked first then  crateTim desc
+		// default sort  online ranked first then  crateTim desc
 		resNode, err = n.defaultListNode(list, namespace, shadowReportTimeMap)
 	}
 	if err != nil {
@@ -229,12 +229,12 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 	for i := range list.Items {
 		names = append(names, list.Items[i].Name)
 	}
-	//only get need to return data report
+	// only get need to return data report
 	shadowReportMap, err := n.GetShadowReportCacheByNames(namespace, names)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	//set node report
+	// set node report
 	for i := range list.Items {
 		report := specV1.Report{}
 		data := shadowReportMap[list.Items[i].Name]
@@ -377,7 +377,7 @@ func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) 
 		return nil, errors.Trace(err)
 	}
 	if !reportTimeOk {
-		//cache not exist set cache
+		// cache not exist set cache
 		return n.SetNodeShadowCache(namespace)
 	} else {
 		dataReportTime, err := n.Cache.GetByte(cachemsg.AllShadowReportTimeCache)
@@ -388,7 +388,7 @@ func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) 
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
-		//check time cache len == lenNode
+		// check time cache len == lenNode
 		if len(reportTimeMap) != lenNode {
 			return n.SetNodeShadowCache(namespace)
 		}
@@ -400,7 +400,7 @@ func (n *NodeServiceImpl) GetShadowReportCacheByNames(namespace string, names []
 	reportMap = map[string][]byte{}
 	for i := range names {
 		report, err := n.Cache.GetByte(cachemsg.GetShadowReportCacheKey(names[i]))
-		//if report not exit then init report cache
+		// if report not exit then init report cache
 		if err != nil || report == nil {
 			return n.setShadowReportCacheByNames(namespace, names)
 		}
@@ -419,11 +419,11 @@ func (n *NodeServiceImpl) setShadowReportCacheByNames(namespace string, names []
 	for i := range shadowList {
 		reportMap[shadowList[i].Name] = []byte(shadowList[i].ReportStr)
 	}
-	//sync set if CacheReportSetLock ==false
-	//if CacheReportSetLock == ture return data form database
+	// sync set if CacheReportSetLock ==false
+	// if CacheReportSetLock == ture return data form database
 	if !cachemsg.CacheReportSetLock {
 		cachemsg.CacheReportSetLock = true
-		//set node report cache
+		// set node report cache
 		go n.setShadowReportCache(reportMap)
 	} else {
 		log.L().Info("lock data return database back")
