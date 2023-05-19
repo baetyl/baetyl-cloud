@@ -7,10 +7,9 @@ const (
 	AllShadowReportTimeCache = "shadow-time"
 	// ShadowReportDataCache set report cache  ex: shadow-aaa-report : "{"apps": []}"
 	ShadowReportDataCache = "shadow-%s-report"
+	// CacheReportSetLock set report cache running flag key
+	CacheReportSetLock = "cache-report-lock"
 )
-
-// CacheReportSetLock init cache lock flag
-var CacheReportSetLock = false
 
 func GetShadowReportCacheKey(nodeName string) string {
 	return fmt.Sprintf(ShadowReportDataCache, nodeName)

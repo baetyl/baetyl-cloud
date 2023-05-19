@@ -421,8 +421,15 @@ func (n *NodeServiceImpl) setShadowReportCacheByNames(namespace string, names []
 	}
 	// sync set if CacheReportSetLock ==false
 	// if CacheReportSetLock == ture return data form database
-	if !cachemsg.CacheReportSetLock {
-		cachemsg.CacheReportSetLock = true
+	ok, err := n.Cache.Exist(cachemsg.CacheReportSetLock)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	if !ok {
+		err := n.Cache.SetByte(cachemsg.CacheReportSetLock, []byte{})
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
 		// set node report cache
 		go n.setShadowReportCache(reportMap)
 	} else {
@@ -436,17 +443,19 @@ func (n *NodeServiceImpl) setShadowReportCache(reportMap map[string][]byte) {
 	log.L().Info("start set report cache")
 	defer func() {
 		if p := recover(); p != nil {
-			fmt.Println("set report cache error", p)
+			log.L().Error(fmt.Sprintf("set report cache error %s", p))
 		}
 	}()
-	defer func() {
-		cachemsg.CacheReportSetLock = false
-	}()
+
 	for name, value := range reportMap {
 		err := n.Cache.SetByte(cachemsg.GetShadowReportCacheKey(name), value)
 		if err != nil {
 			log.L().Error(fmt.Sprintf("set report cache %s failed", name))
 		}
+	}
+	err := n.Cache.Delete(cachemsg.CacheReportSetLock)
+	if err != nil {
+		log.L().Error(fmt.Sprintf("delete CacheReportSetLock err %s", err))
 	}
 }
 
