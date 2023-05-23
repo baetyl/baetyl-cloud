@@ -78,7 +78,7 @@ git clone https://github.com/baetyl/baetyl-cloud.git
 
 ```shell
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install mariadb --set rootUser.password=secretpassword,db.name=baetyl_cloud bitnami/mariadb
+helm install mariadb --set auth.rootPassword=secretpassword,auth.database=baetyl_cloud bitnami/mariadb
 helm install phpmyadmin bitnami/phpmyadmin 
 ```
 **注意**：这里为了演示方便，我们 hardcode 了密码，请自行修改，可全局替换 secretpassword。

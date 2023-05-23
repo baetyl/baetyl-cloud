@@ -10,7 +10,7 @@ import (
 // GetQuota  for admin api
 func (api *API) GetQuota(c *common.Context) (interface{}, error) {
 	ns := c.GetNamespace()
-	quotas, err := api.License.GetQuota(ns)
+	quotas, err := api.Quota.GetQuota(ns)
 	return quotas, err
 }
 
@@ -22,7 +22,7 @@ func (api *API) GetQuotaForMis(c *common.Context) (interface{}, error) {
 		Namespace: ns,
 	}
 
-	quotas, err := api.License.GetQuota(quota.Namespace)
+	quotas, err := api.Quota.GetQuota(quota.Namespace)
 
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (api *API) UpdateQuota(c *common.Context) (interface{}, error) {
 	if err := c.LoadBody(quota); err != nil {
 		return nil, err
 	}
-	err := api.License.UpdateQuota(quota.Namespace, quota.QuotaName, quota.Quota)
+	err := api.Quota.UpdateQuota(quota.Namespace, quota.QuotaName, quota.Quota)
 	return nil, err
 }
 
@@ -80,14 +80,14 @@ func (api *API) DeleteQuota(c *common.Context) (interface{}, error) {
 	if err := c.LoadBody(quota); err != nil {
 		return nil, err
 	}
-	err := api.License.DeleteQuota(quota.Namespace, quota.QuotaName)
+	err := api.Quota.DeleteQuota(quota.Namespace, quota.QuotaName)
 	return nil, err
 }
 
 // InitQuotas
 //  - param namespace string
 func (api *API) InitQuotas(namespace string) error {
-	quotas, err := api.License.GetDefaultQuotas(namespace)
+	quotas, err := api.Quota.GetDefaultQuotas(namespace)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (api *API) InitQuotas(namespace string) error {
 // DeleteQuotaByNamespace
 //  - param namespace string
 func (api *API) DeleteQuotaByNamespace(namespace string) error {
-	if err := api.License.DeleteQuotaByNamespace(namespace); err != nil {
+	if err := api.Quota.DeleteQuotaByNamespace(namespace); err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", "DeleteQuotaByNamespace"),
 			log.Any(common.KeyContextNamespace, namespace))
@@ -108,7 +108,7 @@ func (api *API) DeleteQuotaByNamespace(namespace string) error {
 }
 
 func (api *API) ReleaseQuota(namespace, quotaName string, number int) error {
-	if err := api.License.ReleaseQuota(namespace, quotaName, number); err != nil {
+	if err := api.Quota.ReleaseQuota(namespace, quotaName, number); err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", "QuotaRelease"),
 			log.Any(common.KeyContextNamespace, namespace),
@@ -121,7 +121,7 @@ func (api *API) ReleaseQuota(namespace, quotaName string, number int) error {
 }
 
 func (api *API) CreateQuotas(namespace string, quotas map[string]int) error {
-	if err := api.License.CreateQuota(namespace, quotas); err != nil {
+	if err := api.Quota.CreateQuota(namespace, quotas); err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", "CreateQuotas"),
 			log.Any(common.KeyContextNamespace, namespace),

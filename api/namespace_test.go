@@ -75,15 +75,15 @@ func TestCreateNamespace(t *testing.T) {
 	mkNamespaceService := ms.NewMockNamespaceService(mockCtl)
 	api.NS = mkNamespaceService
 
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
 	nsa := getMockNS("testA")
 
 	quotas := map[string]int{"maxNodeCount": 10}
 
-	mLicense.EXPECT().GetDefaultQuotas(nsa.Name).Return(quotas, nil)
-	mLicense.EXPECT().CreateQuota(nsa.Name, quotas).Return(nil)
+	mQuota.EXPECT().GetDefaultQuotas(nsa.Name).Return(quotas, nil)
+	mQuota.EXPECT().CreateQuota(nsa.Name, quotas).Return(nil)
 	mkNamespaceService.EXPECT().Create(nsa).Return(nsa, nil)
 
 	// 200
@@ -102,8 +102,8 @@ func TestCreateNamespace(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	mkNamespaceService.EXPECT().Create(nsa).Return(nsa, nil)
-	mLicense.EXPECT().GetDefaultQuotas(nsa.Name).Return(quotas, nil)
-	mLicense.EXPECT().CreateQuota(nsa.Name, quotas).Return(err)
+	mQuota.EXPECT().GetDefaultQuotas(nsa.Name).Return(quotas, nil)
+	mQuota.EXPECT().CreateQuota(nsa.Name, quotas).Return(err)
 	// 200
 	req, _ = http.NewRequest(http.MethodPost, "/testA/namespace", nil)
 	w = httptest.NewRecorder()

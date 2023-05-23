@@ -29,6 +29,7 @@ const (
 	BaetylCoreConfPrefix    = "baetyl-core-conf"
 	BaetylInitConfPrefix    = "baetyl-init-conf"
 	BaetylAgentConfPrefix   = "baetyl-agent-conf"
+	BaetylCoreProgramPrefix = "baetyl-program-config-baetyl-core"
 	BaetylCoreContainerPort = 80
 	BaetylModule            = "baetyl"
 	BaetylCoreAPIPort       = "BaetylCoreAPIPort"
@@ -38,6 +39,9 @@ const (
 	PlatformAndroid         = "android"
 	DeprecatedGPUMetrics    = "baetyl-gpu-metrics"
 	DeprecatedDmp           = "baetyl-dmp"
+
+	templateInitProgramYaml = "baetyl-init-program.yml"
+	templateCoreProgramYaml = "baetyl-core-program.yml"
 
 	HookCreateNodeOta = "hookCreateNodeOta"
 	HookUpdateNodeOta = "hookUpdateNodeOta"
@@ -229,7 +233,7 @@ func (api *API) CreateNode(c *common.Context) (interface{}, error) {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "this name is already in use"))
 	}
 
-	err = api.License.AcquireQuota(ns, plugin.QuotaNode, NodeNumber)
+	err = api.Quota.AcquireQuota(ns, plugin.QuotaNode, NodeNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -721,6 +725,13 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	node.Attributes[v1.BaetylCoreFrequency] = fmt.Sprintf("%d", coreConfig.Frequency)
 
+	if node.NodeMode == context.RunModeNative {
+		err = api.updateCoreProgramConfig(app)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	coreApp, err := api.App.Update(nil, ns, app)
 	if err != nil {
 		return nil, err
@@ -924,9 +935,6 @@ func (api *API) NodeModeParamCheck(node *v1.Node) error {
 	if node.NodeMode == context.RunModeNative {
 		if node.Cluster {
 			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "cluster is not supported with native nodeMode"))
-		}
-		if node.Accelerator != "" {
-			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "accelerator is not supported with native nodeMode"))
 		}
 	}
 	return nil
@@ -1220,7 +1228,7 @@ func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq, ag
 		"NodeMode":         node.NodeMode,
 		"CoreFrequency":    fmt.Sprintf("%ds", freq),
 		"AgentPort":        fmt.Sprintf("%d", agentPort),
-		"GPUStats":         node.NodeMode == context.RunModeKube,
+		"GPUStats":         node.Accelerator != "",
 		"DiskNetStats":     node.NodeMode == context.RunModeKube,
 		"QPSStats":         node.NodeMode == context.RunModeKube,
 		BaetylCoreLogLevel: logLevel,
@@ -1297,9 +1305,10 @@ func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node, agentPor
 		"InitConfName": config.Name,
 		"InitAppName":  app.Name,
 		"AgentPort":    fmt.Sprintf("%d", agentPort),
-		"GPUStats":     node.NodeMode == context.RunModeKube,
+		"GPUStats":     node.Accelerator != "",
 		"DiskNetStats": node.NodeMode == context.RunModeKube,
 		"QPSStats":     node.NodeMode == context.RunModeKube,
+		"NodeMode":     node.NodeMode,
 	}
 	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateInitConfYaml, params)
 	if err != nil {
@@ -1316,6 +1325,30 @@ func (api *API) updateInitAppConfig(app *v1.Application, node *v1.Node, agentPor
 	err = yaml.Unmarshal(data, &newConf)
 	if err != nil {
 		return common.Error(common.ErrTemplate, common.Field("error", err))
+	}
+
+	newConf.Name = config.Name
+	newConf.Version = config.Version
+	_, err = api.Config.Update(nil, config.Namespace, &newConf)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (api *API) updateCoreProgramConfig(app *v1.Application) error {
+	config, err := api.getAppConfig(app, BaetylCoreProgramPrefix)
+	if err != nil {
+		return err
+	}
+	params := map[string]interface{}{
+		"Namespace": config.Namespace,
+	}
+
+	var newConf v1.Configuration
+	err = api.Template.UnmarshalTemplate(templateCoreProgramYaml, params, &newConf)
+	if err != nil {
+		return err
 	}
 
 	newConf.Name = config.Name

@@ -758,7 +758,8 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 	return nil
 }
 
-func isValidPort(service *models.ServiceView, tcpPorts map[int32]bool, updPorts map[int32]bool) (int, error) {
+
+func isValidPort(service *models.ServiceView, tcpPorts, updPorts map[int32]bool) (int, error) {
 	hostPortNum := 0
 	for _, port := range service.Ports {
 		if port.ServiceType == string(v1.ServiceTypeNodePort) {
@@ -781,7 +782,8 @@ func isValidPort(service *models.ServiceView, tcpPorts map[int32]bool, updPorts 
 	return hostPortNum, nil
 }
 
-func checkDuplicatePort(protocol string, port int32, tcpPorts map[int32]bool, updPorts map[int32]bool) error {
+
+func checkDuplicatePort(protocol string, port int32, tcpPorts, updPorts map[int32]bool) error {
 	if protocol == string(v1.ProtocolUDP) {
 		if _, ok := updPorts[port]; ok {
 			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate udp ports"))

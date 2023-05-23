@@ -105,7 +105,7 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 		"NodeMode":                   node.NodeMode,
 		"AppMode":                    node.NodeMode,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
-		"GPUStats":                   node.NodeMode == context.RunModeKube,
+		"GPUStats":                   node.Accelerator != "",
 		"DiskNetStats":               node.NodeMode == context.RunModeKube,
 		"QPSStats":                   node.NodeMode == context.RunModeKube,
 	}

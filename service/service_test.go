@@ -27,6 +27,7 @@ type MockServices struct {
 	auth           *mockPlugin.MockAuth
 	shadow         *mockPlugin.MockShadow
 	license        *mockPlugin.MockLicense
+	quota          *mockPlugin.MockQuota
 	property       *mockPlugin.MockProperty
 	module         *mockPlugin.MockModule
 	task           *mockPlugin.MockTask
@@ -80,6 +81,13 @@ func mockLicense(mock plugin.License) plugin.Factory {
 	return qc
 }
 
+func mockQuota(mock plugin.Quota) plugin.Factory {
+	qc := func() (plugin.Plugin, error) {
+		return mock, nil
+	}
+	return qc
+}
+
 func mockProperty(mock plugin.Property) plugin.Factory {
 	factory := func() (plugin.Plugin, error) {
 		return mock, nil
@@ -126,6 +134,7 @@ func mockTestConfig() *config.CloudConfig {
 	conf.Plugin.Index = common.RandString(9)
 	conf.Plugin.AppHistory = common.RandString(9)
 	conf.Plugin.License = common.RandString(9)
+	conf.Plugin.Quota = common.RandString(9)
 	conf.Plugin.Property = common.RandString(9)
 	conf.Plugin.Task = common.RandString(9)
 	conf.Template.Path = "../scripts/native/templates"
@@ -158,6 +167,9 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 
 	mLicense := mockPlugin.NewMockLicense(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.License, mockLicense(mLicense))
+
+	mQuota := mockPlugin.NewMockQuota(mockCtl)
+	plugin.RegisterFactory(conf.Plugin.Quota, mockQuota(mQuota))
 
 	mProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(conf.Plugin.Property, mockProperty(mProperty))
@@ -195,6 +207,7 @@ func InitMockEnvironment(t *testing.T) *MockServices {
 		pki:            mPKI,
 		auth:           mAuth,
 		license:        mLicense,
+		quota:          mQuota,
 		property:       mProperty,
 		module:         mModule,
 		task:           mTask,
