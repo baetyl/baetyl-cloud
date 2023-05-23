@@ -22,5 +22,5 @@ func MockNewDB() (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &DB{db: db, cfg: cfg}, nil
+	return &DB{db: db, Cfg: cfg}, nil
 }

@@ -29,7 +29,7 @@ type DBStorage interface {
 // DBStorage
 type DB struct {
 	db  *sqlx.DB
-	cfg CloudConfig
+	Cfg CloudConfig
 	Log *log.Logger
 }
 
@@ -77,7 +77,7 @@ func NewDB(cfg CloudConfig) (*DB, error) {
 	}
 	return &DB{
 		db:  db,
-		cfg: cfg,
+		Cfg: cfg,
 		Log: log.With(log.Any("plugin", "database")),
 	}, nil
 }

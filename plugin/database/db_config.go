@@ -10,4 +10,5 @@ type CloudConfig struct {
 		MaxIdleConns    int    `yaml:"maxIdleConns" json:"maxIdleConns" default:"5"`
 		ConnMaxLifetime int    `yaml:"connMaxLifetime" json:"connMaxLifetime" default:"150"`
 	} `yaml:"database" json:"database" default:"{}"`
+	DataLimits int `yaml:"dataLimits" json:"dataLimits"`
 }
