@@ -758,6 +758,7 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 	return nil
 }
 
+
 func isValidPort(service *models.ServiceView, tcpPorts, updPorts map[int32]bool) (int, error) {
 	hostPortNum := 0
 	for _, port := range service.Ports {
@@ -780,6 +781,7 @@ func isValidPort(service *models.ServiceView, tcpPorts, updPorts map[int32]bool)
 	}
 	return hostPortNum, nil
 }
+
 
 func checkDuplicatePort(protocol string, port int32, tcpPorts, updPorts map[int32]bool) error {
 	if protocol == string(v1.ProtocolUDP) {
