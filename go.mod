@@ -6,18 +6,16 @@ require (
 	github.com/VictoriaMetrics/fastcache v1.12.1
 	github.com/ZZMarquis/gm v1.3.2
 	github.com/aws/aws-sdk-go v1.34.0
-	github.com/baetyl/baetyl-go/v2 v2.2.4-0.20230423092744-e87a02466860
+	github.com/baetyl/baetyl-go/v2 v2.2.4-0.20230525075920-34b8d6c3a2ba
 	github.com/gin-contrib/cache v1.1.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/mock v1.5.0
-	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.2.0
 	github.com/jinzhu/copier v0.1.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/mattn/go-sqlite3 v1.14.0
-	github.com/mna/redisc v1.3.2
 	github.com/pkg/errors v0.9.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.8.1
@@ -53,6 +51,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/gomodule/redigo v2.0.0+incompatible // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/googleapis/gnostic v0.0.0-20170729233727-0c5108395e2d // indirect
