@@ -9,6 +9,8 @@ const (
 	ShadowReportDataCache = "shadow-%s-report"
 	// CacheReportSetLock set report cache running flag key
 	CacheReportSetLock = "cache-report-lock"
+	// CacheUpdateReportTimeLock set update report time cache running flag key
+	CacheUpdateReportTimeLock = "cache-report-time-lock"
 )
 
 func GetShadowReportCacheKey(nodeName string) string {

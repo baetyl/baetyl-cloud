@@ -423,18 +423,26 @@ func (n *NodeServiceImpl) setShadowReportCacheByNames(namespace string, names []
 	}
 	// sync set if CacheReportSetLock ==false
 	// if CacheReportSetLock == ture return data form database
-	ok, err := n.Cache.Exist(cachemsg.CacheReportSetLock)
+	lockTime, err := n.Cache.GetString(cachemsg.CacheReportSetLock)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	if !ok {
-		err := n.Cache.SetByte(cachemsg.CacheReportSetLock, []byte{})
+	if lockTime == "" {
+		err := n.Cache.SetString(cachemsg.CacheReportSetLock, time.Now().Format(time.RFC3339Nano))
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
 		// set node report cache
 		go n.setShadowReportCache(reportMap)
 	} else {
+		// delete lock key when key set time > 30 minute
+		if time.Now().Add(-30*time.Minute).Format(time.RFC3339Nano) > lockTime {
+			err = n.Cache.Delete(cachemsg.CacheReportSetLock)
+			if err != nil {
+				log.L().Error("delete lock key cacheUpdateReportTimeLock error", log.Error(err))
+				return
+			}
+		}
 		log.L().Info("lock data return database back")
 	}
 	return reportMap, nil

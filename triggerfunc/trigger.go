@@ -40,8 +40,35 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 	}
 	select {
 	case <-t.C:
-		saveCache(cache, time.Now())
-		t.Reset(time.Second)
+		defer func() {
+			t.Reset(time.Second)
+		}()
+		data, err := cache.GetString(cachemsg.CacheUpdateReportTimeLock)
+		if err != nil {
+			log.L().Error("update report  err", log.Error(err))
+		} else {
+			if data == "" {
+				err := cache.SetString(cachemsg.CacheUpdateReportTimeLock, time.Now().Format(time.RFC3339Nano))
+				if err != nil {
+					log.L().Error("update report  err", log.Error(err))
+				} else {
+					saveCache(cache, time.Now())
+					err = cache.Delete(cachemsg.CacheUpdateReportTimeLock)
+					if err != nil {
+						log.L().Error("update report  err", log.Error(err))
+					}
+				}
+			} else {
+				// lock key > 2 minute delete lock key
+				if time.Now().Add(-2*time.Minute).Format(time.RFC3339Nano) > data {
+					err = cache.Delete(cachemsg.CacheUpdateReportTimeLock)
+					if err != nil {
+						log.L().Error("update report  err", log.Error(err))
+					}
+				}
+			}
+		}
+
 	default:
 	}
 	err := cache.SetByte(cachemsg.GetShadowReportCacheKey(shadow.Name), []byte(shadow.ReportStr))
