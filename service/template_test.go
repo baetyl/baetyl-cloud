@@ -71,6 +71,8 @@ labels:
   resource-invisible: "true"
 namespace: ns-1
 selector: baetyl-node-name=node-name-1
+system: true
+replica: 1
 services:
 - name: baetyl-core
   image: out-baetyl
@@ -114,8 +116,6 @@ volumes:
 - name: host-root-path
   hostPath:
     path: '{{.BAETYL_HOST_PATH_LIB}}/host'
-system: true
-replica: 1
 `,
 		},
 		{
@@ -162,6 +162,8 @@ labels:
   resource-invisible: "true"
 namespace: ns-1
 selector: baetyl-node-name=node-name-1
+system: true
+replica: 1
 services:
 - name: baetyl-function
   image: out-baetyl-function
@@ -179,8 +181,6 @@ volumes:
   config:
     name: func-conf-name-1
     version: func-conf-version-1
-system: true
-replica: 1
 `,
 		},
 		{
