@@ -16,6 +16,11 @@ const (
 	ShadowDelete                = "shadowDelete"
 )
 
+var (
+	reportSaveMap = map[string]reportSaveStruct{}
+	t             *time.Timer
+)
+
 // reportSaveStruct save temp need update data
 // @time control the updated content during high concurrency
 type reportSaveStruct struct {
@@ -23,14 +28,10 @@ type reportSaveStruct struct {
 	Time  time.Time
 }
 
-var reportSaveMap = map[string]reportSaveStruct{}
-
 func init() {
 	reportSaveMap = map[string]reportSaveStruct{}
 	t = time.NewTimer(time.Second)
 }
-
-var t *time.Timer
 
 // ShadowCreateOrUpdateCacheSet update shadow cache when shadow update or create
 func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) {
