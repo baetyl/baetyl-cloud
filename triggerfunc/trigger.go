@@ -45,24 +45,29 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 		defer func() {
 			t.Reset(time.Second)
 		}()
-		data, err := cache.GetString(cachemsg.CacheUpdateReportTimeLock)
+		exit, err := cache.Exist(cachemsg.CacheUpdateReportTimeLock)
 		if err != nil {
-			log.L().Error("update report  err", log.Error(err))
+			log.L().Error("get update report lock exit  err", log.Error(err))
 		} else {
-			if data == "" {
+			if exit {
+				lockTime, err := cache.GetString(cachemsg.CacheUpdateReportTimeLock)
+				if err != nil {
+					log.L().Error("get update report lock exit  err", log.Error(err))
+				} else {
+					// lock key > 2 minute delete lock key
+					if time.Now().Add(-2*time.Minute).Format(time.RFC3339Nano) > lockTime {
+						err = cache.Delete(cachemsg.CacheUpdateReportTimeLock)
+						if err != nil {
+							log.L().Error("update report  err", log.Error(err))
+						}
+					}
+				}
+			} else {
 				err := cache.SetString(cachemsg.CacheUpdateReportTimeLock, time.Now().Format(time.RFC3339Nano))
 				if err != nil {
 					log.L().Error("update report  err", log.Error(err))
 				} else {
 					saveCache(cache, time.Now())
-					err = cache.Delete(cachemsg.CacheUpdateReportTimeLock)
-					if err != nil {
-						log.L().Error("update report  err", log.Error(err))
-					}
-				}
-			} else {
-				// lock key > 2 minute delete lock key
-				if time.Now().Add(-2*time.Minute).Format(time.RFC3339Nano) > data {
 					err = cache.Delete(cachemsg.CacheUpdateReportTimeLock)
 					if err != nil {
 						log.L().Error("update report  err", log.Error(err))
