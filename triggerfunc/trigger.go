@@ -142,7 +142,7 @@ func saveCache(cache plugin.DataCache, timeCheck time.Time) {
 	}
 	err = cache.SetByte(cachemsg.AllShadowReportTimeCache, returnTimeData)
 	if err != nil {
-		log.L().Error("delete report time err", log.Error(err))
+		log.L().Error("update report time err", log.Error(err))
 		return
 	}
 }
