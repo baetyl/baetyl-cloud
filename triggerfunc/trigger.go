@@ -1,6 +1,7 @@
 package triggerfunc
 
 import (
+	"sync"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/json"
@@ -17,7 +18,7 @@ const (
 )
 
 var (
-	reportSaveMap = map[string]reportSaveStruct{}
+	reportSaveMap = sync.Map{}
 	t             *time.Timer
 )
 
@@ -29,16 +30,16 @@ type reportSaveStruct struct {
 }
 
 func init() {
-	reportSaveMap = map[string]reportSaveStruct{}
 	t = time.NewTimer(time.Second)
 }
 
 // ShadowCreateOrUpdateCacheSet update shadow cache when shadow update or create
 func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) {
-	reportSaveMap[shadow.Name] = reportSaveStruct{
+	reportSaveMap.Store(shadow.Name, reportSaveStruct{
 		Value: shadow.Time.Format(time.RFC3339Nano),
 		Time:  time.Now(),
-	}
+	})
+
 	select {
 	case <-t.C:
 		defer func() {
@@ -128,13 +129,20 @@ func saveCache(cache plugin.DataCache, timeCheck time.Time) {
 			return
 		}
 	}
-	for key, val := range reportSaveMap {
-		//before timeCheck data update
-		if val.Time.Before(timeCheck) {
-			reportTimeMap[key] = val.Value
-			delete(reportSaveMap, key)
+	reportSaveMap.Range(func(key, val interface{}) bool {
+		v, okVal := val.(reportSaveStruct)
+		k, okKey := key.(string)
+		if okKey && okVal {
+			if v.Time.Before(timeCheck) {
+				reportTimeMap[k] = v.Value
+				reportSaveMap.Delete(key)
+			}
+		} else {
+			log.L().Warn("key or val not match format ")
 		}
-	}
+		return true
+	})
+
 	returnTimeData, err := json.Marshal(reportTimeMap)
 	if err != nil {
 		log.L().Error("Marshal err", log.Error(err))
