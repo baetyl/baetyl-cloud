@@ -431,12 +431,13 @@ func (n *NodeServiceImpl) setShadowReportCacheByNames(namespace string, names []
 		lockTime, err := n.Cache.GetString(cachemsg.CacheReportSetLock)
 		if err != nil {
 			return nil, errors.Trace(err)
-		}
-		// delete lock key when key set time > 30 minute
-		if time.Now().Add(-30*time.Minute).Format(time.RFC3339Nano) > lockTime {
-			err = n.Cache.Delete(cachemsg.CacheReportSetLock)
-			if err != nil {
-				log.L().Error("delete lock key cacheUpdateReportTimeLock error", log.Error(err))
+		} else {
+			// delete lock key when key set time > 30 minute
+			if time.Now().Add(-30*time.Minute).Format(time.RFC3339Nano) > lockTime {
+				err = n.Cache.Delete(cachemsg.CacheReportSetLock)
+				if err != nil {
+					log.L().Error("delete lock key cacheUpdateReportTimeLock error", log.Error(err))
+				}
 			}
 		}
 		log.L().Info("lock data return database back")

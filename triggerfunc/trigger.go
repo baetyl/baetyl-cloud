@@ -53,12 +53,13 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 				lockTime, err := cache.GetString(cachemsg.CacheUpdateReportTimeLock)
 				if err != nil {
 					log.L().Error("get update report lock exit  err", log.Error(err))
-				}
-				// lock key > 2 minute delete lock key
-				if time.Now().Add(-2*time.Minute).Format(time.RFC3339Nano) > lockTime {
-					err = cache.Delete(cachemsg.CacheUpdateReportTimeLock)
-					if err != nil {
-						log.L().Error("update report  err", log.Error(err))
+				} else {
+					// lock key > 2 minute delete lock key
+					if time.Now().Add(-2*time.Minute).Format(time.RFC3339Nano) > lockTime {
+						err = cache.Delete(cachemsg.CacheUpdateReportTimeLock)
+						if err != nil {
+							log.L().Error("update report  err", log.Error(err))
+						}
 					}
 				}
 			} else {
