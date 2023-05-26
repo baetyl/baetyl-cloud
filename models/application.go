@@ -1,6 +1,7 @@
 package models
 
 import (
+	"k8s.io/api/core/v1"
 	"strings"
 	"time"
 
@@ -26,6 +27,7 @@ type ApplicationView struct {
 	CronStatus        specV1.CronStatusCode `json:"cronStatus" default:"0"`
 	CronTime          time.Time             `json:"cronTime,omitempty"`
 	HostNetwork       bool                  `json:"hostNetwork,omitempty"` // specifies host network mode of service
+	DNSPolicy         v1.DNSPolicy          `json:"dnsPolicy,omitempty" default:"ClusterFirst"`
 	Replica           int                   `json:"replica"`
 	Workload          string                `json:"workload,omitempty"` // deployment | daemonset | statefulset | job
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty"`
