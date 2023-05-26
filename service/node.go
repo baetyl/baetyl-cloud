@@ -390,8 +390,8 @@ func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) 
 				return nil, errors.Trace(err)
 			}
 		}
-		// check time cache len == lenNode
-		if len(reportTimeMap) != lenNode {
+		// check time cache len < lenNode
+		if len(reportTimeMap) < lenNode {
 			return n.SetNodeShadowCache(namespace)
 		}
 	}
