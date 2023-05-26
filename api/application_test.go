@@ -3373,6 +3373,7 @@ func TestAPI_ToApplication(t *testing.T) {
 		System:      false,
 		Replica:     1,
 		Workload:    "deployment",
+		DNSPolicy:   v1.DNSClusterFirstWithHostNet,
 		JobConfig: &specV1.AppJobConfig{
 			Completions:   1,
 			RestartPolicy: "Never",
@@ -3431,6 +3432,7 @@ func TestAPI_ToApplication(t *testing.T) {
 		System:      false,
 		Replica:     1,
 		Workload:    "deployment",
+		DNSPolicy:   v1.DNSClusterFirstWithHostNet,
 		JobConfig: &specV1.AppJobConfig{
 			Completions:   1,
 			RestartPolicy: "Never",
