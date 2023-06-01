@@ -387,7 +387,8 @@ func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) 
 		if dataReportTime != nil {
 			err = json.Unmarshal(dataReportTime, &reportTimeMap)
 			if err != nil {
-				return nil, errors.Trace(err)
+				log.L().Error("decode report time error", log.Error(err))
+				return n.SetNodeShadowCache(namespace)
 			}
 		}
 		// check time cache len < lenNode
