@@ -3,6 +3,7 @@ package localcache
 import (
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/baetyl/baetyl-go/v2/errors"
+	"github.com/baetyl/baetyl-go/v2/log"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
@@ -24,6 +25,7 @@ func New() (plugin.Plugin, error) {
 		return nil, errors.Trace(err)
 	}
 	cache := fastcache.New(cfg.FastCacheConfig.MaxBytes)
+	log.L().Info("cache set maxBytesSize", log.Any("size", cfg.FastCacheConfig.MaxBytes))
 	return &localFastCache{
 		c: cache,
 	}, nil
