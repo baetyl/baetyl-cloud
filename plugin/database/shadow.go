@@ -97,7 +97,7 @@ func (d *DB) Delete(namespace, name string) error {
 		return err
 	}
 	//exec common trigger.go  ShadowDelete
-	_, err = trigger.Exec(triggerfunc.ShadowDelete, name)
+	_, err = trigger.Exec(triggerfunc.ShadowDelete, name, namespace)
 	return err
 }
 
