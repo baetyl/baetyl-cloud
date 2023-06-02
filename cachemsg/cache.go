@@ -4,7 +4,7 @@ import "fmt"
 
 const (
 	// AllShadowReportTimeCache set report time , type is map. ex :shadow-time : "{ "aaa": "0001-01-01T00:00:00Z", "d-33949349": "0001-01-01T00:00:00Z"}"
-	AllShadowReportTimeCache = "shadow-time"
+	AllShadowReportTimeCache = "shadow-%s-time"
 	// ShadowReportDataCache set report cache  ex: shadow-aaa-report : "{"apps": []}"
 	ShadowReportDataCache = "shadow-%s-report"
 	// CacheReportSetLock set report cache running flag key
@@ -13,6 +13,12 @@ const (
 	CacheUpdateReportTimeLock = "cache-report-time-lock"
 )
 
+// GetShadowReportTimeCacheKey GetShadowReportTime get namesapce report time key
+func GetShadowReportTimeCacheKey(namespace string) string {
+	return fmt.Sprintf(AllShadowReportTimeCache, namespace)
+}
+
+// GetShadowReportCacheKey get node report key
 func GetShadowReportCacheKey(nodeName string) string {
 	return fmt.Sprintf(ShadowReportDataCache, nodeName)
 }
