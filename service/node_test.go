@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
@@ -93,6 +94,7 @@ func TestDefaultNodeService_List(t *testing.T) {
 		Shadow: mockObject.shadow,
 		Node:   mockObject.node,
 		Cache:  mockObject.cache,
+		logger: log.With(log.Any("service", "node")),
 	}
 
 	mockObject.node.EXPECT().ListNode(nil, ns, s).Return(nil, fmt.Errorf("error"))
@@ -102,7 +104,7 @@ func TestDefaultNodeService_List(t *testing.T) {
 	mockObject.node.EXPECT().ListNode(nil, ns, s).Return(list, nil)
 	mockObject.cache.EXPECT().Exist(gomock.Any()).Return(true, nil).AnyTimes()
 	mockObject.cache.EXPECT().GetByte(cachemsg.GetShadowReportCacheKey(list.Items[0].Name)).Return([]byte(`{"apps":[],"sysapps":[]}`), nil).AnyTimes()
-	mockObject.cache.EXPECT().GetByte(cachemsg.AllShadowReportTimeCache).Return([]byte("{\"node01\":\""+time.Now().Format(time.RFC3339Nano)+"\"}"), nil).AnyTimes()
+	mockObject.cache.EXPECT().GetByte(cachemsg.GetShadowReportTimeCacheKey("default")).Return([]byte("{\"node01\":\""+time.Now().Format(time.RFC3339Nano)+"\"}"), nil).AnyTimes()
 	res, err := nsvc.List(ns, s)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(res.Items))
@@ -131,6 +133,7 @@ func TestFilterNodeService_List(t *testing.T) {
 		Shadow: mockObject.shadow,
 		Node:   mockObject.node,
 		Cache:  mockObject.cache,
+		logger: log.With(log.Any("service", "node")),
 	}
 
 	mockObject.node.EXPECT().ListNode(nil, ns, s).Return(nil, fmt.Errorf("error"))
@@ -142,7 +145,7 @@ func TestFilterNodeService_List(t *testing.T) {
 
 	mockObject.cache.EXPECT().GetByte(cachemsg.GetShadowReportCacheKey(list.Items[0].Name)).Return([]byte(`{"apps":[],"sysapps":[]}`), nil).AnyTimes()
 	mockObject.cache.EXPECT().GetByte(cachemsg.GetShadowReportCacheKey(list.Items[1].Name)).Return([]byte(`{"apps":[],"sysapps":[]}`), nil).AnyTimes()
-	mockObject.cache.EXPECT().GetByte(cachemsg.AllShadowReportTimeCache).Return([]byte("{\"node01\":\""+time.Now().Format(time.RFC3339Nano)+"\",\"node02\":\""+time.Now().Add(-100*time.Second).Format(time.RFC3339Nano)+"\"}"), nil).AnyTimes()
+	mockObject.cache.EXPECT().GetByte(cachemsg.GetShadowReportTimeCacheKey("default")).Return([]byte("{\"node01\":\""+time.Now().Format(time.RFC3339Nano)+"\",\"node02\":\""+time.Now().Add(-100*time.Second).Format(time.RFC3339Nano)+"\"}"), nil).AnyTimes()
 
 	s = &models.ListOptions{
 		NodeOptions: models.NodeOptions{
@@ -254,6 +257,7 @@ func TestDefaultNodeService_Create(t *testing.T) {
 		Shadow:        mockObject.shadow,
 		Node:          mockObject.node,
 		App:           mockObject.app,
+		logger:        log.With(log.Any("service", "node")),
 	}
 	node := genNodeTestCase()
 	apps := &models.ApplicationList{
@@ -306,6 +310,7 @@ func TestDefaultNodeService_Update(t *testing.T) {
 		Shadow:       mockObject.shadow,
 		Node:         mockObject.node,
 		App:          mockObject.app,
+		logger:       log.With(log.Any("service", "node")),
 	}
 	app := &specV1.Application{
 		Name:    "appTest",
@@ -923,6 +928,7 @@ func TestGetNodeProperties(t *testing.T) {
 	ns := NodeServiceImpl{
 		Node:   mockObject.node,
 		Shadow: mockObject.shadow,
+		logger: log.With(log.Any("service", "node")),
 	}
 
 	node := &v1.Node{Attributes: map[string]interface{}{
@@ -974,6 +980,7 @@ func TestUpdateNodeProperties(t *testing.T) {
 	ns := NodeServiceImpl{
 		Node:   mockObject.node,
 		Shadow: mockObject.shadow,
+		logger: log.With(log.Any("service", "node")),
 	}
 
 	node := &v1.Node{Attributes: map[string]interface{}{
@@ -1087,7 +1094,8 @@ func TestUpdateNodeMode(t *testing.T) {
 	mockObject.node.EXPECT().UpdateNode(nil, gomock.Any(), gomock.Any()).Return(nil, nil)
 
 	ns := NodeServiceImpl{
-		Node: mockObject.node,
+		Node:   mockObject.node,
+		logger: log.With(log.Any("service", "node")),
 	}
 	err := ns.UpdateNodeMode("default", "abc", "cloud")
 	assert.NoError(t, err)
