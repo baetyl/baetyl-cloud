@@ -378,6 +378,7 @@ func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) 
 	}
 	if !reportTimeOk {
 		// cache not exist set cache
+		log.L().Warn("reportTime not exit")
 		return n.SetNodeShadowCache(namespace)
 	} else {
 		dataReportTime, err := n.Cache.GetByte(cachemsg.AllShadowReportTimeCache)
@@ -393,6 +394,7 @@ func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) 
 		}
 		// check time cache len < lenNode
 		if len(reportTimeMap) < lenNode {
+			log.L().Warn(fmt.Sprintf("node %d len more then cache %d", lenNode, len(reportTimeMap)))
 			return n.SetNodeShadowCache(namespace)
 		}
 	}
@@ -405,6 +407,10 @@ func (n *NodeServiceImpl) GetShadowReportCacheByNames(namespace string, names []
 		report, err := n.Cache.GetByte(cachemsg.GetShadowReportCacheKey(names[i]))
 		// if report not exit then init report cache
 		if err != nil || report == nil {
+			log.L().Warn("node" + names[i] + "report cache not exit ")
+			if err != nil {
+				log.L().Warn("node" + names[i] + " report cache not exit err " + err.Error())
+			}
 			return n.setShadowReportCacheByNames(namespace, names)
 		}
 		reportMap[names[i]] = report
