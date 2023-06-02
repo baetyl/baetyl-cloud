@@ -67,7 +67,7 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 				if err != nil {
 					log.L().Error("update report  err", log.Error(err))
 				} else {
-					saveCache(cache, time.Now())
+					saveCache(cache, time.Now(), shadow.Namespace)
 					err = cache.Delete(cachemsg.CacheUpdateReportTimeLock)
 					if err != nil {
 						log.L().Error("update report  err", log.Error(err))
@@ -86,8 +86,8 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 }
 
 // ShadowDeleteCache delete shadow cache when shadow delete
-func ShadowDeleteCache(cache plugin.DataCache, name string) {
-	reportTimeData, err := cache.GetByte(cachemsg.AllShadowReportTimeCache)
+func ShadowDeleteCache(cache plugin.DataCache, name string, namespace string) {
+	reportTimeData, err := cache.GetByte(cachemsg.GetShadowReportTimeCacheKey(namespace))
 	if err != nil {
 		log.L().Error("get shadow cache error", log.Error(err))
 		return
@@ -107,7 +107,8 @@ func ShadowDeleteCache(cache plugin.DataCache, name string) {
 		log.L().Error("Marshal err", log.Error(err))
 		return
 	}
-	err = cache.SetByte(cachemsg.AllShadowReportTimeCache, returnTimeData)
+	reportSaveMap.Delete(name)
+	err = cache.SetByte(cachemsg.GetShadowReportTimeCacheKey(namespace), returnTimeData)
 	if err != nil {
 		log.L().Error("delete report time err", log.Error(err))
 		return
@@ -120,8 +121,8 @@ func ShadowDeleteCache(cache plugin.DataCache, name string) {
 	}
 }
 
-func saveCache(cache plugin.DataCache, timeCheck time.Time) {
-	reportTimeData, err := cache.GetByte(cachemsg.AllShadowReportTimeCache)
+func saveCache(cache plugin.DataCache, timeCheck time.Time, namespace string) {
+	reportTimeData, err := cache.GetByte(cachemsg.GetShadowReportTimeCacheKey(namespace))
 	if err != nil {
 		log.L().Error("get shadow cache error", log.Error(err))
 		return
@@ -153,7 +154,7 @@ func saveCache(cache plugin.DataCache, timeCheck time.Time) {
 		log.L().Error("Marshal err", log.Error(err))
 		return
 	}
-	err = cache.SetByte(cachemsg.AllShadowReportTimeCache, returnTimeData)
+	err = cache.SetByte(cachemsg.GetShadowReportTimeCacheKey(namespace), returnTimeData)
 	if err != nil {
 		log.L().Error("update report time err", log.Error(err))
 		return
