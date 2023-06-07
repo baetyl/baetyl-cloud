@@ -1736,10 +1736,10 @@ func TestGetFunctionsByNode(t *testing.T) {
 	req4, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/functions", nil)
 	router.ServeHTTP(w4, req4)
 	assert.Equal(t, http.StatusOK, w4.Code)
-	var list []string
-	json.Unmarshal(w4.Body.Bytes(), &list)
-	assert.Equal(t, 1, len(list))
-	assert.Equal(t, list[0], appNames[1]+"/"+"function1")
+	var functions models.FunctionList
+	json.Unmarshal(w4.Body.Bytes(), &functions)
+	assert.Equal(t, 1, len(functions.Functions))
+	assert.Equal(t, functions.Functions[0], appNames[1]+"/"+"function1")
 }
 
 func TestAPI_NodeNumberCollector(t *testing.T) {

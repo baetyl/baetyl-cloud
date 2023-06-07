@@ -22,6 +22,10 @@ type NodeNames struct {
 	Names []string `json:"names,"binding:"max=20"`
 }
 
+type FunctionList struct {
+	Functions []string `json:"functions"`
+}
+
 type NodeProperties struct {
 	State NodePropertiesState    `yaml:"state,omitempty" json:"state,omitempty"`
 	Meta  NodePropertiesMetadata `yaml:"metadata,omitempty" json:"metadata,omitempty"`
