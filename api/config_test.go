@@ -770,7 +770,9 @@ func TestGetAppByConfig(t *testing.T) {
 	}
 	appNames := []string{"app01", "app02", "app03"}
 	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(mConf, nil)
-	apps := []*specV1.Application{
+
+	sIndex.EXPECT().ListAppIndexByConfig(mConf.Namespace, mConf.Name).Return(appNames, nil).Times(1)
+	result := []models.AppItem{
 		{
 			Namespace: "default",
 			Name:      appNames[0],
@@ -784,11 +786,7 @@ func TestGetAppByConfig(t *testing.T) {
 			Name:      appNames[2],
 		},
 	}
-
-	sIndex.EXPECT().ListAppIndexByConfig(mConf.Namespace, mConf.Name).Return(appNames, nil).Times(1)
-	sApp.EXPECT().Get(mConf.Namespace, appNames[0], "").Return(apps[0], nil)
-	sApp.EXPECT().Get(mConf.Namespace, appNames[1], "").Return(apps[1], nil)
-	sApp.EXPECT().Get(mConf.Namespace, appNames[2], "").Return(apps[2], nil)
+	sApp.EXPECT().ListByNames(mConf.Namespace, appNames).Return(result, nil).AnyTimes()
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/configs/abc/apps", nil)

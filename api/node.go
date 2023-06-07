@@ -474,6 +474,26 @@ func (api *API) GetAppByNode(c *common.Context) (interface{}, error) {
 	return api.listAppByNames(ns, appNames)
 }
 
+// GetFunctionsByNode list function
+func (api *API) GetFunctionsByNode(c *common.Context) (interface{}, error) {
+	ns, n := c.GetNamespace(), c.GetNameFromParam()
+
+	node, err := api.Node.Get(nil, ns, n)
+	if err != nil {
+		return nil, err
+	}
+
+	appNames := make([]string, 0)
+	if node.Desire != nil {
+		apps := node.Desire.AppInfos(false)
+		for _, a := range apps {
+			appNames = append(appNames, a.Name)
+		}
+	}
+
+	return api.listFunctionsByNames(ns, appNames)
+}
+
 // GenInitCmdFromNode generate install command
 func (api *API) GenInitCmdFromNode(c *common.Context) (interface{}, error) {
 	ns, name := c.GetNamespace(), c.Param("name")

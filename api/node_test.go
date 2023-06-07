@@ -78,6 +78,7 @@ func initNodeAPI(t *testing.T) (*API, *gin.Engine, *gomock.Controller) {
 		nodes.PUT("", mockIM, common.Wrapper(api.GetNodes))
 		nodes.GET("/:name/stats", mockIM, common.Wrapper(api.GetNodeStats))
 		nodes.GET("/:name/apps", mockIM, common.Wrapper(api.GetAppByNode))
+		nodes.GET("/:name/functions", mockIM, common.Wrapper(api.GetFunctionsByNode))
 		nodes.PUT("/:name", mockIM, common.Wrapper(api.UpdateNode))
 		nodes.DELETE("/:name", mockIM, common.Wrapper(api.DeleteNode))
 		nodes.GET("/:name/init", mockIM, common.Wrapper(api.GenInitCmdFromNode))
@@ -1597,22 +1598,15 @@ func TestGetAppByNode(t *testing.T) {
 	defer mockCtl.Finish()
 
 	sApp := ms.NewMockApplicationService(mockCtl)
-	sConfig := ms.NewMockConfigService(mockCtl)
-	sSecret := ms.NewMockSecretService(mockCtl)
 	api.AppCombinedService = &service.AppCombinedService{
-		App:    sApp,
-		Config: sConfig,
-		Secret: sSecret,
+		App: sApp,
 	}
 
-	sNode, sIndex := ms.NewMockNodeService(mockCtl), ms.NewMockIndexService(mockCtl)
-	api.Node, api.Index = sNode, sIndex
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Node = sNode
 
-	sInit := ms.NewMockInitService(mockCtl)
-	api.Init = sInit
-
-	appNames := []string{"app1", "app2", "app3"}
-	sysAppNames := []string{"sysapp1", "sysapp2", "sysapp3"}
+	appNames := []string{"app1", "app2"}
+	sysAppNames := []string{"sysapp1", "sysapp2"}
 	appinfos := []specV1.AppInfo{
 		{
 			Name:    appNames[0],
@@ -1620,25 +1614,6 @@ func TestGetAppByNode(t *testing.T) {
 		},
 		{
 			Name:    appNames[1],
-			Version: "v1",
-		},
-		{
-			Name:    appNames[2],
-			Version: "v1",
-		},
-	}
-
-	apps := []*specV1.Application{
-		{
-			Name:    appNames[0],
-			Version: "v1",
-		},
-		{
-			Name:    appNames[1],
-			Version: "v1",
-		},
-		{
-			Name:    appNames[2],
 			Version: "v1",
 		},
 	}
@@ -1652,26 +1627,8 @@ func TestGetAppByNode(t *testing.T) {
 			Name:    sysAppNames[1],
 			Version: "v1",
 		},
-		{
-			Name:    sysAppNames[2],
-			Version: "v1",
-		},
 	}
 
-	sysapps := []*specV1.Application{
-		{
-			Name:    sysAppNames[0],
-			Version: "v1",
-		},
-		{
-			Name:    sysAppNames[1],
-			Version: "v1",
-		},
-		{
-			Name:    sysAppNames[2],
-			Version: "v1",
-		},
-	}
 	node := &specV1.Node{
 		Namespace:   "default",
 		Name:        "abc",
@@ -1680,6 +1637,8 @@ func TestGetAppByNode(t *testing.T) {
 	}
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(node, nil).AnyTimes()
+	result := []models.AppItem{}
+	sApp.EXPECT().ListByNames(node.Namespace, gomock.Any()).Return(result, nil).Times(1)
 
 	w4 := httptest.NewRecorder()
 	req4, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/apps", nil)
@@ -1692,12 +1651,25 @@ func TestGetAppByNode(t *testing.T) {
 	node.Desire.SetAppInfos(true, sysappinfos)
 	node.Desire.SetAppInfos(false, appinfos)
 
-	sApp.EXPECT().Get(node.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
-	sApp.EXPECT().Get(node.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
-	sApp.EXPECT().Get(node.Namespace, appNames[2], "").Return(nil, common.Error(common.ErrResourceNotFound)).AnyTimes()
-	sApp.EXPECT().Get(node.Namespace, sysAppNames[0], "").Return(sysapps[0], nil).AnyTimes()
-	sApp.EXPECT().Get(node.Namespace, sysAppNames[1], "").Return(sysapps[1], nil).AnyTimes()
-	sApp.EXPECT().Get(node.Namespace, sysAppNames[2], "").Return(nil, common.Error(common.ErrResourceNotFound)).AnyTimes()
+	result = []models.AppItem{
+		{
+			Name:    appNames[0],
+			Version: "v1",
+		},
+		{
+			Name:    appNames[1],
+			Version: "v1",
+		},
+		{
+			Name:    sysAppNames[0],
+			Version: "v1",
+		},
+		{
+			Name:    sysAppNames[1],
+			Version: "v1",
+		},
+	}
+	sApp.EXPECT().ListByNames(node.Namespace, append(sysAppNames, appNames...)).Return(result, nil).Times(1)
 
 	w4 = httptest.NewRecorder()
 	req4, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/apps", nil)
@@ -1705,13 +1677,69 @@ func TestGetAppByNode(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w4.Code)
 	json.Unmarshal(w4.Body.Bytes(), list)
 	assert.Equal(t, 4, list.Total)
+}
 
-	w4 = httptest.NewRecorder()
-	req4, _ = http.NewRequest(http.MethodGet, "/v1/nodes/abc/apps?selector="+common.LabelSystem+"=true", nil)
+func TestGetFunctionsByNode(t *testing.T) {
+	api, router, mockCtl := initNodeAPI(t)
+	defer mockCtl.Finish()
+	sApp := ms.NewMockApplicationService(mockCtl)
+	api.AppCombinedService = &service.AppCombinedService{
+		App: sApp,
+	}
+	sNode := ms.NewMockNodeService(mockCtl)
+	api.Node = sNode
+
+	appNames := []string{"app1", "app2"}
+	appInfos := []specV1.AppInfo{
+		{
+			Name:    appNames[0],
+			Version: "v1",
+		},
+		{
+			Name:    appNames[1],
+			Version: "v1",
+		},
+	}
+	node := &specV1.Node{
+		Namespace:   "default",
+		Name:        "abc",
+		Description: "haha",
+		Desire:      specV1.Desire{},
+	}
+	apps := []*specV1.Application{
+		{
+			Name:    appNames[0],
+			Version: "v1",
+		},
+		{
+			Name:    appNames[1],
+			Version: "v1",
+			Type:    common.FunctionApp,
+			Services: []specV1.Service{
+				{
+					Functions: []specV1.ServiceFunction{
+						{
+							Name: "function1",
+						},
+					},
+				},
+			},
+		},
+	}
+	node.Desire.SetAppInfos(false, appInfos)
+
+	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(node, nil).AnyTimes()
+	sApp.EXPECT().Get(node.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
+	sApp.EXPECT().Get(node.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
+
+	w4 := httptest.NewRecorder()
+	req4, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/functions", nil)
 	router.ServeHTTP(w4, req4)
 	assert.Equal(t, http.StatusOK, w4.Code)
-	json.Unmarshal(w4.Body.Bytes(), list)
-	assert.Equal(t, 4, list.Total)
+	var list []string
+	json.Unmarshal(w4.Body.Bytes(), &list)
+	assert.Equal(t, 1, len(list))
+	assert.Equal(t, list[0], appNames[1]+"/"+"function1")
 }
 
 func TestAPI_NodeNumberCollector(t *testing.T) {
