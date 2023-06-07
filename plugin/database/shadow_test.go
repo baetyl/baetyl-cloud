@@ -7,9 +7,10 @@ import (
 	"github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/baetyl/baetyl-go/v2/trigger"
+
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/triggerfunc"
-	"github.com/baetyl/baetyl-go/v2/trigger"
 )
 
 var (
@@ -53,7 +54,7 @@ func TestShadow(t *testing.T) {
 
 	err = trigger.Register(triggerfunc.ShadowDelete, trigger.EventFunc{
 		Args:  []interface{}{},
-		Event: func(name string) string { return "hello " + name },
+		Event: func(name string, namespace string) string { return "hello " + name + namespace },
 	})
 
 	namespace := "test"

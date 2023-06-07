@@ -67,6 +67,7 @@ type NodeServiceImpl struct {
 	Cache         plugin.DataCache
 	SysAppService SystemAppService
 	Hooks         map[string]interface{}
+	logger        *log.Logger
 }
 
 // NewNodeService NewNodeService
@@ -125,6 +126,7 @@ func NewNodeService(config *config.CloudConfig) (NodeService, error) {
 		App:           app.(plugin.Application),
 		Hooks:         make(map[string]interface{}),
 		Cache:         cache.(plugin.DataCache),
+		logger:        log.With(log.Any("service", "node")),
 	}, nil
 }
 
@@ -135,7 +137,7 @@ func (n *NodeServiceImpl) Get(tx interface{}, namespace, name string) (*specV1.N
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
 	} else if err != nil {
-		log.L().Error("get node failed", log.Error(err))
+		n.logger.Error("get node failed", log.Error(err))
 		return nil, err
 	}
 
@@ -155,7 +157,7 @@ func (n *NodeServiceImpl) Get(tx interface{}, namespace, name string) (*specV1.N
 func (n *NodeServiceImpl) Create(tx interface{}, namespace string, node *specV1.Node) (*specV1.Node, error) {
 	res, err := n.Node.CreateNode(tx, namespace, node)
 	if err != nil {
-		log.L().Error("create node failed", log.Error(err))
+		n.logger.Error("create node failed", log.Error(err))
 		return nil, err
 	}
 
@@ -207,7 +209,7 @@ func (n *NodeServiceImpl) List(namespace string, listOptions *models.ListOptions
 	var resNode []specV1.Node
 
 	// get shadow report time form cache if exists
-	shadowReportTimeMap, err := n.GetAllShadowReportTime(namespace, len(list.Items))
+	shadowReportTimeMap, err := n.GetAllShadowReportTime(namespace, list.Items)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -368,32 +370,34 @@ func (n *NodeServiceImpl) GetNodeAfterTime(node specV1.Node, namespace string) (
 }
 
 // GetAllShadowReportTime get node report time from cache
-func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) (reportTimeMap map[string]string, err error) {
+func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, nodes []specV1.Node) (reportTimeMap map[string]string, err error) {
 
 	reportTimeMap = map[string]string{}
 
-	reportTimeOk, err := n.Cache.Exist(cachemsg.AllShadowReportTimeCache)
+	reportTimeOk, err := n.Cache.Exist(cachemsg.GetShadowReportTimeCacheKey(namespace))
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	if !reportTimeOk {
 		// cache not exist set cache
-		return n.SetNodeShadowCache(namespace)
+		n.logger.Warn("reportTime not exit")
+		return n.SetNodeShadowCache(namespace, nodes)
 	} else {
-		dataReportTime, err := n.Cache.GetByte(cachemsg.AllShadowReportTimeCache)
+		dataReportTime, err := n.Cache.GetByte(cachemsg.GetShadowReportTimeCacheKey(namespace))
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
 		if dataReportTime != nil {
 			err = json.Unmarshal(dataReportTime, &reportTimeMap)
 			if err != nil {
-				log.L().Error("decode report time error", log.Error(err))
-				return n.SetNodeShadowCache(namespace)
+				n.logger.Error("decode report time error", log.Error(err))
+				return n.SetNodeShadowCache(namespace, nodes)
 			}
 		}
 		// check time cache len < lenNode
-		if len(reportTimeMap) < lenNode {
-			return n.SetNodeShadowCache(namespace)
+		if len(reportTimeMap) < len(nodes) {
+			n.logger.Warn(fmt.Sprintf("node %d len more then cache %d", len(nodes), len(reportTimeMap)))
+			return n.SetNodeShadowCache(namespace, nodes)
 		}
 	}
 	return reportTimeMap, nil
@@ -401,14 +405,34 @@ func (n *NodeServiceImpl) GetAllShadowReportTime(namespace string, lenNode int) 
 
 func (n *NodeServiceImpl) GetShadowReportCacheByNames(namespace string, names []string) (reportMap map[string][]byte, err error) {
 	reportMap = map[string][]byte{}
+	var updateNames []string
 	for i := range names {
 		report, err := n.Cache.GetByte(cachemsg.GetShadowReportCacheKey(names[i]))
-		// if report not exit then init report cache
 		if err != nil || report == nil {
-			return n.setShadowReportCacheByNames(namespace, names)
+			n.logger.Warn("node " + names[i] + " report cache not exit ")
+			if err != nil {
+				n.logger.Warn("node " + names[i] + " report cache not exit err " + err.Error())
+			}
+			updateNames = append(updateNames, names[i])
+			// if unset data >10 get reset all report
+			if len(updateNames) > 10 {
+				n.logger.Warn("node  report cache not exit >10 ")
+				return n.setShadowReportCacheByNames(namespace, names)
+			}
 		}
 		reportMap[names[i]] = report
 	}
+	// update need update report
+	if len(updateNames) > 0 {
+		updateMap, err := n.setShadowReportCacheByNames(namespace, updateNames)
+		if err != nil {
+			return nil, err
+		}
+		for key, value := range updateMap {
+			reportMap[key] = value
+		}
+	}
+
 	return reportMap, nil
 }
 
@@ -437,46 +461,51 @@ func (n *NodeServiceImpl) setShadowReportCacheByNames(namespace string, names []
 			if time.Now().Add(-30*time.Minute).Format(time.RFC3339Nano) > lockTime {
 				err = n.Cache.Delete(cachemsg.CacheReportSetLock)
 				if err != nil {
-					log.L().Error("delete lock key cacheUpdateReportTimeLock error", log.Error(err))
+					n.logger.Error("delete lock key cacheUpdateReportTimeLock error", log.Error(err))
 				}
 			}
 		}
-		log.L().Info("lock data return database back")
+		n.logger.Info("lock data return database back")
 	} else {
 		err := n.Cache.SetString(cachemsg.CacheReportSetLock, time.Now().Format(time.RFC3339Nano))
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
 		// set node report cache
-		go n.setShadowReportCache(reportMap)
+		go n.setShadowReportCache(reportMap, names)
 	}
 	return reportMap, nil
 }
 
 // setShadowReportCache set node report cache
-func (n *NodeServiceImpl) setShadowReportCache(reportMap map[string][]byte) {
-	log.L().Info("start set report cache")
+func (n *NodeServiceImpl) setShadowReportCache(reportMap map[string][]byte, names []string) {
+	n.logger.Info("start set report cache")
 	defer func() {
 		if p := recover(); p != nil {
-			log.L().Error(fmt.Sprintf("set report cache error %s", p))
+			n.logger.Error(fmt.Sprintf("set report cache error %s", p))
 		}
 	}()
 
-	for name, value := range reportMap {
+	for i := range names {
+		name := names[i]
+		value, ok := reportMap[name]
+		if !ok {
+			value = []byte("{}")
+		}
 		err := n.Cache.SetByte(cachemsg.GetShadowReportCacheKey(name), value)
 		if err != nil {
-			log.L().Error(fmt.Sprintf("set report cache %s failed", name))
+			n.logger.Error(fmt.Sprintf("set report cache %s failed", name))
 		}
 	}
 	err := n.Cache.Delete(cachemsg.CacheReportSetLock)
 	if err != nil {
-		log.L().Error(fmt.Sprintf("delete CacheReportSetLock err %s", err))
+		n.logger.Error(fmt.Sprintf("delete CacheReportSetLock err %s", err))
 	}
 }
 
 // SetNodeShadowCache set node shadow report cache time
-func (n *NodeServiceImpl) SetNodeShadowCache(namespace string) (reportTimeMap map[string]string, err error) {
-	log.L().Info("set report and reportTime cache")
+func (n *NodeServiceImpl) SetNodeShadowCache(namespace string, nodes []specV1.Node) (reportTimeMap map[string]string, err error) {
+	n.logger.Info("set report and reportTime cache")
 	reportTimeMap = map[string]string{}
 	shadowList, err := n.Shadow.ListAll(namespace)
 	if err != nil {
@@ -486,11 +515,18 @@ func (n *NodeServiceImpl) SetNodeShadowCache(namespace string) (reportTimeMap ma
 		shadowMode := shadowList.Items[i]
 		reportTimeMap[shadowMode.Name] = shadowMode.Time.Format(time.RFC3339Nano)
 	}
+	if len(reportTimeMap) < len(nodes) {
+		for i := range nodes {
+			if _, ok := reportTimeMap[nodes[i].Name]; !ok {
+				reportTimeMap[nodes[i].Name] = time.Time{}.Format(time.RFC3339Nano)
+			}
+		}
+	}
 	reportTimeData, err := json.Marshal(reportTimeMap)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	err = n.Cache.SetByte(cachemsg.AllShadowReportTimeCache, reportTimeData)
+	err = n.Cache.SetByte(cachemsg.GetShadowReportTimeCacheKey(namespace), reportTimeData)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -673,7 +709,7 @@ func (n *NodeServiceImpl) GetDesire(namespace, name string) (*specV1.Desire, err
 func (n *NodeServiceImpl) InsertOrUpdateNodeAndAppIndex(tx interface{}, namespace string, node *specV1.Node, shadow *models.Shadow, flag bool) error {
 	apps, err := n.App.ListApplication(tx, namespace, &models.ListOptions{})
 	if err != nil {
-		log.L().Error("list application error", log.Error(err))
+		n.logger.Error("list application error", log.Error(err))
 		return err
 	}
 
@@ -688,13 +724,13 @@ func (n *NodeServiceImpl) InsertOrUpdateNodeAndAppIndex(tx interface{}, namespac
 		}
 	} else {
 		if err = n.updateDesire(tx, shadow, desire); err != nil {
-			log.L().Error("update node desired node failed", log.Error(err))
+			n.logger.Error("update node desired node failed", log.Error(err))
 			return err
 		}
 	}
 
 	if err = n.IndexService.RefreshAppsIndexByNode(tx, namespace, node.Name, appNames); err != nil {
-		log.L().Error("refresh app index by node failed", log.Error(err))
+		n.logger.Error("refresh app index by node failed", log.Error(err))
 		return err
 	}
 	return nil
@@ -866,7 +902,7 @@ func (n *NodeServiceImpl) GetNodeProperties(namespace, name string) (*models.Nod
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
 	} else if err != nil {
-		log.L().Error("get node failed", log.Error(err))
+		n.logger.Error("get node failed", log.Error(err))
 		return nil, err
 	}
 	shadow, err := n.Shadow.Get(nil, namespace, name)
@@ -903,7 +939,7 @@ func (n *NodeServiceImpl) UpdateNodeProperties(namespace, name string, props *mo
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
 	} else if err != nil {
-		log.L().Error("get node failed", log.Error(err))
+		n.logger.Error("get node failed", log.Error(err))
 		return nil, err
 	}
 	shadow, err := n.Shadow.Get(nil, namespace, name)
@@ -955,7 +991,7 @@ func (n *NodeServiceImpl) UpdateNodeMode(ns, name, mode string) error {
 		return common.Error(common.ErrResourceNotFound, common.Field("type", "node"),
 			common.Field("name", name))
 	} else if err != nil {
-		log.L().Error("get node failed", log.Error(err))
+		n.logger.Error("get node failed", log.Error(err))
 		return err
 	}
 	if node.Attributes == nil {
