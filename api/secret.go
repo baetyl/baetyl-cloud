@@ -183,14 +183,11 @@ func (api *API) listAppByNames(namespace string, appNames []string) (*models.App
 		Total: 0,
 		Items: []models.AppItem{},
 	}
-	for _, appName := range appNames {
-		app, err := api.App.Get(namespace, appName, "")
-		if err != nil {
-			if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
-				continue
-			}
-			return nil, err
-		}
+	apps, err := api.App.ListByNames(namespace, appNames)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	for _, app := range apps {
 		delete(app.Labels, common.LabelAppMode)
 		result.Total++
 		result.Items = append(result.Items, models.AppItem{
@@ -205,6 +202,23 @@ func (api *API) listAppByNames(namespace string, appNames []string) (*models.App
 			CronStatus:        app.CronStatus,
 			CronTime:          app.CronTime,
 		})
+	}
+	return result, nil
+}
+
+func (api *API) listFunctionsByNames(namespace string, appNames []string) ([]string, error) {
+	result := make([]string, 0)
+	for _, appName := range appNames {
+		app, err := api.App.Get(namespace, appName, "")
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		if app.Type != common.FunctionApp || len(app.Services) == 0 {
+			continue
+		}
+		for _, fn := range app.Services[0].Functions {
+			result = append(result, app.Name+"/"+fn.Name)
+		}
 	}
 	return result, nil
 }
