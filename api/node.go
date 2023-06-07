@@ -398,7 +398,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	}
 
 	// Delete Node
-	if err := api.Node.Delete(c.GetNamespace(), node); err != nil {
+	if err = api.Node.Delete(c.GetNamespace(), node); err != nil {
 		return nil, err
 	}
 	if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
@@ -491,7 +491,10 @@ func (api *API) GetFunctionsByNode(c *common.Context) (interface{}, error) {
 		}
 	}
 
-	return api.listFunctionsByNames(ns, appNames)
+	res, err := api.listFunctionsByNames(ns, appNames)
+	return models.FunctionList{
+		Functions: res,
+	}, err
 }
 
 // GenInitCmdFromNode generate install command
