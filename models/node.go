@@ -19,7 +19,7 @@ type NodeList struct {
 }
 
 type NodeNames struct {
-	Names []string `json:"names,"binding:"max=20"`
+	Names []string `json:"names," binding:"max=20"`
 }
 
 type FunctionList struct {
