@@ -12,6 +12,7 @@ replica: 1
 services:
   - name: "baetyl-function"
     image: "{{GetModuleImage "baetyl-function"}}"
+    imagePullPolicy: IfNotPresent
     type: "deployment"
     replica: 1
     volumeMounts:
