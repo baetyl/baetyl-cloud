@@ -13,6 +13,7 @@ services:
   - name: "baetyl-core"
     type: "deployment"
     image: {{GetModuleImage "baetyl"}}
+    imagePullPolicy: IfNotPresent
     replica: 1
     args:
       - "core"

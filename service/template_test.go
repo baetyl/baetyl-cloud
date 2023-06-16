@@ -98,6 +98,7 @@ services:
     privileged: true
   replica: 1
   type: deployment
+  imagePullPolicy: IfNotPresent
 volumes:
 - name: core-conf
   config:
@@ -176,6 +177,7 @@ services:
     protocol: TCP
   replica: 1
   type: deployment
+  imagePullPolicy: IfNotPresent
 volumes:
 - name: func-conf
   config:
