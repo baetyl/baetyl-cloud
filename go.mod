@@ -6,7 +6,7 @@ require (
 	github.com/VictoriaMetrics/fastcache v1.12.1
 	github.com/ZZMarquis/gm v1.3.2
 	github.com/aws/aws-sdk-go v1.34.0
-	github.com/baetyl/baetyl-go/v2 v2.2.4-0.20230525075920-34b8d6c3a2ba
+	github.com/baetyl/baetyl-go/v2 v2.2.4-0.20230625073200-0f48322528d2
 	github.com/gin-contrib/cache v1.1.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-playground/validator/v10 v10.11.2
