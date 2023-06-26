@@ -183,6 +183,9 @@ func (api *API) listAppByNames(namespace string, appNames []string) (*models.App
 		Total: 0,
 		Items: []models.AppItem{},
 	}
+	if appNames == nil || len(appNames) == 0 {
+		return result, nil
+	}
 	apps, err := api.App.ListByNames(namespace, appNames)
 	if err != nil {
 		return nil, errors.Trace(err)

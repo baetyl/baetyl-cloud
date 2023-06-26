@@ -1640,7 +1640,6 @@ func TestGetAppByNode(t *testing.T) {
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(node, nil).AnyTimes()
 	result := []models.AppItem{}
-	sApp.EXPECT().ListByNames(node.Namespace, gomock.Any()).Return(result, nil).Times(1)
 
 	w4 := httptest.NewRecorder()
 	req4, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/apps", nil)
