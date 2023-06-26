@@ -336,4 +336,9 @@ func TestGetAppBySecret(t *testing.T) {
 	req4, _ := http.NewRequest(http.MethodGet, "/v1/secrets/abc/apps", nil)
 	router.ServeHTTP(w4, req4)
 	assert.Equal(t, http.StatusOK, w4.Code)
+
+	emptyNames := []string{}
+	res, err := api.listAppByNames(mConfSecret3.Namespace, emptyNames)
+	assert.NoError(t, err)
+	assert.Equal(t, res.Total, 0)
 }
