@@ -1461,8 +1461,13 @@ func (api *API) getSpeedLimit(node *v1.Node) int {
 	}
 	if _, ok := node.Attributes[BaetylCoreSpeedLimit]; !ok {
 		node.Attributes[BaetylCoreSpeedLimit] = 0
+		return 0
 	}
-	return node.Attributes[BaetylCoreSpeedLimit].(int)
+	data, ok := node.Attributes[BaetylCoreSpeedLimit].(float64)
+	if !ok {
+		return 0
+	}
+	return int(data)
 }
 
 func (api *API) updateAgentAppPort(ns string, agent *v1.Application, oldPort, newPort int) error {
