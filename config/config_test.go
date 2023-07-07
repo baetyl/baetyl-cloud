@@ -19,7 +19,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.AdminServer.WriteTimeout = time.Second * 30
 	expect.AdminServer.ReadTimeout = time.Second * 30
 	expect.AdminServer.ShutdownTime = time.Second * 3
-	expect.AdminServer.CacheEnable = true
+	expect.AdminServer.CacheEnable = false
 	expect.AdminServer.CacheDuration = time.Second * 2
 
 	expect.MisServer.Port = ":9006"

@@ -10,7 +10,7 @@ import (
 // CloudConfig baetyl-cloud config
 type CloudConfig struct {
 	InitServer  Server      `yaml:"initServer" json:"initServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
-	AdminServer AdminServer `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"cacheEnable\":true,\"cacheDuration\":2000000000}"`
+	AdminServer AdminServer `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"cacheEnable\":false,\"cacheDuration\":2000000000}"`
 	MisServer   MisServer   `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
 	LogInfo     log.Config  `yaml:"logger" json:"logger"`
 	Task        Task        `yaml:"task" json:"task"`
@@ -66,7 +66,7 @@ type MisServer struct {
 
 type AdminServer struct {
 	Server        `yaml:",inline" json:",inline"`
-	CacheEnable   bool          `yaml:"cacheEnable" json:"cacheEnable" default:"true"`
+	CacheEnable   bool          `yaml:"cacheEnable" json:"cacheEnable" default:"false"`
 	CacheDuration time.Duration `yaml:"cacheDuration" json:"cacheDuration" default:"2s"`
 }
 
