@@ -44,6 +44,26 @@ func (d *DB) Create(tx interface{}, shadow *models.Shadow) (*models.Shadow, erro
 	return shd, err
 }
 
+func (d *DB) BatchCreateShadow(shadows []*models.Shadow) ([]*models.Shadow, error) {
+	var res []*models.Shadow
+	if len(shadows) == 0 {
+		return res, nil
+	}
+	err := d.Transact(func(tx *sqlx.Tx) error {
+		_, err := d.BatchCreateShadowTx(tx, shadows)
+		if err != nil {
+			return err
+		}
+		var names []string
+		for i, _ := range shadows {
+			names = append(names, shadows[i].Name)
+		}
+		res, err = d.ListShadowByNames(tx, shadows[0].Namespace, names)
+		return err
+	})
+	return res, err
+}
+
 func (d *DB) createAndGetShadow(tx *sqlx.Tx, input *models.Shadow, output **models.Shadow) error {
 	_, err := d.CreateShadowTx(tx, input)
 	if err != nil {
@@ -217,6 +237,24 @@ VALUES (?, ?, ?, ?, ?, ?)
 	}
 
 	return d.Exec(tx, insertSQL, shd.Namespace, shd.Name, shd.Report, shd.Desire, shd.ReportMeta, shd.DesireMeta)
+}
+
+func (d *DB) BatchCreateShadowTx(tx *sqlx.Tx, shadows []*models.Shadow) (sql.Result, error) {
+	insertSQL := `
+INSERT INTO baetyl_node_shadow (namespace, name, report, desire, report_meta, desire_meta)
+VALUES
+`
+	var args []interface{}
+	for i, _ := range shadows {
+		insertSQL += ` (?, ?, ?, ?, ?, ?),`
+		shd, err := entities.NewShadowFromShadowModel(shadows[i])
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, shd.Namespace, shd.Name, shd.Report, shd.Desire, shd.ReportMeta, shd.DesireMeta)
+	}
+	insertSQL = strings.TrimRight(insertSQL, ",")
+	return d.Exec(tx, insertSQL, args...)
 }
 
 func (d *DB) DeleteShadowTx(tx *sqlx.Tx, namespace, name string) (sql.Result, error) {
