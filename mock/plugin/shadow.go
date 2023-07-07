@@ -34,6 +34,21 @@ func (m *MockShadow) EXPECT() *MockShadowMockRecorder {
 	return m.recorder
 }
 
+// BatchCreateShadow mocks base method.
+func (m *MockShadow) BatchCreateShadow(arg0 []*models.Shadow) ([]*models.Shadow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchCreateShadow", arg0)
+	ret0, _ := ret[0].([]*models.Shadow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchCreateShadow indicates an expected call of BatchCreateShadow.
+func (mr *MockShadowMockRecorder) BatchCreateShadow(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchCreateShadow", reflect.TypeOf((*MockShadow)(nil).BatchCreateShadow), arg0)
+}
+
 // Close mocks base method.
 func (m *MockShadow) Close() error {
 	m.ctrl.T.Helper()

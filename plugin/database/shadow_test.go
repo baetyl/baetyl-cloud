@@ -201,6 +201,51 @@ func TestShadowTx(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestBatchCreateShadows(t *testing.T) {
+	db, err := MockNewDB()
+	assert.NoError(t, err)
+	db.MockCreateShadowTable()
+
+	namespace := "test"
+
+	shadow := []*models.Shadow{
+		&models.Shadow{
+			Namespace: namespace,
+			Name:      "node01",
+			Desire: v1.Desire{
+				"apps": []v1.AppInfo{
+					{
+						Name:    "app01",
+						Version: "1",
+					},
+				},
+			},
+			Report:     v1.Report{},
+			ReportMeta: map[string]interface{}{},
+			DesireMeta: map[string]interface{}{},
+		},
+		&models.Shadow{
+			Namespace: namespace,
+			Name:      "node02",
+			Desire: v1.Desire{
+				"apps": []v1.AppInfo{
+					{
+						Name:    "app01",
+						Version: "1",
+					},
+				},
+			},
+			Report:     v1.Report{},
+			ReportMeta: map[string]interface{}{},
+			DesireMeta: map[string]interface{}{},
+		},
+	}
+	data, err := db.BatchCreateShadow(shadow)
+	assert.NoError(t, err)
+	assert.Equal(t, len(data), 2)
+
+}
+
 func TestBatchShadows(t *testing.T) {
 	db, err := MockNewDB()
 	assert.NoError(t, err)
