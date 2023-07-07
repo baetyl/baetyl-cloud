@@ -33,6 +33,8 @@ var params = map[string]interface{}{
 	"NodeCertCa":                 "---node cert ca---",
 	"CoreFrequency":              "20s",
 	"CoreAPIPort":                30050,
+	"BaetylCoreByteUint":         "KB",
+	"BaetylCoreSpeedLimit":       0,
 	context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
 }
 
@@ -139,6 +141,8 @@ data:
     sync:
       download:
         timeout: 30m
+        speedLimit: 0
+        byteUint: KB
       report:
         interval: 20s
     httplink:

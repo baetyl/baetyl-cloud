@@ -51,9 +51,14 @@ const (
 	HookUpdateNodeDmp = "hookUpdateNodeDmp"
 	HookDeleteNodeDmp = "hookDeleteNodeDmp"
 
-	BaetylCoreLogLevel = "BaetylCoreLogLevel"
-	LogLevelDebug      = "debug"
-	UserID             = "UserId"
+	BaetylCoreLogLevel   = "BaetylCoreLogLevel"
+	BaetylCoreByteUnit   = "BaetylCoreByteUint"
+	BaetylCoreSpeedLimit = "BaetylCoreSpeedLimit"
+	LogLevelDebug        = "debug"
+	UserID               = "UserId"
+
+	ByteUnitKB = "KB"
+	ByteUnitMB = "MB"
 )
 
 var (
@@ -717,12 +722,16 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 
 	logLevel := api.getLogLevel(node)
+	byteUnit := api.getByteUnit(node)
+	speedLimit := api.getSpeedLimit(node)
 
 	if coreConfig.Version == version &&
 		coreConfig.Frequency == freq &&
 		coreConfig.APIPort == port &&
 		coreConfig.AgentPort == agentPort &&
-		coreConfig.LogLevel == logLevel {
+		coreConfig.LogLevel == logLevel &&
+		coreConfig.ByteUnit == byteUnit &&
+		coreConfig.SpeedLimit == speedLimit {
 		return api.ToApplicationView(app)
 	}
 
@@ -740,8 +749,10 @@ func (api *API) UpdateCoreApp(c *common.Context) (interface{}, error) {
 	}
 	node.Attributes[v1.BaetylCoreAPIPort] = fmt.Sprintf("%d", coreConfig.APIPort)
 	node.Attributes[BaetylCoreLogLevel] = coreConfig.LogLevel
+	node.Attributes[BaetylCoreByteUnit] = coreConfig.ByteUnit
+	node.Attributes[BaetylCoreSpeedLimit] = coreConfig.SpeedLimit
 
-	err = api.updateCoreAppConfig(app, node, coreConfig.Frequency, coreConfig.AgentPort, coreConfig.LogLevel)
+	err = api.updateCoreAppConfig(app, node, coreConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -860,6 +871,10 @@ func (api *API) GetCoreAppConfigs(c *common.Context) (interface{}, error) {
 	}
 
 	coreInfo.LogLevel = api.getLogLevel(node)
+	// get byte unit
+	coreInfo.ByteUnit = api.getByteUnit(node)
+	// get s
+	coreInfo.SpeedLimit = api.getSpeedLimit(node)
 
 	return coreInfo, nil
 }
@@ -1239,21 +1254,23 @@ func (api *API) updateCoreVersions(node *v1.Node, currentVersion, updateVersion 
 	node.Attributes[BaetylCorePrevVersion] = currentVersion
 }
 
-func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, freq, agentPort int, logLevel string) error {
+func (api *API) updateCoreAppConfig(app *v1.Application, node *v1.Node, coreConfig *models.NodeCoreConfigs) error {
 	config, err := api.getAppConfig(app, BaetylCoreConfPrefix)
 	if err != nil {
 		return err
 	}
 	params := map[string]interface{}{
-		"CoreConfName":     config.Name,
-		"CoreAppName":      app.Name,
-		"NodeMode":         node.NodeMode,
-		"CoreFrequency":    fmt.Sprintf("%ds", freq),
-		"AgentPort":        fmt.Sprintf("%d", agentPort),
-		"GPUStats":         node.Accelerator != "",
-		"DiskNetStats":     node.NodeMode == context.RunModeKube,
-		"QPSStats":         node.NodeMode == context.RunModeKube,
-		BaetylCoreLogLevel: logLevel,
+		"CoreConfName":       config.Name,
+		"CoreAppName":        app.Name,
+		"NodeMode":           node.NodeMode,
+		"CoreFrequency":      fmt.Sprintf("%ds", coreConfig.Frequency),
+		"AgentPort":          fmt.Sprintf("%d", coreConfig.AgentPort),
+		"GPUStats":           node.Accelerator != "",
+		"DiskNetStats":       node.NodeMode == context.RunModeKube,
+		"QPSStats":           node.NodeMode == context.RunModeKube,
+		BaetylCoreLogLevel:   coreConfig.LogLevel,
+		BaetylCoreSpeedLimit: coreConfig.SpeedLimit,
+		BaetylCoreByteUnit:   coreConfig.ByteUnit,
 	}
 	res, err := api.Init.GetResource(config.Namespace, node.Name, service.TemplateCoreConfYaml, params)
 	if err != nil {
@@ -1428,6 +1445,31 @@ func (api *API) getLogLevel(node *v1.Node) string {
 	return node.Attributes[BaetylCoreLogLevel].(string)
 }
 
+func (api *API) getByteUnit(node *v1.Node) string {
+	if node.Attributes == nil {
+		return ByteUnitKB
+	}
+	if _, ok := node.Attributes[BaetylCoreByteUnit]; !ok {
+		node.Attributes[BaetylCoreByteUnit] = ByteUnitKB
+	}
+	return node.Attributes[BaetylCoreByteUnit].(string)
+}
+
+func (api *API) getSpeedLimit(node *v1.Node) int {
+	if node.Attributes == nil {
+		return 0
+	}
+	if _, ok := node.Attributes[BaetylCoreSpeedLimit]; !ok {
+		node.Attributes[BaetylCoreSpeedLimit] = 0
+		return 0
+	}
+	data, ok := node.Attributes[BaetylCoreSpeedLimit].(float64)
+	if !ok {
+		return 0
+	}
+	return int(data)
+}
+
 func (api *API) updateAgentAppPort(ns string, agent *v1.Application, oldPort, newPort int) error {
 	for i, v := range agent.Services[0].Ports {
 		if v.HostPort == int32(oldPort) {
@@ -1505,7 +1547,17 @@ func (api *API) UpdateConfigByAccelerator(ns string, node *v1.Node) error {
 		return err
 	}
 	logLevel := api.getLogLevel(node)
-	err = api.updateCoreAppConfig(core, node, freq, agentPort, logLevel)
+	speedLimit := api.getSpeedLimit(node)
+	byteUint := api.getByteUnit(node)
+	err = api.updateCoreAppConfig(core, node, &models.NodeCoreConfigs{
+		Version:    "",
+		Frequency:  freq,
+		APIPort:    0,
+		AgentPort:  agentPort,
+		LogLevel:   logLevel,
+		ByteUnit:   byteUint,
+		SpeedLimit: speedLimit,
+	})
 	if err != nil {
 		return err
 	}

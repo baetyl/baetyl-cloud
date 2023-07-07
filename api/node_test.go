@@ -1115,6 +1115,8 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.BaetylAgentPort:     common.DefaultAgentPort,
 			BaetylCoreLogLevel:         LogLevelDebug,
+			BaetylCoreByteUnit:         ByteUnitKB,
+			BaetylCoreSpeedLimit:       0,
 			UserID:                     "",
 		},
 		Desire: specV1.Desire{
@@ -1638,7 +1640,6 @@ func TestGetAppByNode(t *testing.T) {
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(node, nil).AnyTimes()
 	result := []models.AppItem{}
-	sApp.EXPECT().ListByNames(node.Namespace, gomock.Any()).Return(result, nil).Times(1)
 
 	w4 := httptest.NewRecorder()
 	req4, _ := http.NewRequest(http.MethodGet, "/v1/nodes/abc/apps", nil)
@@ -2014,15 +2015,17 @@ func TestAPI_UpdateCoreApp(t *testing.T) {
 	mockConfig.EXPECT().Get(ns, "baetyl-program-config-baetyl-core", "").Return(pconfig, nil).Times(1)
 
 	pparams := map[string]interface{}{
-		"CoreAppName":      "baetyl-core-1",
-		"CoreConfName":     "baetyl-core-conf-ialplsycd",
-		"CoreFrequency":    "40s",
-		"NodeMode":         "native",
-		"AgentPort":        "30080",
-		"GPUStats":         true,
-		"DiskNetStats":     false,
-		"QPSStats":         false,
-		BaetylCoreLogLevel: LogLevelDebug,
+		"CoreAppName":        "baetyl-core-1",
+		"CoreConfName":       "baetyl-core-conf-ialplsycd",
+		"CoreFrequency":      "40s",
+		"NodeMode":           "native",
+		"AgentPort":          "30080",
+		"GPUStats":           true,
+		"DiskNetStats":       false,
+		"QPSStats":           false,
+		BaetylCoreLogLevel:   LogLevelDebug,
+		BaetylCoreByteUnit:   ByteUnitKB,
+		BaetylCoreSpeedLimit: 0,
 	}
 
 	params := map[string]interface{}{
@@ -2160,6 +2163,8 @@ func TestAPI_GetCoreAppConfigs(t *testing.T) {
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.BaetylCoreAPIPort:   common.DefaultCoreAPIPort,
 			specV1.BaetylAgentPort:     common.DefaultAgentPort,
+			BaetylCoreByteUnit:         ByteUnitKB,
+			BaetylCoreSpeedLimit:       100,
 		},
 		Report: map[string]interface{}{"1": "1"},
 		Desire: map[string]interface{}{"2": "2"},
