@@ -4,7 +4,7 @@ type FastCacheConfig struct {
 }
 
 type CloudConfig struct {
-	FastCacheConfig struct {
-		MaxBytes int `json:"maxBytes" default:"58720256" yaml:"maxBytes"` //default 56 * 1024 * 1024  56m
-	} `yaml:"fastCacheConfig" json:"fastCacheConfig" default:"{}"`
+	FreeCacheConfig struct {
+		MaxBytes int `json:"maxBytes" default:"10485760" yaml:"maxBytes"` //default 10 * 1024 * 1024  56m
+	} `yaml:"freeCacheConfig" json:"fastCacheConfig" default:"{}"`
 }
