@@ -407,7 +407,7 @@ func (n *NodeServiceImpl) GetShadowReportCacheByNames(namespace string, names []
 	reportMap = map[string][]byte{}
 	var updateNames []string
 	for i := range names {
-		report, err := n.Cache.GetByte(cachemsg.GetShadowReportCacheKey(names[i]))
+		report, err := n.Cache.GetByte(cachemsg.GetShadowReportCacheKey(namespace, names[i]))
 		if err != nil || report == nil {
 			n.logger.Warn("node " + names[i] + " report cache not exit ")
 			if err != nil {
@@ -472,13 +472,13 @@ func (n *NodeServiceImpl) setShadowReportCacheByNames(namespace string, names []
 			return nil, errors.Trace(err)
 		}
 		// set node report cache
-		go n.setShadowReportCache(reportMap, names)
+		go n.setShadowReportCache(reportMap, namespace, names)
 	}
 	return reportMap, nil
 }
 
 // setShadowReportCache set node report cache
-func (n *NodeServiceImpl) setShadowReportCache(reportMap map[string][]byte, names []string) {
+func (n *NodeServiceImpl) setShadowReportCache(reportMap map[string][]byte, namespace string, names []string) {
 	n.logger.Info("start set report cache")
 	defer func() {
 		if p := recover(); p != nil {
@@ -492,7 +492,7 @@ func (n *NodeServiceImpl) setShadowReportCache(reportMap map[string][]byte, name
 		if !ok {
 			value = []byte("{}")
 		}
-		err := n.Cache.SetByte(cachemsg.GetShadowReportCacheKey(name), value)
+		err := n.Cache.SetByte(cachemsg.GetShadowReportCacheKey(namespace, name), value)
 		if err != nil {
 			n.logger.Error(fmt.Sprintf("set report cache %s failed", name))
 		}
