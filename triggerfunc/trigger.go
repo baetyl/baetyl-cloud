@@ -52,25 +52,25 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 			if exit {
 				lockTime, err := cache.GetString(cachemsg.CacheUpdateReportTimeLock)
 				if err != nil {
-					log.L().Error("get update report lock exit  err", log.Error(err))
+					log.L().Error("get update report lock   err", log.Error(err))
 				} else {
 					// lock key > 2 minute delete lock key
 					if time.Now().Add(-2*time.Minute).Format(time.RFC3339Nano) > lockTime {
 						err = cache.Delete(cachemsg.CacheUpdateReportTimeLock)
 						if err != nil {
-							log.L().Error("update report  err", log.Error(err))
+							log.L().Error("delete lock  report time key  err", log.Error(err))
 						}
 					}
 				}
 			} else {
 				err := cache.SetString(cachemsg.CacheUpdateReportTimeLock, time.Now().Format(time.RFC3339Nano))
 				if err != nil {
-					log.L().Error("update report  err", log.Error(err))
+					log.L().Error("update report time err", log.Error(err))
 				} else {
 					saveCache(cache, time.Now(), shadow.Namespace)
 					err = cache.Delete(cachemsg.CacheUpdateReportTimeLock)
 					if err != nil {
-						log.L().Error("update report  err", log.Error(err))
+						log.L().Error("after update delete lock  key  err", log.Error(err))
 					}
 				}
 			}
@@ -78,9 +78,9 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 
 	default:
 	}
-	err := cache.SetByte(cachemsg.GetShadowReportCacheKey(shadow.Name), []byte(shadow.ReportStr))
+	err := cache.SetByte(cachemsg.GetShadowReportCacheKey(shadow.Namespace, shadow.Name), []byte(shadow.ReportStr))
 	if err != nil {
-		log.L().Error("update report  err", log.Error(err))
+		log.L().Error("update report  cache err", log.Error(err))
 		return
 	}
 }
@@ -114,7 +114,7 @@ func ShadowDeleteCache(cache plugin.DataCache, name string, namespace string) {
 		return
 	}
 
-	err = cache.Delete(cachemsg.GetShadowReportCacheKey(name))
+	err = cache.Delete(cachemsg.GetShadowReportCacheKey(namespace, name))
 	if err != nil {
 		log.L().Error("delete report  err", log.Error(err))
 		return
@@ -122,19 +122,27 @@ func ShadowDeleteCache(cache plugin.DataCache, name string, namespace string) {
 }
 
 func saveCache(cache plugin.DataCache, timeCheck time.Time, namespace string) {
-	reportTimeData, err := cache.GetByte(cachemsg.GetShadowReportTimeCacheKey(namespace))
+	reportTimeOk, err := cache.Exist(cachemsg.GetShadowReportTimeCacheKey(namespace))
 	if err != nil {
-		log.L().Error("get shadow cache error", log.Error(err))
+		log.L().Error("get shadow time exit cache error", log.Error(err))
 		return
 	}
 	reportTimeMap := map[string]string{}
-	if reportTimeData != nil {
-		err = json.Unmarshal(reportTimeData, &reportTimeMap)
+	if reportTimeOk {
+		reportTimeData, err := cache.GetByte(cachemsg.GetShadowReportTimeCacheKey(namespace))
 		if err != nil {
-			log.L().Error("unmarshal err", log.Error(err))
+			log.L().Error("get shadow cache error", log.Error(err))
 			return
 		}
+		if reportTimeData != nil {
+			err = json.Unmarshal(reportTimeData, &reportTimeMap)
+			if err != nil {
+				log.L().Error("unmarshal err", log.Error(err))
+				return
+			}
+		}
 	}
+
 	reportSaveMap.Range(func(key, val interface{}) bool {
 		v, okVal := val.(reportSaveStruct)
 		k, okKey := key.(string)

@@ -1,22 +1,21 @@
+// Package localcache  freecache implements a local cache for files
 package localcache
 
 import (
-	"github.com/VictoriaMetrics/fastcache"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
+	"github.com/coocood/freecache"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
-const BigSize = 65535
-
-type localFastCache struct {
-	c *fastcache.Cache
+type localFreeCache struct {
+	c *freecache.Cache
 }
 
 func init() {
-	plugin.RegisterFactory("fastcache", New)
+	plugin.RegisterFactory("freecache", New)
 }
 
 func New() (plugin.Plugin, error) {
@@ -24,56 +23,49 @@ func New() (plugin.Plugin, error) {
 	if err := common.LoadConfig(&cfg); err != nil {
 		return nil, errors.Trace(err)
 	}
-	cache := fastcache.New(cfg.FastCacheConfig.MaxBytes)
-	log.L().Info("cache set maxBytesSize", log.Any("size", cfg.FastCacheConfig.MaxBytes))
-	return &localFastCache{
+	cache := freecache.NewCache(cfg.FreeCacheConfig.MaxBytes)
+	log.L().Info("cache set maxBytesSize", log.Any("size", cfg.FreeCacheConfig.MaxBytes))
+	return &localFreeCache{
 		c: cache,
 	}, nil
 }
 
-func (f localFastCache) SetString(key string, value string) error {
-	if len(value) > BigSize {
-		f.c.SetBig([]byte(key), []byte(value))
-	} else {
-		f.c.Set([]byte(key), []byte(value))
+func (f localFreeCache) SetString(key string, value string) error {
+	return f.c.Set([]byte(key), []byte(value), 0)
+}
+
+func (f localFreeCache) Exist(key string) (bool, error) {
+	_, err := f.c.Get([]byte(key))
+	if err != nil {
+		if err == freecache.ErrNotFound {
+			return false, nil
+		}
+		return false, err
 	}
-	return nil
+	return true, nil
 }
 
-func (f localFastCache) Exist(key string) (bool, error) {
-	return f.c.Has([]byte(key)), nil
-}
-
-func (f localFastCache) GetString(key string) (string, error) {
-	getData := f.c.GetBig(nil, []byte(key))
-	if getData == nil {
-		getData = f.c.Get(nil, []byte(key))
+func (f localFreeCache) GetString(key string) (string, error) {
+	getData, err := f.c.Get([]byte(key))
+	if err != nil {
+		return "", err
 	}
-	return string(getData), nil
+	return string(getData), err
 }
 
-func (f localFastCache) SetByte(key string, value []byte) error {
-	if len(value) > BigSize {
-		f.c.SetBig([]byte(key), value)
-	} else {
-		f.c.Set([]byte(key), value)
-	}
-	return nil
+func (f localFreeCache) SetByte(key string, value []byte) error {
+	return f.c.Set([]byte(key), value, 0)
 }
 
-func (f localFastCache) GetByte(key string) ([]byte, error) {
-	getData := f.c.GetBig(nil, []byte(key))
-	if getData == nil {
-		getData = f.c.Get(nil, []byte(key))
-	}
-	return getData, nil
+func (f localFreeCache) GetByte(key string) ([]byte, error) {
+	return f.c.Get([]byte(key))
 }
 
-func (f localFastCache) Delete(key string) error {
+func (f localFreeCache) Delete(key string) error {
 	f.c.Del([]byte(key))
 	return nil
 }
 
-func (f localFastCache) Close() error {
+func (f localFreeCache) Close() error {
 	return nil
 }

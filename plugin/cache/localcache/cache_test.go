@@ -13,8 +13,8 @@ import (
 
 func TestCache(t *testing.T) {
 	conf := `
-fastCacheConfig:
- maxBytes: 128
+freeCacheConfig:
+ maxBytes: 104857600
 
 `
 	filename := "cloud.yml"
@@ -48,10 +48,17 @@ fastCacheConfig:
 	str := ""
 	for {
 		str += "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-		if len(str) > BigSize {
+		if len(str) > 65535 {
 			break
 		}
 	}
+
+	err = cache.SetByte("c", []byte(str))
+	assert.NoError(t, err)
+
+	dataByte, err := cache.GetByte("c")
+	assert.NoError(t, err)
+	assert.Equal(t, []byte(str), dataByte)
 
 	err = cache.SetString("b", str)
 	assert.NoError(t, err)
