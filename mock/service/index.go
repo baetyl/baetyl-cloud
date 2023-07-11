@@ -5,35 +5,36 @@
 package service
 
 import (
+	reflect "reflect"
+
 	common "github.com/baetyl/baetyl-cloud/v2/common"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
-// MockIndexService is a mock of IndexService interface
+// MockIndexService is a mock of IndexService interface.
 type MockIndexService struct {
 	ctrl     *gomock.Controller
 	recorder *MockIndexServiceMockRecorder
 }
 
-// MockIndexServiceMockRecorder is the mock recorder for MockIndexService
+// MockIndexServiceMockRecorder is the mock recorder for MockIndexService.
 type MockIndexServiceMockRecorder struct {
 	mock *MockIndexService
 }
 
-// NewMockIndexService creates a new mock instance
+// NewMockIndexService creates a new mock instance.
 func NewMockIndexService(ctrl *gomock.Controller) *MockIndexService {
 	mock := &MockIndexService{ctrl: ctrl}
 	mock.recorder = &MockIndexServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockIndexService) EXPECT() *MockIndexServiceMockRecorder {
 	return m.recorder
 }
 
-// ListAppIndexByConfig mocks base method
+// ListAppIndexByConfig mocks base method.
 func (m *MockIndexService) ListAppIndexByConfig(arg0, arg1 string) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListAppIndexByConfig", arg0, arg1)
@@ -42,13 +43,13 @@ func (m *MockIndexService) ListAppIndexByConfig(arg0, arg1 string) ([]string, er
 	return ret0, ret1
 }
 
-// ListAppIndexByConfig indicates an expected call of ListAppIndexByConfig
+// ListAppIndexByConfig indicates an expected call of ListAppIndexByConfig.
 func (mr *MockIndexServiceMockRecorder) ListAppIndexByConfig(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppIndexByConfig", reflect.TypeOf((*MockIndexService)(nil).ListAppIndexByConfig), arg0, arg1)
 }
 
-// ListAppIndexBySecret mocks base method
+// ListAppIndexBySecret mocks base method.
 func (m *MockIndexService) ListAppIndexBySecret(arg0, arg1 string) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListAppIndexBySecret", arg0, arg1)
@@ -57,13 +58,13 @@ func (m *MockIndexService) ListAppIndexBySecret(arg0, arg1 string) ([]string, er
 	return ret0, ret1
 }
 
-// ListAppIndexBySecret indicates an expected call of ListAppIndexBySecret
+// ListAppIndexBySecret indicates an expected call of ListAppIndexBySecret.
 func (mr *MockIndexServiceMockRecorder) ListAppIndexBySecret(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppIndexBySecret", reflect.TypeOf((*MockIndexService)(nil).ListAppIndexBySecret), arg0, arg1)
 }
 
-// ListAppsByNode mocks base method
+// ListAppsByNode mocks base method.
 func (m *MockIndexService) ListAppsByNode(arg0, arg1 string) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListAppsByNode", arg0, arg1)
@@ -72,13 +73,13 @@ func (m *MockIndexService) ListAppsByNode(arg0, arg1 string) ([]string, error) {
 	return ret0, ret1
 }
 
-// ListAppsByNode indicates an expected call of ListAppsByNode
+// ListAppsByNode indicates an expected call of ListAppsByNode.
 func (mr *MockIndexServiceMockRecorder) ListAppsByNode(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppsByNode", reflect.TypeOf((*MockIndexService)(nil).ListAppsByNode), arg0, arg1)
 }
 
-// ListConfigIndexByApp mocks base method
+// ListConfigIndexByApp mocks base method.
 func (m *MockIndexService) ListConfigIndexByApp(arg0, arg1 string) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListConfigIndexByApp", arg0, arg1)
@@ -87,13 +88,13 @@ func (m *MockIndexService) ListConfigIndexByApp(arg0, arg1 string) ([]string, er
 	return ret0, ret1
 }
 
-// ListConfigIndexByApp indicates an expected call of ListConfigIndexByApp
+// ListConfigIndexByApp indicates an expected call of ListConfigIndexByApp.
 func (mr *MockIndexServiceMockRecorder) ListConfigIndexByApp(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListConfigIndexByApp", reflect.TypeOf((*MockIndexService)(nil).ListConfigIndexByApp), arg0, arg1)
 }
 
-// ListIndex mocks base method
+// ListIndex mocks base method.
 func (m *MockIndexService) ListIndex(arg0 string, arg1, arg2 common.Resource, arg3 string) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListIndex", arg0, arg1, arg2, arg3)
@@ -102,13 +103,13 @@ func (m *MockIndexService) ListIndex(arg0 string, arg1, arg2 common.Resource, ar
 	return ret0, ret1
 }
 
-// ListIndex indicates an expected call of ListIndex
+// ListIndex indicates an expected call of ListIndex.
 func (mr *MockIndexServiceMockRecorder) ListIndex(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListIndex", reflect.TypeOf((*MockIndexService)(nil).ListIndex), arg0, arg1, arg2, arg3)
 }
 
-// ListNodesByApp mocks base method
+// ListNodesByApp mocks base method.
 func (m *MockIndexService) ListNodesByApp(arg0, arg1 string) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListNodesByApp", arg0, arg1)
@@ -117,13 +118,28 @@ func (m *MockIndexService) ListNodesByApp(arg0, arg1 string) ([]string, error) {
 	return ret0, ret1
 }
 
-// ListNodesByApp indicates an expected call of ListNodesByApp
+// ListNodesByApp indicates an expected call of ListNodesByApp.
 func (mr *MockIndexServiceMockRecorder) ListNodesByApp(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNodesByApp", reflect.TypeOf((*MockIndexService)(nil).ListNodesByApp), arg0, arg1)
 }
 
-// RefreshAppIndexByConfig mocks base method
+// ListSecretIndexByApp mocks base method.
+func (m *MockIndexService) ListSecretIndexByApp(arg0, arg1 string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListSecretIndexByApp", arg0, arg1)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListSecretIndexByApp indicates an expected call of ListSecretIndexByApp.
+func (mr *MockIndexServiceMockRecorder) ListSecretIndexByApp(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSecretIndexByApp", reflect.TypeOf((*MockIndexService)(nil).ListSecretIndexByApp), arg0, arg1)
+}
+
+// RefreshAppIndexByConfig mocks base method.
 func (m *MockIndexService) RefreshAppIndexByConfig(arg0 interface{}, arg1, arg2 string, arg3 []string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RefreshAppIndexByConfig", arg0, arg1, arg2, arg3)
@@ -131,13 +147,13 @@ func (m *MockIndexService) RefreshAppIndexByConfig(arg0 interface{}, arg1, arg2 
 	return ret0
 }
 
-// RefreshAppIndexByConfig indicates an expected call of RefreshAppIndexByConfig
+// RefreshAppIndexByConfig indicates an expected call of RefreshAppIndexByConfig.
 func (mr *MockIndexServiceMockRecorder) RefreshAppIndexByConfig(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshAppIndexByConfig", reflect.TypeOf((*MockIndexService)(nil).RefreshAppIndexByConfig), arg0, arg1, arg2, arg3)
 }
 
-// RefreshAppsIndexByNode mocks base method
+// RefreshAppsIndexByNode mocks base method.
 func (m *MockIndexService) RefreshAppsIndexByNode(arg0 interface{}, arg1, arg2 string, arg3 []string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RefreshAppsIndexByNode", arg0, arg1, arg2, arg3)
@@ -145,13 +161,13 @@ func (m *MockIndexService) RefreshAppsIndexByNode(arg0 interface{}, arg1, arg2 s
 	return ret0
 }
 
-// RefreshAppsIndexByNode indicates an expected call of RefreshAppsIndexByNode
+// RefreshAppsIndexByNode indicates an expected call of RefreshAppsIndexByNode.
 func (mr *MockIndexServiceMockRecorder) RefreshAppsIndexByNode(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshAppsIndexByNode", reflect.TypeOf((*MockIndexService)(nil).RefreshAppsIndexByNode), arg0, arg1, arg2, arg3)
 }
 
-// RefreshConfigIndexByApp mocks base method
+// RefreshConfigIndexByApp mocks base method.
 func (m *MockIndexService) RefreshConfigIndexByApp(arg0 interface{}, arg1, arg2 string, arg3 []string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RefreshConfigIndexByApp", arg0, arg1, arg2, arg3)
@@ -159,13 +175,13 @@ func (m *MockIndexService) RefreshConfigIndexByApp(arg0 interface{}, arg1, arg2 
 	return ret0
 }
 
-// RefreshConfigIndexByApp indicates an expected call of RefreshConfigIndexByApp
+// RefreshConfigIndexByApp indicates an expected call of RefreshConfigIndexByApp.
 func (mr *MockIndexServiceMockRecorder) RefreshConfigIndexByApp(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshConfigIndexByApp", reflect.TypeOf((*MockIndexService)(nil).RefreshConfigIndexByApp), arg0, arg1, arg2, arg3)
 }
 
-// RefreshIndex mocks base method
+// RefreshIndex mocks base method.
 func (m *MockIndexService) RefreshIndex(arg0 interface{}, arg1 string, arg2, arg3 common.Resource, arg4 string, arg5 []string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RefreshIndex", arg0, arg1, arg2, arg3, arg4, arg5)
@@ -173,13 +189,13 @@ func (m *MockIndexService) RefreshIndex(arg0 interface{}, arg1 string, arg2, arg
 	return ret0
 }
 
-// RefreshIndex indicates an expected call of RefreshIndex
+// RefreshIndex indicates an expected call of RefreshIndex.
 func (mr *MockIndexServiceMockRecorder) RefreshIndex(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshIndex", reflect.TypeOf((*MockIndexService)(nil).RefreshIndex), arg0, arg1, arg2, arg3, arg4, arg5)
 }
 
-// RefreshNodesIndexByApp mocks base method
+// RefreshNodesIndexByApp mocks base method.
 func (m *MockIndexService) RefreshNodesIndexByApp(arg0 interface{}, arg1, arg2 string, arg3 []string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RefreshNodesIndexByApp", arg0, arg1, arg2, arg3)
@@ -187,13 +203,13 @@ func (m *MockIndexService) RefreshNodesIndexByApp(arg0 interface{}, arg1, arg2 s
 	return ret0
 }
 
-// RefreshNodesIndexByApp indicates an expected call of RefreshNodesIndexByApp
+// RefreshNodesIndexByApp indicates an expected call of RefreshNodesIndexByApp.
 func (mr *MockIndexServiceMockRecorder) RefreshNodesIndexByApp(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshNodesIndexByApp", reflect.TypeOf((*MockIndexService)(nil).RefreshNodesIndexByApp), arg0, arg1, arg2, arg3)
 }
 
-// RefreshSecretIndexByApp mocks base method
+// RefreshSecretIndexByApp mocks base method.
 func (m *MockIndexService) RefreshSecretIndexByApp(arg0 interface{}, arg1, arg2 string, arg3 []string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RefreshSecretIndexByApp", arg0, arg1, arg2, arg3)
@@ -201,7 +217,7 @@ func (m *MockIndexService) RefreshSecretIndexByApp(arg0 interface{}, arg1, arg2 
 	return ret0
 }
 
-// RefreshSecretIndexByApp indicates an expected call of RefreshSecretIndexByApp
+// RefreshSecretIndexByApp indicates an expected call of RefreshSecretIndexByApp.
 func (mr *MockIndexServiceMockRecorder) RefreshSecretIndexByApp(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshSecretIndexByApp", reflect.TypeOf((*MockIndexService)(nil).RefreshSecretIndexByApp), arg0, arg1, arg2, arg3)

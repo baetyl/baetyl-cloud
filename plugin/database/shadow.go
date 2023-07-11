@@ -6,11 +6,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/trigger"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
+	"github.com/baetyl/baetyl-cloud/v2/triggerfunc"
 )
 
 const batchSize = 200
@@ -33,8 +35,33 @@ func (d *DB) Create(tx interface{}, shadow *models.Shadow) (*models.Shadow, erro
 	} else {
 		transaction := tx.(*sqlx.Tx)
 		err = d.createAndGetShadow(transaction, shadow, &shd)
+		if err != nil {
+			return shd, err
+		}
 	}
+	//exec triggerfunc trigger.go  ShadowCreateOrUpdateCacheSet
+	_, err = trigger.Exec(triggerfunc.ShadowCreateOrUpdateTrigger, *shd)
 	return shd, err
+}
+
+func (d *DB) BatchCreateShadow(shadows []*models.Shadow) ([]*models.Shadow, error) {
+	var res []*models.Shadow
+	if len(shadows) == 0 {
+		return res, nil
+	}
+	err := d.Transact(func(tx *sqlx.Tx) error {
+		_, err := d.BatchCreateShadowTx(tx, shadows)
+		if err != nil {
+			return err
+		}
+		var names []string
+		for i, _ := range shadows {
+			names = append(names, shadows[i].Name)
+		}
+		res, err = d.ListShadowByNames(tx, shadows[0].Namespace, names)
+		return err
+	})
+	return res, err
 }
 
 func (d *DB) createAndGetShadow(tx *sqlx.Tx, input *models.Shadow, output **models.Shadow) error {
@@ -85,6 +112,12 @@ func (d *DB) ListShadowByNames(tx interface{}, namespace string, names []string)
 
 func (d *DB) Delete(namespace, name string) error {
 	_, err := d.DeleteShadowTx(nil, namespace, name)
+
+	if err != nil {
+		return err
+	}
+	//exec common trigger.go  ShadowDelete
+	_, err = trigger.Exec(triggerfunc.ShadowDelete, name, namespace)
 	return err
 }
 
@@ -107,7 +140,8 @@ func (d *DB) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
 		shd, err = d.GetShadowTx(tx, shadow.Namespace, shadow.Name)
 		return err
 	})
-
+	//exec common trigger.go  ShadowCreateOrUpdateCacheSet
+	_, err = trigger.Exec(triggerfunc.ShadowCreateOrUpdateTrigger, *shd)
 	return shd, err
 }
 
@@ -205,6 +239,24 @@ VALUES (?, ?, ?, ?, ?, ?)
 	return d.Exec(tx, insertSQL, shd.Namespace, shd.Name, shd.Report, shd.Desire, shd.ReportMeta, shd.DesireMeta)
 }
 
+func (d *DB) BatchCreateShadowTx(tx *sqlx.Tx, shadows []*models.Shadow) (sql.Result, error) {
+	insertSQL := `
+INSERT INTO baetyl_node_shadow (namespace, name, report, desire, report_meta, desire_meta)
+VALUES
+`
+	var args []interface{}
+	for i, _ := range shadows {
+		insertSQL += ` (?, ?, ?, ?, ?, ?),`
+		shd, err := entities.NewShadowFromShadowModel(shadows[i])
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, shd.Namespace, shd.Name, shd.Report, shd.Desire, shd.ReportMeta, shd.DesireMeta)
+	}
+	insertSQL = strings.TrimRight(insertSQL, ",")
+	return d.Exec(tx, insertSQL, args...)
+}
+
 func (d *DB) DeleteShadowTx(tx *sqlx.Tx, namespace, name string) (sql.Result, error) {
 	deleteSql := `
 DELETE FROM baetyl_node_shadow WHERE namespace=? AND name=?
@@ -277,6 +329,41 @@ FROM baetyl_node_shadow WHERE namespace=? AND name in (?)
 	return result, nil
 }
 
+func (d *DB) ListShadowTx(tx *sqlx.Tx, namespace string) ([]entities.Shadow, error) {
+	selectSQL := `
+SELECT 
+id, name, namespace, report, desire, report_meta, desire_meta, create_time, update_time, desire_version
+FROM baetyl_node_shadow WHERE namespace=?
+`
+	var shadows []entities.Shadow
+
+	if err := d.Query(tx, selectSQL, &shadows, namespace); err != nil {
+		return nil, err
+	}
+	return shadows, nil
+}
+
 func genResourceVersion() string {
 	return fmt.Sprintf("%d%s", time.Now().UTC().Unix(), common.RandString(6))
+}
+
+func (d *DB) ListAll(namespace string) (*models.ShadowList, error) {
+
+	shadows, err := d.ListShadowTx(nil, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	total := len(shadows)
+	items := make([]models.Shadow, 0, total)
+
+	for _, s := range shadows {
+		shd, _ := s.ToReportShadow()
+		items = append(items, *shd)
+	}
+	result := &models.ShadowList{
+		Total: total,
+		Items: items,
+	}
+	return result, nil
 }

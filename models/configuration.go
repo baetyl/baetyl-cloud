@@ -15,10 +15,10 @@ type ConfigurationList struct {
 }
 
 type ConfigurationView struct {
-	Name              string            `json:"name,omitempty" validate:"resourceName"`
+	Name              string            `json:"name,omitempty" binding:"res_name"`
 	Namespace         string            `json:"namespace,omitempty"`
 	Labels            map[string]string `json:"labels,omitempty"`
-	Data              []ConfigDataItem  `json:"data,omitempty" default:"[]" validate:"dive"`
+	Data              []ConfigDataItem  `json:"data,omitempty" default:"[]" binding:"dive"`
 	CreationTimestamp time.Time         `json:"createTime,omitempty"`
 	UpdateTimestamp   time.Time         `json:"updateTime,omitempty"`
 	Description       string            `json:"description,omitempty"`
@@ -27,7 +27,7 @@ type ConfigurationView struct {
 }
 
 type ConfigDataItem struct {
-	Key   string            `json:"key,omitempty" validate:"required,validConfigKeys"`
+	Key   string            `json:"key,omitempty" binding:"required,config_key"`
 	Value map[string]string `json:"value,omitempty"`
 }
 

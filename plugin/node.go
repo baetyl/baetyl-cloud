@@ -15,4 +15,5 @@ type Node interface {
 	DeleteNode(tx interface{}, namespace, name string) error
 	ListNode(tx interface{}, namespace string, listOptions *models.ListOptions) (*models.NodeList, error)
 	CountAllNode(tx interface{}) (int, error)
+	GetNodeByNames(tx interface{}, namespace string, names []string) ([]v1.Node, error)
 }

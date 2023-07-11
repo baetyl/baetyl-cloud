@@ -1,11 +1,11 @@
 package service
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/errors"
+	"github.com/baetyl/baetyl-go/v2/json"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -25,6 +25,7 @@ const (
 	templateBrokerAppYaml  = "baetyl-broker-app.yml"
 	templateRuleConfYaml   = "baetyl-rule-conf.yml"
 	templateRuleAppYaml    = "baetyl-rule-app.yml"
+	templateEkuiperAppYaml = "baetyl-ekuiper-app.yml"
 )
 
 var (
@@ -92,6 +93,7 @@ func NewSystemAppService(config *config.CloudConfig) (SystemAppService, error) {
 	systemService.OptionalAppFuncs = map[string]GenAppFunc{
 		specV1.BaetylFunction: systemService.genFunctionApp,
 		specV1.BaetylRule:     systemService.genRuleApp,
+		specV1.BaetylEkuiper:  systemService.genEkuiperApp,
 	}
 	return systemService, nil
 }
@@ -103,7 +105,7 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 		"NodeMode":                   node.NodeMode,
 		"AppMode":                    node.NodeMode,
 		context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
-		"GPUStats":                   specV1.IsLegalAcceleratorType(node.Accelerator),
+		"GPUStats":                   node.Accelerator != "",
 		"DiskNetStats":               node.NodeMode == context.RunModeKube,
 		"QPSStats":                   node.NodeMode == context.RunModeKube,
 	}
@@ -113,6 +115,17 @@ func (s *SystemAppServiceImpl) GenApps(tx interface{}, ns string, node *specV1.N
 			return nil, errors.Trace(err)
 		}
 	}
+
+	coreAppName := fmt.Sprintf("%s-%s", specV1.BaetylCore, common.RandString(9))
+	// create secret
+	cert, err := s.genNodeCerts(tx, ns, node.Name, coreAppName)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	params["NodeCertName"] = cert.Name
+	params["NodeCertVersion"] = cert.Version
+	params["CoreAppName"] = coreAppName
+
 	if gen, ok := s.Hooks[HookNameGenSyncExtResource]; ok {
 		err := gen.(GenSyncExtResource)(tx, ns, node, params)
 		if err != nil {
@@ -188,12 +201,11 @@ func (s *SystemAppServiceImpl) GenOptionalApps(tx interface{}, ns string, node *
 }
 
 func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-core-%s", common.RandString(9))
-	confName := fmt.Sprintf("baetyl-core-conf-%s", common.RandString(9))
-	params["CoreAppName"] = appName
+	confName := fmt.Sprintf("%s-conf-%s", specV1.BaetylCore, common.RandString(9))
 	params["CoreConfName"] = confName
 	params["CoreFrequency"] = fmt.Sprintf("%ss", common.DefaultCoreFrequency)
 	params["CoreAPIPort"] = common.DefaultCoreAPIPort
+	params["AgentPort"] = common.DefaultAgentPort
 
 	// create config
 	conf, err := s.GenConfig(tx, ns, TemplateCoreConfYaml, params)
@@ -201,25 +213,18 @@ func (s *SystemAppServiceImpl) genCoreApp(tx interface{}, ns, nodeName string, p
 		return nil, errors.Trace(err)
 	}
 
-	// create secret
-	cert, err := s.genNodeCerts(tx, ns, nodeName, appName)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
 	params["CoreConfVersion"] = conf.Version
-	params["NodeCertName"] = cert.Name
-	params["NodeCertVersion"] = cert.Version
 
 	// create application
 	return s.GenApp(tx, ns, templateCoreAppYaml, params)
 }
 
 func (s *SystemAppServiceImpl) genInitApp(tx interface{}, ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-init-%s", common.RandString(9))
-	confName := fmt.Sprintf("baetyl-init-conf-%s", common.RandString(9))
+	appName := fmt.Sprintf("%s-%s", specV1.BaetylInit, common.RandString(9))
+	confName := fmt.Sprintf("%s-conf-%s", specV1.BaetylInit, common.RandString(9))
 	params["InitAppName"] = appName
 	params["InitConfName"] = confName
+	params["AgentPort"] = common.DefaultAgentPort
 
 	// create config
 	conf, err := s.GenConfig(tx, ns, templateInitConfYaml, params)
@@ -233,8 +238,8 @@ func (s *SystemAppServiceImpl) genInitApp(tx interface{}, ns, nodeName string, p
 }
 
 func (s *SystemAppServiceImpl) genFunctionApp(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-function-%s", common.RandString(9))
-	confName := fmt.Sprintf("baetyl-function-conf-%s", common.RandString(9))
+	appName := fmt.Sprintf("%s-%s", specV1.BaetylFunction, common.RandString(9))
+	confName := fmt.Sprintf("%s-conf-%s", specV1.BaetylFunction, common.RandString(9))
 	// create config
 	confMap := map[string]interface{}{
 		"Namespace":        ns,
@@ -265,8 +270,8 @@ func (s *SystemAppServiceImpl) genFunctionApp(tx interface{}, ns string, node *s
 }
 
 func (s *SystemAppServiceImpl) genBrokerApp(tx interface{}, ns, nodeName string, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-broker-%s", common.RandString(9))
-	confName := fmt.Sprintf("baetyl-broker-conf-%s", common.RandString(9))
+	appName := fmt.Sprintf("%s-%s", specV1.BaetylBroker, common.RandString(9))
+	confName := fmt.Sprintf("%s-conf-%s", specV1.BaetylBroker, common.RandString(9))
 	// create config
 	confMap := map[string]interface{}{
 		"Namespace":      ns,
@@ -297,8 +302,8 @@ func (s *SystemAppServiceImpl) genBrokerApp(tx interface{}, ns, nodeName string,
 }
 
 func (s *SystemAppServiceImpl) genRuleApp(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) (*specV1.Application, error) {
-	appName := fmt.Sprintf("baetyl-rule-%s", common.RandString(9))
-	confName := fmt.Sprintf("baetyl-rule-conf-%s", common.RandString(9))
+	appName := fmt.Sprintf("%s-%s", specV1.BaetylRule, common.RandString(9))
+	confName := fmt.Sprintf("%s-conf-%s", specV1.BaetylRule, common.RandString(9))
 	// create config
 	confMap := map[string]interface{}{
 		"Namespace":    ns,
@@ -326,6 +331,21 @@ func (s *SystemAppServiceImpl) genRuleApp(tx interface{}, ns string, node *specV
 		appMap[k] = v
 	}
 	return s.GenApp(tx, ns, templateRuleAppYaml, appMap)
+}
+
+func (s *SystemAppServiceImpl) genEkuiperApp(tx interface{}, ns string, node *specV1.Node, params map[string]interface{}) (*specV1.Application, error) {
+	appName := fmt.Sprintf("%s-%s", specV1.BaetylEkuiper, common.RandString(9))
+
+	// create application
+	appMap := map[string]interface{}{
+		"Namespace":      ns,
+		"NodeName":       node.Name,
+		"EkuiperAppName": appName,
+	}
+	for k, v := range params {
+		appMap[k] = v
+	}
+	return s.GenApp(tx, ns, templateEkuiperAppYaml, appMap)
 }
 
 func (s *SystemAppServiceImpl) genNodeCerts(tx interface{}, ns, nodeName, appName string) (*specV1.Secret, error) {

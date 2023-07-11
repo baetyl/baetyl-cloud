@@ -23,6 +23,7 @@ type API struct {
 	Module   service.ModuleService
 	Init     service.InitService
 	License  service.LicenseService
+	Quota    service.QuotaService
 	Template service.TemplateService
 	Task     service.TaskService
 	Locker   service.LockerService
@@ -34,7 +35,7 @@ type API struct {
 	log *log.Logger
 }
 
-// NewAPI NewAPI
+// NewAPI new api
 func NewAPI(config *config.CloudConfig) (*API, error) {
 	acs, err := service.NewAppCombinedService(config)
 	if err != nil {
@@ -88,6 +89,10 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
+	quotaService, err := service.NewQuotaService(config)
+	if err != nil {
+		return nil, err
+	}
 	templateService, err := service.NewTemplateService(config, map[string]interface{}{
 		"GetProperty":      propertyService.GetPropertyValue,
 		"RandString":       common.RandString,
@@ -130,6 +135,7 @@ func NewAPI(config *config.CloudConfig) (*API, error) {
 		Module:             moduleService,
 		Init:               initService,
 		License:            licenseService,
+		Quota:              quotaService,
 		Template:           templateService,
 		Task:               taskService,
 		Locker:             lockerService,

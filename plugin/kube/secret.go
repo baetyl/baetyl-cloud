@@ -12,6 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/common/util"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 	"github.com/baetyl/baetyl-cloud/v2/plugin/kube/apis/cloud/v1alpha1"
 )
@@ -22,7 +23,7 @@ func (c *client) toSecretModel(secret *v1alpha1.Secret) *specV1.Secret {
 	if err != nil {
 		panic(fmt.Sprintf("copier exception: %s", err.Error()))
 	}
-	res.Data, err = DecryptMap(res.Data, c.aesKey)
+	res.Data, err = util.DecryptMap(res.Data, c.aesKey)
 	if err != nil {
 		log.L().Error("decrypt exception", log.Error(err))
 	}
@@ -64,7 +65,7 @@ func (c *client) fromSecretModel(secret *specV1.Secret) (*v1alpha1.Secret, error
 	if err != nil {
 		panic(fmt.Sprintf("copier exception: %s", err.Error()))
 	}
-	res.Data, err = EncryptMap(res.Data, c.aesKey)
+	res.Data, err = util.EncryptMap(res.Data, c.aesKey)
 	if err != nil {
 		log.L().Error("encrypt exception", log.Error(err))
 	}

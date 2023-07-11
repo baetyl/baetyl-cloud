@@ -9,13 +9,13 @@ import (
 
 // CloudConfig baetyl-cloud config
 type CloudConfig struct {
-	InitServer  Server     `yaml:"initServer" json:"initServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
-	AdminServer Server     `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
-	MisServer   MisServer  `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
-	LogInfo     log.Config `yaml:"logger" json:"logger"`
-	Task        Task       `yaml:"task" json:"task"`
-	Lock        Lock       `yaml:"lock" json:"lock"`
-	CronJobs    []CronJob  `yaml:"cronJobs" json:"cronJobs" default:"[]"`
+	InitServer  Server      `yaml:"initServer" json:"initServer" default:"{\"port\":\":9003\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000}"`
+	AdminServer AdminServer `yaml:"adminServer" json:"adminServer" default:"{\"port\":\":9004\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"cacheEnable\":false,\"cacheDuration\":2000000000}"`
+	MisServer   MisServer   `yaml:"misServer" json:"misServer" default:"{\"port\":\":9006\",\"readTimeout\":30000000000,\"writeTimeout\":30000000000,\"shutdownTime\":3000000000,\"authToken\":\"baetyl-cloud-token\",\"tokenHeader\":\"baetyl-cloud-token\",\"userHeader\":\"baetyl-cloud-user\"}"`
+	LogInfo     log.Config  `yaml:"logger" json:"logger"`
+	Task        Task        `yaml:"task" json:"task"`
+	Lock        Lock        `yaml:"lock" json:"lock"`
+	CronJobs    []CronJob   `yaml:"cronJobs" json:"cronJobs" default:"[]"`
 	Cache       struct {
 		ExpirationDuration time.Duration `yaml:"expirationDuration" json:"expirationDuration" default:"10m"`
 	} `yaml:"cache" json:"cache"`
@@ -27,6 +27,7 @@ type CloudConfig struct {
 		PKI        string   `yaml:"pki" json:"pki" default:"defaultpki"`
 		Auth       string   `yaml:"auth" json:"auth" default:"defaultauth"`
 		License    string   `yaml:"license" json:"license" default:"defaultlicense"`
+		Quota      string   `yaml:"quota" json:"quota" default:"defaultquota"`
 		Resource   string   `yaml:"resource" json:"resource" default:"kube"`
 		Shadow     string   `yaml:"shadow" json:"shadow" default:"database"`
 		Index      string   `yaml:"index" json:"index" default:"database"`
@@ -47,6 +48,7 @@ type CloudConfig struct {
 		Cron       string   `yaml:"cron" json:"cron" default:"database"`
 		Csrf       string   `yaml:"csrf" json:"csrf" default:"defaultcsrf"`
 		JWT        string   `yaml:"jwt" json:"jwt" default:"defaultjwt"`
+		Cache      string   `yaml:"cache" json:"cache" default:"fastcache"`
 	} `yaml:"plugin" json:"plugin"`
 }
 
@@ -60,6 +62,12 @@ type MisServer struct {
 	AuthToken   string `yaml:"authToken" json:"authToken" default:"baetyl-cloud-token"`
 	TokenHeader string `yaml:"tokenHeader" json:"tokenHeader" default:"baetyl-cloud-token"`
 	UserHeader  string `yaml:"userHeader" json:"userHeader" default:"baetyl-cloud-user"`
+}
+
+type AdminServer struct {
+	Server        `yaml:",inline" json:",inline"`
+	CacheEnable   bool          `yaml:"cacheEnable" json:"cacheEnable" default:"false"`
+	CacheDuration time.Duration `yaml:"cacheDuration" json:"cacheDuration" default:"2s"`
 }
 
 // Server server config

@@ -2,12 +2,12 @@ package service
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"strings"
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/errors"
+	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 
@@ -31,6 +31,7 @@ const (
 
 	TemplateCoreConfYaml       = "baetyl-core-conf.yml"
 	TemplateInitConfYaml       = "baetyl-init-conf.yml"
+	TemplateAgentConfYaml      = "baetyl-agent-conf.yml"
 	TemplateBaetylInitCommand  = "baetyl-init-command"
 	TemplateInitCommandWget    = "baetyl-init-command-wget"
 	TemplateInitCommandWindows = "baetyl-init-command-windows"
@@ -122,6 +123,7 @@ func NewInitService(config *config.CloudConfig) (InitService, error) {
 	initService.ResourceMapFunc[templateBaetylInstallShell] = initService.getInstallShell
 	initService.ResourceMapFunc[templateBaetylWindowsInstallShell] = initService.getWindowsInstallShell
 	initService.ResourceMapFunc[TemplateInitConfYaml] = initService.getInitConfig
+	initService.ResourceMapFunc[TemplateAgentConfYaml] = initService.getAgentConfig
 
 	return initService, nil
 }
@@ -179,9 +181,11 @@ func (s *InitServiceImpl) getInitDeploymentYaml(ns, nodeName string, params map[
 	params["EdgeSystemNamespace"] = context.EdgeSystemNamespace()
 	params["InitAppName"] = init.Name
 	params["InitVersion"] = init.Version
-	params["GPUStats"] = specV1.IsLegalAcceleratorType(node.Accelerator)
+	params["GPUStats"] = node.Accelerator != ""
 	params["DiskNetStats"] = node.NodeMode == context.RunModeKube
 	params["QPSStats"] = node.NodeMode == context.RunModeKube
+	params["AgentPort"] = common.DefaultAgentPort
+	params["NodeMode"] = node.NodeMode
 
 	registryAuth, err := s.GetRegistryAuth()
 	if err != nil {
@@ -300,4 +304,10 @@ func (s *InitServiceImpl) getInitConfig(ns, nodeName string, params map[string]i
 	params["Namespace"] = ns
 	params["NodeName"] = nodeName
 	return s.TemplateService.ParseTemplate(TemplateInitConfYaml, params)
+}
+
+func (s *InitServiceImpl) getAgentConfig(ns, nodeName string, params map[string]interface{}) ([]byte, error) {
+	params["Namespace"] = ns
+	params["NodeName"] = nodeName
+	return s.TemplateService.ParseTemplate(TemplateAgentConfYaml, params)
 }

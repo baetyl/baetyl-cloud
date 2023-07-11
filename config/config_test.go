@@ -19,6 +19,8 @@ func TestDefaultValue(t *testing.T) {
 	expect.AdminServer.WriteTimeout = time.Second * 30
 	expect.AdminServer.ReadTimeout = time.Second * 30
 	expect.AdminServer.ShutdownTime = time.Second * 3
+	expect.AdminServer.CacheEnable = false
+	expect.AdminServer.CacheDuration = time.Second * 2
 
 	expect.MisServer.Port = ":9006"
 	expect.MisServer.WriteTimeout = time.Second * 30
@@ -59,6 +61,8 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Cron = "database"
 	expect.Plugin.Csrf = "defaultcsrf"
 	expect.Plugin.JWT = "defaultjwt"
+	expect.Plugin.Quota = "defaultquota"
+	expect.Plugin.Cache = "fastcache"
 
 	expect.Template.Path = "/etc/baetyl/templates"
 

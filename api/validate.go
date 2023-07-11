@@ -2,8 +2,9 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
+
+	"github.com/baetyl/baetyl-go/v2/json"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 )

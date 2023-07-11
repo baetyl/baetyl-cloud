@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/errors"
+	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/jinzhu/copier"
@@ -30,11 +30,12 @@ const (
 	HookCreateApplicationOta = "hookCreateApplicationOta"
 	HookUpdateApplicationOta = "hookUpdateApplicationOta"
 	HookDeleteApplicationOta = "hookDeleteApplicationOta"
+	AppNameMaxLength         = 55 // expect svc name with "-Nodeport", 64-9=55
 )
 
-type CreateApplicationOta = func(app *specV1.Application) (*specV1.Application, error)
-type UpdateApplicationOta = func(app *specV1.Application) (*specV1.Application, error)
-type DeleteApplicationOta = func(app *specV1.Application) error
+type CreateApplicationOta = func(c *common.Context, app *specV1.Application) (*specV1.Application, error)
+type UpdateApplicationOta = func(c *common.Context, app *specV1.Application) (*specV1.Application, error)
+type DeleteApplicationOta = func(c *common.Context, app *specV1.Application) error
 
 // GetApplication get a application
 func (api *API) GetApplication(c *common.Context) (interface{}, error) {
@@ -106,8 +107,8 @@ func (api *API) CreateApplication(c *common.Context) (interface{}, error) {
 	}
 
 	if f, exist := api.Hooks[HookCreateApplicationOta]; exist {
-		if otaFunc, ok := f.(CreateApplicationOta); ok {
-			app, err = otaFunc(app)
+		if hk, ok := f.(CreateApplicationOta); ok {
+			app, err = hk(c, app)
 			if err != nil {
 				return nil, err
 			}
@@ -172,8 +173,8 @@ func (api *API) UpdateApplication(c *common.Context) (interface{}, error) {
 	app.Ota = oldApp.Ota
 
 	if f, exist := api.Hooks[HookUpdateApplicationOta]; exist {
-		if otaFunc, ok := f.(UpdateApplicationOta); ok {
-			app, err = otaFunc(app)
+		if hk, ok := f.(UpdateApplicationOta); ok {
+			app, err = hk(c, app)
 			if err != nil {
 				return nil, err
 			}
@@ -206,8 +207,8 @@ func (api *API) DeleteApplication(c *common.Context) (interface{}, error) {
 	}
 
 	if f, exist := api.Hooks[HookDeleteApplicationOta]; exist {
-		if otaFunc, ok := f.(DeleteApplicationOta); ok {
-			err = otaFunc(app)
+		if hk, ok := f.(DeleteApplicationOta); ok {
+			err = hk(c, app)
 			if err != nil {
 				return nil, err
 			}
@@ -279,8 +280,11 @@ func (api *API) ParseApplication(c *common.Context) (*models.ApplicationView, er
 	if app.Name == "" {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is required"))
 	}
-
+	if len(app.Name) > AppNameMaxLength {
+		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is too long"))
+	}
 	if app.Type == common.ContainerApp {
+		app.ImageTrim()
 		for _, v := range app.Services {
 			if v.FunctionConfig != nil || v.Functions != nil {
 				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "add function info in container app"))
@@ -306,7 +310,7 @@ func (api *API) ParseApplication(c *common.Context) (*models.ApplicationView, er
 	}
 
 	// multi-container compatibility
-	api.compatibleAppDeprecatedFiled(app)
+	api.compatibleAppDeprecatedField(app)
 
 	if app.Workload != specV1.WorkloadDeployment &&
 		app.Workload != specV1.WorkloadDaemonSet &&
@@ -378,7 +382,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 		return nil, err
 	}
 
-	api.compatibleAppDeprecatedFiled(appView)
+	api.compatibleAppDeprecatedField(appView)
 	populateAppDefaultField(appView)
 
 	if app.Type != common.FunctionApp {
@@ -450,7 +454,7 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 	copier.Copy(app, appView)
 
 	translateSecretLikedModelsToSecrets(appView, app)
-	translateNativeApp(appView, app, oldApp)
+	translateNativeApp(appView, app)
 
 	if app.Type != common.FunctionApp {
 		return app, nil, nil
@@ -533,8 +537,7 @@ func (api *API) ToApplicationListView(apps *models.ApplicationList) {
 	}
 }
 
-func translateNativeApp(appView *models.ApplicationView,
-	app *specV1.Application, oldApp *specV1.Application) {
+func translateNativeApp(appView *models.ApplicationView, app *specV1.Application) {
 	if appView.Mode != context.RunModeNative || appView.Type == common.FunctionApp {
 		return
 	}
@@ -546,9 +549,10 @@ func translateNativeApp(appView *models.ApplicationView,
 		volumeMount, volume := generateVmAndMount(serviceView.ProgramConfig, vmName, ProgramConfigDir)
 
 		var exist bool
-		for _, v := range service.VolumeMounts {
-			if v.Name == vmName {
+		for i, v := range service.VolumeMounts {
+			if strings.HasPrefix(v.Name, ProgramConfigPrefix) && v.MountPath == ProgramConfigDir {
 				exist = true
+				service.VolumeMounts[i] = volumeMount
 				break
 			}
 		}
@@ -558,7 +562,7 @@ func translateNativeApp(appView *models.ApplicationView,
 
 		exist = false
 		for i, v := range app.Volumes {
-			if v.Name == vmName {
+			if strings.HasPrefix(v.Name, ProgramConfigPrefix) {
 				app.Volumes[i] = volume
 				exist = true
 				break
@@ -575,8 +579,14 @@ func (api *API) translateToNativeAppView(appView *models.ApplicationView) error 
 		return nil
 	}
 	for index := range appView.Services {
+		var vmName string
 		service := &appView.Services[index]
-		vmName := getNameOfNativeProgramVolumeMount(service.Name)
+		for _, v := range service.VolumeMounts {
+			if strings.HasPrefix(v.Name, ProgramConfigPrefix) && v.MountPath == ProgramConfigDir {
+				vmName = v.Name
+				break
+			}
+		}
 		configName, err := getNameOfNativeProgramConfig(appView, vmName)
 		if err != nil {
 			return err
@@ -696,7 +706,8 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 		}
 	}
 
-	ports := make(map[int32]bool)
+	tcpPorts := make(map[int32]bool)
+	updPorts := make(map[int32]bool)
 	for _, service := range app.Services {
 		if service.ProgramConfig != "" {
 			_, err := api.Config.Get(namespace, service.ProgramConfig, "")
@@ -704,28 +715,45 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 				return err
 			}
 		}
-		if app.Replica > 1 && len(service.Ports) > 0 {
-			return common.Error(common.ErrRequestParamInvalid,
-				common.Field("error", "port mapping is only supported under single replica"))
-		}
-		err := isValidPort(&service, ports)
+		hostPortNum, err := isValidPort(&service, tcpPorts, updPorts)
 		if err != nil {
 			return err
+		}
+		if app.Replica > 1 && hostPortNum > 0 {
+			return common.Error(common.ErrRequestParamInvalid,
+				common.Field("error", "port mapping is only supported under single replica"))
 		}
 	}
 	for _, service := range app.InitServices {
-		if app.Replica > 1 && len(service.Ports) > 0 {
-			return common.Error(common.ErrRequestParamInvalid,
-				common.Field("error", "port mapping is only supported under single replica"))
-		}
-		err := isValidPort(&service, ports)
+		hostPortNum, err := isValidPort(&service, tcpPorts, updPorts)
 		if err != nil {
 			return err
+		}
+		if app.Replica > 1 && hostPortNum > 0 {
+			return common.Error(common.ErrRequestParamInvalid,
+				common.Field("error", "port mapping is only supported under single replica"))
 		}
 	}
 
 	if app.CronStatus == specV1.CronWait && app.CronTime.Before(time.Now()) {
 		return common.Error(common.ErrRequestParamInvalid, common.Field("error", "failed to add cron job, time should be set after now"))
+	}
+
+	if app.AutoScaleCfg != nil && len(app.AutoScaleCfg.Metrics) != 0 {
+		if app.AutoScaleCfg.MinReplicas <= 0 {
+			return common.Error(common.ErrRequestParamInvalid,
+				common.Field("error", "minReplicas must be greater than 0"))
+		}
+		if app.AutoScaleCfg.MaxReplicas < app.AutoScaleCfg.MinReplicas {
+			return common.Error(common.ErrRequestParamInvalid,
+				common.Field("error", "minReplicas must be less than maxReplicas"))
+		}
+		for _, metrics := range app.AutoScaleCfg.Metrics {
+			if metrics.Resource.Name != "cpu" && metrics.Resource.Name != "memory" {
+				return common.Error(common.ErrRequestParamInvalid,
+					common.Field("error", "only cpu and memory is supported"))
+			}
+		}
 	}
 
 	app.Labels = common.AddSystemLabel(app.Labels, map[string]string{
@@ -734,27 +762,40 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 	return nil
 }
 
-func isValidPort(service *models.ServiceView, ports map[int32]bool) error {
+func isValidPort(service *models.ServiceView, tcpPorts, updPorts map[int32]bool) (int, error) {
+	hostPortNum := 0
 	for _, port := range service.Ports {
 		if port.ServiceType == string(v1.ServiceTypeNodePort) {
 			if port.NodePort <= 0 {
-				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "invalid NodePort"))
+				return hostPortNum, common.Error(common.ErrRequestParamInvalid, common.Field("error", "invalid NodePort"))
 			}
-			if _, ok := ports[port.NodePort]; ok {
-				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate host ports"))
-			} else {
-				ports[port.NodePort] = true
+			if err := checkDuplicatePort(port.Protocol, port.NodePort, tcpPorts, updPorts); err != nil {
+				return hostPortNum, errors.Trace(err)
 			}
 		} else {
 			if port.HostPort == 0 {
 				continue
 			}
-			if _, ok := ports[port.HostPort]; ok {
-				return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate host ports"))
-			} else {
-				ports[port.HostPort] = true
+			if err := checkDuplicatePort(port.Protocol, port.HostPort, tcpPorts, updPorts); err != nil {
+				return hostPortNum, errors.Trace(err)
 			}
+			hostPortNum++
 		}
+	}
+	return hostPortNum, nil
+}
+
+func checkDuplicatePort(protocol string, port int32, tcpPorts, updPorts map[int32]bool) error {
+	if protocol == string(v1.ProtocolUDP) {
+		if _, ok := updPorts[port]; ok {
+			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate udp ports"))
+		}
+		updPorts[port] = true
+	} else {
+		if _, ok := tcpPorts[port]; ok {
+			return common.Error(common.ErrRequestParamInvalid, common.Field("error", "duplicate tcp ports"))
+		}
+		tcpPorts[port] = true
 	}
 	return nil
 }
@@ -781,7 +822,7 @@ func (api *API) IsAppCanDelete(namesapce, name string) (bool, error) {
 	return true, nil
 }
 
-func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
+func (api *API) compatibleAppDeprecatedField(app *models.ApplicationView) {
 	// Workload
 	if app.Workload == "" {
 		// compatible with the original one service corresponding to one workload
@@ -827,8 +868,6 @@ func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
 					api.log.Warn("app service replica is inconsistent", log.Any("index", i), log.Any("name", app.Services[i].Name))
 				}
 			}
-		} else {
-			app.Replica = 1
 		}
 	} else {
 		for i, svc := range app.Services {
@@ -850,7 +889,7 @@ func (api *API) compatibleAppDeprecatedFiled(app *models.ApplicationView) {
 				RestartPolicy: app.Services[0].JobConfig.RestartPolicy,
 			}
 		} else {
-			app.JobConfig = &specV1.AppJobConfig{RestartPolicy: "Never", Completions: 1}
+			app.JobConfig = &specV1.AppJobConfig{RestartPolicy: "Never"}
 			for i, svc := range app.Services {
 				if svc.JobConfig == nil || svc.JobConfig.RestartPolicy == "" {
 					app.Services[i].JobConfig = &specV1.ServiceJobConfig{
@@ -1018,5 +1057,5 @@ func getNameOfFunctionCodeVolumeMount(serviceName string) string {
 }
 
 func getNameOfNativeProgramVolumeMount(serviceName string) string {
-	return fmt.Sprintf("%s-%s", ProgramConfigPrefix, serviceName)
+	return fmt.Sprintf("%s-%s", ProgramConfigPrefix, common.RandString(9))
 }

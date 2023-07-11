@@ -109,7 +109,7 @@ func FromSecretListToCertificateList(s *SecretList, needToFilter bool) *Certific
 }
 
 type SecretView struct {
-	Name              string            `json:"name,omitempty" validate:"omitempty,resourceName"`
+	Name              string            `json:"name,omitempty" binding:"omitempty,res_name"`
 	Namespace         string            `json:"namespace,omitempty"`
 	Data              map[string]string `json:"data,omitempty" binding:"required"`
 	CreationTimestamp time.Time         `json:"createTime,omitempty"`

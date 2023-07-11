@@ -19,7 +19,11 @@ type NodeList struct {
 }
 
 type NodeNames struct {
-	Names []string `json:"names,"validate:"maxLength=20"`
+	Names []string `json:"names," binding:"max=20"`
+}
+
+type FunctionList struct {
+	Functions []string `json:"functions"`
 }
 
 type NodeProperties struct {
@@ -56,8 +60,12 @@ type NodePropertiesMetadata struct {
 type NodeCoreConfigs struct {
 	Version string `yaml:"version,omitempty" json:"version,omitempty"`
 	// unit: seconds
-	Frequency int `yaml:"frequency,omitempty" json:"frequency,omitempty"`
-	APIPort   int `yaml:"apiport,omitempty" json:"apiport,omitempty"`
+	Frequency  int    `yaml:"frequency,omitempty" json:"frequency,omitempty"`
+	APIPort    int    `yaml:"apiport,omitempty" json:"apiport,omitempty"`
+	AgentPort  int    `yaml:"agentport,omitempty" json:"agentport,omitempty" default:"30080"`
+	LogLevel   string `yaml:"logLevel,omitempty" json:"logLevel,omitempty" default:"debug" binding:"omitempty,oneof=debug info warn error"`
+	ByteUnit   string `yaml:"byteUnit,omitempty" json:"byteUnit,omitempty" default:"KB" `
+	SpeedLimit int    `yaml:"speedLimit,omitempty" json:"speedLimit,omitempty" default:"0"`
 }
 
 type NodeCoreVersions struct {

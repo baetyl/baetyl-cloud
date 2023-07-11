@@ -69,7 +69,7 @@ func NewPKI() (plugin.Plugin, error) {
 	return cli, nil
 }
 
-func (p *defaultPkiClient) GetRootCertId() string {
+func (p *defaultPkiClient) GetRootCertID() string {
 	return RootCertId
 }
 

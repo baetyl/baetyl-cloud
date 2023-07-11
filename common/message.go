@@ -30,6 +30,7 @@ const (
 	ErrResourceConflict        = "ErrResourceConflict"
 	ErrResourceDeleteForbidden = "ErrResourceDeleteForbidden"
 	ErrResourceHasBeenUsed     = "ErrResourceHasBeenUsed"
+	ErrSubResourceExist        = "ErrSubResourceExist"
 	ErrNodeNotReady            = "ErrNodeNotReady"
 	ErrInvalidToken            = "ErrInvalidToken"
 
@@ -97,6 +98,7 @@ const (
 
 	ErrPubsubTimeout   = "ErrPubsubTimeout"
 	ErrUpdateSubLabels = "ErrUpdateSubLabels"
+	ErrDataTooLarge    = "ErrDataTooLarge"
 )
 
 var templates = map[Code]string{
@@ -104,7 +106,7 @@ var templates = map[Code]string{
 	ErrPluginNotFound: "The plugin{{if .name}} ({{.name}}){{end}} is not found.",
 	ErrPluginInvalid:  "The plugin {{.name}} is invalid, not implement all interfaces of {{.kind}}.",
 	// * request
-	ErrRequestAccessDenied:   "访问已被拒绝。\nThe request access is denied.",
+	ErrRequestAccessDenied:   "访问已被拒绝。\nThe request access is denied.{{if .error}} ({{.error}}){{end}}",
 	ErrRequestMethodNotFound: "访问了不存在的api接口。\nThe request method is not found.",
 	ErrRequestParamInvalid:   "非法的请求参数。\nThe request parameter is invalid.{{if .error}} ({{.error}}){{end}}",
 	// * resource
@@ -112,6 +114,7 @@ var templates = map[Code]string{
 	ErrResourceAccessForbidden: "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} can not be accessed{{if .namespace}} in namespace({{.namespace}}){{end}}.",
 	ErrResourceConflict:        "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} already exist.",
 	ErrResourceHasBeenUsed:     "该资源名称已被占用，请更换命名。The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} has been used.",
+	ErrSubResourceExist:        "该资源下存在子资源未删除，请删除后重试。The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} exist",
 	ErrResourceDeleteForbidden: "The {{if .type}}({{.type}}) {{end}}resource{{if .name}} ({{.name}}){{end}} can not be deleted{{if .namespace}} in namespace({{.namespace}}){{end}}",
 	// * volumes
 	ErrVolumeType: "The volume{{if .name}} ({{.name}}){{end}} type should be{{if .type}} ({{.type}}){{end}}.",
@@ -178,6 +181,7 @@ var templates = map[Code]string{
 
 	ErrPubsubTimeout:   "Publish or subscribe message timeout. {{if .error}} ({{.error}}){{end}}",
 	ErrUpdateSubLabels: "Failed to update sub node labels. {{if .error}} ({{.error}}){{end}}",
+	ErrDataTooLarge:    "数据量过大。\nData too large. Resource {{if .name}}({{.name}}){{end}}, size={{if .size}}({{.size}}){{end}}, max={{if .max}}({{.max}}){{end}}",
 }
 
 func getHTTPStatus(c Code) int {

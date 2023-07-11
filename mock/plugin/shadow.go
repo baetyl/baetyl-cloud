@@ -5,35 +5,51 @@
 package plugin
 
 import (
+	reflect "reflect"
+
 	models "github.com/baetyl/baetyl-cloud/v2/models"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
-// MockShadow is a mock of Shadow interface
+// MockShadow is a mock of Shadow interface.
 type MockShadow struct {
 	ctrl     *gomock.Controller
 	recorder *MockShadowMockRecorder
 }
 
-// MockShadowMockRecorder is the mock recorder for MockShadow
+// MockShadowMockRecorder is the mock recorder for MockShadow.
 type MockShadowMockRecorder struct {
 	mock *MockShadow
 }
 
-// NewMockShadow creates a new mock instance
+// NewMockShadow creates a new mock instance.
 func NewMockShadow(ctrl *gomock.Controller) *MockShadow {
 	mock := &MockShadow{ctrl: ctrl}
 	mock.recorder = &MockShadowMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockShadow) EXPECT() *MockShadowMockRecorder {
 	return m.recorder
 }
 
-// Close mocks base method
+// BatchCreateShadow mocks base method.
+func (m *MockShadow) BatchCreateShadow(arg0 []*models.Shadow) ([]*models.Shadow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchCreateShadow", arg0)
+	ret0, _ := ret[0].([]*models.Shadow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchCreateShadow indicates an expected call of BatchCreateShadow.
+func (mr *MockShadowMockRecorder) BatchCreateShadow(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchCreateShadow", reflect.TypeOf((*MockShadow)(nil).BatchCreateShadow), arg0)
+}
+
+// Close mocks base method.
 func (m *MockShadow) Close() error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Close")
@@ -41,13 +57,13 @@ func (m *MockShadow) Close() error {
 	return ret0
 }
 
-// Close indicates an expected call of Close
+// Close indicates an expected call of Close.
 func (mr *MockShadowMockRecorder) Close() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockShadow)(nil).Close))
 }
 
-// Create mocks base method
+// Create mocks base method.
 func (m *MockShadow) Create(arg0 interface{}, arg1 *models.Shadow) (*models.Shadow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0, arg1)
@@ -56,13 +72,13 @@ func (m *MockShadow) Create(arg0 interface{}, arg1 *models.Shadow) (*models.Shad
 	return ret0, ret1
 }
 
-// Create indicates an expected call of Create
+// Create indicates an expected call of Create.
 func (mr *MockShadowMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockShadow)(nil).Create), arg0, arg1)
 }
 
-// Delete mocks base method
+// Delete mocks base method.
 func (m *MockShadow) Delete(arg0, arg1 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
@@ -70,13 +86,13 @@ func (m *MockShadow) Delete(arg0, arg1 string) error {
 	return ret0
 }
 
-// Delete indicates an expected call of Delete
+// Delete indicates an expected call of Delete.
 func (mr *MockShadowMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockShadow)(nil).Delete), arg0, arg1)
 }
 
-// Get mocks base method
+// Get mocks base method.
 func (m *MockShadow) Get(arg0 interface{}, arg1, arg2 string) (*models.Shadow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0, arg1, arg2)
@@ -85,13 +101,13 @@ func (m *MockShadow) Get(arg0 interface{}, arg1, arg2 string) (*models.Shadow, e
 	return ret0, ret1
 }
 
-// Get indicates an expected call of Get
+// Get indicates an expected call of Get.
 func (mr *MockShadowMockRecorder) Get(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockShadow)(nil).Get), arg0, arg1, arg2)
 }
 
-// List mocks base method
+// List mocks base method.
 func (m *MockShadow) List(arg0 string, arg1 *models.NodeList) (*models.ShadowList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", arg0, arg1)
@@ -100,13 +116,28 @@ func (m *MockShadow) List(arg0 string, arg1 *models.NodeList) (*models.ShadowLis
 	return ret0, ret1
 }
 
-// List indicates an expected call of List
+// List indicates an expected call of List.
 func (mr *MockShadowMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockShadow)(nil).List), arg0, arg1)
 }
 
-// ListShadowByNames mocks base method
+// ListAll mocks base method.
+func (m *MockShadow) ListAll(arg0 string) (*models.ShadowList, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAll", arg0)
+	ret0, _ := ret[0].(*models.ShadowList)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAll indicates an expected call of ListAll.
+func (mr *MockShadowMockRecorder) ListAll(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAll", reflect.TypeOf((*MockShadow)(nil).ListAll), arg0)
+}
+
+// ListShadowByNames mocks base method.
 func (m *MockShadow) ListShadowByNames(arg0 interface{}, arg1 string, arg2 []string) ([]*models.Shadow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListShadowByNames", arg0, arg1, arg2)
@@ -115,13 +146,13 @@ func (m *MockShadow) ListShadowByNames(arg0 interface{}, arg1 string, arg2 []str
 	return ret0, ret1
 }
 
-// ListShadowByNames indicates an expected call of ListShadowByNames
+// ListShadowByNames indicates an expected call of ListShadowByNames.
 func (mr *MockShadowMockRecorder) ListShadowByNames(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListShadowByNames", reflect.TypeOf((*MockShadow)(nil).ListShadowByNames), arg0, arg1, arg2)
 }
 
-// UpdateDesire mocks base method
+// UpdateDesire mocks base method.
 func (m *MockShadow) UpdateDesire(arg0 interface{}, arg1 *models.Shadow) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateDesire", arg0, arg1)
@@ -129,13 +160,13 @@ func (m *MockShadow) UpdateDesire(arg0 interface{}, arg1 *models.Shadow) error {
 	return ret0
 }
 
-// UpdateDesire indicates an expected call of UpdateDesire
+// UpdateDesire indicates an expected call of UpdateDesire.
 func (mr *MockShadowMockRecorder) UpdateDesire(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDesire", reflect.TypeOf((*MockShadow)(nil).UpdateDesire), arg0, arg1)
 }
 
-// UpdateDesires mocks base method
+// UpdateDesires mocks base method.
 func (m *MockShadow) UpdateDesires(arg0 interface{}, arg1 []*models.Shadow) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateDesires", arg0, arg1)
@@ -143,13 +174,13 @@ func (m *MockShadow) UpdateDesires(arg0 interface{}, arg1 []*models.Shadow) erro
 	return ret0
 }
 
-// UpdateDesires indicates an expected call of UpdateDesires
+// UpdateDesires indicates an expected call of UpdateDesires.
 func (mr *MockShadowMockRecorder) UpdateDesires(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDesires", reflect.TypeOf((*MockShadow)(nil).UpdateDesires), arg0, arg1)
 }
 
-// UpdateReport mocks base method
+// UpdateReport mocks base method.
 func (m *MockShadow) UpdateReport(arg0 *models.Shadow) (*models.Shadow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateReport", arg0)
@@ -158,7 +189,7 @@ func (m *MockShadow) UpdateReport(arg0 *models.Shadow) (*models.Shadow, error) {
 	return ret0, ret1
 }
 
-// UpdateReport indicates an expected call of UpdateReport
+// UpdateReport indicates an expected call of UpdateReport.
 func (mr *MockShadowMockRecorder) UpdateReport(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateReport", reflect.TypeOf((*MockShadow)(nil).UpdateReport), arg0)

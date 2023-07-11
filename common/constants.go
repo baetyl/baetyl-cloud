@@ -53,8 +53,12 @@ const (
 	Device Resource = "device"
 	// Driver driver resource
 	Driver Resource = "driver"
+	// AccessTemplate accesstemplate resource
+	AccessTemplate Resource = "accesstemplate"
 	// DeviceModel devicemodel resource
 	DeviceModel Resource = "devicemodel"
+	// BusinessTemplate businesstemplate resource
+	BusinessTemplate Resource = "businesstemplate"
 	// Index index resource
 	Index Resource = "index"
 	// !deprecated
@@ -88,6 +92,8 @@ const (
 	DefaultCoreFrequency = "20"
 	// DefaultCoreAPIPort
 	DefaultCoreAPIPort = "30050"
+	// DefaultAgentPort
+	DefaultAgentPort = "30080"
 	// ComposeVersion compose version
 	ComposeVersion = "3"
 	// Bind bind
@@ -136,12 +142,16 @@ const (
 	Metadata         = "matadata"
 	PkiCertID        = "pkiCertID"
 	NodeSelector     = "nodeSelector"
+	WorkLoad         = "workLoad"
+	JobConfig        = "jobConfig"
 
 	AnnotationDescription     = BaetylCloudGroup + "/" + Description
 	AnnotationUpdateTimestamp = BaetylCloudGroup + "/" + UpdateTimestamp
 	AnnotationMetadata        = BaetylCloudGroup + "/" + Metadata
 	AnnotationPkiCertID       = BaetylCloudGroup + "/" + PkiCertID
 	AnnotationNodeSelector    = BaetylCloudGroup + "/" + NodeSelector
+	AnnotationWorkLoad        = BaetylCloudGroup + "/" + WorkLoad
+	AnnotationJobConfig       = BaetylCloudGroup + "/" + JobConfig
 )
 
 const (

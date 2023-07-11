@@ -36,6 +36,7 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9)}
 	c.Plugin.License = common.RandString(9)
+	c.Plugin.Quota = common.RandString(9)
 	c.Plugin.Property = common.RandString(9)
 	c.Plugin.Module = common.RandString(9)
 	c.Plugin.Task = common.RandString(9)
@@ -43,6 +44,7 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	c.Plugin.Tx = common.RandString(9)
 	c.Plugin.Sign = common.RandString(9)
 	c.Plugin.Cron = common.RandString(9)
+	c.Plugin.Cache = common.RandString(9)
 	mockCtl := gomock.NewController(t)
 
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
@@ -76,6 +78,10 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	mLicense := mockPlugin.NewMockLicense(mockCtl)
 	plugin.RegisterFactory(c.Plugin.License, func() (plugin.Plugin, error) {
 		return mLicense, nil
+	})
+	mQouta := mockPlugin.NewMockQuota(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Quota, func() (plugin.Plugin, error) {
+		return mQouta, nil
 	})
 	mockProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
@@ -121,6 +127,10 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 	plugin.RegisterFactory(c.Plugin.Cron, func() (plugin.Plugin, error) {
 		return mockCronApp, nil
 	})
+	mockCache := mockPlugin.NewMockDataCache(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Cache, func() (plugin.Plugin, error) {
+		return mockCache, nil
+	})
 
 	mockAPI, err := api.NewAPI(c)
 	assert.NoError(t, err)
@@ -135,6 +145,9 @@ func initAdminServerMock(t *testing.T) (*AdminServer, *mockPlugin.MockAuth, *moc
 func TestAdminServer_Handler(t *testing.T) {
 	s, mkAuth, _, mockCtl := initAdminServerMock(t)
 	defer mockCtl.Finish()
+
+	mLock := service.NewMockLockerService(mockCtl)
+	s.api.Locker = mLock
 
 	s.InitRoute()
 	r := s.GetRoute()
@@ -178,9 +191,11 @@ func TestAdminServer_Handler(t *testing.T) {
 
 	// 401
 	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
-	mLicense := service.NewMockLicenseService(mockCtl)
-	s.api.License = mLicense
-	mLicense.EXPECT().CheckQuota(gomock.Any(), gomock.Any()).Return(fmt.Errorf("quota error"))
+	mQuota := service.NewMockQuotaService(mockCtl)
+	s.api.Quota = mQuota
+	mQuota.EXPECT().CheckQuota(gomock.Any(), gomock.Any()).Return(fmt.Errorf("quota error"))
+	mLock.EXPECT().Lock(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+	mLock.EXPECT().Unlock(gomock.Any(), gomock.Any(), gomock.Any()).Return()
 	req, _ = http.NewRequest(http.MethodPost, "/v1/nodes", nil)
 	w4 = httptest.NewRecorder()
 	s.GetRoute().ServeHTTP(w4, req)

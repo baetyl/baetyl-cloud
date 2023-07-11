@@ -3,8 +3,9 @@ package service
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
+
+	"github.com/baetyl/baetyl-go/v2/json"
 
 	"github.com/baetyl/baetyl-cloud/v2/config"
 	"github.com/baetyl/baetyl-cloud/v2/plugin"

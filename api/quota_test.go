@@ -2,21 +2,20 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
-
+	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 var namespace = "default"
@@ -44,14 +43,14 @@ func TestAPI_GetQuota(t *testing.T) {
 	api, router, mockCtl := initQuotaAPI(t)
 	defer mockCtl.Finish()
 
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
 	quotas := map[string]int{
 		"maxNodeCount": 10,
 	}
 
-	mLicense.EXPECT().GetQuota(namespace).Return(quotas, nil)
+	mQuota.EXPECT().GetQuota(namespace).Return(quotas, nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/quotas", nil)
 	w := httptest.NewRecorder()
@@ -70,12 +69,12 @@ func TestAPI_UpdateQuota(t *testing.T) {
 	api, router, mockCtl := initQuotaAPI(t)
 	defer mockCtl.Finish()
 
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
 	number := 10
 	body := `{"quotaName":"maxNodeCount","quota": 10,"namespace":"default"}`
-	mLicense.EXPECT().UpdateQuota(namespace, plugin.QuotaNode, number).Return(nil)
+	mQuota.EXPECT().UpdateQuota(namespace, plugin.QuotaNode, number).Return(nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodPut, "/v1/quotas", bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
@@ -88,15 +87,15 @@ func TestAPI_CreateQuota(t *testing.T) {
 	api, router, mockCtl := initQuotaAPI(t)
 	defer mockCtl.Finish()
 
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
 	quotas := map[string]int{
 		"maxNodeCount": 10,
 	}
 	body := `{"quotaName":"maxNodeCount","quota": 10,"namespace":"default"}`
 
-	mLicense.EXPECT().CreateQuota(namespace, quotas).Return(nil)
+	mQuota.EXPECT().CreateQuota(namespace, quotas).Return(nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodPost, "/v1/quotas", bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
@@ -108,12 +107,12 @@ func TestAPI_DeleteQuota(t *testing.T) {
 	api, router, mockCtl := initQuotaAPI(t)
 	defer mockCtl.Finish()
 
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
 	body := `{"quotaName":"maxNodeCount","quota": 10,"namespace":"default"}`
 
-	mLicense.EXPECT().DeleteQuota(namespace, plugin.QuotaNode).Return(nil)
+	mQuota.EXPECT().DeleteQuota(namespace, plugin.QuotaNode).Return(nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodDelete, "/v1/quotas", bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
@@ -125,8 +124,8 @@ func TestAPI_GetQuotaForMis(t *testing.T) {
 	api, router, mockCtl := initQuotaAPI(t)
 	defer mockCtl.Finish()
 
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
 	quotas := map[string]int{
 		"maxNodeCount": 10,
@@ -134,7 +133,7 @@ func TestAPI_GetQuotaForMis(t *testing.T) {
 
 	body := `{"quotaName":"maxNodeCount","quota": 10,"namespace":"default"}`
 
-	mLicense.EXPECT().GetQuota(namespace).Return(quotas, nil)
+	mQuota.EXPECT().GetQuota(namespace).Return(quotas, nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/quotas/default", bytes.NewBufferString(body))
 	w := httptest.NewRecorder()
@@ -146,27 +145,27 @@ func TestAPI_InitQuotas(t *testing.T) {
 	api, _, mockCtl := initQuotaAPI(t)
 	defer mockCtl.Finish()
 
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
-	namespace := "testError"
+	ns := "testError"
 	testErr := fmt.Errorf("testError")
 
-	mLicense.EXPECT().GetDefaultQuotas(namespace).Return(nil, testErr)
-	err := api.InitQuotas(namespace)
+	mQuota.EXPECT().GetDefaultQuotas(ns).Return(nil, testErr)
+	err := api.InitQuotas(ns)
 	assert.Error(t, testErr, err)
 
-	namespace = "testSucc"
+	ns = "testSucc"
 	quotas := map[string]int{plugin.QuotaNode: 10}
 
-	mLicense.EXPECT().GetDefaultQuotas(namespace).Return(quotas, nil)
-	mLicense.EXPECT().CreateQuota(namespace, quotas).Return(testErr)
-	err = api.InitQuotas(namespace)
+	mQuota.EXPECT().GetDefaultQuotas(ns).Return(quotas, nil)
+	mQuota.EXPECT().CreateQuota(ns, quotas).Return(testErr)
+	err = api.InitQuotas(ns)
 	assert.Error(t, testErr, err)
 
-	mLicense.EXPECT().GetDefaultQuotas(namespace).Return(quotas, nil)
-	mLicense.EXPECT().CreateQuota(namespace, quotas).Return(nil)
-	err = api.InitQuotas(namespace)
+	mQuota.EXPECT().GetDefaultQuotas(ns).Return(quotas, nil)
+	mQuota.EXPECT().CreateQuota(ns, quotas).Return(nil)
+	err = api.InitQuotas(ns)
 	assert.NoError(t, err)
 }
 
@@ -174,19 +173,19 @@ func TestAPI_DeleteAllQuotas(t *testing.T) {
 	api, _, mockCtl := initQuotaAPI(t)
 	defer mockCtl.Finish()
 
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
-	namespace := "testError"
+	ns := "testError"
 	testErr := fmt.Errorf("testError")
 
-	mLicense.EXPECT().DeleteQuotaByNamespace(namespace).Return(testErr)
-	err := api.DeleteQuotaByNamespace(namespace)
+	mQuota.EXPECT().DeleteQuotaByNamespace(ns).Return(testErr)
+	err := api.DeleteQuotaByNamespace(ns)
 	assert.Error(t, testErr, err)
-	namespace = "testSucc"
+	ns = "testSucc"
 
-	mLicense.EXPECT().DeleteQuotaByNamespace(namespace).Return(nil)
-	err = api.DeleteQuotaByNamespace(namespace)
+	mQuota.EXPECT().DeleteQuotaByNamespace(ns).Return(nil)
+	err = api.DeleteQuotaByNamespace(ns)
 	assert.NoError(t, err)
 }
 
@@ -194,19 +193,19 @@ func TestAPI_RealseNodeQuota(t *testing.T) {
 	api, _, mockCtl := initQuotaAPI(t)
 	defer mockCtl.Finish()
 
-	mLicense := ms.NewMockLicenseService(mockCtl)
-	api.License = mLicense
+	mQuota := ms.NewMockQuotaService(mockCtl)
+	api.Quota = mQuota
 
-	namespace := "testError"
+	ns := "testError"
 	number := 1
 	testErr := fmt.Errorf("testError")
 
-	mLicense.EXPECT().ReleaseQuota(namespace, plugin.QuotaNode, number).Return(testErr)
-	err := api.ReleaseQuota(namespace, plugin.QuotaNode, number)
+	mQuota.EXPECT().ReleaseQuota(ns, plugin.QuotaNode, number).Return(testErr)
+	err := api.ReleaseQuota(ns, plugin.QuotaNode, number)
 	assert.Error(t, testErr, err)
-	namespace = "testSucc"
+	ns = "testSucc"
 
-	mLicense.EXPECT().ReleaseQuota(namespace, plugin.QuotaNode, number).Return(nil)
-	err = api.ReleaseQuota(namespace, plugin.QuotaNode, number)
+	mQuota.EXPECT().ReleaseQuota(ns, plugin.QuotaNode, number).Return(nil)
+	err = api.ReleaseQuota(ns, plugin.QuotaNode, number)
 	assert.NoError(t, err)
 }

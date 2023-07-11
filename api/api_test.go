@@ -19,6 +19,7 @@ func TestNewAdminAPI(t *testing.T) {
 	c.Plugin.Auth = common.RandString(9)
 	c.Plugin.Sign = common.RandString(9)
 	c.Plugin.License = common.RandString(9)
+	c.Plugin.Quota = common.RandString(9)
 	c.Plugin.Resource = common.RandString(9)
 	c.Plugin.Shadow = common.RandString(9)
 	c.Plugin.Index = common.RandString(9)
@@ -35,6 +36,7 @@ func TestNewAdminAPI(t *testing.T) {
 	c.Plugin.Locker = common.RandString(9)
 	c.Plugin.Tx = common.RandString(9)
 	c.Plugin.Cron = common.RandString(9)
+	c.Plugin.Cache = common.RandString(9)
 
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
@@ -58,6 +60,10 @@ func TestNewAdminAPI(t *testing.T) {
 	mockLicense := mockPlugin.NewMockLicense(mockCtl)
 	plugin.RegisterFactory(c.Plugin.License, func() (plugin.Plugin, error) {
 		return mockLicense, nil
+	})
+	mockQuota := mockPlugin.NewMockQuota(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Quota, func() (plugin.Plugin, error) {
+		return mockQuota, nil
 	})
 	mockResource := mockPlugin.NewMockResource(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Resource, func() (plugin.Plugin, error) {
@@ -110,6 +116,11 @@ func TestNewAdminAPI(t *testing.T) {
 	mockCronApp := mockPlugin.NewMockCron(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Cron, func() (plugin.Plugin, error) {
 		return mockCronApp, nil
+	})
+
+	mockCache := mockPlugin.NewMockDataCache(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Cache, func() (plugin.Plugin, error) {
+		return mockCache, nil
 	})
 
 	api, err := NewAPI(c)

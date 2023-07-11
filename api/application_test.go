@@ -2,7 +2,6 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/baetyl/baetyl-go/v2/context"
+	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
@@ -622,6 +622,62 @@ func TestCreateContainerApplication(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+
+	appView.Volumes = []models.VolumeView{}
+	appView.Registries = []models.RegistryView{}
+	appView.Services = []models.ServiceView{
+		{
+			Service: specV1.Service{
+				Name:     "agent",
+				Hostname: "test-agent",
+				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+				Replica:  2,
+				Ports: []specV1.ContainerPort{
+					{
+						HostPort:      8080,
+						ContainerPort: 8080,
+					},
+				},
+			},
+		},
+	}
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	appView.Services = []models.ServiceView{
+		{
+			Service: specV1.Service{
+				Name:     "agent",
+				Hostname: "test-agent",
+				Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+				Replica:  2,
+				Ports: []specV1.ContainerPort{
+					{
+						ServiceType:   string(v1.ServiceTypeNodePort),
+						NodePort:      8080,
+						ContainerPort: 8080,
+					},
+					{
+						ServiceType:   string(v1.ServiceTypeNodePort),
+						NodePort:      8081,
+						ContainerPort: 8081,
+					},
+				},
+			},
+		},
+	}
+	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Return(eden2, nil).Times(1)
+	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(mApp, nil).Times(1)
+	w = httptest.NewRecorder()
+	body, _ = json.Marshal(appView)
+	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden2", bytes.NewReader(body))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestInitContainerApp(t *testing.T) {
@@ -802,7 +858,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 				Service: specV1.Service{
 					Name:     "agent",
 					Hostname: "test-agent",
-					Image:    "hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
+					Image:    "  hub.baidubce.com/baetyl/baetyl-agent:1.0.0",
 					Replica:  1,
 					VolumeMounts: []specV1.VolumeMount{
 						{
@@ -883,7 +939,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 		Selector:          "",
 		Replica:           1,
 		Workload:          specV1.WorkloadDeployment,
-		JobConfig:         &specV1.AppJobConfig{RestartPolicy: "Never", Completions: 1},
+		JobConfig:         &specV1.AppJobConfig{RestartPolicy: "Never"},
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -916,7 +972,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 						Value: "value",
 					},
 				},
-				JobConfig: &specV1.ServiceJobConfig{RestartPolicy: "Never", Completions: 1},
+				JobConfig: &specV1.ServiceJobConfig{RestartPolicy: "Never"},
 			},
 		},
 		Volumes: []specV1.Volume{
@@ -968,7 +1024,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
-	fApp.EXPECT().CreateApp(appView.Namespace, nil, app, gomock.Any()).Return(app1, nil)
+	fApp.EXPECT().CreateApp(appView.Namespace, nil, gomock.Any(), gomock.Any()).Return(app1, nil)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secretRegistry, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secretCertificate, nil).Times(1)
@@ -981,6 +1037,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 
 	appViewRes := &models.ApplicationView{}
 	err := json.Unmarshal(w.Body.Bytes(), appViewRes)
+	assert.Equal(t, app.Services[0].Image, "hub.baidubce.com/baetyl/baetyl-agent:1.0.0")
 	assert.NoError(t, err)
 	assert.Len(t, appViewRes.Volumes, 3)
 	assert.Len(t, appViewRes.Registries, 1)
@@ -3189,7 +3246,7 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 		},
 	}
 
-	api.compatibleAppDeprecatedFiled(app0)
+	api.compatibleAppDeprecatedField(app0)
 	assert.EqualValues(t, expectApp0, app0)
 
 	// case 1
@@ -3201,9 +3258,9 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 	expectApp1 := &models.ApplicationView{
 		Name:        "a1",
 		HostNetwork: false,
-		Replica:     1,
+		Replica:     0,
 		JobConfig: &specV1.AppJobConfig{
-			Completions:   1,
+			Completions:   0,
 			Parallelism:   0,
 			BackoffLimit:  0,
 			RestartPolicy: "Never",
@@ -3212,7 +3269,7 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 		Services: []models.ServiceView{},
 	}
 
-	api.compatibleAppDeprecatedFiled(app1)
+	api.compatibleAppDeprecatedField(app1)
 	assert.EqualValues(t, expectApp1, app1)
 
 	// case 2
@@ -3267,7 +3324,7 @@ func Test_compatibleAppDeprecatedFiled(t *testing.T) {
 		},
 	}
 
-	api.compatibleAppDeprecatedFiled(app2)
+	api.compatibleAppDeprecatedField(app2)
 	assert.EqualValues(t, expectApp2.Services[0].JobConfig, app2.Services[0].JobConfig)
 	expectApp2.Services[0].JobConfig = nil
 	app2.Services[0].JobConfig = nil
@@ -3316,6 +3373,7 @@ func TestAPI_ToApplication(t *testing.T) {
 		System:      false,
 		Replica:     1,
 		Workload:    "deployment",
+		DNSPolicy:   v1.DNSClusterFirstWithHostNet,
 		JobConfig: &specV1.AppJobConfig{
 			Completions:   1,
 			RestartPolicy: "Never",
@@ -3374,6 +3432,7 @@ func TestAPI_ToApplication(t *testing.T) {
 		System:      false,
 		Replica:     1,
 		Workload:    "deployment",
+		DNSPolicy:   v1.DNSClusterFirstWithHostNet,
 		JobConfig: &specV1.AppJobConfig{
 			Completions:   1,
 			RestartPolicy: "Never",
@@ -3384,4 +3443,37 @@ func TestAPI_ToApplication(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, expApp, app)
 	fmt.Println(cfg)
+}
+
+func TestIsValidPort(t *testing.T) {
+	svc := &models.ServiceView{
+		Service: specV1.Service{
+			Ports: []specV1.ContainerPort{
+				{
+					HostPort:      20,
+					ContainerPort: 20,
+					Protocol:      string(v1.ProtocolUDP),
+				},
+				{
+					HostPort:      20,
+					ContainerPort: 20,
+					Protocol:      string(v1.ProtocolTCP),
+				},
+			},
+		},
+	}
+	tcpPorts := make(map[int32]bool)
+	udpPorts := make(map[int32]bool)
+	_, err := isValidPort(svc, tcpPorts, udpPorts)
+	assert.NoError(t, err)
+
+	svc.Ports = []specV1.ContainerPort{
+		{
+			HostPort:      20,
+			ContainerPort: 20,
+			Protocol:      string(v1.ProtocolUDP),
+		},
+	}
+	_, err = isValidPort(svc, tcpPorts, udpPorts)
+	assert.NotNil(t, err)
 }

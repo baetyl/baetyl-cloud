@@ -5,36 +5,37 @@
 package plugin
 
 import (
+	reflect "reflect"
+
 	models "github.com/baetyl/baetyl-cloud/v2/models"
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
-// MockNode is a mock of Node interface
+// MockNode is a mock of Node interface.
 type MockNode struct {
 	ctrl     *gomock.Controller
 	recorder *MockNodeMockRecorder
 }
 
-// MockNodeMockRecorder is the mock recorder for MockNode
+// MockNodeMockRecorder is the mock recorder for MockNode.
 type MockNodeMockRecorder struct {
 	mock *MockNode
 }
 
-// NewMockNode creates a new mock instance
+// NewMockNode creates a new mock instance.
 func NewMockNode(ctrl *gomock.Controller) *MockNode {
 	mock := &MockNode{ctrl: ctrl}
 	mock.recorder = &MockNodeMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockNode) EXPECT() *MockNodeMockRecorder {
 	return m.recorder
 }
 
-// CountAllNode mocks base method
+// CountAllNode mocks base method.
 func (m *MockNode) CountAllNode(arg0 interface{}) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CountAllNode", arg0)
@@ -43,13 +44,13 @@ func (m *MockNode) CountAllNode(arg0 interface{}) (int, error) {
 	return ret0, ret1
 }
 
-// CountAllNode indicates an expected call of CountAllNode
+// CountAllNode indicates an expected call of CountAllNode.
 func (mr *MockNodeMockRecorder) CountAllNode(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountAllNode", reflect.TypeOf((*MockNode)(nil).CountAllNode), arg0)
 }
 
-// CreateNode mocks base method
+// CreateNode mocks base method.
 func (m *MockNode) CreateNode(arg0 interface{}, arg1 string, arg2 *v1.Node) (*v1.Node, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateNode", arg0, arg1, arg2)
@@ -58,13 +59,13 @@ func (m *MockNode) CreateNode(arg0 interface{}, arg1 string, arg2 *v1.Node) (*v1
 	return ret0, ret1
 }
 
-// CreateNode indicates an expected call of CreateNode
+// CreateNode indicates an expected call of CreateNode.
 func (mr *MockNodeMockRecorder) CreateNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNode", reflect.TypeOf((*MockNode)(nil).CreateNode), arg0, arg1, arg2)
 }
 
-// DeleteNode mocks base method
+// DeleteNode mocks base method.
 func (m *MockNode) DeleteNode(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteNode", arg0, arg1, arg2)
@@ -72,13 +73,13 @@ func (m *MockNode) DeleteNode(arg0 interface{}, arg1, arg2 string) error {
 	return ret0
 }
 
-// DeleteNode indicates an expected call of DeleteNode
+// DeleteNode indicates an expected call of DeleteNode.
 func (mr *MockNodeMockRecorder) DeleteNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNode", reflect.TypeOf((*MockNode)(nil).DeleteNode), arg0, arg1, arg2)
 }
 
-// GetNode mocks base method
+// GetNode mocks base method.
 func (m *MockNode) GetNode(arg0 interface{}, arg1, arg2 string) (*v1.Node, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNode", arg0, arg1, arg2)
@@ -87,13 +88,28 @@ func (m *MockNode) GetNode(arg0 interface{}, arg1, arg2 string) (*v1.Node, error
 	return ret0, ret1
 }
 
-// GetNode indicates an expected call of GetNode
+// GetNode indicates an expected call of GetNode.
 func (mr *MockNodeMockRecorder) GetNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNode", reflect.TypeOf((*MockNode)(nil).GetNode), arg0, arg1, arg2)
 }
 
-// ListNode mocks base method
+// GetNodeByNames mocks base method.
+func (m *MockNode) GetNodeByNames(arg0 interface{}, arg1 string, arg2 []string) ([]v1.Node, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNodeByNames", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]v1.Node)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNodeByNames indicates an expected call of GetNodeByNames.
+func (mr *MockNodeMockRecorder) GetNodeByNames(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNodeByNames", reflect.TypeOf((*MockNode)(nil).GetNodeByNames), arg0, arg1, arg2)
+}
+
+// ListNode mocks base method.
 func (m *MockNode) ListNode(arg0 interface{}, arg1 string, arg2 *models.ListOptions) (*models.NodeList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListNode", arg0, arg1, arg2)
@@ -102,13 +118,13 @@ func (m *MockNode) ListNode(arg0 interface{}, arg1 string, arg2 *models.ListOpti
 	return ret0, ret1
 }
 
-// ListNode indicates an expected call of ListNode
+// ListNode indicates an expected call of ListNode.
 func (mr *MockNodeMockRecorder) ListNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNode", reflect.TypeOf((*MockNode)(nil).ListNode), arg0, arg1, arg2)
 }
 
-// UpdateNode mocks base method
+// UpdateNode mocks base method.
 func (m *MockNode) UpdateNode(arg0 interface{}, arg1 string, arg2 []*v1.Node) ([]*v1.Node, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateNode", arg0, arg1, arg2)
@@ -117,7 +133,7 @@ func (m *MockNode) UpdateNode(arg0 interface{}, arg1 string, arg2 []*v1.Node) ([
 	return ret0, ret1
 }
 
-// UpdateNode indicates an expected call of UpdateNode
+// UpdateNode indicates an expected call of UpdateNode.
 func (mr *MockNodeMockRecorder) UpdateNode(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNode", reflect.TypeOf((*MockNode)(nil).UpdateNode), arg0, arg1, arg2)

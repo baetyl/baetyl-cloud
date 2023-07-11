@@ -2,7 +2,6 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/json"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -343,7 +343,7 @@ func TestCreateConfig(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodPost, "/v1/configs", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, string(w.Body.Bytes()), "{\"code\":\"ErrRequestParamInvalid\",\"message\":\"非法的请求参数。\\nThe request parameter is invalid. (There is a unknown error (Key: 'ConfigurationView.Data[0].Key' Error:Field validation for 'Key' failed on the 'validConfigKeys' tag). If the attempt to retry does not work, please contact us.)\",\"requestId\":\"\"}")
+	assert.Equal(t, string(w.Body.Bytes()), "{\"code\":\"ErrRequestParamInvalid\",\"message\":\"非法的请求参数。\\nThe request parameter is invalid. (There is a unknown error (Key: 'ConfigurationView.Data[0].Key' Error:Field validation for 'Key' failed on the 'config_key' tag). If the attempt to retry does not work, please contact us.)\",\"requestId\":\"\"}")
 
 	mConf = &models.ConfigurationView{
 		Name:      "abc",
@@ -770,7 +770,9 @@ func TestGetAppByConfig(t *testing.T) {
 	}
 	appNames := []string{"app01", "app02", "app03"}
 	sConfig.EXPECT().Get(mConf.Namespace, mConf.Name, "").Return(mConf, nil)
-	apps := []*specV1.Application{
+
+	sIndex.EXPECT().ListAppIndexByConfig(mConf.Namespace, mConf.Name).Return(appNames, nil).Times(1)
+	result := []models.AppItem{
 		{
 			Namespace: "default",
 			Name:      appNames[0],
@@ -784,11 +786,7 @@ func TestGetAppByConfig(t *testing.T) {
 			Name:      appNames[2],
 		},
 	}
-
-	sIndex.EXPECT().ListAppIndexByConfig(mConf.Namespace, mConf.Name).Return(appNames, nil).Times(1)
-	sApp.EXPECT().Get(mConf.Namespace, appNames[0], "").Return(apps[0], nil)
-	sApp.EXPECT().Get(mConf.Namespace, appNames[1], "").Return(apps[1], nil)
-	sApp.EXPECT().Get(mConf.Namespace, appNames[2], "").Return(apps[2], nil)
+	sApp.EXPECT().ListByNames(mConf.Namespace, appNames).Return(result, nil).AnyTimes()
 
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/v1/configs/abc/apps", nil)

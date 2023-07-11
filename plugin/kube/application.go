@@ -3,6 +3,7 @@ package kube
 import (
 	"fmt"
 
+	"github.com/baetyl/baetyl-go/v2/json"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/jinzhu/copier"
@@ -16,13 +17,24 @@ import (
 func toAppModel(app *v1alpha1.Application) *specV1.Application {
 	description, _ := app.Annotations[common.AnnotationDescription]
 	nodeSelector, _ := app.Annotations[common.AnnotationNodeSelector]
+	workLoad, _ := app.Annotations[common.AnnotationWorkLoad]
+	jobConfig, ok := app.Annotations[common.AnnotationJobConfig]
+
 	res := &specV1.Application{
 		Name:         app.ObjectMeta.Name,
 		Namespace:    app.ObjectMeta.Namespace,
 		Version:      app.ObjectMeta.ResourceVersion,
 		Description:  description,
 		NodeSelector: nodeSelector,
+		Workload:     workLoad,
 		Labels:       app.ObjectMeta.Labels,
+	}
+	if ok {
+		var jobCfg specV1.AppJobConfig
+		err := json.Unmarshal([]byte(jobConfig), &jobCfg)
+		if err == nil {
+			res.JobConfig = &jobCfg
+		}
 	}
 
 	err := copier.Copy(res, &app.Spec)
@@ -79,6 +91,17 @@ func fromAppModel(namespace string, app *specV1.Application) *v1alpha1.Applicati
 
 	if app.NodeSelector != "" {
 		res.Annotations[common.AnnotationNodeSelector] = app.NodeSelector
+	}
+
+	if app.Workload != "" {
+		res.Annotations[common.AnnotationWorkLoad] = app.Workload
+	}
+
+	if app.JobConfig != nil {
+		jobConfig, err := json.Marshal(app.JobConfig)
+		if err == nil {
+			res.Annotations[common.AnnotationJobConfig] = string(jobConfig)
+		}
 	}
 
 	err := copier.Copy(&res.Spec, app)

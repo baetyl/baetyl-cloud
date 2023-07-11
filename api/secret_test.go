@@ -2,12 +2,12 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/baetyl/baetyl-go/v2/errors"
+	"github.com/baetyl/baetyl-go/v2/json"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -316,9 +316,29 @@ func TestGetAppBySecret(t *testing.T) {
 	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
 	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
 	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()
+	result := []models.AppItem{
+		{
+			Namespace: "default",
+			Name:      appNames[0],
+		},
+		{
+			Namespace: "default",
+			Name:      appNames[1],
+		},
+		{
+			Namespace: "default",
+			Name:      appNames[2],
+		},
+	}
+	sApp.EXPECT().ListByNames(mConfSecret3.Namespace, appNames).Return(result, nil).AnyTimes()
 
 	w4 := httptest.NewRecorder()
 	req4, _ := http.NewRequest(http.MethodGet, "/v1/secrets/abc/apps", nil)
 	router.ServeHTTP(w4, req4)
 	assert.Equal(t, http.StatusOK, w4.Code)
+
+	emptyNames := []string{}
+	res, err := api.listAppByNames(mConfSecret3.Namespace, emptyNames)
+	assert.NoError(t, err)
+	assert.Equal(t, res.Total, 0)
 }

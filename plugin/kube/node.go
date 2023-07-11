@@ -1,9 +1,9 @@
 package kube
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/baetyl/baetyl-go/v2/utils"
@@ -135,6 +135,9 @@ func fromNodeModel(node *specV1.Node) (*v1alpha1.Node, error) {
 	if _, ok := node.Attributes[specV1.BaetylCoreAPIPort]; !ok {
 		node.Attributes[specV1.BaetylCoreAPIPort] = common.DefaultCoreAPIPort
 	}
+	if _, ok := node.Attributes[specV1.BaetylAgentPort]; !ok {
+		node.Attributes[specV1.BaetylAgentPort] = common.DefaultAgentPort
+	}
 	if _, ok := node.Attributes[specV1.KeySyncMode]; !ok {
 		node.Attributes[specV1.KeySyncMode] = specV1.CloudMode
 	}
@@ -229,4 +232,8 @@ func (c *client) CountAllNode(tx interface{}) (int, error) {
 		total += len(list.Items)
 	}
 	return total, nil
+}
+
+func (c *client) GetNodeByNames(tx interface{}, namespace string, name []string) ([]specV1.Node, error) {
+	return nil, nil
 }

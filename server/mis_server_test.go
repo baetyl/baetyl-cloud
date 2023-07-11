@@ -29,12 +29,14 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	c.Plugin.PKI = common.RandString(9)
 	c.Plugin.Functions = []string{common.RandString(9)}
 	c.Plugin.License = common.RandString(9)
+	c.Plugin.Quota = common.RandString(9)
 	c.Plugin.Property = common.RandString(9)
 	c.Plugin.Module = common.RandString(9)
 	c.Plugin.Task = common.RandString(9)
 	c.Plugin.Locker = common.RandString(9)
 	c.Plugin.Tx = common.RandString(9)
 	c.Plugin.Cron = common.RandString(9)
+	c.Plugin.Cache = common.RandString(9)
 	mockCtl := gomock.NewController(t)
 
 	mockObjectStorage := mockPlugin.NewMockObject(mockCtl)
@@ -67,6 +69,10 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	mLicense := mockPlugin.NewMockLicense(mockCtl)
 	plugin.RegisterFactory(c.Plugin.License, func() (plugin.Plugin, error) {
 		return mLicense, nil
+	})
+	mQuota := mockPlugin.NewMockQuota(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Quota, func() (plugin.Plugin, error) {
+		return mQuota, nil
 	})
 	mockProperty := mockPlugin.NewMockProperty(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Property, func() (plugin.Plugin, error) {
@@ -123,6 +129,11 @@ func initMisServerMock(t *testing.T) (*MisServer, *gomock.Controller) {
 	mockCronApp := mockPlugin.NewMockCron(mockCtl)
 	plugin.RegisterFactory(c.Plugin.Cron, func() (plugin.Plugin, error) {
 		return mockCronApp, nil
+	})
+
+	mockCache := mockPlugin.NewMockDataCache(mockCtl)
+	plugin.RegisterFactory(c.Plugin.Cache, func() (plugin.Plugin, error) {
+		return mockCache, nil
 	})
 	mockAPI, err := api.NewAPI(c)
 	assert.NoError(t, err)

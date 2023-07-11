@@ -2,13 +2,13 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/json"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -709,6 +709,21 @@ func TestGetAppByCertificate(t *testing.T) {
 	sSecret.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any()).Return(mConfSecret3, nil)
 
 	sIndex.EXPECT().ListAppIndexBySecret(mConfSecret3.Namespace, mConfSecret3.Name).Return(appNames, nil).Times(1)
+	result := []models.AppItem{
+		{
+			Namespace: "default",
+			Name:      appNames[0],
+		},
+		{
+			Namespace: "default",
+			Name:      appNames[1],
+		},
+		{
+			Namespace: "default",
+			Name:      appNames[2],
+		},
+	}
+	sApp.EXPECT().ListByNames(mConfSecret3.Namespace, appNames).Return(result, nil).AnyTimes()
 	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[0], "").Return(apps[0], nil).AnyTimes()
 	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[1], "").Return(apps[1], nil).AnyTimes()
 	sApp.EXPECT().Get(mConfSecret3.Namespace, appNames[2], "").Return(apps[2], nil).AnyTimes()

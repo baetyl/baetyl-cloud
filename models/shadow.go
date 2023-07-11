@@ -1,9 +1,9 @@
 package models
 
 import (
-	"encoding/json"
 	"time"
 
+	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/baetyl/baetyl-go/v2/spec/v1"
 
 	"github.com/baetyl/baetyl-cloud/v2/common"
@@ -18,6 +18,8 @@ type Shadow struct {
 	DesireMeta        v1.Desire `json:"desireMeta,omitempty"`
 	CreationTimestamp time.Time `json:"createTime,omitempty"`
 	DesireVersion     string    `json:"desireVersion,omitempty"`
+	Time              time.Time `json:"time"`
+	ReportStr         string
 }
 
 // NodeViewList node view list

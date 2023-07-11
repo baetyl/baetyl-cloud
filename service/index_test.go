@@ -73,6 +73,8 @@ func TestResourceList(t *testing.T) {
 	assert.NoError(t, err)
 	_, err = is.ListAppsByNode(namespace, data)
 	assert.NoError(t, err)
+	_, err = is.ListSecretIndexByApp(namespace, data)
+	assert.NoError(t, err)
 }
 
 func TestResourceRefresh(t *testing.T) {

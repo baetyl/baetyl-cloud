@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS `baetyl_certificate` (
   `parent_id` varchar(64) NOT NULL DEFAULT '' COMMENT '上级证书id',
   `type` varchar(64) NOT NULL DEFAULT '' COMMENT '证书类型（根 CA、二级 CA、节点客户端证书、模块客户端证书、模块服务端证书）',
   `common_name` varchar(128) NOT NULL DEFAULT '' COMMENT '常用名',
-  `description` varchar(256) NOT NULL DEFAULT '' COMMENT '描述信息',
+  `description` varchar(1024) NOT NULL DEFAULT '' COMMENT '描述信息',
   `not_before` datetime NOT NULL DEFAULT '2017-01-01 00:00:00' COMMENT '证书生效时间',
   `not_after` datetime NOT NULL DEFAULT '2017-01-01 00:00:00' COMMENT '记录失效时间',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
@@ -150,4 +150,16 @@ CREATE TABLE IF NOT EXISTS `baetyl_module` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_name` (`name`,`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='module table';
+
+CREATE TABLE IF NOT EXISTS `baetyl_cron_app` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID,主键',
+  `name` varchar(128) NOT NULL DEFAULT '' COMMENT '应用名称',
+  `namespace` varchar(64) NOT NULL DEFAULT '' COMMENT '命名空间',
+  `selector` varchar(2048) NOT NULL DEFAULT '' COMMENT '边缘节点选择器',
+  `cron_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'cron time',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'create time',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_name` (`namespace`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='cron app table';
 COMMIT;

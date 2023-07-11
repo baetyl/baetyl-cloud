@@ -33,6 +33,8 @@ var params = map[string]interface{}{
 	"NodeCertCa":                 "---node cert ca---",
 	"CoreFrequency":              "20s",
 	"CoreAPIPort":                30050,
+	"BaetylCoreByteUint":         "KB",
+	"BaetylCoreSpeedLimit":       0,
 	context.KeyBaetylHostPathLib: "{{." + context.KeyBaetylHostPathLib + "}}",
 }
 
@@ -71,6 +73,8 @@ labels:
   resource-invisible: "true"
 namespace: ns-1
 selector: baetyl-node-name=node-name-1
+system: true
+replica: 1
 services:
 - name: baetyl-core
   image: out-baetyl
@@ -114,8 +118,6 @@ volumes:
 - name: host-root-path
   hostPath:
     path: '{{.BAETYL_HOST_PATH_LIB}}/host'
-system: true
-replica: 1
 `,
 		},
 		{
@@ -139,6 +141,8 @@ data:
     sync:
       download:
         timeout: 30m
+        speedLimit: 0
+        byteUint: KB
       report:
         interval: 20s
     httplink:
@@ -162,6 +166,8 @@ labels:
   resource-invisible: "true"
 namespace: ns-1
 selector: baetyl-node-name=node-name-1
+system: true
+replica: 1
 services:
 - name: baetyl-function
   image: out-baetyl-function
@@ -179,8 +185,6 @@ volumes:
   config:
     name: func-conf-name-1
     version: func-conf-version-1
-system: true
-replica: 1
 `,
 		},
 		{

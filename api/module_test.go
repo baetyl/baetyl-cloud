@@ -2,12 +2,12 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -118,10 +118,6 @@ func TestCreateModule(t *testing.T) {
 	api.Init = sInit
 	api.SysApp = sSysApp
 
-	s := []string{
-		"baetyl-function",
-	}
-	sSysApp.EXPECT().GetOptionalApps().Return(s).Times(1)
 	m1 := &models.Module{
 		Name:    "baetyl-function",
 		Version: "m1v",
@@ -135,7 +131,6 @@ func TestCreateModule(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	sSysApp.EXPECT().GetOptionalApps().Return(s).Times(1)
 	sModule.EXPECT().CreateModule(m1).Return(nil, errors.New("err")).Times(1)
 
 	w = httptest.NewRecorder()
@@ -155,10 +150,6 @@ func TestUpdateModule(t *testing.T) {
 	api.Init = sInit
 	api.SysApp = sSysApp
 
-	s := []string{
-		"baetyl-function",
-	}
-	sSysApp.EXPECT().GetOptionalApps().Return(s).Times(1)
 	m1 := &models.Module{
 		Name:    "baetyl-function",
 		Version: "m1v",

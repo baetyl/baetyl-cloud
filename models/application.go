@@ -1,13 +1,15 @@
 package models
 
 import (
+	"k8s.io/api/core/v1"
+	"strings"
 	"time"
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
 
 type ApplicationView struct {
-	Name              string                `json:"name,omitempty" validate:"resourceName"`
+	Name              string                `json:"name,omitempty" binding:"res_name"`
 	Mode              string                `json:"mode,omitempty" default:"kube"`
 	Type              string                `json:"type,omitempty" default:"container"`
 	Labels            map[string]string     `json:"labels,omitempty"`
@@ -16,25 +18,33 @@ type ApplicationView struct {
 	Version           string                `json:"version,omitempty"`
 	Selector          string                `json:"selector,omitempty"`
 	NodeSelector      string                `json:"nodeSelector,omitempty"`
-	InitServices      []ServiceView         `json:"initServices,omitempty" validate:"dive"`
-	Services          []ServiceView         `json:"services,omitempty" validate:"dive"`
-	Volumes           []VolumeView          `json:"volumes,omitempty" validate:"dive"`
+	InitServices      []ServiceView         `json:"initServices,omitempty" binding:"dive"`
+	Services          []ServiceView         `json:"services,omitempty" binding:"dive"`
+	Volumes           []VolumeView          `json:"volumes,omitempty" binding:"dive"`
 	Description       string                `json:"description,omitempty"`
 	System            bool                  `json:"system,omitempty"`
 	Registries        []RegistryView        `json:"registries,omitempty"`
 	CronStatus        specV1.CronStatusCode `json:"cronStatus" default:"0"`
 	CronTime          time.Time             `json:"cronTime,omitempty"`
 	HostNetwork       bool                  `json:"hostNetwork,omitempty"` // specifies host network mode of service
-	Replica           int                   `json:"replica,omitempty"`
+	DNSPolicy         v1.DNSPolicy          `json:"dnsPolicy,omitempty" default:"ClusterFirst"`
+	Replica           int                   `json:"replica"`
 	Workload          string                `json:"workload,omitempty"` // deployment | daemonset | statefulset | job
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty"`
 	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
+	AutoScaleCfg      *specV1.AutoScaleCfg  `json:"autoScaleCfg,omitempty"`
+}
+
+func (a *ApplicationView) ImageTrim() {
+	for index, service := range a.Services {
+		a.Services[index].Image = strings.TrimSpace(service.Image)
+	}
 }
 
 // VolumeView volume view
 type VolumeView struct {
 	// specified name of the volume
-	Name        string                       `json:"name,omitempty" binding:"required" validate:"omitempty,resourceName"`
+	Name        string                       `json:"name,omitempty" binding:"required,res_name"`
 	HostPath    *specV1.HostPathVolumeSource `json:"hostPath,omitempty"`
 	Config      *specV1.ObjectReference      `json:"config,omitempty"`
 	Secret      *specV1.ObjectReference      `json:"secret,omitempty"`
@@ -43,7 +53,7 @@ type VolumeView struct {
 }
 
 type AppItem struct {
-	Name              string                `json:"name,omitempty" validate:"omitempty,resourceName"`
+	Name              string                `json:"name,omitempty" binding:"omitempty,res_name"`
 	Mode              string                `json:"mode,omitempty" default:"kube"`
 	Type              string                `json:"type,omitempty" default:"container"`
 	Labels            map[string]string     `json:"labels,omitempty"`
@@ -61,6 +71,7 @@ type AppItem struct {
 	Workload          string                `json:"workload,omitempty" yaml:"workload,omitempty"` // deployment | daemonset | statefulset | job
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty" yaml:"jobConfig,omitempty"`
 	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
+	AutoScaleCfg      *specV1.AutoScaleCfg  `json:"autoScaleCfg,omitempty"`
 }
 
 // ApplicationList app List
