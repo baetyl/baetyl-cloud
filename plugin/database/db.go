@@ -7,11 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 // DBStorage
@@ -54,7 +55,7 @@ func New() (plugin.Plugin, error) {
 
 func NewDB(cfg CloudConfig) (*DB, error) {
 	if cfg.Database.Decryption {
-		decryptedURL, err := genDecryptedURL(cfg.Database.URL)
+		decryptedURL, err := genDecryptedURL(cfg.Database.URL, cfg.Database.DecryptionPlugin)
 		if decryptedURL == "" || err != nil {
 			return nil, errors.Trace(err)
 		}
@@ -82,9 +83,9 @@ func NewDB(cfg CloudConfig) (*DB, error) {
 	}, nil
 }
 
-func genDecryptedURL(originURL string) (string, error) {
+func genDecryptedURL(originURL, decryptionPlugin string) (string, error) {
 	var decryptedURL string
-	decrypt, err := plugin.GetPlugin("decryption")
+	decrypt, err := plugin.GetPlugin(decryptionPlugin)
 	if err != nil {
 		return "", errors.Trace(err)
 	}
