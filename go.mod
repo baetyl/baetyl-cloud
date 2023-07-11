@@ -3,10 +3,10 @@ module github.com/baetyl/baetyl-cloud/v2
 go 1.18
 
 require (
-	github.com/VictoriaMetrics/fastcache v1.12.1
 	github.com/ZZMarquis/gm v1.3.2
 	github.com/aws/aws-sdk-go v1.34.0
 	github.com/baetyl/baetyl-go/v2 v2.2.4-0.20230626031834-a39dbb3259dd
+	github.com/coocood/freecache v1.2.3
 	github.com/gin-contrib/cache v1.1.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-playground/validator/v10 v10.11.2
@@ -37,7 +37,6 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/conduitio/bwlimit v0.1.0 // indirect
 	github.com/containerd/containerd v1.5.18 // indirect
-	github.com/coocood/freecache v1.2.3 // indirect
 	github.com/creasty/defaults v1.4.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect

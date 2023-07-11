@@ -62,7 +62,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Csrf = "defaultcsrf"
 	expect.Plugin.JWT = "defaultjwt"
 	expect.Plugin.Quota = "defaultquota"
-	expect.Plugin.Cache = "fastcache"
+	expect.Plugin.Cache = "freecache"
 
 	expect.Template.Path = "/etc/baetyl/templates"
 
