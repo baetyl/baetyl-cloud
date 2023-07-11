@@ -23,6 +23,7 @@ func init() {
 
 // RandString
 //   - param n: suggest at least 10 to avoid conflict
+//
 // referred to https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-go
 func RandString(n int) string {
 	b := make([]byte, n)
