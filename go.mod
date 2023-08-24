@@ -1,6 +1,6 @@
 module github.com/baetyl/baetyl-cloud/v2
 
-go 1.18
+go 1.20
 
 require (
 	github.com/ZZMarquis/gm v1.3.2
