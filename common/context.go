@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 // Context context
@@ -75,12 +75,12 @@ func (c *Context) GetUser() User {
 	return user.(User)
 }
 
-// SetUser sets user info into context
+// SetUserInfo sets user info into context
 func (c *Context) SetUserInfo(info UserInfo) {
 	c.Set("userInfo", info)
 }
 
-// GetUser gets user info from context if exists
+// GetUserInfo gets user info from context if exists
 func (c *Context) GetUserInfo() UserInfo {
 	info, ok := c.Get("userInfo")
 	if !ok {
@@ -109,7 +109,7 @@ func (c *Context) SetTrace() {
 	k := GetTraceHeader()
 	v := c.Request.Header.Get(k)
 	if v == "" {
-		v = uuid.NewV4().String()
+		v = uuid.NewString()
 	}
 	c.Writer.Header().Set(k, v)
 }
