@@ -5,35 +5,36 @@
 package service
 
 import (
+	reflect "reflect"
+
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
-// MockSystemAppService is a mock of SystemAppService interface
+// MockSystemAppService is a mock of SystemAppService interface.
 type MockSystemAppService struct {
 	ctrl     *gomock.Controller
 	recorder *MockSystemAppServiceMockRecorder
 }
 
-// MockSystemAppServiceMockRecorder is the mock recorder for MockSystemAppService
+// MockSystemAppServiceMockRecorder is the mock recorder for MockSystemAppService.
 type MockSystemAppServiceMockRecorder struct {
 	mock *MockSystemAppService
 }
 
-// NewMockSystemAppService creates a new mock instance
+// NewMockSystemAppService creates a new mock instance.
 func NewMockSystemAppService(ctrl *gomock.Controller) *MockSystemAppService {
 	mock := &MockSystemAppService{ctrl: ctrl}
 	mock.recorder = &MockSystemAppServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockSystemAppService) EXPECT() *MockSystemAppServiceMockRecorder {
 	return m.recorder
 }
 
-// GenApps mocks base method
+// GenApps mocks base method.
 func (m *MockSystemAppService) GenApps(arg0 interface{}, arg1 string, arg2 *v1.Node) ([]*v1.Application, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenApps", arg0, arg1, arg2)
@@ -42,13 +43,13 @@ func (m *MockSystemAppService) GenApps(arg0 interface{}, arg1 string, arg2 *v1.N
 	return ret0, ret1
 }
 
-// GenApps indicates an expected call of GenApps
+// GenApps indicates an expected call of GenApps.
 func (mr *MockSystemAppServiceMockRecorder) GenApps(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenApps", reflect.TypeOf((*MockSystemAppService)(nil).GenApps), arg0, arg1, arg2)
 }
 
-// GenOptionalApps mocks base method
+// GenOptionalApps mocks base method.
 func (m *MockSystemAppService) GenOptionalApps(arg0 interface{}, arg1 string, arg2 *v1.Node, arg3 []string) ([]*v1.Application, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenOptionalApps", arg0, arg1, arg2, arg3)
@@ -57,13 +58,13 @@ func (m *MockSystemAppService) GenOptionalApps(arg0 interface{}, arg1 string, ar
 	return ret0, ret1
 }
 
-// GenOptionalApps indicates an expected call of GenOptionalApps
+// GenOptionalApps indicates an expected call of GenOptionalApps.
 func (mr *MockSystemAppServiceMockRecorder) GenOptionalApps(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenOptionalApps", reflect.TypeOf((*MockSystemAppService)(nil).GenOptionalApps), arg0, arg1, arg2, arg3)
 }
 
-// GetOptionalApps mocks base method
+// GetOptionalApps mocks base method.
 func (m *MockSystemAppService) GetOptionalApps() []string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOptionalApps")
@@ -71,7 +72,7 @@ func (m *MockSystemAppService) GetOptionalApps() []string {
 	return ret0
 }
 
-// GetOptionalApps indicates an expected call of GetOptionalApps
+// GetOptionalApps indicates an expected call of GetOptionalApps.
 func (mr *MockSystemAppServiceMockRecorder) GetOptionalApps() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptionalApps", reflect.TypeOf((*MockSystemAppService)(nil).GetOptionalApps))

@@ -688,7 +688,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 			"conf.yaml":          "property.1: value-1\nproperty.2: value-2\nproperty.3: value-3",
 		},
 	}
-	sConfig.EXPECT().Get("default", "common-cm", "").Return(nil, nil).Times(1)
+	sConfig.EXPECT().Get(nil, "default", "common-cm", "").Return(nil, nil).Times(1)
 	sFacade.EXPECT().CreateConfig("default", expectConfig).Return(expectConfig, nil).Times(1)
 
 	buf := new(bytes.Buffer)
@@ -712,7 +712,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 			"_object_123.jpg": "{\"metadata\":{\"account\":\"current\",\"bucket\":\"bie-document\",\"object\":\"test-images/1.jpg\",\"source\":\"baidubos\",\"type\":\"object\",\"userID\":\"\"}}",
 		},
 	}
-	sConfig.EXPECT().Get("default", "object-cm", "").Return(nil, nil).Times(1)
+	sConfig.EXPECT().Get(nil, "default", "object-cm", "").Return(nil, nil).Times(1)
 	sFacade.EXPECT().CreateConfig("default", gomock.Any()).Return(objectCfg, nil).Times(1)
 
 	buf = new(bytes.Buffer)
@@ -736,7 +736,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 			"_object_tf_mnist.zip": "{\"url\":\"https://doc.bce.baidu.com/bce-documentation/BIE/tf_mnist.zip\",\"unpack\":\"zip\",\"metadata\":{\"object\":\"tf_mnist.zip\",\"source\":\"http\",\"type\":\"object\",\"unpack\":\"zip\",\"url\":\"https://doc.bce.baidu.com/bce-documentation/BIE/tf_mnist.zip\",\"userID\":\"\"}}",
 		},
 	}
-	sConfig.EXPECT().Get("default", "http-cm", "").Return(nil, nil).Times(1)
+	sConfig.EXPECT().Get(nil, "default", "http-cm", "").Return(nil, nil).Times(1)
 	sFacade.EXPECT().CreateConfig("default", gomock.Any()).Return(httpConfig, nil).Times(1)
 
 	buf = new(bytes.Buffer)
@@ -763,7 +763,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 			"address": "nginx:latest",
 		},
 	}
-	sConfig.EXPECT().Get("default", "image-cm", "").Return(nil, nil).Times(1)
+	sConfig.EXPECT().Get(nil, "default", "image-cm", "").Return(nil, nil).Times(1)
 	sFacade.EXPECT().CreateConfig("default", gomock.Any()).Return(imageConfig, nil).Times(1)
 
 	buf = new(bytes.Buffer)
@@ -790,7 +790,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 			"_object_linux-amd64": "{\"unpack\":\"zip\",\"metadata\":{\"account\":\"current\",\"bucket\":\"bie-document\",\"object\":\"Easyedge-SDK/program1.zip\",\"platform\":\"linux-amd64\",\"source\":\"baidubos\",\"type\":\"object\",\"unpack\":\"zip\",\"userID\":\"\"}}",
 		},
 	}
-	sConfig.EXPECT().Get("default", "program-cm", "").Return(nil, nil).Times(1)
+	sConfig.EXPECT().Get(nil, "default", "program-cm", "").Return(nil, nil).Times(1)
 	sFacade.EXPECT().CreateConfig("default", gomock.Any()).Return(programConfig, nil).Times(1)
 
 	buf = new(bytes.Buffer)
@@ -818,7 +818,7 @@ func TestAPI_CreateConfig(t *testing.T) {
 			"_object_cfc-new-demo.zip": "{\"unpack\":\"zip\",\"metadata\":{\"bucket\":\"baetyl-cloud-1cd2d7790b6f4347bbeb3ecee54eca6e\",\"function\":\"cfc-new-demo\",\"handler\":\"index.add2\",\"object\":\"9741a152f1282a514d72804927cc3f4c71d49aae86684195c2930c63c56f784b/cfc-new-demo.zip\",\"runtime\":\"python3\",\"source\":\"baidubos\",\"type\":\"function\",\"unpack\":\"zip\",\"userID\":\"\",\"version\":\"1\"}}",
 		},
 	}
-	sConfig.EXPECT().Get("default", "function-cm", "").Return(nil, nil).Times(1)
+	sConfig.EXPECT().Get(nil, "default", "function-cm", "").Return(nil, nil).Times(1)
 	sFacade.EXPECT().CreateConfig("default", gomock.Any()).Return(functionConfig, nil).Times(1)
 
 	buf = new(bytes.Buffer)
@@ -876,7 +876,7 @@ func TestAPI_UpdateKVConfig(t *testing.T) {
 			"conf.yaml":          "property.1: value-11\nproperty.2: value-22\nproperty.3: value-33",
 		},
 	}
-	sConfig.EXPECT().Get("default", "common-cm", "").Return(expectConfig, nil).Times(1)
+	sConfig.EXPECT().Get(nil, "default", "common-cm", "").Return(expectConfig, nil).Times(1)
 	sFacade.EXPECT().UpdateConfig("default", gomock.Any()).Return(updateConfig, nil).Times(1)
 
 	buf := new(bytes.Buffer)
@@ -925,7 +925,7 @@ func TestAPI_UpdateObjectConfig(t *testing.T) {
 			"_object_123.jpg": "{\"account\":\"current\",\"bucket\":\"bie-document\",\"object\":\"test-images/123.jpg\",\"source\":\"baidubos\",\"type\":\"object\",\"userID\":\"\"}",
 		},
 	}
-	sConfig.EXPECT().Get("default", "object-cm", "").Return(objectCfg, nil).Times(1)
+	sConfig.EXPECT().Get(nil, "default", "object-cm", "").Return(objectCfg, nil).Times(1)
 	sFacade.EXPECT().UpdateConfig("default", gomock.Any()).Return(objectCfgUpdate, nil).Times(1)
 
 	buf := new(bytes.Buffer)
@@ -981,7 +981,7 @@ func TestAPI_UpdateFunctionConfig(t *testing.T) {
 			"_object_cfc-new-demo.zip": "{\"bucket\":\"baetyl-cloud-1cd2d7790b6f4347bbeb3ecee54eca6e\",\"function\":\"cfc-new-demo\",\"handler\":\"index.sum\",\"object\":\"9741a152f1282a514d72804927cc3f4c71d49aae86684195c2930c63c56f784b/cfc-new-demo.zip\",\"runtime\":\"python3\",\"source\":\"baidubos\",\"type\":\"function\",\"unpack\":\"zip\",\"userID\":\"\",\"version\":1}",
 		},
 	}
-	sConfig.EXPECT().Get("default", "function-cm", "").Return(functionConfig, nil).Times(1)
+	sConfig.EXPECT().Get(nil, "default", "function-cm", "").Return(functionConfig, nil).Times(1)
 	sFacade.EXPECT().UpdateConfig("default", gomock.Any()).Return(functionConfigUpdate, nil).Times(1)
 
 	buf := new(bytes.Buffer)
@@ -1029,7 +1029,7 @@ func TestAPI_DeleteConfig(t *testing.T) {
 			"conf.yaml":          "property.1: value-1\nproperty.2: value-2\nproperty.3: value-3",
 		},
 	}
-	sConfig.EXPECT().Get("default", "common-cm", "").Return(expectConfig, nil).Times(1)
+	sConfig.EXPECT().Get(nil, "default", "common-cm", "").Return(expectConfig, nil).Times(1)
 	sIndex.EXPECT().ListAppIndexByConfig("default", "common-cm").Return(nil, nil).Times(1)
 	sFacade.EXPECT().DeleteConfig("default", "common-cm").Return(nil).Times(1)
 

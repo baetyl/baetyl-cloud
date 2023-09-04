@@ -16,7 +16,7 @@ import (
 
 // ConfigService ConfigService
 type ConfigService interface {
-	Get(namespace, name, version string) (*specV1.Configuration, error)
+	Get(tx interface{}, namespace, name, version string) (*specV1.Configuration, error)
 	List(namespace string, listOptions *models.ListOptions) (*models.ConfigurationList, error)
 	Create(tx interface{}, namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
 	Update(tx interface{}, namespace string, config *specV1.Configuration) (*specV1.Configuration, error)
@@ -40,8 +40,8 @@ func NewConfigService(config *config.CloudConfig) (ConfigService, error) {
 }
 
 // Get get a config
-func (s *configService) Get(namespace, name, version string) (*specV1.Configuration, error) {
-	res, err := s.config.GetConfig(nil, namespace, name, version)
+func (s *configService) Get(tx interface{}, namespace, name, version string) (*specV1.Configuration, error) {
+	res, err := s.config.GetConfig(tx, namespace, name, version)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "config"),
 			common.Field("name", name))

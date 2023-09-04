@@ -62,7 +62,7 @@ func NewApplicationService(config *config.CloudConfig) (ApplicationService, erro
 
 // Get get application
 func (a *AppServiceImpl) Get(namespace, name, version string) (*specV1.Application, error) {
-	app, err := a.App.GetApplication(namespace, name, version)
+	app, err := a.App.GetApplication(nil, namespace, name, version)
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		return nil, common.Error(common.ErrResourceNotFound, common.Field("type", "app"),
 			common.Field("name", name))

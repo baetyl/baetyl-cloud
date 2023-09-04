@@ -403,7 +403,7 @@ func (api *API) DeleteNode(c *common.Context) (interface{}, error) {
 	}
 
 	// Delete Node
-	if err = api.Node.Delete(c.GetNamespace(), node); err != nil {
+	if err = api.Node.Delete(nil, c.GetNamespace(), node); err != nil {
 		return nil, err
 	}
 	if e := api.ReleaseQuota(ns, plugin.QuotaNode, NodeNumber); e != nil {
@@ -1109,7 +1109,7 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 		for _, v := range app.Volumes {
 			// Clean Config
 			if v.Config != nil {
-				config, err := api.Config.Get(ns, v.Config.Name, "")
+				config, err := api.Config.Get(nil, ns, v.Config.Name, "")
 				if err != nil {
 					logResourceError(err, common.Config, v.Config.Name, ns)
 					continue
@@ -1147,7 +1147,7 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 						log.L().Warn("failed to get "+common.AnnotationPkiCertID+" of certificate secret", log.Any(common.KeyContextNamespace, ns), log.Any("name", v.Secret.Name))
 					}
 				}
-				if err := api.Secret.Delete(ns, v.Secret.Name); err != nil {
+				if err := api.Secret.Delete(nil, ns, v.Secret.Name); err != nil {
 					logResourceError(err, common.Secret, v.Secret.Name, ns)
 				}
 			}
@@ -1232,7 +1232,7 @@ func (api *API) getAppConfig(app *v1.Application, confPrefix string) (*v1.Config
 		if volume.Config == nil || !strings.Contains(volume.Config.Name, confPrefix) {
 			continue
 		}
-		conf, err := api.Config.Get(app.Namespace, volume.Config.Name, "")
+		conf, err := api.Config.Get(nil, app.Namespace, volume.Config.Name, "")
 		if err != nil {
 			return nil, err
 		}

@@ -110,8 +110,12 @@ func (d *DB) ListShadowByNames(tx interface{}, namespace string, names []string)
 	return d.listShadowByNamesTx(transaction, namespace, names)
 }
 
-func (d *DB) Delete(namespace, name string) error {
-	_, err := d.DeleteShadowTx(nil, namespace, name)
+func (d *DB) Delete(tx interface{}, namespace, name string) error {
+	var transaction *sqlx.Tx
+	if tx != nil {
+		transaction = tx.(*sqlx.Tx)
+	}
+	_, err := d.DeleteShadowTx(transaction, namespace, name)
 
 	if err != nil {
 		return err

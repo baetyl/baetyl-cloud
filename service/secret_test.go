@@ -70,8 +70,8 @@ func TestDefaultRegistryService_Delete(t *testing.T) {
 	cs, err := NewSecretService(mockObject.conf)
 	assert.NoError(t, err)
 	registry := genSecretTestCase()
-	mockObject.secret.EXPECT().DeleteSecret(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-	err = cs.Delete(registry.Namespace, registry.Name)
+	mockObject.secret.EXPECT().DeleteSecret(nil, gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	err = cs.Delete(nil, registry.Namespace, registry.Name)
 	assert.NoError(t, err)
 }
 func TestDefaultRegistryService_Create(t *testing.T) {

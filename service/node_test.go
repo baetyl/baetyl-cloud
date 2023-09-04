@@ -229,20 +229,20 @@ func TestDefaultNodeService_Delete(t *testing.T) {
 	}
 
 	node := genNodeTestCase()
-	mockObject.shadow.EXPECT().Delete(node.Namespace, node.Name).Return(nil).AnyTimes()
+	mockObject.shadow.EXPECT().Delete(nil, node.Namespace, node.Name).Return(nil).AnyTimes()
 
 	mockObject.node.EXPECT().DeleteNode(nil, node.Namespace, node.Name).Return(fmt.Errorf("error"))
-	err := cs.Delete(node.Namespace, node)
+	err := cs.Delete(nil, node.Namespace, node)
 	assert.Error(t, err)
 
 	mockObject.node.EXPECT().DeleteNode(nil, node.Namespace, node.Name).Return(nil)
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("error"))
-	err = cs.Delete(node.Namespace, node)
+	err = cs.Delete(nil, node.Namespace, node)
 	assert.NoError(t, err)
 
 	mockObject.node.EXPECT().DeleteNode(nil, node.Namespace, node.Name).Return(nil)
 	mockIndexService.EXPECT().RefreshAppsIndexByNode(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-	err = cs.Delete(node.Namespace, node)
+	err = cs.Delete(nil, node.Namespace, node)
 	assert.NoError(t, err)
 }
 

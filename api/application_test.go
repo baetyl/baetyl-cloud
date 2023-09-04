@@ -342,7 +342,7 @@ func TestGetFunctionApplication(t *testing.T) {
 		},
 	}
 	fApp.EXPECT().GetApp(mApp.Namespace, mApp.Name, "").Return(mApp, nil).Times(1)
-	sConfig.EXPECT().Get(mApp.Namespace, "baetyl-function-app-service-xxxxxxxxx", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, mApp.Namespace, "baetyl-function-app-service-xxxxxxxxx", "").Return(config, nil).Times(1)
 
 	// 200
 	req, _ = http.NewRequest(http.MethodGet, "/v1/apps/abc", nil)
@@ -496,7 +496,7 @@ func TestCreateContainerApplication(t *testing.T) {
 	config := &specV1.Configuration{}
 	secret := &specV1.Secret{}
 	app := &specV1.Application{}
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(app, nil).Times(1)
@@ -507,7 +507,7 @@ func TestCreateContainerApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusForbidden, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(nil, fmt.Errorf("config not found")).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(nil, fmt.Errorf("config not found")).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -515,7 +515,7 @@ func TestCreateContainerApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(nil, fmt.Errorf("secret not found")).Times(1)
 
 	w = httptest.NewRecorder()
@@ -524,14 +524,14 @@ func TestCreateContainerApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 
 	w = httptest.NewRecorder()
@@ -540,7 +540,7 @@ func TestCreateContainerApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
@@ -569,7 +569,7 @@ func TestCreateContainerApplication(t *testing.T) {
 		},
 	}
 
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
@@ -598,7 +598,7 @@ func TestCreateContainerApplication(t *testing.T) {
 		},
 	}
 
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
@@ -611,7 +611,7 @@ func TestCreateContainerApplication(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	mApp := getMockContainerApp()
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(2)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
@@ -1019,7 +1019,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 
 	log.L().Info("", log.Any("app1", app))
 
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "certificate01", "").Return(secret, nil).Times(1)
@@ -1072,7 +1072,7 @@ func TestUpdateContainerApplication(t *testing.T) {
 	secret1 := &specV1.Secret{Name: "registry01", Version: "123", Labels: map[string]string{specV1.SecretLabel: specV1.SecretRegistry}}
 	secret2 := &specV1.Secret{Name: "secret01", Version: "123"}
 	registry := &models.Registry{Name: "registry01", Version: "1"}
-	sConfig.EXPECT().Get(gomock.Any(), gomock.Any(), "").Return(config, nil).AnyTimes()
+	sConfig.EXPECT().Get(nil, gomock.Any(), gomock.Any(), "").Return(config, nil).AnyTimes()
 	sSecret.EXPECT().Get(gomock.Any(), secret2.Name, gomock.Any()).Return(secret2, nil).AnyTimes()
 	sSecret.EXPECT().Get(gomock.Any(), registry.Name, gomock.Any()).Return(secret1, nil).AnyTimes()
 
@@ -1253,8 +1253,8 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 			},
 		},
 	}
-	sConfig.EXPECT().Get(appView.Namespace, "test-program", "").Return(programConfig, nil).Times(2)
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "test-program", "").Return(programConfig, nil).Times(2)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app1, nil)
 	w := httptest.NewRecorder()
@@ -1395,8 +1395,8 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 			},
 		},
 	}
-	sConfig.EXPECT().Get(appView.Namespace, "test-program2", "").Return(programConfig2, nil).Times(2)
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "test-program2", "").Return(programConfig2, nil).Times(2)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app12, nil)
 	w = httptest.NewRecorder()
@@ -1515,8 +1515,8 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 	}
 
 	agentConfig2 := &specV1.Configuration{}
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf2", "").Return(agentConfig2, nil).Times(1)
-	sConfig.EXPECT().Get(appView.Namespace, "test-program2", "").Return(programConfig2, nil).Times(2)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf2", "").Return(agentConfig2, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "test-program2", "").Return(programConfig2, nil).Times(2)
 
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(app1, nil).Times(1)
 	fApp.EXPECT().UpdateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(app2, nil)
@@ -1722,7 +1722,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 
 	config := &specV1.Configuration{}
 	app := &specV1.Application{}
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(app, nil).Times(1)
 
 	w := httptest.NewRecorder()
@@ -1731,7 +1731,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusForbidden, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(nil, fmt.Errorf("config not found")).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(nil, fmt.Errorf("config not found")).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -1739,14 +1739,14 @@ func TestCreateFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	w = httptest.NewRecorder()
@@ -1773,7 +1773,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 		},
 	}
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 
@@ -1801,7 +1801,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 		},
 	}
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(nil, errors.New("err")).Times(1)
@@ -1832,7 +1832,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 			"service.yml": string(data),
 		},
 	}
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 	funcs := map[string]string{
@@ -1847,13 +1847,13 @@ func TestCreateFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	// one more for program config
 	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
-	sConfig.EXPECT().Get(appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
+	sConfig.EXPECT().Get(nil, appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -2290,19 +2290,19 @@ func TestUpdateFunctionApplication(t *testing.T) {
 
 	configCode := &specV1.Configuration{}
 	sApp.EXPECT().Get(namespace, "abc", "").Return(oldApp, nil).Times(1)
-	sConfig.EXPECT().Get(namespace, "func2", "").Return(configCode, nil).Times(1)
-	sConfig.EXPECT().Get(namespace, "func3", "").Return(configCode, nil).Times(1)
-	sConfig.EXPECT().Get(namespace, "baetyl-function-config-app-service-2", "").Return(config2, nil).Times(1)
-	sConfig.EXPECT().Get(namespace, "baetyl-function-config-app-service-3", "").Return(config2, nil).Times(1)
-	sConfig.EXPECT().Get(namespace, "baetyl-function-program-config-app-service-bbbb", "").Return(config2, nil).Times(1)
-	sConfig.EXPECT().Get(namespace, "baetyl-function-program-config-app-service-cccc", "").Return(config2, nil).Times(1)
+	sConfig.EXPECT().Get(nil, namespace, "func2", "").Return(configCode, nil).Times(1)
+	sConfig.EXPECT().Get(nil, namespace, "func3", "").Return(configCode, nil).Times(1)
+	sConfig.EXPECT().Get(nil, namespace, "baetyl-function-config-app-service-2", "").Return(config2, nil).Times(1)
+	sConfig.EXPECT().Get(nil, namespace, "baetyl-function-config-app-service-3", "").Return(config2, nil).Times(1)
+	sConfig.EXPECT().Get(nil, namespace, "baetyl-function-program-config-app-service-bbbb", "").Return(config2, nil).Times(1)
+	sConfig.EXPECT().Get(nil, namespace, "baetyl-function-program-config-app-service-cccc", "").Return(config2, nil).Times(1)
 	funcs := map[string]string{
 		"python36": "image",
 	}
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(2)
 	fApp.EXPECT().UpdateApp(namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(newApp, nil)
-	sConfig.EXPECT().Get(namespace, "baetyl-function-config-app-service-2", "").Return(config2, nil).Times(1)
-	sConfig.EXPECT().Get(namespace, "baetyl-function-config-app-service-3", "").Return(config2, nil).Times(1)
+	sConfig.EXPECT().Get(nil, namespace, "baetyl-function-config-app-service-2", "").Return(config2, nil).Times(1)
+	sConfig.EXPECT().Get(nil, namespace, "baetyl-function-config-app-service-3", "").Return(config2, nil).Times(1)
 
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(newAppView)
@@ -2451,7 +2451,7 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 
 	config := &specV1.Configuration{}
 	app := &specV1.Application{}
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(app, nil).Times(1)
 
 	w := httptest.NewRecorder()
@@ -2460,7 +2460,7 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusForbidden, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(nil, fmt.Errorf("config not found")).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(nil, fmt.Errorf("config not found")).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -2468,14 +2468,14 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	w = httptest.NewRecorder()
@@ -2503,7 +2503,7 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 		},
 	}
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 
@@ -2532,7 +2532,7 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 		},
 	}
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(nil, errors.New("err")).Times(1)
@@ -2563,7 +2563,7 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 			"service.yml": string(data),
 		},
 	}
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 	funcs := map[string]string{
@@ -2578,13 +2578,13 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	// one more for program config
 	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
-	sConfig.EXPECT().Get(appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
+	sConfig.EXPECT().Get(nil, appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -2695,7 +2695,7 @@ func TestCreateKubeNotFunctionApplication(t *testing.T) {
 		},
 	}
 
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(config, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
@@ -2786,7 +2786,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 
 	config := &specV1.Configuration{}
 	app := &specV1.Application{}
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(app, nil).Times(1)
 
 	w := httptest.NewRecorder()
@@ -2795,7 +2795,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusForbidden, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(nil, fmt.Errorf("config not found")).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(nil, fmt.Errorf("config not found")).Times(1)
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -2803,14 +2803,14 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
 	req, _ = http.NewRequest(http.MethodPost, "/v1/apps?base=eden", bytes.NewReader(body))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	w = httptest.NewRecorder()
@@ -2837,7 +2837,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 		},
 	}
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 
@@ -2865,7 +2865,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 		},
 	}
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 	config2 := &specV1.Configuration{}
@@ -2877,7 +2877,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
@@ -2909,7 +2909,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 			"service.yml": string(data),
 		},
 	}
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
@@ -2925,14 +2925,14 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	sConfig.EXPECT().Get(appView.Namespace, "func1", "").Return(config, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "func1", "").Return(config, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "eden2", "").Return(eden2, nil).Times(1)
 	sTempalte.EXPECT().UnmarshalTemplate("baetyl-python36-program.yml", gomock.Any(), config2).Return(nil).Times(1)
 	sFunc.EXPECT().ListRuntimes().Return(funcs, nil).Times(1)
 	// one more for program config
 	fApp.EXPECT().CreateApp(appView.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).Return(eden2, nil).Times(1)
-	sConfig.EXPECT().Get(appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
+	sConfig.EXPECT().Get(nil, appView.Namespace, gomock.Any(), "").Return(config, nil).AnyTimes()
 
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(appView)
@@ -3056,8 +3056,8 @@ func TestCreateNativeNotFunctionApplication(t *testing.T) {
 	}
 
 	agentConfig := &specV1.Configuration{}
-	sConfig.EXPECT().Get(appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
-	sConfig.EXPECT().Get(appView.Namespace, "test-program", "").Return(programConfig, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "agent-conf", "").Return(agentConfig, nil).Times(1)
+	sConfig.EXPECT().Get(nil, appView.Namespace, "test-program", "").Return(programConfig, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "secret01", "").Return(secret, nil).Times(1)
 	sSecret.EXPECT().Get(appView.Namespace, "registry01", "").Return(secret, nil).Times(1)
 	sApp.EXPECT().Get(appView.Namespace, "abc", "").Return(nil, common.Error(common.ErrResourceNotFound)).Times(1)

@@ -20,7 +20,7 @@ type SecretService interface {
 	List(namespace string, listOptions *models.ListOptions) (*models.SecretList, error)
 	Create(tx interface{}, namespace string, secret *specV1.Secret) (*specV1.Secret, error)
 	Update(namespace string, secret *specV1.Secret) (*specV1.Secret, error)
-	Delete(namespace, name string) error
+	Delete(tx interface{}, namespace, name string) error
 }
 
 type secretService struct {
@@ -74,6 +74,6 @@ func (s *secretService) Update(namespace string, secret *specV1.Secret) (*specV1
 }
 
 // Delete Delete a Secret
-func (s *secretService) Delete(namespace, name string) error {
-	return s.secret.DeleteSecret(namespace, name)
+func (s *secretService) Delete(tx interface{}, namespace, name string) error {
+	return s.secret.DeleteSecret(tx, namespace, name)
 }

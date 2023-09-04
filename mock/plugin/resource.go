@@ -196,32 +196,32 @@ func (mr *MockResourceMockRecorder) DeleteNode(arg0, arg1, arg2 interface{}) *go
 }
 
 // DeleteSecret mocks base method.
-func (m *MockResource) DeleteSecret(arg0, arg1 string) error {
+func (m *MockResource) DeleteSecret(arg0 interface{}, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSecret", arg0, arg1)
+	ret := m.ctrl.Call(m, "DeleteSecret", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteSecret indicates an expected call of DeleteSecret.
-func (mr *MockResourceMockRecorder) DeleteSecret(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) DeleteSecret(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSecret", reflect.TypeOf((*MockResource)(nil).DeleteSecret), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSecret", reflect.TypeOf((*MockResource)(nil).DeleteSecret), arg0, arg1, arg2)
 }
 
 // GetApplication mocks base method.
-func (m *MockResource) GetApplication(arg0, arg1, arg2 string) (*v1.Application, error) {
+func (m *MockResource) GetApplication(arg0 interface{}, arg1, arg2, arg3 string) (*v1.Application, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetApplication", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetApplication", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(*v1.Application)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetApplication indicates an expected call of GetApplication.
-func (mr *MockResourceMockRecorder) GetApplication(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockResourceMockRecorder) GetApplication(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetApplication", reflect.TypeOf((*MockResource)(nil).GetApplication), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetApplication", reflect.TypeOf((*MockResource)(nil).GetApplication), arg0, arg1, arg2, arg3)
 }
 
 // GetConfig mocks base method.

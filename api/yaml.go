@@ -446,7 +446,7 @@ func (api *API) generateConfig(ns, userId string, r runtime.Object) (interface{}
 		return nil, err
 	}
 
-	oldConfig, err := api.Config.Get(ns, cfg.Name, "")
+	oldConfig, err := api.Config.Get(nil, ns, cfg.Name, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
 			return nil, err
@@ -489,7 +489,7 @@ func (api *API) updateConfig(ns, userId string, r runtime.Object) (interface{}, 
 		return nil, err
 	}
 
-	res, err := api.Config.Get(ns, cfg.Name, "")
+	res, err := api.Config.Get(nil, ns, cfg.Name, "")
 	if err != nil {
 		return nil, err
 	}
@@ -526,7 +526,7 @@ func (api *API) deleteConfig(ns string, r runtime.Object) (string, error) {
 		return "", err
 	}
 
-	res, err := api.Config.Get(ns, cfg.Name, "")
+	res, err := api.Config.Get(nil, ns, cfg.Name, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 			return "", nil
@@ -900,7 +900,7 @@ func (api *API) generateCommonAppInfo(ns string, podSpec *corev1.PodSpec) (*spec
 	for _, v := range podSpec.Volumes {
 		var vol specV1.Volume
 		if v.ConfigMap != nil {
-			_, err := api.Config.Get(ns, v.ConfigMap.Name, "")
+			_, err := api.Config.Get(nil, ns, v.ConfigMap.Name, "")
 			if err != nil {
 				return nil, err
 			}
