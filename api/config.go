@@ -29,7 +29,7 @@ const (
 // GetConfig get a config
 func (api *API) GetConfig(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	config, err := api.Config.Get(ns, n, "")
+	config, err := api.Config.Get(nil, ns, n, "")
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (api *API) CreateConfig(c *common.Context) (interface{}, error) {
 	config.Namespace = ns
 
 	// TODO: remove get method, return error inside service instead
-	oldConfig, err := api.Config.Get(ns, name, "")
+	oldConfig, err := api.Config.Get(nil, ns, name, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); !ok || e.Code() != common.ErrResourceNotFound {
 			return nil, err
@@ -97,7 +97,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 	}
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
 
-	res, err := api.Config.Get(ns, n, "")
+	res, err := api.Config.Get(nil, ns, n, "")
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (api *API) UpdateConfig(c *common.Context) (interface{}, error) {
 // DeleteConfig delete the config
 func (api *API) DeleteConfig(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := api.Config.Get(ns, n, "")
+	res, err := api.Config.Get(nil, ns, n, "")
 	if err != nil {
 		if e, ok := err.(errors.Coder); ok && e.Code() == common.ErrResourceNotFound {
 			return nil, nil
@@ -153,7 +153,7 @@ func (api *API) DeleteConfig(c *common.Context) (interface{}, error) {
 
 func (api *API) GetAppByConfig(c *common.Context) (interface{}, error) {
 	ns, n := c.GetNamespace(), c.GetNameFromParam()
-	res, err := api.Config.Get(ns, n, "")
+	res, err := api.Config.Get(nil, ns, n, "")
 	if err != nil {
 		log.L().Error("get config failed", log.Error(err))
 		return nil, err

@@ -120,7 +120,7 @@ func fromListOptionsModel(listOptions *models.ListOptions) *metav1.ListOptions {
 	return res
 }
 
-func (c *client) GetApplication(namespace, name, version string) (*specV1.Application, error) {
+func (c *client) GetApplication(_ interface{}, namespace, name, version string) (*specV1.Application, error) {
 	defer utils.Trace(c.log.Debug, "GetApplication")()
 	options := metav1.GetOptions{ResourceVersion: version}
 	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Get(name, options)

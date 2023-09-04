@@ -397,7 +397,7 @@ func (s *SystemAppServiceImpl) GenConfig(tx interface{}, ns, template string, pa
 	}
 	conf, err := s.Config.Create(tx, ns, cfg)
 	if err != nil {
-		res, err := s.Config.Get(ns, cfg.Name, "")
+		res, err := s.Config.Get(nil, ns, cfg.Name, "")
 		if err != nil {
 			return nil, errors.Trace(err)
 		}

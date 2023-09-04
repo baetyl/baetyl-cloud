@@ -140,7 +140,7 @@ func TestShadow(t *testing.T) {
 	assert.Equal(t, 1, len(list.Items))
 	assert.Equal(t, "node01", list.Items[0].Name)
 
-	err = db.Delete(namespace, shadow.Name)
+	err = db.Delete(nil, namespace, shadow.Name)
 	assert.NoError(t, err)
 }
 

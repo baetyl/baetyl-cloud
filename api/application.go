@@ -404,7 +404,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 			}
 		}
 
-		config, err := api.Config.Get(appView.Namespace, generatedConfigName, "")
+		config, err := api.Config.Get(nil, appView.Namespace, generatedConfigName, "")
 		if err != nil {
 			return nil, err
 		}
@@ -418,7 +418,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 		}
 
 		if app.Mode == context.RunModeNative {
-			_, err = api.Config.Get(appView.Namespace, generatedProgramConfigName, "")
+			_, err = api.Config.Get(nil, appView.Namespace, generatedProgramConfigName, "")
 			if err != nil {
 				return nil, err
 			}
@@ -593,7 +593,7 @@ func (api *API) translateToNativeAppView(appView *models.ApplicationView) error 
 		}
 		service.ProgramConfig = configName
 
-		_, err = api.Config.Get(appView.Namespace, configName, "")
+		_, err = api.Config.Get(nil, appView.Namespace, configName, "")
 		if err != nil {
 			return err
 		}
@@ -680,7 +680,7 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 			if isProgramConfig(v.Name) {
 				continue
 			}
-			_, err := api.Config.Get(namespace, v.Config.Name, "")
+			_, err := api.Config.Get(nil, namespace, v.Config.Name, "")
 			if err != nil {
 				return err
 			}
@@ -710,7 +710,7 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 	updPorts := make(map[int32]bool)
 	for _, service := range app.Services {
 		if service.ProgramConfig != "" {
-			_, err := api.Config.Get(namespace, service.ProgramConfig, "")
+			_, err := api.Config.Get(nil, namespace, service.ProgramConfig, "")
 			if err != nil {
 				return err
 			}

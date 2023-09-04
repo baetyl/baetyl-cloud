@@ -14,7 +14,7 @@ type Shadow interface {
 	ListShadowByNames(tx interface{}, namespace string, names []string) ([]*models.Shadow, error)
 	Create(tx interface{}, shadow *models.Shadow) (*models.Shadow, error)
 	BatchCreateShadow(shadows []*models.Shadow) ([]*models.Shadow, error)
-	Delete(namespace, name string) error
+	Delete(tx interface{}, namespace, name string) error
 	UpdateDesire(tx interface{}, shadow *models.Shadow) error
 	UpdateDesires(tx interface{}, shadows []*models.Shadow) error
 	UpdateReport(shadow *models.Shadow) (*models.Shadow, error)

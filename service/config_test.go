@@ -41,7 +41,7 @@ func TestDefaultConfigService_Get(t *testing.T) {
 
 	cs, err := NewConfigService(mockObject.conf)
 	assert.NoError(t, err)
-	res, err := cs.Get(namespace, name, "")
+	res, err := cs.Get(nil, namespace, name, "")
 	assert.NoError(t, err)
 	assert.Equal(t, mConf.Version, res.Version)
 }

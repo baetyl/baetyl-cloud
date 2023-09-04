@@ -149,7 +149,7 @@ func (t *SyncServiceImpl) Desire(namespace string, crdInfos []specV1.ResourceInf
 			}
 			crdData.Value.Value = app
 		case specV1.KindConfiguration, specV1.KindConfig:
-			cfg, err := t.ConfigService.Get(namespace, info.Name, info.Version)
+			cfg, err := t.ConfigService.Get(nil, namespace, info.Name, info.Version)
 			if err != nil {
 				log.L().Error("failed to get config", log.Any(common.KeyContextNamespace, namespace), log.Any("name", info.Name))
 				return nil, err

@@ -81,17 +81,17 @@ func (mr *MockNodeServiceMockRecorder) Create(arg0, arg1, arg2 interface{}) *gom
 }
 
 // Delete mocks base method.
-func (m *MockNodeService) Delete(arg0 string, arg1 *v1.Node) error {
+func (m *MockNodeService) Delete(arg0 interface{}, arg1 string, arg2 *v1.Node) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
+	ret := m.ctrl.Call(m, "Delete", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockNodeServiceMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockNodeServiceMockRecorder) Delete(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockNodeService)(nil).Delete), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockNodeService)(nil).Delete), arg0, arg1, arg2)
 }
 
 // DeleteNodeAppVersion mocks base method.

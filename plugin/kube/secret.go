@@ -122,7 +122,7 @@ func (c *client) UpdateSecret(namespace string, secretMapModel *specV1.Secret) (
 	return c.toSecretModel(SecretMap), err
 }
 
-func (c *client) DeleteSecret(namespace, name string) error {
+func (c *client) DeleteSecret(_ any, namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "DeleteSecret")()
 	err := c.customClient.CloudV1alpha1().Secrets(namespace).Delete(name, &metav1.DeleteOptions{})
 	if err != nil {

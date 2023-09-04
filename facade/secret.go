@@ -42,7 +42,7 @@ func (a *facade) UpdateSecret(ns string, secret *specV1.Secret) (*specV1.Secret,
 }
 
 func (a *facade) DeleteSecret(ns, name string) error {
-	return a.secret.Delete(ns, name)
+	return a.secret.Delete(nil, ns, name)
 }
 
 func (a *facade) updateAppSecret(namespace string, secret *specV1.Secret) error {

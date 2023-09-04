@@ -148,7 +148,7 @@ func TestDeleteSecret(t *testing.T) {
 	}
 	ns, n := "test", "test"
 
-	mFacade.sSecret.EXPECT().Delete(ns, n).Return(nil).Times(1)
+	mFacade.sSecret.EXPECT().Delete(nil, ns, n).Return(nil).Times(1)
 	err := sFacade.DeleteSecret(ns, n)
 	assert.NoError(t, err)
 }

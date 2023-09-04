@@ -5,9 +5,10 @@
 package service
 
 import (
+	reflect "reflect"
+
 	v1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockSyncService is a mock of SyncService interface.

@@ -226,9 +226,9 @@ func initApplicationClient() *client {
 
 func TestGetApplication(t *testing.T) {
 	c := initApplicationClient()
-	_, err := c.GetApplication("default", "test", "")
+	_, err := c.GetApplication(nil, "default", "test", "")
 	assert.NotNil(t, err)
-	cfg, err := c.GetApplication("default", "test_name", "")
+	cfg, err := c.GetApplication(nil, "default", "test_name", "")
 	assert.Equal(t, cfg.Name, "test_name")
 }
 

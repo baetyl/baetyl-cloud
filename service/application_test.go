@@ -95,7 +95,7 @@ func TestDefaultApplicationService_Get(t *testing.T) {
 	namespace := "default"
 	name := "Deployment-get"
 
-	mockObject.app.EXPECT().GetApplication(namespace, name, "").Return(nil, nil).AnyTimes()
+	mockObject.app.EXPECT().GetApplication(nil, namespace, name, "").Return(nil, nil).AnyTimes()
 	cs, err := NewApplicationService(mockObject.conf)
 	assert.NoError(t, err)
 	_, err = cs.Get(namespace, name, "")

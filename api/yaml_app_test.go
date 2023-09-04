@@ -10,11 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	mf "github.com/baetyl/baetyl-cloud/v2/mock/facade"
-	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
-	gmodels "github.com/baetyl/baetyl-cloud/v2/models"
-	"github.com/baetyl/baetyl-cloud/v2/service"
 	"github.com/baetyl/baetyl-go/v2/context"
 	"github.com/baetyl/baetyl-go/v2/json"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
@@ -23,6 +18,12 @@ import (
 	appv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	mf "github.com/baetyl/baetyl-cloud/v2/mock/facade"
+	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
+	gmodels "github.com/baetyl/baetyl-cloud/v2/models"
+	"github.com/baetyl/baetyl-cloud/v2/service"
 )
 
 var (
@@ -419,7 +420,7 @@ func TestAPI_CreateDeployApp(t *testing.T) {
 		},
 	}
 	sApp.EXPECT().Get("default", "nginx", "").Return(nil, nil).Times(1)
-	sConfig.EXPECT().Get("default", "common-cm", "").Return(cfg, nil).Times(2)
+	sConfig.EXPECT().Get(nil, "default", "common-cm", "").Return(cfg, nil).Times(2)
 	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(4)
 	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(4)
 	sFacade.EXPECT().CreateApp("default", nil, gomock.Any(), nil).Return(deployApp, nil).Times(1)
@@ -576,7 +577,7 @@ func TestAPI_CreateDaemonSetApp(t *testing.T) {
 		},
 	}
 	sApp.EXPECT().Get("default", "nginx", "").Return(nil, nil).Times(1)
-	sConfig.EXPECT().Get("default", "common-cm", "").Return(cfg, nil).Times(2)
+	sConfig.EXPECT().Get(nil, "default", "common-cm", "").Return(cfg, nil).Times(2)
 	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(4)
 	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(4)
 	sFacade.EXPECT().CreateApp("default", nil, gomock.Any(), nil).Return(dsApp, nil).Times(1)
@@ -894,7 +895,7 @@ func TestAPI_UpdateDeployApp(t *testing.T) {
 	}
 
 	sApp.EXPECT().Get("default", "nginx", "").Return(expectApp, nil).Times(1)
-	sConfig.EXPECT().Get("default", "common-cm", "").Return(cfg, nil).Times(2)
+	sConfig.EXPECT().Get(nil, "default", "common-cm", "").Return(cfg, nil).Times(2)
 	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(4)
 	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(4)
 	sFacade.EXPECT().UpdateApp("default", expectApp, gomock.Any(), nil).Return(updateApp, nil).Times(1)
@@ -1140,7 +1141,7 @@ func TestAPI_UpdateDsApp(t *testing.T) {
 	}
 
 	sApp.EXPECT().Get("default", "nginx", "").Return(dsApp, nil).Times(1)
-	sConfig.EXPECT().Get("default", "common-cm", "").Return(cfg, nil).Times(2)
+	sConfig.EXPECT().Get(nil, "default", "common-cm", "").Return(cfg, nil).Times(2)
 	sSecret.EXPECT().Get("default", "dcell", "").Return(secret, nil).Times(4)
 	sSecret.EXPECT().Get("default", "myregistrykey", "").Return(registry, nil).Times(4)
 	sFacade.EXPECT().UpdateApp("default", dsApp, gomock.Any(), nil).Return(updateApp, nil).Times(1)
