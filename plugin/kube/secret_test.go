@@ -134,9 +134,9 @@ func TestUpdateSecret(t *testing.T) {
 
 func TestDeleteSecret(t *testing.T) {
 	c := initSecretMapClient()
-	err := c.DeleteSecret("default", "test-delete")
+	err := c.DeleteSecret(nil, "default", "test-delete")
 	assert.NoError(t, err)
-	err = c.DeleteSecret("default", "test-delete")
+	err = c.DeleteSecret(nil, "default", "test-delete")
 	assert.NoError(t, err)
 }
 
