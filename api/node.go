@@ -1115,7 +1115,7 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 					continue
 				}
 
-				if res := CheckIsSysResources(config.Labels); !res {
+				if !CheckIsSysResources(config.Labels) {
 					continue
 				}
 
@@ -1131,7 +1131,7 @@ func (api *API) deleteSysApps(ns string, sysApps []string) []*v1.Application {
 					continue
 				}
 
-				if res := CheckIsSysResources(secret.Labels); !res {
+				if !CheckIsSysResources(secret.Labels) || CheckIsSysSecrets(secret.Labels) {
 					continue
 				}
 
@@ -1170,6 +1170,15 @@ func CheckIsSysResources(labels map[string]string) bool {
 		return false
 	}
 	return true
+}
+
+// CheckIsSysSecrets don't delete system registry secret
+func CheckIsSysSecrets(labels map[string]string) bool {
+	v, ok := labels[v1.SecretLabel]
+	if !ok || v != v1.SecretRegistry {
+		return false
+	}
+	return CheckIsSysResources(labels)
 }
 
 func (api *API) parseCoreAppConfigs(c *common.Context) (*models.NodeCoreConfigs, error) {
