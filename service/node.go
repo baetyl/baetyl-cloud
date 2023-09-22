@@ -609,23 +609,24 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 		return n.createShadow(nil, namespace, name, nil, report)
 	}
 
-	if shadow.Report == nil {
-		shadow.Report = report
-	} else {
-		err = shadow.Report.Merge(report)
-		if err != nil {
-			return nil, err
-		}
-		// TODO refactor merge and remove this
-		// since merge won't delete exist key-val, node info and stats should override
-		if node, ok := report[common.NodeInfo]; ok {
-			shadow.Report[common.NodeInfo] = node
-		}
-		if nodeStats, ok := report[common.NodeStats]; ok {
-			shadow.Report[common.NodeStats] = nodeStats
-		}
-	}
-	if err := n.updateReportNodeProperties(namespace, name, report, shadow); err != nil {
+	shadow.Report = report
+	//if shadow.Report == nil {
+	//	shadow.Report = report
+	//} else {
+	//	err = shadow.Report.Merge(report)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	// TODO refactor merge and remove this
+	//	// since merge won't delete exist key-val, node info and stats should override
+	//	if node, ok := report[common.NodeInfo]; ok {
+	//		shadow.Report[common.NodeInfo] = node
+	//	}
+	//	if nodeStats, ok := report[common.NodeStats]; ok {
+	//		shadow.Report[common.NodeStats] = nodeStats
+	//	}
+	//}
+	if err = n.updateReportNodeProperties(namespace, name, report, shadow); err != nil {
 		return nil, err
 	}
 	return n.Shadow.UpdateReport(shadow)
