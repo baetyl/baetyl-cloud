@@ -17,8 +17,6 @@ data:
     sync:
       download:
         timeout: 30m
-        speedLimit: {{.BaetylCoreSpeedLimit}}
-        byteUint: {{.BaetylCoreByteUint}}
       report:
         interval: {{.CoreFrequency}}
     httplink:

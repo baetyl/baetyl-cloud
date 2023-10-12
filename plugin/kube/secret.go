@@ -82,7 +82,7 @@ func (c *client) fromSecretModel(secret *specV1.Secret) (*v1alpha1.Secret, error
 func (c *client) GetSecret(tx interface{}, namespace, name, version string) (*specV1.Secret, error) {
 	options := metav1.GetOptions{ResourceVersion: version}
 	defer utils.Trace(c.log.Debug, "GetSecret")()
-	Secret, err := c.customClient.CloudV1alpha1().Secrets(namespace).Get(name, options)
+	Secret, err := c.customClient.CloudV1alpha1().Secrets(namespace).Get(c.ctx, name, options)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (c *client) CreateSecret(tx interface{}, namespace string, secretModel *spe
 	defer utils.Trace(c.log.Debug, "CreateSecret")()
 	Secret, err := c.customClient.CloudV1alpha1().
 		Secrets(namespace).
-		Create(model)
+		Create(c.ctx, model, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (c *client) UpdateSecret(namespace string, secretMapModel *specV1.Secret) (
 	defer utils.Trace(c.log.Debug, "UpdateSecret")()
 	SecretMap, err := c.customClient.CloudV1alpha1().
 		Secrets(namespace).
-		Update(model)
+		Update(c.ctx, model, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (c *client) UpdateSecret(namespace string, secretMapModel *specV1.Secret) (
 
 func (c *client) DeleteSecret(_ any, namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "DeleteSecret")()
-	err := c.customClient.CloudV1alpha1().Secrets(namespace).Delete(name, &metav1.DeleteOptions{})
+	err := c.customClient.CloudV1alpha1().Secrets(namespace).Delete(c.ctx, name, metav1.DeleteOptions{})
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			return nil
@@ -136,7 +136,7 @@ func (c *client) DeleteSecret(_ any, namespace, name string) error {
 
 func (c *client) ListSecret(namespace string, listOptions *models.ListOptions) (*models.SecretList, error) {
 	defer utils.Trace(c.log.Debug, "ListSecret")()
-	list, err := c.customClient.CloudV1alpha1().Secrets(namespace).List(*fromListOptionsModel(listOptions))
+	list, err := c.customClient.CloudV1alpha1().Secrets(namespace).List(c.ctx, *fromListOptionsModel(listOptions))
 	if err != nil {
 		return nil, err
 	}

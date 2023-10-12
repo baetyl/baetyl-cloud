@@ -1,8 +1,8 @@
-FROM golang:1.18.3-stretch as devel
+FROM golang:1.21.3 as devel
 COPY / /go/src/
 RUN cd /go/src/ && make build
 
-FROM busybox
+FROM busybox:1.36.1
 COPY /scripts/native/templates /etc/templates
 COPY --from=devel /go/src/output/baetyl-cloud /bin/
 ENTRYPOINT ["baetyl-cloud"]

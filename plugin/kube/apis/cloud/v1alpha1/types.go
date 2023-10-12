@@ -25,6 +25,23 @@ type NodeList struct {
 }
 
 type NodeSpec struct {
+	// TODO: The CRD no longer supports fields containing the interface{} type
+	// which leads to an exception in DeepCopy generation.
+	// Temporary workaround: replace the following code 1 in zz_generated.deepcopy.go with code 2
+	//
+	// code 1:
+	// 		for key, val := range *in {
+	//			if val == nil {
+	//				(*out)[key] = nil
+	//			} else {
+	//				(*out)[key] = val.DeepCopyany()
+	//			}
+	//		}
+	//
+	// code2:
+	// 		for key, val := range *in {
+	//			(*out)[key] = val
+	//		}
 	Attributes map[string]interface{}   `json:"attributes,omitempty"`
 	DesireRef  *v1.LocalObjectReference `json:"desireRef,omitempty"`
 	ReportRef  *v1.LocalObjectReference `json:"reportRef,omitempty"`
