@@ -1,0 +1,27 @@
+# kubectl apply -f baetyl-cloud-rbac.yml
+# kubectl delete -f baetyl-cloud-rbac.yml
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: baetyl-cloud-clusterrole
+rules:
+  - apiGroups: [ "cloud.baetyl.io" ]
+    resources: [ "secrets","applications","nodes","configurations","nodedesires","nodereports" ]
+    verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: baetyl-cloud-rbac
+subjects:
+  - kind: ServiceAccount
+    # Reference to upper's `metadata.name`
+    name: baetyl-cloud
+    # Reference to upper's `metadata.namespace`
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: baetyl-cloud-clusterrole
+  apiGroup: rbac.authorization.k8s.io

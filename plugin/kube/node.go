@@ -154,7 +154,7 @@ func fromNodeModel(node *specV1.Node) (*v1alpha1.Node, error) {
 
 func (c *client) GetNode(tx interface{}, namespace, name string) (*specV1.Node, error) {
 	defer utils.Trace(c.log.Debug, "GetNode")()
-	node, err := c.customClient.CloudV1alpha1().Nodes(namespace).Get(name, metav1.GetOptions{})
+	node, err := c.customClient.CloudV1alpha1().Nodes(namespace).Get(c.ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func (c *client) CreateNode(tx interface{}, namespace string, node *specV1.Node)
 	}
 
 	defer utils.Trace(c.log.Debug, "CreateNode")()
-	n, err = c.customClient.CloudV1alpha1().Nodes(namespace).Create(n)
+	n, err = c.customClient.CloudV1alpha1().Nodes(namespace).Create(c.ctx, n, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +191,7 @@ func (c *client) UpdateNode(tx interface{}, namespace string, nodes []*specV1.No
 			return nil, err
 		}
 
-		n, err = c.customClient.CloudV1alpha1().Nodes(namespace).Update(n)
+		n, err = c.customClient.CloudV1alpha1().Nodes(namespace).Update(c.ctx, n, metav1.UpdateOptions{})
 		if err != nil {
 			log.L().Error("update node error", log.Error(err))
 			return nil, err
@@ -203,12 +203,12 @@ func (c *client) UpdateNode(tx interface{}, namespace string, nodes []*specV1.No
 
 func (c *client) DeleteNode(tx interface{}, namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "DeleteNode")()
-	return c.customClient.CloudV1alpha1().Nodes(namespace).Delete(name, &metav1.DeleteOptions{})
+	return c.customClient.CloudV1alpha1().Nodes(namespace).Delete(c.ctx, name, metav1.DeleteOptions{})
 }
 
 func (c *client) ListNode(tx interface{}, namespace string, listOptions *models.ListOptions) (*models.NodeList, error) {
 	defer utils.Trace(c.log.Debug, "ListNode")()
-	list, err := c.customClient.CloudV1alpha1().Nodes(namespace).List(*fromListOptionsModel(listOptions))
+	list, err := c.customClient.CloudV1alpha1().Nodes(namespace).List(c.ctx, *fromListOptionsModel(listOptions))
 	if err != nil {
 		return nil, err
 	}
@@ -219,13 +219,13 @@ func (c *client) ListNode(tx interface{}, namespace string, listOptions *models.
 }
 
 func (c *client) CountAllNode(tx interface{}) (int, error) {
-	nsList, err := c.coreV1.Namespaces().List(metav1.ListOptions{})
+	nsList, err := c.coreV1.Namespaces().List(c.ctx, metav1.ListOptions{})
 	if err != nil {
 		return 0, err
 	}
 	total := 0
 	for _, ns := range nsList.Items {
-		list, err := c.customClient.CloudV1alpha1().Nodes(ns.Name).List(metav1.ListOptions{})
+		list, err := c.customClient.CloudV1alpha1().Nodes(ns.Name).List(c.ctx, metav1.ListOptions{})
 		if err != nil {
 			return 0, err
 		}

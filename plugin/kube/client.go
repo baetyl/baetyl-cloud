@@ -1,6 +1,8 @@
 package kube
 
 import (
+	"context"
+
 	"github.com/baetyl/baetyl-go/v2/log"
 	"k8s.io/client-go/kubernetes"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -17,11 +19,13 @@ type client struct {
 	customClient clientset.Interface
 	cfg          CloudConfig
 	aesKey       []byte
+	ctx          context.Context
+	cancel       context.CancelFunc
 	log          *log.Logger
 }
 
-// Close Close
 func (c *client) Close() error {
+	c.cancel()
 	return nil
 }
 
@@ -56,10 +60,13 @@ func New() (plugin.Plugin, error) {
 	if err != nil {
 		return nil, err
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 	return &client{
 		coreV1:       kubeClient.CoreV1(),
 		customClient: customClient,
 		cfg:          cfg,
+		ctx:          ctx,
+		cancel:       cancel,
 		aesKey:       []byte(cfg.Kube.AES.Key),
 		log:          log.With(log.Any("plugin", "kube")),
 	}, nil

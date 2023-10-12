@@ -123,7 +123,7 @@ func fromListOptionsModel(listOptions *models.ListOptions) *metav1.ListOptions {
 func (c *client) GetApplication(_ interface{}, namespace, name, version string) (*specV1.Application, error) {
 	defer utils.Trace(c.log.Debug, "GetApplication")()
 	options := metav1.GetOptions{ResourceVersion: version}
-	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Get(name, options)
+	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Get(c.ctx, name, options)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (c *client) GetApplication(_ interface{}, namespace, name, version string) 
 func (c *client) CreateApplication(tx interface{}, namespace string, application *specV1.Application) (*specV1.Application, error) {
 	app := fromAppModel(namespace, application)
 	defer utils.Trace(c.log.Debug, "CreateApplication")()
-	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Create(app)
+	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Create(c.ctx, app, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (c *client) CreateApplication(tx interface{}, namespace string, application
 func (c *client) UpdateApplication(tx interface{}, namespace string, application *specV1.Application) (*specV1.Application, error) {
 	app := fromAppModel(namespace, application)
 	defer utils.Trace(c.log.Debug, "UpdateApplication")()
-	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Update(app)
+	app, err := c.customClient.CloudV1alpha1().Applications(namespace).Update(c.ctx, app, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -153,13 +153,13 @@ func (c *client) UpdateApplication(tx interface{}, namespace string, application
 
 func (c *client) DeleteApplication(tx interface{}, namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "DeleteApplication")()
-	err := c.customClient.CloudV1alpha1().Applications(namespace).Delete(name, &metav1.DeleteOptions{})
+	err := c.customClient.CloudV1alpha1().Applications(namespace).Delete(c.ctx, name, metav1.DeleteOptions{})
 	return err
 }
 
 func (c *client) ListApplication(tx interface{}, namespace string, listOptions *models.ListOptions) (*models.ApplicationList, error) {
 	defer utils.Trace(c.log.Debug, "ListApplication")()
-	list, err := c.customClient.CloudV1alpha1().Applications(namespace).List(*fromListOptionsModel(listOptions))
+	list, err := c.customClient.CloudV1alpha1().Applications(namespace).List(c.ctx, *fromListOptionsModel(listOptions))
 	listOptions.Continue = list.Continue
 	if err != nil {
 		return nil, err
@@ -171,7 +171,7 @@ func (c *client) ListApplication(tx interface{}, namespace string, listOptions *
 
 func (c *client) ListApplicationsByNames(tx interface{}, ns string, names []string) ([]models.AppItem, int, error) {
 	defer utils.Trace(c.log.Debug, "ListApplicationsByNames")()
-	list, err := c.customClient.CloudV1alpha1().Applications(ns).List(metav1.ListOptions{})
+	list, err := c.customClient.CloudV1alpha1().Applications(ns).List(c.ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, 0, err
 	}

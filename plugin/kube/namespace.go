@@ -32,7 +32,7 @@ func fromNamespaceModel(namespace *models.Namespace) *v1.Namespace {
 
 func (c *client) GetNamespace(namespace string) (*models.Namespace, error) {
 	defer utils.Trace(c.log.Debug, "GetNamespace")()
-	n, err := c.coreV1.Namespaces().Get(namespace, metav1.GetOptions{})
+	n, err := c.coreV1.Namespaces().Get(c.ctx, namespace, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (c *client) GetNamespace(namespace string) (*models.Namespace, error) {
 
 func (c *client) CreateNamespace(namespace *models.Namespace) (*models.Namespace, error) {
 	defer utils.Trace(c.log.Debug, "CreateNamespace")()
-	n, err := c.coreV1.Namespaces().Create(fromNamespaceModel(namespace))
+	n, err := c.coreV1.Namespaces().Create(c.ctx, fromNamespaceModel(namespace), metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (c *client) CreateNamespace(namespace *models.Namespace) (*models.Namespace
 
 func (c *client) ListNamespace(listOptions *models.ListOptions) (*models.NamespaceList, error) {
 	defer utils.Trace(c.log.Debug, "ListNamespace")()
-	list, err := c.coreV1.Namespaces().List(*fromListOptionsModel(listOptions))
+	list, err := c.coreV1.Namespaces().List(c.ctx, *fromListOptionsModel(listOptions))
 	if err != nil {
 		return nil, err
 	}
@@ -62,15 +62,15 @@ func (c *client) ListNamespace(listOptions *models.ListOptions) (*models.Namespa
 
 func (c *client) DeleteNamespace(namespace *models.Namespace) error {
 	defer utils.Trace(c.log.Debug, "DeleteNamespace")()
-	err := c.coreV1.Namespaces().Delete(namespace.Name, &metav1.DeleteOptions{})
+	err := c.coreV1.Namespaces().Delete(c.ctx, namespace.Name, metav1.DeleteOptions{})
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			return nil
 		}
 		return err
 	}
-	if n, _ := c.coreV1.Namespaces().Get(namespace.Name, metav1.GetOptions{}); n != nil {
-		_, err = c.coreV1.Namespaces().Finalize(fromNamespaceModel(namespace))
+	if n, _ := c.coreV1.Namespaces().Get(c.ctx, namespace.Name, metav1.GetOptions{}); n != nil {
+		_, err = c.coreV1.Namespaces().Finalize(c.ctx, fromNamespaceModel(namespace), metav1.UpdateOptions{})
 	}
 	return err
 }

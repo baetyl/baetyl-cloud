@@ -70,7 +70,7 @@ func fromConfigurationModel(config *specV1.Configuration) *v1alpha1.Configuratio
 func (c *client) GetConfig(tx interface{}, namespace, name, version string) (*specV1.Configuration, error) {
 	options := metav1.GetOptions{ResourceVersion: version}
 	defer utils.Trace(c.log.Debug, "GetConfig")()
-	config, err := c.customClient.CloudV1alpha1().Configurations(namespace).Get(name, options)
+	config, err := c.customClient.CloudV1alpha1().Configurations(namespace).Get(c.ctx, name, options)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (c *client) CreateConfig(tx interface{}, namespace string, configModel *spe
 	defer utils.Trace(c.log.Debug, "CreateConfig")()
 	config, err := c.customClient.CloudV1alpha1().
 		Configurations(namespace).
-		Create(fromConfigurationModel(configModel))
+		Create(c.ctx, fromConfigurationModel(configModel), metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (c *client) UpdateConfig(tx interface{}, namespace string, configurationMod
 	defer utils.Trace(c.log.Debug, "UpdateConfig")()
 	configuration, err := c.customClient.CloudV1alpha1().
 		Configurations(namespace).
-		Update(fromConfigurationModel(configurationModel))
+		Update(c.ctx, fromConfigurationModel(configurationModel), metav1.UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -102,12 +102,12 @@ func (c *client) UpdateConfig(tx interface{}, namespace string, configurationMod
 
 func (c *client) DeleteConfig(tx interface{}, namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "DeleteConfig")()
-	return c.customClient.CloudV1alpha1().Configurations(namespace).Delete(name, &metav1.DeleteOptions{})
+	return c.customClient.CloudV1alpha1().Configurations(namespace).Delete(c.ctx, name, metav1.DeleteOptions{})
 }
 
 func (c *client) ListConfig(namespace string, listOptions *models.ListOptions) (*models.ConfigurationList, error) {
 	defer utils.Trace(c.log.Debug, "ListConfig")()
-	list, err := c.customClient.CloudV1alpha1().Configurations(namespace).List(*fromListOptionsModel(listOptions))
+	list, err := c.customClient.CloudV1alpha1().Configurations(namespace).List(c.ctx, *fromListOptionsModel(listOptions))
 	if err != nil {
 		return nil, err
 	}
