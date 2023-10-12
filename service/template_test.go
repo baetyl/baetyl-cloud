@@ -141,8 +141,6 @@ data:
     sync:
       download:
         timeout: 30m
-        speedLimit: 0
-        byteUint: KB
       report:
         interval: 20s
     httplink:

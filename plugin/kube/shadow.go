@@ -18,11 +18,11 @@ import (
 
 func (c *client) Get(tx interface{}, namespace, name string) (*models.Shadow, error) {
 	defer utils.Trace(c.log.Debug, "shadow Get")()
-	nodeDesire, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Get(name, metav1.GetOptions{})
+	nodeDesire, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Get(c.ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
-	nodeReport, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Get(name, metav1.GetOptions{})
+	nodeReport, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Get(c.ctx, name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -41,13 +41,13 @@ func (c *client) Create(tx interface{}, shadow *models.Shadow) (*models.Shadow, 
 		return nil, err
 	}
 	defer utils.Trace(c.log.Debug, "shadow Create")()
-	nd, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Create(desire)
+	nd, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Create(c.ctx, desire, metav1.CreateOptions{})
 	if err != nil {
-		d, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Get(name, metav1.GetOptions{})
+		d, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Get(c.ctx, name, metav1.GetOptions{})
 		if err == nil && d != nil {
 			desire.ResourceVersion = d.ResourceVersion
 			desire.Labels = d.Labels
-			desire, err = c.customClient.CloudV1alpha1().NodeDesires(namespace).Update(desire)
+			desire, err = c.customClient.CloudV1alpha1().NodeDesires(namespace).Update(c.ctx, desire, metav1.UpdateOptions{})
 			if err != nil {
 				return nil, err
 			}
@@ -61,13 +61,13 @@ func (c *client) Create(tx interface{}, shadow *models.Shadow) (*models.Shadow, 
 		return nil, err
 	}
 
-	nr, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Create(report)
+	nr, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Create(c.ctx, report, metav1.CreateOptions{})
 	if err != nil {
-		r, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Get(name, metav1.GetOptions{})
+		r, err := c.customClient.CloudV1alpha1().NodeReports(namespace).Get(c.ctx, name, metav1.GetOptions{})
 		if err == nil && r != nil {
 			report.ResourceVersion = r.ResourceVersion
 			report.Labels = r.Labels
-			report, err = c.customClient.CloudV1alpha1().NodeReports(namespace).Update(report)
+			report, err = c.customClient.CloudV1alpha1().NodeReports(namespace).Update(c.ctx, report, metav1.UpdateOptions{})
 			if err != nil {
 				return nil, err
 			}
@@ -89,11 +89,11 @@ func (c *client) List(namespace string, nodeList *models.NodeList) (*models.Shad
 	}
 
 	defer utils.Trace(c.log.Debug, "shadow List")()
-	deisres, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).List(option)
+	deisres, err := c.customClient.CloudV1alpha1().NodeDesires(namespace).List(c.ctx, option)
 	if err != nil {
 		return nil, err
 	}
-	reports, err := c.customClient.CloudV1alpha1().NodeReports(namespace).List(option)
+	reports, err := c.customClient.CloudV1alpha1().NodeReports(namespace).List(c.ctx, option)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (c *client) ListShadowByNames(tx interface{}, namespace string, names []str
 
 func (c *client) Delete(namespace, name string) error {
 	defer utils.Trace(c.log.Debug, "shadow Delete")()
-	err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Delete(name, &metav1.DeleteOptions{})
+	err := c.customClient.CloudV1alpha1().NodeDesires(namespace).Delete(c.ctx, name, metav1.DeleteOptions{})
 	if err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", common.NodeDesire),
@@ -126,7 +126,7 @@ func (c *client) Delete(namespace, name string) error {
 			log.Any("name", name),
 			log.Any("operation", "delete"))
 	}
-	err = c.customClient.CloudV1alpha1().NodeReports(namespace).Delete(name, &metav1.DeleteOptions{})
+	err = c.customClient.CloudV1alpha1().NodeReports(namespace).Delete(c.ctx, name, metav1.DeleteOptions{})
 	if err != nil {
 		common.LogDirtyData(err,
 			log.Any("type", common.NodeReport),
@@ -143,14 +143,14 @@ func (c *client) UpdateDesire(tx interface{}, shadow *models.Shadow) error {
 		return err
 	}
 	defer utils.Trace(c.log.Debug, "shadow UpdateDesire")()
-	d, err := c.customClient.CloudV1alpha1().NodeDesires(shadow.Namespace).Get(desire.Name, metav1.GetOptions{})
+	d, err := c.customClient.CloudV1alpha1().NodeDesires(shadow.Namespace).Get(c.ctx, desire.Name, metav1.GetOptions{})
 	if err != nil {
 		log.L().Error("get node desire error", log.Error(err))
 		return err
 	}
 	desire.ResourceVersion = d.ResourceVersion
 	desire.Labels = d.Labels
-	desire, err = c.customClient.CloudV1alpha1().NodeDesires(shadow.Namespace).Update(desire)
+	desire, err = c.customClient.CloudV1alpha1().NodeDesires(shadow.Namespace).Update(c.ctx, desire, metav1.UpdateOptions{})
 	if err != nil {
 		log.L().Error("update node desire error", log.Error(err))
 		return err
@@ -177,14 +177,14 @@ func (c *client) UpdateReport(shadow *models.Shadow) (*models.Shadow, error) {
 		return nil, err
 	}
 	defer utils.Trace(c.log.Debug, "shadow UpdateReport")()
-	r, err := c.customClient.CloudV1alpha1().NodeReports(shadow.Namespace).Get(shadow.Name, metav1.GetOptions{})
+	r, err := c.customClient.CloudV1alpha1().NodeReports(shadow.Namespace).Get(c.ctx, shadow.Name, metav1.GetOptions{})
 	if err != nil {
 		log.L().Error("get node report error", log.Error(err))
 		return nil, err
 	}
 	report.ResourceVersion = r.ResourceVersion
 	report.Labels = r.Labels
-	report, err = c.customClient.CloudV1alpha1().NodeReports(shadow.Namespace).Update(report)
+	report, err = c.customClient.CloudV1alpha1().NodeReports(shadow.Namespace).Update(c.ctx, report, metav1.UpdateOptions{})
 	if err != nil {
 		log.L().Error("update node report error", log.Error(err))
 		return nil, err
