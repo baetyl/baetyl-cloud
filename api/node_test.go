@@ -792,6 +792,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			specV1.KeyAccelerator:      "",
 			UserID:                     "",
 		},
+		NodeMode: context.RunModeKube,
 	}
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode, nil).Times(1)
@@ -817,7 +818,8 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			specV1.KeyAccelerator:      "",
 			specV1.KeyOptionalSysApps:  interface{}([]interface{}{"a"}),
 		},
-		SysApps: []string{"a"},
+		SysApps:  []string{"a"},
+		NodeMode: context.RunModeKube,
 	}
 
 	sNode.EXPECT().Get(nil, gomock.Any(), gomock.Any()).Return(mNode2, nil).Times(1)
@@ -850,7 +852,8 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			specV1.KeyOptionalSysApps:  interface{}([]interface{}{"a"}),
 			UserID:                     "",
 		},
-		SysApps: []string{"a"},
+		SysApps:  []string{"a"},
+		NodeMode: context.RunModeKube,
 	}
 	sNode.EXPECT().Update(mNode.Namespace, mNode3).Return(mNode3, nil)
 	// equal
@@ -875,6 +878,7 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
 		},
+		NodeMode: context.RunModeKube,
 	}
 
 	sNode.EXPECT().Get(nil, mNode4.Namespace, mNode4.Name).Return(mNode4, nil).Times(1)
@@ -900,7 +904,8 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			specV1.KeyAccelerator:      "",
 			UserID:                     "",
 		},
-		SysApps: []string{"a"},
+		SysApps:  []string{"a"},
+		NodeMode: context.RunModeKube,
 	}
 	sNode.EXPECT().Update(mNode.Namespace, mNode6).Return(mNode6, nil)
 
@@ -917,7 +922,8 @@ func TestUpdateNodeAddSysApp(t *testing.T) {
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
 		},
-		SysApps: []string{"a"},
+		SysApps:  []string{"a"},
+		NodeMode: context.RunModeKube,
 	}
 	w = httptest.NewRecorder()
 	body, _ = json.Marshal(mNode5)
@@ -967,8 +973,9 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
 		},
-		SysApps: []string{"rule-node12"},
-		Desire:  desire,
+		SysApps:  []string{"rule-node12"},
+		Desire:   desire,
+		NodeMode: context.RunModeKube,
 	}
 
 	sNode.EXPECT().Get(nil, mNode7.Namespace, mNode7.Name).Return(mNode7, nil).Times(1)
@@ -1021,6 +1028,7 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 			specV1.KeyAccelerator:      "",
 			UserID:                     "",
 		},
+		NodeMode: context.RunModeKube,
 	}
 	sNode.EXPECT().Update(mNode7.Namespace, mNode9).Return(mNode9, nil)
 
@@ -1037,6 +1045,7 @@ func TestUpdateNodeDeleteSysApp(t *testing.T) {
 			specV1.BaetylCoreFrequency: common.DefaultCoreFrequency,
 			specV1.KeyAccelerator:      "",
 		},
+		NodeMode: context.RunModeKube,
 	}
 	w := httptest.NewRecorder()
 	body, _ := json.Marshal(mNode8)
@@ -1068,6 +1077,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 	api.Facade = facade
 
 	mNode := &specV1.Node{
+		NodeMode:  context.RunModeKube,
 		Namespace: "default",
 		Name:      "abc",
 		Labels: map[string]string{
@@ -1100,6 +1110,7 @@ func TestUpdateNodeAccelerator(t *testing.T) {
 		},
 	}
 	newNode := &specV1.Node{
+		NodeMode:  context.RunModeKube,
 		Namespace: "default",
 		Name:      "abc",
 		Labels: map[string]string{
