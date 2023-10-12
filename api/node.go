@@ -294,7 +294,7 @@ func (api *API) UpdateNode(c *common.Context) (interface{}, error) {
 		common.LabelNodeName:    node.Name,
 		common.LabelAccelerator: node.Accelerator,
 		common.LabelCluster:     strconv.FormatBool(node.Cluster),
-		common.LabelNodeMode:    node.NodeMode,
+		common.LabelNodeMode:    oldNode.NodeMode,
 	})
 	node.Version = oldNode.Version
 	node.Attributes = oldNode.Attributes
