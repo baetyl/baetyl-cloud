@@ -136,6 +136,7 @@ func TestNewHTTPLink(t *testing.T) {
 	link.AddMsgRouter(string(specV1.MessageDeviceReport), server.HandlerMessage(hd.deviceReport))
 	link.AddMsgRouter(string(specV1.MessageDeviceLifecycleReport), server.HandlerMessage(hd.deviceLifecycleReport))
 	link.AddMsgRouter(string(specV1.MessageDeviceDesire), server.HandlerMessage(hd.deviceDesire))
+	link.AddMsgRouter(string(specV1.NewMessageDeviceDesire), server.HandlerMessage(hd.deviceDesire))
 
 	go link.Start()
 	defer func() {
@@ -214,12 +215,18 @@ func TestNewHTTPLink(t *testing.T) {
 	assert.Equal(t, deviceLifecycReportMsg.Kind, drResp.Kind)
 	assert.EqualValues(t, deviceLifecycReportMsg.Content.Value, data)
 
-	// MessageDeviceDesire
 	dt, err = json.Marshal(deviceDesiretMsg.Content.Value)
 	assert.NoError(t, err)
+
 	resp, err = cli.PostJSON("v1/sync/desire", dt, map[string]string{
 		"cn":   "default.test",
 		"kind": string(specV1.MessageDeviceDesire),
+	})
+	assert.NoError(t, err)
+
+	resp, err = cli.PostJSON("v1/sync/desire", dt, map[string]string{
+		"cn":   "default.test",
+		"kind": string(specV1.NewMessageDeviceDesire),
 	})
 	assert.NoError(t, err)
 
