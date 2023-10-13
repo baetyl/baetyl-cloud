@@ -103,12 +103,11 @@ func (s *AdminServer) InitRoute() {
 
 	s.router.Use(RequestIDHandler)
 	s.router.Use(LoggerHandler)
-	s.router.Use(s.AuthHandler)
 	s.router.Use(s.ExternalHandlers...)
 
 	NodeCollector = s.api.NodeNumberCollector
 
-	v1 := s.router.Group("v1")
+	v1 := s.GetV1RouteGroup()
 	{
 		configs := v1.Group("/configs")
 		configs.GET("/:name", s.WrapperCache(s.api.GetConfig))
@@ -261,7 +260,7 @@ func (s *AdminServer) InitRoute() {
 		yaml.POST("/delete", common.Wrapper(s.api.DeleteYamlResource))
 	}
 
-	v2 := s.router.Group("v2")
+	v2 := s.GetV2RouteGroup()
 	{
 		objects := v2.Group("/objects")
 		objects.GET("", s.WrapperCache(s.api.ListObjectSourcesV2))
@@ -277,6 +276,18 @@ func (s *AdminServer) InitRoute() {
 // GetRoute get router
 func (s *AdminServer) GetRoute() *gin.Engine {
 	return s.router
+}
+
+func (s *AdminServer) GetV1RouteGroup() *gin.RouterGroup {
+	route := s.router.Group("v1")
+	route.Use(s.AuthHandler)
+	return route
+}
+
+func (s *AdminServer) GetV2RouteGroup() *gin.RouterGroup {
+	route := s.router.Group("v2")
+	route.Use(s.AuthHandler)
+	return route
 }
 
 // auth handler
