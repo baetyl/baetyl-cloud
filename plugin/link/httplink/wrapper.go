@@ -80,7 +80,7 @@ func genReportMsg(c *common.Context) (*specV1.Message, error) {
 // MsgDesire desire
 func (l *httpLink) MsgDesire(c *common.Context) (interface{}, error) {
 	switch c.GetHeader("kind") {
-	case string(specV1.MessageDeviceDesire):
+	case string(specV1.NewMessageDeviceDesire), string(specV1.MessageDeviceDesire):
 		return l.deviceDesire(c)
 	default:
 		return l.desire(c)
@@ -104,7 +104,10 @@ func (l *httpLink) deviceDesire(c *common.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return l.msgRouter[string(specV1.MessageDeviceDesire)].(server.HandlerMessage)(*msg)
+	if msg.Kind == specV1.MessageDeviceDesire {
+		l.msgRouter[string(specV1.MessageDeviceDesire)].(server.HandlerMessage)(*msg)
+	}
+	return l.msgRouter[string(specV1.NewMessageDeviceDesire)].(server.HandlerMessage)(*msg)
 }
 
 func genDesireMsg(c *common.Context) (*specV1.Message, error) {

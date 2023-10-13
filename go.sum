@@ -12,8 +12,8 @@ github.com/andybalholm/brotli v1.0.4 h1:V7DdXeJtZscaqfNuAdSRuRFzuiKlHSC/Zh3zl9qY
 github.com/andybalholm/brotli v1.0.4/go.mod h1:fO7iG3H7G2nSZ7m0zPUDn85XEX2GTukHGRSepvi9Eig=
 github.com/aws/aws-sdk-go v1.44.330 h1:kO41s8I4hRYtWSIuMc/O053wmEGfMTT8D4KtPSojUkA=
 github.com/aws/aws-sdk-go v1.44.330/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
-github.com/baetyl/baetyl-go/v2 v2.0.0-20230914071550-79bfb273018f h1:YVD/yMqE0AgfLpNyJrd4ucBcBUEvtxvw9KNGYSPAKMA=
-github.com/baetyl/baetyl-go/v2 v2.0.0-20230914071550-79bfb273018f/go.mod h1:p1V1EpzbtPV4pAQirG+XvpXOGmEU7wOuZ+G5onHzRpk=
+github.com/baetyl/baetyl-go/v2 v2.2.4-0.20231012104825-fbd4335c0411 h1:4ZeQLcy93TwxB/fSDQXwzW7ERMO34iVrYzc0xMIOM+k=
+github.com/baetyl/baetyl-go/v2 v2.2.4-0.20231012104825-fbd4335c0411/go.mod h1:p1V1EpzbtPV4pAQirG+XvpXOGmEU7wOuZ+G5onHzRpk=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
