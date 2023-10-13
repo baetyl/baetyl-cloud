@@ -100,15 +100,12 @@ func (s *AdminServer) InitRoute() {
 	s.router.NoRoute(NoRouteHandler)
 	s.router.NoMethod(NoMethodHandler)
 	s.router.GET("/health", Health)
-
 	s.router.Use(RequestIDHandler)
 	s.router.Use(LoggerHandler)
-	s.router.Use(s.AuthHandler)
-	s.router.Use(s.ExternalHandlers...)
 
 	NodeCollector = s.api.NodeNumberCollector
 
-	v1 := s.router.Group("v1")
+	v1 := s.GetV1RouterGroup()
 	{
 		configs := v1.Group("/configs")
 		configs.GET("/:name", s.WrapperCache(s.api.GetConfig))
@@ -261,7 +258,7 @@ func (s *AdminServer) InitRoute() {
 		yaml.POST("/delete", common.Wrapper(s.api.DeleteYamlResource))
 	}
 
-	v2 := s.router.Group("v2")
+	v2 := s.GetV2RouterGroup()
 	{
 		objects := v2.Group("/objects")
 		objects.GET("", s.WrapperCache(s.api.ListObjectSourcesV2))
@@ -277,6 +274,20 @@ func (s *AdminServer) InitRoute() {
 // GetRoute get router
 func (s *AdminServer) GetRoute() *gin.Engine {
 	return s.router
+}
+
+func (s *AdminServer) GetV1RouterGroup() *gin.RouterGroup {
+	router := s.router.Group("v1")
+	router.Use(s.AuthHandler)
+	router.Use(s.ExternalHandlers...)
+	return router
+}
+
+func (s *AdminServer) GetV2RouterGroup() *gin.RouterGroup {
+	router := s.router.Group("v2")
+	router.Use(s.AuthHandler)
+	router.Use(s.ExternalHandlers...)
+	return router
 }
 
 // auth handler

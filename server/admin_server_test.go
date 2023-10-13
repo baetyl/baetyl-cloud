@@ -153,7 +153,6 @@ func TestAdminServer_Handler(t *testing.T) {
 	r := s.GetRoute()
 	assert.NotNil(t, r)
 
-	mkAuth.EXPECT().Authenticate(gomock.Any()).Return(nil)
 	// 200
 	req, _ := http.NewRequest(http.MethodGet, "/health", nil)
 	w := httptest.NewRecorder()
