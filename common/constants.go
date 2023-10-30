@@ -199,12 +199,6 @@ const (
 )
 
 const (
-	ContainerApp = "container"
-	FunctionApp  = "function"
-	HelmApp      = "helm"
-)
-
-const (
 	ConfigObjectPrefix = "_object_"
 )
 

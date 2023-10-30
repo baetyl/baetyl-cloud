@@ -216,7 +216,7 @@ func (api *API) listFunctionsByNames(namespace string, appNames []string) ([]str
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
-		if app.Type != common.FunctionApp || len(app.Services) == 0 {
+		if app.Type != specV1.AppTypeFunction || len(app.Services) == 0 {
 			continue
 		}
 		for _, fn := range app.Services[0].Functions {

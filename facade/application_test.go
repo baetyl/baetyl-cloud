@@ -8,7 +8,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
 
@@ -73,7 +72,7 @@ func TestDeleteApplication(t *testing.T) {
 	app := &specV1.Application{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -164,7 +163,7 @@ func TestUpdateApplication(t *testing.T) {
 	app := &specV1.Application{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -241,7 +240,7 @@ func TestUpdateApplication(t *testing.T) {
 	appNew := &specV1.Application{
 		Namespace:  "baetyl-cloud",
 		Name:       "abc",
-		Type:       common.FunctionApp,
+		Type:       specV1.AppTypeFunction,
 		CronStatus: specV1.CronNotSet,
 	}
 	mAppFacade.sCron.EXPECT().UpdateCron(gomock.Any()).Return(nil).AnyTimes()

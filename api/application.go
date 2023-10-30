@@ -283,7 +283,7 @@ func (api *API) ParseApplication(c *common.Context) (*models.ApplicationView, er
 	if len(app.Name) > AppNameMaxLength {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "name is too long"))
 	}
-	if app.Type == common.ContainerApp {
+	if app.Type == specV1.AppTypeContainer {
 		app.ImageTrim()
 		for _, v := range app.Services {
 			if v.FunctionConfig != nil || v.Functions != nil {
@@ -296,7 +296,7 @@ func (api *API) ParseApplication(c *common.Context) (*models.ApplicationView, er
 				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "program config is required in native mode"))
 			}
 		}
-	} else if app.Type == common.FunctionApp {
+	} else if app.Type == specV1.AppTypeFunction {
 		for _, v := range app.Services {
 			if v.FunctionConfig == nil {
 				return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "function config can't be empty in function app"))
@@ -305,7 +305,7 @@ func (api *API) ParseApplication(c *common.Context) (*models.ApplicationView, er
 		if len(app.Registries) != 0 {
 			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "registries should be empty in function app"))
 		}
-	} else if app.Type == common.HelmApp {
+	} else if app.Type == specV1.AppTypeHelm || app.Type == specV1.AppTypeYaml {
 		return app, nil
 	} else {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "type is invalid"))
@@ -387,7 +387,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 	api.compatibleAppDeprecatedField(appView)
 	populateAppDefaultField(appView)
 
-	if app.Type != common.FunctionApp {
+	if app.Type != specV1.AppTypeFunction {
 		delete(appView.Labels, common.LabelAppMode)
 		return appView, nil
 	}
@@ -430,7 +430,7 @@ func (api *API) ToApplicationView(app *specV1.Application) (*models.ApplicationV
 	}
 
 	// kube function set program nil
-	if appView.Type == common.FunctionApp && appView.Mode == context.RunModeKube {
+	if appView.Type == specV1.AppTypeFunction && appView.Mode == context.RunModeKube {
 		for i := 0; i < len(appView.Volumes); i++ {
 			if strings.HasPrefix(appView.Volumes[i].Name, "baetyl-function-program-config") {
 				appView.Volumes = append(appView.Volumes[:i], appView.Volumes[i+1:]...)
@@ -458,7 +458,7 @@ func (api *API) ToApplication(appView *models.ApplicationView, oldApp *specV1.Ap
 	translateSecretLikedModelsToSecrets(appView, app)
 	translateNativeApp(appView, app)
 
-	if app.Type != common.FunctionApp {
+	if app.Type != specV1.AppTypeFunction {
 		return app, nil, nil
 	}
 	oldServices := map[string]bool{}
@@ -540,7 +540,7 @@ func (api *API) ToApplicationListView(apps *models.ApplicationList) {
 }
 
 func translateNativeApp(appView *models.ApplicationView, app *specV1.Application) {
-	if appView.Mode != context.RunModeNative || appView.Type == common.FunctionApp {
+	if appView.Mode != context.RunModeNative || appView.Type == specV1.AppTypeFunction {
 		return
 	}
 
@@ -577,7 +577,7 @@ func translateNativeApp(appView *models.ApplicationView, app *specV1.Application
 }
 
 func (api *API) translateToNativeAppView(appView *models.ApplicationView) error {
-	if appView.Mode != context.RunModeNative || appView.Type == common.FunctionApp {
+	if appView.Mode != context.RunModeNative || appView.Type == specV1.AppTypeFunction {
 		return nil
 	}
 	for index := range appView.Services {
