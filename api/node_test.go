@@ -1726,7 +1726,7 @@ func TestGetFunctionsByNode(t *testing.T) {
 		{
 			Name:    appNames[1],
 			Version: "v1",
-			Type:    common.FunctionApp,
+			Type:    specV1.AppTypeFunction,
 			Services: []specV1.Service{
 				{
 					Functions: []specV1.ServiceFunction{

@@ -30,7 +30,7 @@ func getMockContainerApp() *specV1.Application {
 	mApp := &specV1.Application{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Replica:   1,
 		Services: []specV1.Service{
 			{
@@ -90,7 +90,7 @@ func getMockFunctionApp() *specV1.Application {
 	mApp := &specV1.Application{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -197,7 +197,7 @@ func TestGetInvisibleApplication(t *testing.T) {
 	mApp := &specV1.Application{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Labels: map[string]string{
 			common.ResourceInvisible: "true",
 		},
@@ -426,7 +426,7 @@ func TestCreateContainerApplication(t *testing.T) {
 	appView := &models.ApplicationView{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -554,7 +554,7 @@ func TestCreateContainerApplication(t *testing.T) {
 	eden2 := &specV1.Application{
 		Namespace: appView.Namespace,
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
 			{
@@ -583,7 +583,7 @@ func TestCreateContainerApplication(t *testing.T) {
 	eden2 = &specV1.Application{
 		Namespace: appView.Namespace,
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
 			{
@@ -703,7 +703,7 @@ func TestInitContainerApp(t *testing.T) {
 	appView := &models.ApplicationView{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		InitServices: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -756,7 +756,7 @@ func TestCreateNodePortApp(t *testing.T) {
 	appView := &models.ApplicationView{
 		Namespace: "baetyl-cloud",
 		Name:      "nodeport",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -850,7 +850,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 	appView := &models.ApplicationView{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Replica:   1,
 		Workload:  specV1.WorkloadDeployment,
 		Services: []models.ServiceView{
@@ -930,7 +930,7 @@ func TestCreateApplicationHasCertificates(t *testing.T) {
 	}
 	app := &specV1.Application{
 		Name:              "abc",
-		Type:              common.ContainerApp,
+		Type:              specV1.AppTypeContainer,
 		Labels:            nil,
 		Mode:              "kube",
 		Namespace:         "baetyl-cloud",
@@ -1134,7 +1134,7 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Mode:      context.RunModeNative,
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -1198,7 +1198,7 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Mode:      context.RunModeNative,
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -1267,7 +1267,7 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Mode:      context.RunModeNative,
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -1340,7 +1340,7 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Mode:      context.RunModeNative,
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -1409,7 +1409,7 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Mode:      context.RunModeNative,
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -1458,7 +1458,7 @@ func TestUpdateNativeNotFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Mode:      context.RunModeNative,
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services: []specV1.Service{
 			{
 				Name:     "agent2",
@@ -1549,7 +1549,7 @@ func TestUpdateInvisibleApplication(t *testing.T) {
 	mApp := &specV1.Application{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Labels: map[string]string{
 			common.ResourceInvisible: "true",
 		},
@@ -1587,7 +1587,7 @@ func TestUpdateSysApplication(t *testing.T) {
 	mOldApp := &specV1.Application{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Labels: map[string]string{
 			common.LabelSystem: "true",
 		},
@@ -1598,7 +1598,7 @@ func TestUpdateSysApplication(t *testing.T) {
 	mApp := &specV1.Application{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Labels: map[string]string{
 			common.LabelSystem: "true",
 			"extra":            "true",
@@ -1617,7 +1617,7 @@ func TestUpdateSysApplication(t *testing.T) {
 	mOldApp2 := &specV1.Application{
 		Namespace: "baetyl-cloud",
 		Name:      "abcd",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Labels: map[string]string{
 			common.LabelSystem: "true",
 		},
@@ -1629,7 +1629,7 @@ func TestUpdateSysApplication(t *testing.T) {
 	mApp2 := &specV1.Application{
 		Namespace: "baetyl-cloud",
 		Name:      "abcd",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Labels: map[string]string{
 			common.LabelSystem: "true",
 		},
@@ -1677,7 +1677,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 	appView := &models.ApplicationView{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -1758,7 +1758,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 	eden2 := &specV1.Application{
 		Namespace: appView.Namespace,
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
 			{
@@ -1786,7 +1786,7 @@ func TestCreateFunctionApplication(t *testing.T) {
 	eden2 = &specV1.Application{
 		Namespace: appView.Namespace,
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
 			{
@@ -1890,7 +1890,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	oldApp := &specV1.Application{
 		Namespace: namespace,
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services: []specV1.Service{
 			{
 				Name:     "agent",
@@ -2030,7 +2030,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	newApp := &specV1.Application{
 		Namespace: namespace,
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services: []specV1.Service{
 			{
 				Name:     "agent2",
@@ -2163,7 +2163,7 @@ func TestUpdateFunctionApplication(t *testing.T) {
 	}
 	newAppView := &models.ApplicationView{
 		Namespace: namespace,
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -2406,7 +2406,7 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Mode:      context.RunModeKube,
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -2488,7 +2488,7 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 		Namespace: appView.Namespace,
 		Name:      "abc",
 		Mode:      context.RunModeKube,
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
 			{
@@ -2516,7 +2516,7 @@ func TestCreateKubeFunctionApplication(t *testing.T) {
 	eden2 = &specV1.Application{
 		Namespace: appView.Namespace,
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Mode:      context.RunModeKube,
 		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
@@ -2617,7 +2617,7 @@ func TestCreateKubeNotFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Mode:      context.RunModeKube,
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -2680,7 +2680,7 @@ func TestCreateKubeNotFunctionApplication(t *testing.T) {
 		Namespace: appView.Namespace,
 		Name:      "abc",
 		Mode:      context.RunModeKube,
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
 			{
@@ -2740,7 +2740,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 	appView := &models.ApplicationView{
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Mode:      context.RunModeNative,
 		Services: []models.ServiceView{
 			{
@@ -2822,7 +2822,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 	eden2 := &specV1.Application{
 		Namespace: appView.Namespace,
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
 			{
@@ -2850,7 +2850,7 @@ func TestCreateNativeFunctionApplication(t *testing.T) {
 	eden2 = &specV1.Application{
 		Namespace: appView.Namespace,
 		Name:      "abc",
-		Type:      common.FunctionApp,
+		Type:      specV1.AppTypeFunction,
 		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
 			{
@@ -2965,7 +2965,7 @@ func TestCreateNativeNotFunctionApplication(t *testing.T) {
 		Namespace: "baetyl-cloud",
 		Name:      "abc",
 		Mode:      context.RunModeNative,
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services: []models.ServiceView{
 			{
 				Service: specV1.Service{
@@ -3040,7 +3040,7 @@ func TestCreateNativeNotFunctionApplication(t *testing.T) {
 	eden2 := &specV1.Application{
 		Namespace: appView.Namespace,
 		Name:      "abc",
-		Type:      common.ContainerApp,
+		Type:      specV1.AppTypeContainer,
 		Services:  []specV1.Service{},
 		Volumes: []specV1.Volume{
 			{

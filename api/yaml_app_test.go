@@ -19,7 +19,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	mf "github.com/baetyl/baetyl-cloud/v2/mock/facade"
 	ms "github.com/baetyl/baetyl-cloud/v2/mock/service"
 	gmodels "github.com/baetyl/baetyl-cloud/v2/models"
@@ -327,7 +326,7 @@ func TestAPI_CreateDeployApp(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -482,7 +481,7 @@ func TestAPI_CreateDaemonSetApp(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -636,7 +635,7 @@ func TestAPI_CreateJobApp(t *testing.T) {
 			"app":             "pi",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -714,7 +713,7 @@ func TestAPI_UpdateDeployApp(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -801,7 +800,7 @@ func TestAPI_UpdateDeployApp(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -956,7 +955,7 @@ func TestAPI_UpdateDsApp(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -1045,7 +1044,7 @@ func TestAPI_UpdateDsApp(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -1200,7 +1199,7 @@ func TestAPI_UpdateJobApp(t *testing.T) {
 			"app":             "pi",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -1224,7 +1223,7 @@ func TestAPI_UpdateJobApp(t *testing.T) {
 			"app":             "pi",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -1304,7 +1303,7 @@ func TestAPI_DeleteApp(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -1425,7 +1424,7 @@ func TestAPI_CreateService(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -1505,7 +1504,7 @@ func TestAPI_CreateService(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -1629,7 +1628,7 @@ func TestAPI_UpdateService(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -1709,7 +1708,7 @@ func TestAPI_UpdateService(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -1833,7 +1832,7 @@ func TestAPI_DeleteService(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{
@@ -1914,7 +1913,7 @@ func TestAPI_DeleteService(t *testing.T) {
 			"app":             "nginx",
 			"baetyl-app-mode": "kube",
 		},
-		Type: common.ContainerApp,
+		Type: specV1.AppTypeContainer,
 		Mode: context.RunModeKube,
 		Services: []specV1.Service{
 			{

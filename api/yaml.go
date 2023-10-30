@@ -818,7 +818,7 @@ func (api *API) generateDeployApp(ns string, deploy *appv1.Deployment) (*specV1.
 	}
 	app.Labels = labels
 
-	app.Type = common.ContainerApp
+	app.Type = specV1.AppTypeContainer
 	app.Mode = context.RunModeKube
 	app.Workload = "deployment"
 
@@ -843,7 +843,7 @@ func (api *API) generateDaemonSetApp(ns string, ds *appv1.DaemonSet) (*specV1.Ap
 	}
 	app.Labels = labels
 
-	app.Type = common.ContainerApp
+	app.Type = specV1.AppTypeContainer
 	app.Mode = context.RunModeKube
 	app.Workload = "daemonset"
 
@@ -884,7 +884,7 @@ func (api *API) generateJobApp(ns string, job *batchv1.Job) (*specV1.Application
 	}
 	app.JobConfig = &jobConfig
 
-	app.Type = common.ContainerApp
+	app.Type = specV1.AppTypeContainer
 	app.Mode = context.RunModeKube
 	app.Workload = "job"
 
