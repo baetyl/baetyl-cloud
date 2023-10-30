@@ -305,6 +305,8 @@ func (api *API) ParseApplication(c *common.Context) (*models.ApplicationView, er
 		if len(app.Registries) != 0 {
 			return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "registries should be empty in function app"))
 		}
+	} else if app.Type == common.HelmApp {
+		return app, nil
 	} else {
 		return nil, common.Error(common.ErrRequestParamInvalid, common.Field("error", "type is invalid"))
 	}

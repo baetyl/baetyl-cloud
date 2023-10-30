@@ -201,6 +201,7 @@ const (
 const (
 	ContainerApp = "container"
 	FunctionApp  = "function"
+	HelmApp      = "helm"
 )
 
 const (
