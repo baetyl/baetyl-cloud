@@ -30,7 +30,7 @@ func TestReport(t *testing.T) {
 		NodeService: ns,
 	}
 	info := specV1.Report{}
-	response, err := sync.Report(namespace, name, info)
+	response, err := sync.Report(namespace, name, specV1.BaetylCore, info)
 	assert.NotNil(t, err)
 
 	shadow := &models.Shadow{
@@ -43,7 +43,7 @@ func TestReport(t *testing.T) {
 	}
 
 	ns.EXPECT().UpdateReport(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil)
-	response, err = sync.Report(namespace, name, info)
+	response, err = sync.Report(namespace, name, specV1.BaetylCore, info)
 	assert.Error(t, err)
 
 	shadow = &models.Shadow{
@@ -61,7 +61,7 @@ func TestReport(t *testing.T) {
 		},
 	}
 	ns.EXPECT().UpdateReport(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil)
-	response, err = sync.Report(namespace, name, info)
+	response, err = sync.Report(namespace, name, specV1.BaetylCore, info)
 	assert.NoError(t, err)
 	assert.NotNil(t, response)
 }
@@ -211,12 +211,12 @@ func TestSyncService_Report(t *testing.T) {
 	}
 	mockNs.EXPECT().UpdateReport(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
 
-	_, err := ss.Report(namespace, name, report)
+	_, err := ss.Report(namespace, name, specV1.BaetylCore, report)
 	assert.NotNil(t, err)
 
 	mockNs.EXPECT().UpdateReport(gomock.Any(), gomock.Any(), gomock.Any()).Return(shadow, nil).AnyTimes()
 
-	_, err = ss.Report(namespace, name, report)
+	_, err = ss.Report(namespace, name, specV1.BaetylCore, report)
 	assert.NotNil(t, err)
 	report[common.DesiredSysApplications] = []specV1.AppInfo{
 		{
@@ -224,7 +224,7 @@ func TestSyncService_Report(t *testing.T) {
 			"v1",
 		},
 	}
-	_, err = ss.Report(namespace, name, report)
+	_, err = ss.Report(namespace, name, specV1.BaetylCore, report)
 	assert.NotNil(t, err)
 }
 

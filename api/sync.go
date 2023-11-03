@@ -46,6 +46,7 @@ func NewSyncAPI(cfg *config.CloudConfig) (SyncAPI, error) {
 // Report for node report
 func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 	var report specV1.Report
+	var source string
 	err := msg.Content.Unmarshal(&report)
 	if err != nil {
 		return nil, err
@@ -53,20 +54,10 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 
 	setNodeClientIPIfExist(msg, &report)
 
-	// TODO remove the trick. set node prop if source=baetyl-init
 	ns, n := msg.Metadata["namespace"], msg.Metadata["name"]
 	if msg.Metadata != nil {
-		switch msg.Metadata["source"] {
-		case specV1.BaetylInit:
-			props, err := s.Node.GetNodeProperties(ns, n)
-			if err != nil {
-				s.log.Warn("failed to get node properties", log.Any("source", specV1.BaetylInit))
-			} else {
-				s.log.Debug("set init node properties", log.Any("source", specV1.BaetylInit))
-				if props != nil {
-					report[common.NodeProps] = props.State.Report
-				}
-			}
+		source = msg.Metadata["source"]
+		switch source {
 		case specV1.BaetylCore:
 			nodeInfo, err := s.Node.Get(nil, ns, n)
 			if err != nil {
@@ -87,7 +78,7 @@ func (s *SyncAPIImpl) Report(msg specV1.Message) (*specV1.Message, error) {
 		}
 	}
 
-	delta, err := s.Sync.Report(ns, n, report)
+	delta, err := s.Sync.Report(ns, n, source, report)
 	if err != nil {
 		return nil, err
 	}
