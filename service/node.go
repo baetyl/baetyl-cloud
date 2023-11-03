@@ -47,6 +47,7 @@ type NodeService interface {
 	Delete(tx interface{}, namespace string, node *specV1.Node) error
 
 	UpdateReport(namespace, name string, report specV1.Report) (*models.Shadow, error)
+	UpdateInitReport(namespace, name string, report specV1.Report) (*models.Shadow, error)
 	UpdateDesire(tx interface{}, namespace string, names []string, app *specV1.Application, f func(*models.Shadow, *specV1.Application)) error
 
 	GetDesire(namespace, name string) (*specV1.Desire, error)
@@ -628,6 +629,33 @@ func (n *NodeServiceImpl) UpdateReport(namespace, name string, report specV1.Rep
 	//}
 	if err = n.updateReportNodeProperties(namespace, name, report, shadow); err != nil {
 		return nil, err
+	}
+	return n.Shadow.UpdateReport(shadow)
+}
+
+func (n *NodeServiceImpl) UpdateInitReport(namespace, name string, report specV1.Report) (*models.Shadow, error) {
+	shadow, err := n.Shadow.Get(nil, namespace, name)
+	if err != nil {
+		return nil, err
+	}
+
+	if report != nil {
+		report["time"] = time.Now().UTC()
+	}
+
+	if shadow == nil {
+		_, err = n.Node.GetNode(nil, namespace, name)
+		if err != nil {
+			return nil, err
+		}
+		return n.createShadow(nil, namespace, name, nil, report)
+	}
+	// only update sysapp & sysapp stats when init report
+	if rSys, ok := report[specV1.KeySysApps]; ok && rSys != nil {
+		shadow.Report[specV1.KeySysApps] = rSys
+	}
+	if rSys, ok := report[specV1.KeySysAppStats]; ok && rSys != nil {
+		shadow.Report[specV1.KeySysAppStats] = rSys
 	}
 	return n.Shadow.UpdateReport(shadow)
 }

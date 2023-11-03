@@ -198,6 +198,21 @@ func (mr *MockNodeServiceMockRecorder) UpdateDesire(arg0, arg1, arg2, arg3, arg4
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDesire", reflect.TypeOf((*MockNodeService)(nil).UpdateDesire), arg0, arg1, arg2, arg3, arg4)
 }
 
+// UpdateInitReport mocks base method.
+func (m *MockNodeService) UpdateInitReport(arg0, arg1 string, arg2 v1.Report) (*models.Shadow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateInitReport", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*models.Shadow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateInitReport indicates an expected call of UpdateInitReport.
+func (mr *MockNodeServiceMockRecorder) UpdateInitReport(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateInitReport", reflect.TypeOf((*MockNodeService)(nil).UpdateInitReport), arg0, arg1, arg2)
+}
+
 // UpdateNodeAppVersion mocks base method.
 func (m *MockNodeService) UpdateNodeAppVersion(arg0 interface{}, arg1 string, arg2 *v1.Application) ([]string, error) {
 	m.ctrl.T.Helper()

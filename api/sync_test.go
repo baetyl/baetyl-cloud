@@ -53,14 +53,14 @@ func TestSyncAPIImpl_Report(t *testing.T) {
 		Metadata: msg.Metadata,
 		Content:  specV1.LazyValue{},
 	}
-	mSync.EXPECT().Report("default", "test", gomock.Any()).Return(resp, nil).Times(1)
+	mSync.EXPECT().Report("default", "test", "", gomock.Any()).Return(resp, nil).Times(1)
 	res, err := sync.Report(msg)
 	assert.NoError(t, err)
 	assert.EqualValues(t, expMsg.Kind, res.Kind)
 	assert.EqualValues(t, expMsg.Metadata, res.Metadata)
 
 	// bad case 0
-	mSync.EXPECT().Report("default", "test", gomock.Any()).Return(nil, os.ErrInvalid).Times(1)
+	mSync.EXPECT().Report("default", "test", "", gomock.Any()).Return(nil, os.ErrInvalid).Times(1)
 	_, err = sync.Report(msg)
 	assert.Error(t, err)
 }

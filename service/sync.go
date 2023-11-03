@@ -17,7 +17,7 @@ import (
 
 // SyncService sync service
 type SyncService interface {
-	Report(namespace, name string, report specV1.Report) (specV1.Delta, error)
+	Report(namespace, name, source string, report specV1.Report) (specV1.Delta, error)
 	Desire(namespace string, infos []specV1.ResourceInfo, metadata map[string]string) ([]specV1.ResourceValue, error)
 }
 
@@ -66,18 +66,30 @@ func NewSyncService(config *config.CloudConfig) (SyncService, error) {
 	return es, nil
 }
 
-func (t *SyncServiceImpl) Report(namespace, name string, report specV1.Report) (specV1.Delta, error) {
-	shadow, err := t.NodeService.UpdateReport(namespace, name, report)
-	if err != nil {
-		log.L().Error("failed to update node reported status",
-			log.Any(common.KeyContextNamespace, namespace),
-			log.Any("name", name),
-			log.Error(err))
-		return nil, err
+func (t *SyncServiceImpl) Report(namespace, name, source string, report specV1.Report) (specV1.Delta, error) {
+	var err error
+	var shadow *models.Shadow
+	if source == specV1.BaetylInit {
+		shadow, err = t.NodeService.UpdateInitReport(namespace, name, report)
+		if err != nil {
+			log.L().Error("failed to update node reported status",
+				log.Any(common.KeyContextNamespace, namespace),
+				log.Any("name", name),
+				log.Error(err))
+			return nil, err
+		}
+	} else {
+		shadow, err = t.NodeService.UpdateReport(namespace, name, report)
+		if err != nil {
+			log.L().Error("failed to update node reported status",
+				log.Any(common.KeyContextNamespace, namespace),
+				log.Any("name", name),
+				log.Error(err))
+			return nil, err
+		}
 	}
 
 	err = checkSysapp(name, &shadow.Desire)
-
 	if err != nil {
 		log.L().Error("system app wasnot ready",
 			log.Any(common.KeyContextNamespace, namespace),

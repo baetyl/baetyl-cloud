@@ -50,16 +50,16 @@ func (mr *MockSyncServiceMockRecorder) Desire(arg0, arg1, arg2 interface{}) *gom
 }
 
 // Report mocks base method.
-func (m *MockSyncService) Report(arg0, arg1 string, arg2 v1.Report) (v1.Delta, error) {
+func (m *MockSyncService) Report(arg0, arg1, arg2 string, arg3 v1.Report) (v1.Delta, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Report", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Report", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(v1.Delta)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Report indicates an expected call of Report.
-func (mr *MockSyncServiceMockRecorder) Report(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockSyncServiceMockRecorder) Report(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Report", reflect.TypeOf((*MockSyncService)(nil).Report), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Report", reflect.TypeOf((*MockSyncService)(nil).Report), arg0, arg1, arg2, arg3)
 }
