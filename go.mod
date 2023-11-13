@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/ZZMarquis/gm v1.3.2
 	github.com/aws/aws-sdk-go v1.44.330
-	github.com/baetyl/baetyl-go/v2 v2.2.4-0.20231030030817-41acfb4e183e
+	github.com/baetyl/baetyl-go/v2 v2.2.4-0.20231113023730-8772c16fd02d
 	github.com/coocood/freecache v1.2.3
 	github.com/gin-contrib/cache v1.1.0
 	github.com/gin-gonic/gin v1.9.1
@@ -39,6 +39,7 @@ require (
 	github.com/containerd/containerd v1.5.18 // indirect
 	github.com/creasty/defaults v1.4.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/denisbrodbeck/machineid v1.0.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
