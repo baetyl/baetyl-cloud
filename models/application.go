@@ -1,9 +1,10 @@
 package models
 
 import (
-	"k8s.io/api/core/v1"
 	"strings"
 	"time"
+
+	"k8s.io/api/core/v1"
 
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 )
@@ -33,6 +34,7 @@ type ApplicationView struct {
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty"`
 	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
 	AutoScaleCfg      *specV1.AutoScaleCfg  `json:"autoScaleCfg,omitempty"`
+	PreserveUpdates   bool                  `json:"preserveUpdates,omitempty"`
 }
 
 func (a *ApplicationView) ImageTrim() {
@@ -72,6 +74,7 @@ type AppItem struct {
 	JobConfig         *specV1.AppJobConfig  `json:"jobConfig,omitempty" yaml:"jobConfig,omitempty"`
 	Ota               specV1.OtaInfo        `json:"ota,omitempty"`
 	AutoScaleCfg      *specV1.AutoScaleCfg  `json:"autoScaleCfg,omitempty"`
+	PreserveUpdates   bool                  `json:"preserveUpdates,omitempty" yaml:"preserveUpdates,omitempty"`
 }
 
 // ApplicationList app List
