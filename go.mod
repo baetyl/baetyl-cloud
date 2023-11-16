@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/ZZMarquis/gm v1.3.2
 	github.com/aws/aws-sdk-go v1.44.330
-	github.com/baetyl/baetyl-go/v2 v2.2.4-0.20231113023730-8772c16fd02d
+	github.com/baetyl/baetyl-go/v2 v2.2.4-0.20231114062225-6e5e78d5f19a
 	github.com/coocood/freecache v1.2.3
 	github.com/gin-contrib/cache v1.1.0
 	github.com/gin-gonic/gin v1.9.1
