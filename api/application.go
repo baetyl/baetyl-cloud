@@ -758,6 +758,15 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 		}
 	}
 
+	if app.Type == specV1.AppTypeYaml || app.Type == specV1.AppTypeHelm {
+		if customNS, ok := app.Labels[specV1.CustomAppNsLabel]; customNS != "" && ok {
+			if customNS == context.EdgeSystemNamespace() || customNS == context.EdgeNamespace() {
+				return common.Error(common.ErrRequestParamInvalid,
+					common.Field("error", "custom namespace of yaml app is invalid(baetyl-edge/baetyl-edge-system)"))
+			}
+		}
+	}
+
 	app.Labels = common.AddSystemLabel(app.Labels, map[string]string{
 		common.LabelAppMode: app.Mode,
 	})
