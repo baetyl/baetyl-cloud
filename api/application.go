@@ -758,7 +758,7 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 		}
 	}
 
-	if app.Type == specV1.AppTypeYaml {
+	if app.Type == specV1.AppTypeYaml || app.Type == specV1.AppTypeHelm {
 		if customNS, ok := app.Labels[specV1.CustomAppNsLabel]; customNS != "" && ok {
 			if customNS == context.EdgeSystemNamespace() || customNS == context.EdgeNamespace() {
 				return common.Error(common.ErrRequestParamInvalid,
