@@ -11,6 +11,7 @@ import (
 	"github.com/baetyl/baetyl-go/v2/json"
 	"github.com/baetyl/baetyl-go/v2/log"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
+	"github.com/baetyl/baetyl-go/v2/utils"
 	"github.com/jinzhu/copier"
 	v1 "k8s.io/api/core/v1"
 
@@ -763,6 +764,9 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 			if customNS == context.EdgeSystemNamespace() || customNS == context.EdgeNamespace() {
 				return common.Error(common.ErrRequestParamInvalid,
 					common.Field("error", "custom namespace of yaml app is invalid(baetyl-edge/baetyl-edge-system)"))
+			}
+			if err := utils.GetValidator().Struct(customNS); err != nil {
+				return common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 			}
 		}
 	}
