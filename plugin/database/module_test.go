@@ -225,7 +225,7 @@ func TestModule(t *testing.T) {
 	assert.Equal(t, err.Error(), "访问不存在的资源。\nThe (module) resource (baetyl3) is not found.")
 }
 
-func TestListApp(t *testing.T) {
+func TestListModuleApp(t *testing.T) {
 	db, err := MockNewDB()
 	if err != nil {
 		fmt.Printf("get mock sqlite3 error = %s", err.Error())

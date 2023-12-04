@@ -28,12 +28,12 @@ type CloudConfig struct {
 		Auth       string   `yaml:"auth" json:"auth" default:"defaultauth"`
 		License    string   `yaml:"license" json:"license" default:"defaultlicense"`
 		Quota      string   `yaml:"quota" json:"quota" default:"defaultquota"`
-		Resource   string   `yaml:"resource" json:"resource" default:"kube"`
+		Resource   string   `yaml:"resource" json:"resource" default:"database"`
 		Shadow     string   `yaml:"shadow" json:"shadow" default:"database"`
 		Index      string   `yaml:"index" json:"index" default:"database"`
-		Batch      string   `yaml:"batch" json:"batch" default:"databaseext"`
-		Record     string   `yaml:"record" json:"record" default:"databaseext"`
-		Callback   string   `yaml:"callback" json:"callback" default:"databaseext"`
+		Batch      string   `yaml:"batch" json:"batch" default:"database"`
+		Record     string   `yaml:"record" json:"record" default:"database"`
+		Callback   string   `yaml:"callback" json:"callback" default:"database"`
 		AppHistory string   `yaml:"appHistory" json:"appHistory" default:"database"`
 		Objects    []string `yaml:"objects" json:"objects" default:"[]"`
 		Functions  []string `yaml:"functions" json:"functions" default:"[]"`
@@ -43,7 +43,7 @@ type CloudConfig struct {
 		Locker     string   `yaml:"locker" json:"locker" default:"defaultlocker"`
 		Task       string   `yaml:"task" json:"task" default:"defaulttask"`
 		Sign       string   `yaml:"sign" json:"sign" default:"defaultsign"`
-		DM         string   `yaml:"dm" json:"dm" default:"databaseext"`
+		DM         string   `yaml:"dm" json:"dm" default:"database"`
 		Tx         string   `yaml:"tx" json:"tx" default:"defaulttx"`
 		Cron       string   `yaml:"cron" json:"cron" default:"database"`
 		Csrf       string   `yaml:"csrf" json:"csrf" default:"defaultcsrf"`

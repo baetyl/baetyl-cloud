@@ -237,5 +237,19 @@ const (
 )
 
 const (
-	TaskNamespaceDelete = "namespace-delete"
+	TypeDeviceModel      = 0
+	TypeDeviceModelDraft = 1
+)
+
+const (
+	KindDeviceModel      = "devicemodel"
+	KindDriver           = "driver"
+	LabelDriverMode      = "baetyl-driver-mode"
+	LabelAndroidMode     = "baetyl-android-mode"
+	VGPU                 = "vgpu"
+	KindBusinessTemplate = "businesstemplate"
+	KindAccessTemplate   = "accesstemplate"
+	ConfigTypeKV         = "kv"
+	MaxSecretDataSize    = 64 * 1024       // 64Kb
+	MaxConfigDataSize    = 4 * 1024 * 1024 // 4Mb
 )
