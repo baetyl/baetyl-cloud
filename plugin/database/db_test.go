@@ -1,26 +1,23 @@
 package database
 
 import (
-	"context"
-	"time"
-
-	"github.com/jmoiron/sqlx"
+	"github.com/baetyl/baetyl-go/v2/log"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func MockNewDB() (*DB, error) {
+func MockNewDB() (*BaetylCloudDB, error) {
 	var cfg CloudConfig
 	cfg.Database.Type = "sqlite3"
 	cfg.Database.URL = ":memory:"
-	db, err := sqlx.Open(cfg.Database.Type, cfg.Database.URL)
+	cfg.Database.ConnMaxLifetime = 150
+	cfg.Database.MaxConns = 20
+	cfg.Database.MaxIdleConns = 5
+	db, err := NewDB(cfg)
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	err = db.PingContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &DB{db: db, cfg: cfg}, nil
+	return &BaetylCloudDB{
+		DB:  *db,
+		log: log.L().With(log.Any("plugin", "test")),
+	}, nil
 }

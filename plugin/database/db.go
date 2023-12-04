@@ -7,11 +7,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
+)
+
+var (
+	ErrDatabaseTx = errors.New("failed to transfer interface to sqlx.Tx")
 )
 
 // DBStorage
@@ -34,7 +39,7 @@ type DB struct {
 }
 
 func init() {
-	plugin.RegisterFactory("database", New)
+	plugin.RegisterFactory("database", NewExtDB)
 }
 
 var (
@@ -174,4 +179,32 @@ func (d *DB) Rollback(tx *sqlx.Tx) {
 	if err != nil {
 		log.Error(err)
 	}
+}
+
+type BaetylCloudDB struct {
+	DB
+	log *log.Logger
+}
+
+func NewExtDB() (plugin.Plugin, error) {
+	db, err := New()
+	if err != nil {
+		return nil, err
+	}
+	dbExt := &BaetylCloudDB{
+		log: log.L().With(log.Any("plugin", "databaseext")),
+	}
+	dbExt.DB = *db.(*DB)
+	return dbExt, nil
+}
+
+func (d *BaetylCloudDB) InterfaceToTx(tx interface{}) (*sqlx.Tx, error) {
+	if tx == nil {
+		return nil, nil
+	}
+	transaction, ok := tx.(*sqlx.Tx)
+	if !ok {
+		return nil, common.Error(common.ErrConvertConflict, common.Field("error", ErrDatabaseTx))
+	}
+	return transaction, nil
 }

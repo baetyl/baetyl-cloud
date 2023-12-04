@@ -39,12 +39,12 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.PKI = "defaultpki"
 	expect.Plugin.Auth = "defaultauth"
 	expect.Plugin.License = "defaultlicense"
-	expect.Plugin.Resource = "kube"
+	expect.Plugin.Resource = "database"
 	expect.Plugin.Shadow = "database"
 	expect.Plugin.Index = "database"
-	expect.Plugin.Batch = "databaseext"
-	expect.Plugin.Record = "databaseext"
-	expect.Plugin.Callback = "databaseext"
+	expect.Plugin.Batch = "database"
+	expect.Plugin.Record = "database"
+	expect.Plugin.Callback = "database"
 	expect.Plugin.AppHistory = "database"
 	expect.Plugin.Functions = []string{}
 	expect.Plugin.Objects = []string{}
@@ -55,7 +55,7 @@ func TestDefaultValue(t *testing.T) {
 	expect.Plugin.Locker = "defaultlocker"
 	expect.Plugin.Task = "defaulttask"
 	expect.Lock.ExpireTime = 5
-	expect.Plugin.DM = "databaseext"
+	expect.Plugin.DM = "database"
 	expect.Plugin.Tx = "defaulttx"
 	expect.Plugin.Sign = "defaultsign"
 	expect.Plugin.Cron = "database"
