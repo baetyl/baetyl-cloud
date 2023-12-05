@@ -765,7 +765,7 @@ func (api *API) validApplication(namespace string, app *models.ApplicationView) 
 				return common.Error(common.ErrRequestParamInvalid,
 					common.Field("error", "custom namespace of yaml app is invalid(baetyl-edge/baetyl-edge-system)"))
 			}
-			if err := utils.GetValidator().Struct(customNS); err != nil {
+			if err := utils.GetValidator().Var(customNS, "res_name"); err != nil {
 				return common.Error(common.ErrRequestParamInvalid, common.Field("error", err.Error()))
 			}
 		}
