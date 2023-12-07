@@ -422,6 +422,9 @@ func (s *SystemAppServiceImpl) GenApp(tx interface{}, ns, template string, param
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+	if version, ok := params["AppVersion"]; ok {
+		application.Version = version.(string)
+	}
 	app, err := s.App.Create(tx, ns, application)
 	if err != nil {
 		var res *specV1.Application
