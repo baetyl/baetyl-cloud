@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
 )
 
 func TestFromNodeModel(t *testing.T) {

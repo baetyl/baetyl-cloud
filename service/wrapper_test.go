@@ -3,14 +3,15 @@ package service
 import (
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/config"
-	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	specV1 "github.com/baetyl/baetyl-go/v2/spec/v1"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/config"
+	mockPlugin "github.com/baetyl/baetyl-cloud/v2/mock/plugin"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 func mockTx(mock plugin.TransactionFactory) plugin.Factory {

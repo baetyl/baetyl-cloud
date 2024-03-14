@@ -3,8 +3,9 @@ package plugin
 import (
 	"io"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
 
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )

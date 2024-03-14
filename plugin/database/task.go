@@ -3,8 +3,9 @@ package database
 import (
 	"database/sql"
 
-	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/baetyl/baetyl-cloud/v2/plugin/database/entities"
 
 	"github.com/baetyl/baetyl-cloud/v2/models"
 )
