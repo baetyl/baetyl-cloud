@@ -15,6 +15,7 @@ import (
 const (
 	ShadowCreateOrUpdateTrigger = "shadowCreateOrUpdateTrigger"
 	ShadowDelete                = "shadowDelete"
+	DefaultTriggerTime          = 1 * time.Second
 )
 
 var (
@@ -30,7 +31,7 @@ type reportSaveStruct struct {
 }
 
 func init() {
-	t = time.NewTimer(time.Second)
+	t = time.NewTimer(DefaultTriggerTime)
 }
 
 // ShadowCreateOrUpdateCacheSet update shadow cache when shadow update or create
@@ -43,7 +44,7 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 	case <-t.C:
 		start := time.Now()
 		defer func() {
-			t.Reset(time.Second)
+			t.Reset(DefaultTriggerTime)
 		}()
 		exit, err := cache.Exist(cachemsg.CacheUpdateReportTimeLock)
 		if err != nil {
