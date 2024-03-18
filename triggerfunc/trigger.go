@@ -48,7 +48,7 @@ func ShadowCreateOrUpdateCacheSet(cache plugin.DataCache, shadow models.Shadow) 
 		}()
 		exit, err := cache.Exist(cachemsg.CacheUpdateReportTimeLock)
 		if err != nil {
-			log.L().Error("get update report lock exit  err", log.Error(err))
+			log.L().Error("get update report lock exit err", log.Error(err))
 		} else {
 			if exit {
 				lockTime, err := cache.GetString(cachemsg.CacheUpdateReportTimeLock)
