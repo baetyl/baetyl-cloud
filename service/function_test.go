@@ -4,9 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
 
 	"github.com/baetyl/baetyl-cloud/v2/mock/service"
 	"github.com/baetyl/baetyl-cloud/v2/models"

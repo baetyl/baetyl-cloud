@@ -3,10 +3,11 @@ package csrf
 import (
 	"net/url"
 
-	"github.com/baetyl/baetyl-cloud/v2/common"
-	"github.com/baetyl/baetyl-cloud/v2/plugin"
 	"github.com/baetyl/baetyl-go/v2/errors"
 	"github.com/baetyl/baetyl-go/v2/log"
+
+	"github.com/baetyl/baetyl-cloud/v2/common"
+	"github.com/baetyl/baetyl-cloud/v2/plugin"
 )
 
 var (
