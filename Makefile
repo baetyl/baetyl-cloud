@@ -21,6 +21,15 @@ all: build
 build: $(SRC_FILES)
 	env GO111MODULE=on GOPROXY=$(GO_PROXY) CGO_ENABLED=0 go build -o output/$(MODULE) -ldflags "$(GO_FLAGS)" .
 
+.PHONY: local
+local:
+	docker build \
+		-t $(MODULE):$(VERSION) \
+		--build-arg GOPROXY="$(GO_PROXY)" \
+		--build-arg GIT_REV="$(GIT_REV)" \
+		--build-arg VERSION="$(VERSION)" \
+		-f Dockerfile.local .
+
 .PHONY: image
 image:
 	@echo "BUILDX: $(REGISTRY)$(MODULE):$(VERSION)"
